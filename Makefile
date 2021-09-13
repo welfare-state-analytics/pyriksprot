@@ -1,7 +1,5 @@
 .DEFAULT_GOAL=lint
 
-# include ./workflow/Makefile
-
 SHELL := /bin/bash
 SOURCE_FOLDERS=pyriksprot tests
 PACKAGE_FOLDER=pyriksprot
