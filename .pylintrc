@@ -1,0 +1,170 @@
+[MASTER]
+ignore-patterns=deprecated,data,test_data,resources,scripts
+
+# Python code to execute, usually for sys.path manipulation such as
+# pygtk.require().
+#init-hook=
+init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()))"
+
+# Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
+# number of processors available to use.
+jobs=0
+
+[MESSAGES CONTROL]
+
+disable=invalid-name,
+        missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        line-too-long,
+        no-self-use,
+        pointless-string-statement,
+        global-statement,
+        c-extension-no-member,
+        too-few-public-methods,
+        logging-format-interpolation,
+        logging-fstring-interpolation,
+        consider-using-enumerate,
+        unnecessary-comprehension,
+        misplaced-comparison-constant,
+        too-many-branches,
+        too-many-locals,
+        wrong-import-order,
+        wrong-spelling-in-comment,
+        wrong-spelling-in-docstring,
+        duplicate-code,
+        consider-using-from-import,
+        consider-using-dict-items,
+        unused-private-member
+        # apply-builtin,
+        # backtick,
+        # bad-inline-option,
+        # bad-python3-import,
+        # basestring-builtin,
+        # buffer-builtin,
+        # cmp-builtin,
+        # cmp-method,
+        # coerce-builtin,
+        # coerce-method,
+        # comprehension-escape
+        # delslice-method,
+        # deprecated-itertools-function,
+        # deprecated-operator-function,
+        # deprecated-pragma,
+        # deprecated-str-translate-call,
+        # deprecated-string-function,
+        # deprecated-sys-function,
+        # deprecated-types-field,
+        # deprecated-urllib-function,
+        # dict-items-not-iterating,
+        # dict-iter-method,
+        # dict-keys-not-iterating,
+        # dict-values-not-iterating,
+        # dict-view-method,
+        # div-method,
+        # eq-without-hash,
+        # exception-escape,
+        # exception-message-attribute,
+        # execfile-builtin,
+        # file-builtin,
+        # file-ignored,
+        # filter-builtin-not-iterating,
+        # getslice-method,
+        # hex-method,
+        # idiv-method,
+        # import-star-module-level,
+        # indexing-exception,
+        # input-builtin,
+        # intern-builtin,
+        # invalid-str-codec,
+        # locally-disabled,
+        # long-builtin,
+        # long-suffix,
+        # map-builtin-not-iterating,
+        # metaclass-assignment,
+        # next-method-called,
+        # next-method-defined,
+        # no-absolute-import,
+        # non-ascii-bytes-literal,
+        # nonzero-method,
+        # oct-method,
+        # old-division,
+        # old-ne-operator,
+        # old-octal-literal,
+        # old-raise-syntax,
+        # parameter-unpacking,
+        # print-statement,
+        # raising-string,
+        # range-builtin-not-iterating,
+        # raw_input-builtin,
+        # raw-checker-failed,
+        # rdiv-method,
+        # reduce-builtin,
+        # reload-builtin,
+        # round-builtin,
+        # setslice-method,
+        # standarderror-builtin,
+        # suppressed-message,
+        # sys-max-int,
+        # unichr-builtin,
+        # unicode-builtin,
+        # unpacking-in-except,
+        # use-symbolic-message-instead,
+        # useless-suppression,
+        # using-cmp-argument,
+        # xrange-builtin,
+        # xreadlines-attribute,
+        # zip-builtin-not-iterating,
+
+
+[REPORTS]
+output-format=text
+reports=no
+score=no
+
+[REFACTORING]
+
+max-nested-blocks=5
+never-returning-functions=sys.exit
+
+[MISCELLANEOUS]
+
+notes=
+#notes=FIXME, XXX, TODO
+
+[BASIC]
+
+argument-naming-style=snake_case
+attr-naming-style=snake_case
+
+[LOGGING]
+
+# The type of string formatting that logging methods do. `old` means using %
+# formatting, `new` is for `{}` formatting.
+logging-format-style=old
+
+# Logging modules to check that the string format arguments are in logging
+# function parameter format.
+logging-modules=logging
+
+[VARIABLES]
+
+#callbacks=cb_,
+#          _cb
+
+[DESIGN]
+
+max-args=8
+max-attributes=14
+max-bool-expr=5
+max-branches=12
+max-locals=15
+max-parents=7
+max-public-methods=20
+max-returns=6
+max-statements=50
+min-public-methods=2
+
+[EXCEPTIONS]
+
+overgeneral-exceptions=BaseException

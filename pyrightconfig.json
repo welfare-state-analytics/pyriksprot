@@ -1,0 +1,22 @@
+{
+    "include": [
+        "workflow",
+        "scripts",
+        "tests"
+    ],
+    "exclude": [
+        "**/deprecated",
+        "**/__pycache__",
+        "**/.pytest_cache",
+        "**/__init__.py",
+        "**/__paths__.py"
+    ],
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false,
+    "reportUntypedFunctionDecorator": false,
+    "reportUntypedClassDecorator": true,
+    "reportOptionalSubscript": false,
+    "reportOptionalMemberAccess": false,
+    "reportOptionalCall": false,
+    "pythonVersion": "3.8"
+}
