@@ -99,21 +99,6 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 show_missing = true
 sort = "Name"
 
-[tool.pyright]
-include = ["pyriksprot", "tests"]
-exclude = [
-    ".git",
-    ".vscode",
-    "**/__init__.py",
-    "**/__pycache__",
-    "tmp",
-    "tests/test_data",
-    "tests/output",
-]
-# typeCheckingMode = "basic"
-# reportGeneralTypeIssues = false
-# reportMissingTypeStubs = false
-
 [tool.mypy]
 allow_redefinition = true
 check_untyped_defs = true
@@ -129,3 +114,23 @@ python_version = 3.8
 [build-system]
 requires = ["setuptools", "poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+include = ["pyriksprot", "tests"]
+exclude = [
+    ".git",
+    ".vscode",
+    "**/__init__.py",
+    "**/__pycache__",
+    "tmp",
+    "tests/test_data",
+    "tests/output",
+]
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUntypedFunctionDecorator = false
+reportUntypedClassDecorator = true
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false
+reportOptionalCall = false
+pythonVersion = "3.8"
