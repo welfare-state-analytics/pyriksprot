@@ -1,0 +1,117 @@
+[tool.poetry]
+name = "pyriksprot"
+version = "2021.9.0"
+description = "Python API for Riksdagens Protokoll"
+authors = ["Roger Mähler <roger.mahler@hotmail.com>"]
+packages = [
+    { include = "pyriksprot" },
+]
+classifiers = [
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+    'Topic :: Software Development',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://westac.se"
+repository = "https://github.com/welfare-state-analytics/pyriksprot"
+
+[tool.poetry.dependencies]
+python = "==3.8.5"
+untangle = "^1.1.1"
+Jinja2 = "^2.11.3"
+click = "^7.1.2"
+dehyphen = "^0.3.4"
+pandas = "^1.2.3"
+loguru = "^0.5.3"
+
+[tool.poetry.dev-dependencies]
+black = "==20.*,>=20.8.0.b1"
+coverage = "==5.*,>=5.4.0"
+flake8 = "==3.*,>=3.8.4"
+flake8-black = "==0.*,>=0.2.1"
+isort = "==5.*,>=5.7.0"
+mypy = "==0.*,>=0.812.0"
+pre-commit = "==2.*,>=2.10.1"
+pycodestyle = "==2.*,>=2.6.0"
+pyflakes = "==2.*,>=2.2.0"
+pylint = "==2.*,>=2.7.1"
+pytest = "==6.*,>=6.2.2"
+pytest-cov = "==2.*,>=2.11.1"
+rope = "==0.*,>=0.18.0"
+
+[tool.poetry.scripts]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-rfE", "-q"]
+log_cli = "False"
+testpaths = ["tests"]
+python_files = "*_test.py"
+python_functions = "test_*"
+markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+norecursedirs = [
+    "test_data",
+    "output",
+    "__pycache__",
+    "deprecated",
+    ".git",
+    ".github",
+    ".vscode",
+    "profile-reports",
+    "tmp",
+]
+
+[tool.black]
+skip_string_normalization = true
+line-length = 120
+target-version = ["py38"]
+skip-string-normalization = true
+exclude = '''
+(
+  \.git
+  | \.pypy_cache
+  | \.pytest_cache
+  | \.mypy_cache
+  | deprecated
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+py_version = "auto"
+float_to_top = true
+src_paths = ["pyriksprot", "tests"]
+
+[tool.coverage.run]
+source = ["pyriksprot"]
+branch = true
+omit = ["**/__init__.py", "tests/*"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+show_missing = true
+sort = "Name"
+
+[tool.pyright]
+include = ["pyriksprot", "tests"]
+exclude = [
+    ".git",
+    ".vscode",
+    "**/__init__.py",
+    "**/__pycache__",
+    "tmp",
+    "tests/test_data",
+    "tests/output",
+]
+# typeCheckingMode = "basic"
+# reportGeneralTypeIssues = false
+# reportMissingTypeStubs = false
+
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
