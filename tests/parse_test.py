@@ -31,7 +31,7 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 )
 def test_parse_xml_with_no_utterances(filename):
 
-    protocol = parse.ProtocolMapper.to_protocol(jj("tests", "test_data", "source", filename), skip_size=0)
+    protocol = parse.ProtocolMapper.to_protocol(jj("tests", "test_data", "xml", filename), skip_size=0)
 
     assert len(protocol.utterances) == 0, "utterances empty"
     assert not protocol.has_text()

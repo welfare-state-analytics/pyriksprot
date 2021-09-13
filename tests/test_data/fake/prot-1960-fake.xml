@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<teiCorpus xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Riksdagens protocols 1960</title>
+      </titleStmt>
+      <editionStmt>
+        <edition>0.1.0</edition>
+      </editionStmt>
+      <publicationStmt>
+        <authority>National Library of Sweden and the WESTAC project</authority>
+      </publicationStmt>
+      <sourceDesc>
+        <bibl>
+          <title>Riksdagens protocols 1960</title>
+        </bibl>
+      </sourceDesc>
+    </fileDesc>
+    <encodingDesc>
+      <editorialDecl>
+        <correction>
+        </correction>
+      </editorialDecl>
+    </encodingDesc>
+  </teiHeader>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>Protokoll</title>
+        </titleStmt>
+        <publicationStmt>
+          <authority>N/A</authority>
+        </publicationStmt>
+        <sourceDesc>
+          <bibl>
+            <title>Protokoll</title>
+          </bibl>
+        </sourceDesc>
+      </fileDesc>
+      <encodingDesc>
+        <editorialDecl>
+          <correction>
+            <p>No correction of source texts was performed.</p>
+          </correction>
+        </editorialDecl>
+      </encodingDesc>
+    </teiHeader>
+    <text>
+      <front>
+        <div type="preface">
+          <head>prot-1960-fake</head>
+          <docDate when="1960">1960</docDate>
+        </div>
+      </front>
+      <body>
+        <div>
+          <pb n="0" facs="https://betalab.kb.se/prot-1960-fake/prot_1960-fake-001.jp2/_view"/>
+          <note type="date" n="a01">
+            2 Nr 32. Torsdagen den 28 juni 1960 fm.
+          </note>
+          <note n="a02">Note</note>
+          <note type="speaker" n="a03">Note</note>
+          <u who="A" xml:id="i-1" next="i-2" n="c01">
+            <seg n="b01">Herr Talman! Jag talar.</seg>
+          </u>
+          <note n="a04">Note</note>
+          <u who="A" xml:id="i-2" prev="i-1" n="c02">
+            <seg n="b02">Det regnar ute.</seg><seg n="b03">Visste du det?</seg>
+          </u>
+          <note n="a05">Note</note>
+          <note n="a06" type="speaker">B:</note>
+          <u who="B" xml:id="i-3" n="c03">
+            <seg n="b04">Jag håller med.</seg><seg n="b05">Talmannen är snäll.</seg>
+          </u>
+          <note n="a07" type="speaker">C:</note>
+          <u who="C" xml:id="i-4" n="c04">
+            <seg n="b05">Jag håller också med.</seg>
+          </u>
+          </div>
+      </body>
+    </text>
+  </TEI>
+</teiCorpus>

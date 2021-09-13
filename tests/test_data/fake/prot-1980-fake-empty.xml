@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8'?>
+<teiCorpus xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Riksdagens protocols 1980</title>
+      </titleStmt>
+      <editionStmt>
+        <edition>0.1.0</edition>
+      </editionStmt>
+      <publicationStmt>
+        <authority>National Library of Sweden and the WESTAC project</authority>
+      </publicationStmt>
+      <sourceDesc>
+        <bibl>
+          <title>Riksdagens protocols 1980</title>
+        </bibl>
+      </sourceDesc>
+    </fileDesc>
+    <encodingDesc>
+      <editorialDecl>
+        <correction>
+        </correction>
+      </editorialDecl>
+    </encodingDesc>
+  </teiHeader>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>Protokoll</title>
+        </titleStmt>
+        <publicationStmt>
+          <authority>N/A</authority>
+        </publicationStmt>
+        <sourceDesc>
+          <bibl>
+            <title>Protokoll</title>
+          </bibl>
+        </sourceDesc>
+      </fileDesc>
+      <encodingDesc>
+        <editorialDecl>
+          <correction>
+            <p>No correction of source texts was performed.</p>
+          </correction>
+        </editorialDecl>
+      </encodingDesc>
+    </teiHeader>
+    <text>
+      <front>
+        <div type="preface">
+          <head>prot-1980-fake</head>
+          <docDate when="1980">1980</docDate>
+        </div>
+      </front>
+      <body>
+        <div>
+          <pb n="0" facs="https://betalab.kb.se/prot-1980-fake/prot_1980-fake-empty-001.jp2/_view"/>
+          <note type="date" n="a01">
+            2 Nr 32. Torsdagen den 28 juni 1980 fm.
+          </note>
+          <note n="a02">Note</note>
+          <note n="a04">Note</note>
+          <note n="a05">Note</note>
+        </div>
+      </body>
+    </text>
+  </TEI>
+</teiCorpus>

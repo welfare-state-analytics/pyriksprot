@@ -325,7 +325,7 @@ def test_protocol_to_speeches_with_different_strategies(
     filename: str, speech_count: int, non_empty_speech_count: int, strategy: str
 ):
 
-    protocol: model.Protocol = parse.ProtocolMapper.to_protocol(jj("tests", "test_data", "source", filename))
+    protocol: model.Protocol = parse.ProtocolMapper.to_protocol(jj("tests", "test_data", "xml", filename))
 
     speeches = protocol.to_speeches(merge_strategy=strategy, skip_size=0)
     assert len(speeches) == speech_count, "speech count"
@@ -353,7 +353,7 @@ def test_protocol_to_speeches_with_different_strategies(
 )
 def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
 
-    data = untangle.parse(jj("tests", "test_data", "source", filename))
+    data = untangle.parse(jj("tests", "test_data", "xml", filename))
 
     protocol = parse.ProtocolMapper.to_protocol(data, skip_size=0)
     speeches = protocol.to_speeches(merge_strategy='n')

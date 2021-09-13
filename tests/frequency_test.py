@@ -18,7 +18,7 @@ TEST_PARLACLARIN_XML_FILES = [
 
 @pytest.mark.parametrize('filename, level, expected_count', TEST_PARLACLARIN_XML_FILES)
 def test_parla_clarin_iterator(filename: str, level: str, expected_count: int):
-    texts_iter = tf.ProtocolTextIterator(filenames=[jj("./tests/test_data/source", filename)], level=level)
+    texts_iter = tf.ProtocolTextIterator(filenames=[jj("./tests/test_data/xml", filename)], level=level)
     texts = [t for t in texts_iter]
     assert all(len(t) > 0 for t in texts)
     assert expected_count == len(texts)
@@ -41,7 +41,7 @@ def test_word_frequency_counter(text):
 
 @pytest.mark.parametrize('filename', [f[0] for f in TEST_PARLACLARIN_XML_FILES])
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
-    path: str = jj("tests", "test_data", "source", filename)
+    path: str = jj("tests", "test_data", "xml", filename)
 
     texts = parse.ProtocolTextIterator(filenames=[path], level='protocol')
     counter: tf.TermFrequencyCounter = tf.TermFrequencyCounter()
@@ -54,7 +54,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
 @pytest.mark.parametrize('filename', [f[0] for f in TEST_PARLACLARIN_XML_FILES[:1]])
 def test_persist_word_frequencies(filename: List[str]):
-    path: str = jj("tests", "test_data", "source", filename)
+    path: str = jj("tests", "test_data", "xml", filename)
 
     texts = parse.ProtocolTextIterator(filenames=[path], level='protocol')
     counter: tf.TermFrequencyCounter = tf.TermFrequencyCounter()

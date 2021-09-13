@@ -2,9 +2,11 @@
 
 from .convert import ProtocolConverter, convert_protocol, dedent, dehyphen, pretokenize
 from .dehyphenation import SwedishDehyphenator
+from .interface import ITagger, TaggedDocument
 from .model import ParlaClarinError, Protocol, Speech, Utterance
 from .parse import IterateLevel, ProtocolMapper, ProtocolTextIterator
 from .persist import StorageFormat, load_metadata, load_protocol, store_protocol
+from .tag import tag_protocol, tag_protocol_xml
 from .tf import TermFrequencyCounter, compute_term_frequencies
 from .utility import (
     data_path_ts,

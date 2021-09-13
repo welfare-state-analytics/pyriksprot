@@ -22,11 +22,10 @@ os.makedirs(jj("tests", "output"), exist_ok=True)
 
 @pytest.fixture
 def cfg() -> dict:
-    s
     return dict(
         word_frequency_filename='./tests/output/riksdagen-corpus-term-frequencies.pkl',
-        whitelist_filename='./tests/output/output/dehyphen_whitelist.txt.gz',
-        whitelist_log_filename='./tests/output/output/dehyphen_whitelist_log.pkl',
+        whitelist_filename='./tests/output/dehyphen_whitelist.txt.gz',
+        whitelist_log_filename='./tests/output/dehyphen_whitelist_log.pkl',
         unresolved_filename='./tests/output/dehyphen_unresolved.txt.gz',
     )
 
