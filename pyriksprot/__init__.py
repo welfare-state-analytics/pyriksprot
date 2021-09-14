@@ -1,7 +1,7 @@
 # type: ignore
 
 from .convert import ProtocolConverter, convert_protocol, dedent, dehyphen, pretokenize
-from .dehyphenation import SwedishDehyphenator
+from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
 from .interface import ITagger, TaggedDocument
 from .model import ParlaClarinError, Protocol, Speech, Utterance
 from .parse import IterateLevel, ProtocolMapper, ProtocolTextIterator

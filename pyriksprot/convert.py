@@ -18,6 +18,11 @@ def get_dehyphenator() -> SwedishDehyphenatorService:
     return __dehyphenator
 
 
+def set_dehyphenator(**opts) -> None:
+    global __dehyphenator
+    __dehyphenator = SwedishDehyphenatorService(**opts)
+
+
 def dedent(text: str) -> str:
     """Remove any white-space indentation from `text`."""
     if isinstance(text, Undefined):
@@ -85,8 +90,7 @@ def convert_protocol(
         output_filename (str, optional): Target file. Defaults to None.
         template_name (str, optional): Template name (found in resource-folder). Defaults to None.
     """
-    global __dehyphenator
-    __dehyphenator = SwedishDehyphenatorService(**dehyphen_cfg)
+    set_dehyphenator(**dehyphen_cfg)
     protocol: model.Protocol = parse.ProtocolMapper.to_protocol(input_filename, skip_size=5)
     content: str = ""
 

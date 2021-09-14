@@ -15,7 +15,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Dict, Set
+from typing import Callable, Dict, Set
 
 from ..utility import load_dict, load_token_set, store_dict, store_token_set
 
@@ -98,6 +98,19 @@ class SwedishDehyphenatorService:
         store_token_set(self.dehyphenator.whitelist, self.whitelist_filename)
         store_token_set(self.dehyphenator.unresolved, self.unresolved_filename)
         store_dict(self.dehyphenator.whitelist_log, self.whitelist_log_filename)
+
+    @staticmethod
+    def create_dehypen(**opts) -> Callable[[str], str]:
+        """Create a dehypen service. Return wrapped dehypen function."""
+        service = SwedishDehyphenatorService(**opts)
+
+        def dehyphen(text: str) -> str:
+            """Remove hyphens from `text`."""
+            dehyphenated_text = service.dehyphenator.dehyphen_text(text)
+
+            return dehyphenated_text
+
+        return dehyphen
 
 
 class ParagraphMergeStrategy(IntEnum):

@@ -5,6 +5,8 @@ SOURCE_FOLDERS=pyriksprot tests
 PACKAGE_FOLDER=pyriksprot
 PYTEST_ARGS=--durations=0 --cov=$(PACKAGE_FOLDER) --cov-report=xml --cov-report=html tests
 
+RUN_TIMESTAMP := $(shell /bin/date "+%Y-%m-%d-%H%M%S")
+
 faster-release: bump.patch tag
 
 fast-release: clean-dev tidy build guard-clean-working-repository bump.patch tag
@@ -44,6 +46,9 @@ retest:
 init: tools
 	@poetry install
 
+profile-tagging:
+	@mkdir -p ./profile-reports
+	@poetry run python -m pyinstrument -r html -o ./.profile-reports/$(RUN_TIMESTAMP)_tagging-pyinstrument.html ./tests/profile_tagging.py
 
 .ONESHELL: guard-clean-working-repository
 guard-clean-working-repository:
