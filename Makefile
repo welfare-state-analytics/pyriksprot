@@ -7,11 +7,11 @@ PYTEST_ARGS=--durations=0 --cov=$(PACKAGE_FOLDER) --cov-report=xml --cov-report=
 
 RUN_TIMESTAMP := $(shell /bin/date "+%Y-%m-%d-%H%M%S")
 
-faster-release: bump.patch tag
+faster-release: bump.patch tag publish
 
-fast-release: clean-dev tidy build guard-clean-working-repository bump.patch tag
+fast-release: clean-dev tidy build guard-clean-working-repository bump.patch tag publish
 
-release: ready guard-clean-working-repository bump.patch tag
+release: ready guard-clean-working-repository bump.patch tag publish
 
 ready: tools clean-dev tidy test lint requirements.txt build
 
