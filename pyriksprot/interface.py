@@ -1,9 +1,14 @@
 import abc
 import itertools
 from functools import reduce
-from typing import Any, Callable, List, Mapping, Union
+from typing import Any, Callable, List, Literal, Mapping, Union
 
 TaggedDocument = Mapping[str, List[str]]
+IterateLevel = Literal['protocol', 'speech', 'speaker', 'utterance', 'paragraph']
+
+
+class IProtocol(abc.ABC):
+    ...
 
 
 class ITagger(abc.ABC):

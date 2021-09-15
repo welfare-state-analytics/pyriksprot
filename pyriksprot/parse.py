@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import os
 import textwrap
+from collections import defaultdict
 from io import StringIO
-from typing import Iterable, List, Literal, Tuple, Union
+from typing import TYPE_CHECKING, Iterable, List, Tuple, Union
 
 import untangle  # pylint: disable=import-error
 
 from . import model
-from .utility import hasattr_path, path_add_suffix
+from .utility import flatten, hasattr_path
+
+if TYPE_CHECKING:
+    from .interface import IterateLevel
 
 
 class XML_Utterance:
@@ -63,6 +69,7 @@ class XML_Protocol:
         self,
         data: Union[str, untangle.Element],
         skip_size: int = 0,
+        delimiter: str = '\n',
     ):
         """
         Args:
@@ -86,6 +93,7 @@ class XML_Protocol:
         )
 
         self.skip_size: bool = skip_size
+        self.delimiter: str = delimiter
 
     @property
     def date(self) -> str:
@@ -108,6 +116,56 @@ class XML_Protocol:
     def utterances(self) -> List[XML_Utterance]:
         """Return sequence of XML_Utterances."""
         return self._utterances
+
+    @property
+    def text(self) -> str:
+        """Return sequence of XML_Utterances."""
+        return self.delimiter.join(x.text for x in self._utterances)
+
+    def to_text(self, level: IterateLevel) -> List[Tuple[str, str, str, str]]:
+        """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
+        try:
+
+            if level.startswith('protocol'):
+
+                items = [(self.name, None, self.name, self.text)]
+
+            elif level.startswith('speaker'):
+
+                data = defaultdict(list)
+                for u in self.utterances:
+                    data[u.who].append(u.text)
+
+                items = [(self.name, who, who, '\n'.join(data[who])) for who in data]
+
+            elif level.startswith('speech'):
+
+                data, who = defaultdict(list), {}
+                for u in self.utterances:
+                    data[u.n].append(u.text)
+                    who[u.n] = u.who
+
+                items = [(self.name, who[n], n, '\n'.join(data[n])) for n in data]
+
+            elif level.startswith('utterance'):
+
+                items = [(self.name, x.who, x.u_id, x.text) for x in self.utterances]
+
+            elif level.startswith('paragraph'):
+
+                items = [
+                    (self.name, u.who, f"{u.u_id}@{i}", p) for u in self.utterances for i, p in enumerate(u.paragraphs)
+                ]
+
+            if self.skip_size > 0:
+
+                return [item for item in items if len(item[3]) > self.skip_size]
+
+            return items
+
+        except Exception as ex:
+            raise ex
+            # return ex
 
 
 class ProtocolMapper:
@@ -139,61 +197,3 @@ class ProtocolMapper:
             next_id=u.next_id,
             paragraphs=u.paragraphs,
         )
-
-
-IterateLevel = Literal['protocol', 'speech', 'utterance', 'paragraph']
-
-
-class ProtocolTextIterator:
-    """Reads xml files and returns a stream of (name, text)"""
-
-    def __init__(
-        self, *, filenames: List[str], level: IterateLevel, merge_strategy: IterateLevel = 'n', skip_size: int = 1
-    ):
-        self.filenames: List[str] = filenames
-        self.iterator = None
-        self.skip_size: int = skip_size
-        self.level: IterateLevel = level
-        self.merge_strategy: IterateLevel = merge_strategy
-
-    def __iter__(self):
-        self.iterator = self.create_iterator()
-        return self
-
-    def __next__(self):
-        return next(self.iterator)
-
-    @property
-    def protocols(self) -> Iterable[Tuple[str, model.Protocol]]:
-        return (
-            (filename, ProtocolMapper.to_protocol(data=filename, skip_size=self.skip_size))
-            for filename in self.filenames
-        )
-
-    def create_iterator(self):
-
-        if self.level.startswith('protocol'):
-
-            for filename, protocol in self.protocols:
-                yield protocol.name, protocol.text
-
-        elif self.level.startswith('speech'):
-
-            for filename, protocol in self.protocols:
-                for speech in protocol.to_speeches(self.merge_strategy, skip_size=self.skip_size):
-                    yield path_add_suffix(filename, speech.speech_id), speech.text
-
-        elif self.level.startswith('utterance'):
-
-            for filename, protocol in self.protocols:
-                for utterance in protocol.utterances:
-                    yield f"{protocol.name}_{utterance.who}_{utterance.u_id}", utterance.text
-
-        elif self.level.startswith('paragraph'):
-
-            for filename, protocol in self.protocols:
-                for utterance in protocol.utterances:
-                    for i, p in enumerate(utterance.paragraphs):
-                        yield f"{protocol.name}_{utterance.who}_{utterance.u_id}@{i}", p
-        else:
-            raise ValueError(f"unexpected argument: {self.level}")

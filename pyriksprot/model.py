@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import contextlib
 import csv
@@ -6,13 +8,16 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from io import StringIO
-from typing import Any, Callable, List, Literal, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Literal, Mapping, Optional, Tuple, Union
 
 import pandas as pd
 from loguru import logger
 from pandas.io import json
 
 from .utility import deprecated, flatten, strip_extensions
+
+if TYPE_CHECKING:
+    from .interface import IterateLevel
 
 
 class ParlaClarinError(ValueError):
@@ -279,6 +284,41 @@ class Protocol(UtteranceMixIn):
 
         speeches: List[Speech] = SpeechMergerFactory.get(merge_strategy).speeches(self, skip_size=skip_size)
         return speeches
+
+    def to_text(self, level: IterateLevel, skip_size: int = 1) -> List[Tuple[str, str, str, str]]:
+
+        items: List[Tuple[str, str, str, str]] = []
+
+        if level.startswith('protocol'):
+
+            items = [(self.name, None, self.name, self.text)]
+
+        elif level.startswith('speech'):
+
+            items = [(self.name, s.speaker, s.speech_id, s.text) for s in self.to_speeches('n', skip_size=skip_size)]
+
+        elif level.startswith('speaker'):
+
+            items = [(self.name, s.speaker, s.speech_id, s.text) for s in self.to_speeches('who', skip_size=skip_size)]
+
+        elif level.startswith('utterance'):
+
+            return [(self.name, u.who, u.u_id, u.text) for u in self.utterances]
+
+        elif level.startswith('paragraph'):
+
+            items = [
+                (self.name, u.who, f"{u.u_id}@{i}", p) for u in self.utterances for i, p in enumerate(u.paragraphs)
+            ]
+
+        else:
+            raise ValueError(f"unexpected argument: {level}")
+
+        if skip_size > 0:
+
+            items = [x for x in items if len(x[3]) > skip_size]
+
+        return items
 
 
 class IMergeSpeechStrategy(abc.ABC):
