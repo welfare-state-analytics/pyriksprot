@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Iterable, List, Tuple, Union
 import untangle  # pylint: disable=import-error
 
 from . import model
-from .utility import flatten, hasattr_path
+from .utility import hasattr_path
 
 if TYPE_CHECKING:
     from .interface import IterateLevel
