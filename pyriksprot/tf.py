@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 
 from tqdm.auto import tqdm
 
-from .parse import ProtocolTextIterator
-from .tokenize import tokenize as default_tokenize
+from .iterators import ProtocolTextIterator, XmlProtocolTextIterator
+from .sparv_tokenize import default_tokenize
 
 
 class TermFrequencyCounter:
@@ -17,25 +17,25 @@ class TermFrequencyCounter:
         frequencies (Dict[str, int]): Term frequencies.
     """
 
-    def __init__(self, tokenize: Callable[[str], List[str]] = None, do_lower_case: bool = True):
+    def __init__(self, tokenizer: Callable[[str], List[str]] = None, do_lower_case: bool = True):
         """
         Args:
-            tokenize (Callable[[str], List[str]], optional): Tokenizer to use when ingesting tokens. Defaults to None.
+            tokenizer (Callable[[str], List[str]], optional): Tokenizer to use when ingesting tokens. Defaults to None.
             do_lower_case (bool, optional): [description]. Defaults to True.
         """
 
-        self._tokenize: Callable[[Any], List[str]] = tokenize or default_tokenize
+        self._tokenize: Callable[[Any], List[str]] = tokenizer or default_tokenize
         self._do_lower_case: bool = do_lower_case
 
         self.frequencies: Dict[str, int] = defaultdict(int)
 
-    def ingest(self, value: Union[str, Iterable[str], ProtocolTextIterator]) -> "TermFrequencyCounter":
+    def ingest(self, value: Union[str, Iterable[str], XmlProtocolTextIterator]) -> "TermFrequencyCounter":
         """Update term frequencies with term counts in `value`"""
         texts = (
-            (value,)
+            value
             if isinstance(value, str)
-            else (t for _, t in value)
-            if isinstance(value, ProtocolTextIterator)
+            else (t for _, _, _, t in value)
+            if isinstance(value, (XmlProtocolTextIterator, ProtocolTextIterator))
             else value
         )
         for text in tqdm(texts):
@@ -61,7 +61,9 @@ class TermFrequencyCounter:
             return pickle.load(fp)
 
 
-def compute_term_frequencies(source: Union[str, List[str]], filename: str) -> TermFrequencyCounter:
+def compute_term_frequencies(
+    source: Union[str, List[str]], filename: str, processes: int = 2, skip_size: int = 1, ordered: bool = False
+) -> TermFrequencyCounter:
     """Compute (corpus) term frequency for documents in `source `.
 
     Args:
@@ -75,7 +77,7 @@ def compute_term_frequencies(source: Union[str, List[str]], filename: str) -> Te
         TermFrequencyCounter: Combinded term frequencies for given source(s).
     """
     try:
-        if isinstance(source, ProtocolTextIterator):
+        if isinstance(source, XmlProtocolTextIterator):
             texts = source
         else:
             if isinstance(source, str):
@@ -90,7 +92,13 @@ def compute_term_frequencies(source: Union[str, List[str]], filename: str) -> Te
             else:
                 raise ValueError(f"unknown source of type {type(source)}")
 
-            texts = ProtocolTextIterator(filenames=filenames, level='protocol')
+            texts = XmlProtocolTextIterator(
+                filenames=filenames,
+                level='protocol',
+                processes=processes,
+                skip_size=skip_size,
+                ordered=ordered,
+            )
 
         counter = TermFrequencyCounter()
 
