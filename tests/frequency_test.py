@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from pyriksprot import model, parse, tf
+from pyriksprot import iterators, model, parse, tf
 from pyriksprot.utility import temporary_file
 
 jj = os.path.join
@@ -14,14 +14,6 @@ TEST_PARLACLARIN_XML_FILES = [
     ("prot-197879--14.xml", 'protocol', 1),
     ("prot-199596--35.xml", 'protocol', 1),
 ]
-
-
-@pytest.mark.parametrize('filename, level, expected_count', TEST_PARLACLARIN_XML_FILES)
-def test_parla_clarin_iterator(filename: str, level: str, expected_count: int):
-    texts_iter = tf.ProtocolTextIterator(filenames=[jj("./tests/test_data/xml", filename)], level=level)
-    texts = [t for t in texts_iter]
-    assert all(len(t) > 0 for t in texts)
-    assert expected_count == len(texts)
 
 
 @pytest.mark.parametrize('text', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
@@ -43,7 +35,7 @@ def test_word_frequency_counter(text):
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
     path: str = jj("tests", "test_data", "xml", filename)
 
-    texts = parse.ProtocolTextIterator(filenames=[path], level='protocol')
+    texts = iterators.ProtocolTextIterator(filenames=[path], level='protocol')
     counter: tf.TermFrequencyCounter = tf.TermFrequencyCounter()
     protocol: model.Protocol = parse.ProtocolMapper.to_protocol(path)
 
@@ -56,7 +48,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 def test_persist_word_frequencies(filename: List[str]):
     path: str = jj("tests", "test_data", "xml", filename)
 
-    texts = parse.ProtocolTextIterator(filenames=[path], level='protocol')
+    texts = iterators.ProtocolTextIterator(filenames=[path], level='protocol')
     counter: tf.TermFrequencyCounter = tf.TermFrequencyCounter()
 
     counter.ingest(texts)
@@ -73,10 +65,10 @@ def test_persist_word_frequencies(filename: List[str]):
 
 
 @pytest.mark.parametrize(
-    'filename,expected_frequencies',
+    'document_name,expected_frequencies',
     [
         (
-            'prot-1958-fake.xml',
+            'prot-1958-fake',
             {
                 'hej': 1,
                 '!': 1,
@@ -97,11 +89,19 @@ def test_persist_word_frequencies(filename: List[str]):
         )
     ],
 )
-def test_compute_word_frequencies(filename: str, expected_frequencies: dict):
+def test_compute_word_frequencies(document_name: str, expected_frequencies: dict):
+    filename: str = jj("tests", "test_data", "fake", f"{document_name}.xml")
 
-    filenames: List[str] = [jj('./tests/test_data/fake', filename)]
     with temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
-        counts: tf.TermFrequencyCounter = tf.compute_term_frequencies(source=filenames, filename=store_name)
+        counts: tf.TermFrequencyCounter = tf.compute_term_frequencies(source=[filename], filename=store_name)
+        assert os.path.isfile(store_name)
+
+    assert dict(counts.frequencies) == expected_frequencies
+
+    with temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
+        counts: tf.TermFrequencyCounter = tf.compute_term_frequencies(
+            source=[filename], filename=store_name, processes=2
+        )
         assert os.path.isfile(store_name)
 
     assert dict(counts.frequencies) == expected_frequencies
