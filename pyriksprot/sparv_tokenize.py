@@ -30,7 +30,7 @@ import re
 from os.path import join as jj
 from typing import List
 
-from loguru import logger
+# from loguru import logger
 
 # try:
 #     from sparv.core import paths
@@ -53,7 +53,7 @@ MODEL_NAME: str = jj(SPARV_DATADIR, "models", "segment", MODEL_FILENAME)
 SALDO_TOKENS_NAME: str = jj(SPARV_DATADIR, "models", "segment", SALDO_TOKENS_FILENAME)
 
 
-def configure(model_name: str, saldo_tokens_name: str) -> None:
+def configure_models(model_name: str, saldo_tokens_name: str) -> None:
     global MODEL_NAME, SALDO_TOKENS_NAME
     MODEL_NAME = model_name
     SALDO_TOKENS_NAME = saldo_tokens_name
@@ -114,9 +114,9 @@ class BetterWordTokenizer:
                     else:
                         try:
                             key, val = line.strip().split(None, 1)
-                        except ValueError as e:
-                            logger.error(f"Error parsing configuration file: {line}")
-                            raise e
+                        except ValueError:  # pylint: disable=bare-except
+                            print(f"ERROR parsing configuration file: {line}")
+                            raise
                         key = key[:-1]
 
                         if key == "case_sensitive":
@@ -196,14 +196,14 @@ class ModelNotFoundError(Exception):
     ...
 
 
-def tokenize(text: str) -> List[str]:
+def default_tokenize(text: str) -> List[str]:
     global _TOKENIZER, MODEL_NAME, SALDO_TOKENS_NAME
 
     if not os.path.isfile(MODEL_NAME) or not os.path.isfile(SALDO_TOKENS_NAME):
         raise ModelNotFoundError(
             (
                 f"Tokenize models {SALDO_TOKENS_FILENAME} and/or {MODEL_FILENAME} not found.\n"
-                "Please use pyriksprot.tokenize.configure() to set model filenames."
+                "Please use pyriksprot.tokeni.configure_models() to set model filenames."
             )
         )
     _TOKENIZER = _TOKENIZER or BetterWordTokenizer(model=MODEL_NAME, token_list=SALDO_TOKENS_NAME)

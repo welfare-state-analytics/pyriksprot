@@ -8,7 +8,7 @@ from jinja2 import Environment, PackageLoader, Template, Undefined, select_autoe
 
 from . import model, parse
 from .dehyphenation import SwedishDehyphenatorService
-from .tokenize import tokenize
+from .sparv_tokenize import default_tokenize
 from .utility import strip_paths
 
 __dehyphenator: SwedishDehyphenatorService = None
@@ -38,7 +38,7 @@ def dehyphen(text: str) -> str:
 
 def pretokenize(text: str) -> str:
     """Tokenize `text`, then join resulting tokens."""
-    return ' '.join(tokenize(text))
+    return ' '.join(default_tokenize(text))
 
 
 jinja_env = Environment(
