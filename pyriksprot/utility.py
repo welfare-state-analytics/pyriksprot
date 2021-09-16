@@ -277,7 +277,7 @@ def parse_range_list(rl):
         parts = list(split_range(r.strip()))
         if len(parts) == 0:
             return range(0, 0)
-        elif len(parts) > 2:
+        if len(parts) > 2:
             raise ValueError("Invalid range: {}".format(r))
         return range(parts[0], parts[-1] + 1)
 
