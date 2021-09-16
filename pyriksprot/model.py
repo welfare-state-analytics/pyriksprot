@@ -19,6 +19,8 @@ from .utility import deprecated, flatten, strip_extensions
 if TYPE_CHECKING:
     from .interface import IterateLevel
 
+# pylint: disable=too-many-arguments
+
 
 class ParlaClarinError(ValueError):
     ...
@@ -41,6 +43,7 @@ class Utterance:
         next_id: str = None,
         paragraphs: Union[List[str], str] = None,
         annotation: Optional[str] = None,
+        page_number: Optional[str] = '',
         **_,
     ):
         self.u_id: str = u_id
@@ -52,6 +55,7 @@ class Utterance:
             [] if not paragraphs else paragraphs if isinstance(paragraphs, list) else paragraphs.split(PARAGRAPH_MARKER)
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
+        self.page_number: Optional[str] = page_number
 
     @property
     def text(self) -> str:
@@ -163,7 +167,7 @@ class Speech(UtteranceMixIn):
 
     num_tokens: int = 0
     num_words: int = 0
-
+    page_number: str = ''
     delimiter: str = field(default='\n')
 
     # self.dedent: bool = True
@@ -236,17 +240,6 @@ class Speech(UtteranceMixIn):
         return '\n'.join(texts)
 
 
-#     @property
-#     def paragraph_texts(self) -> List[List[str]]:
-#         """Utterance segments"""
-#         return [u.paragraphs for u in self.utterances]
-
-#     @property
-#     def utterance_texts(self) -> List[str]:
-#         """List of utterance texts"""
-#         return [self.delimiter.join(s) for s in self.paragraph_texts]
-
-
 class Protocol(UtteranceMixIn):
     def __init__(self, date: str, name: str, utterances: List[Utterance], **_):
         self.date: str = date
@@ -285,30 +278,38 @@ class Protocol(UtteranceMixIn):
         speeches: List[Speech] = SpeechMergerFactory.get(merge_strategy).speeches(self, skip_size=skip_size)
         return speeches
 
-    def to_text(self, level: IterateLevel, skip_size: int = 1) -> List[Tuple[str, str, str, str]]:
+    def to_text(self, level: IterateLevel, skip_size: int = 1) -> List[Tuple[str, str, str, str, str]]:
 
         items: List[Tuple[str, str, str, str]] = []
 
         if level.startswith('protocol'):
 
-            items = [(self.name, None, self.name, self.text)]
+            items = [(self.name, None, self.name, self.text, None)]
 
         elif level.startswith('speech'):
 
-            items = [(self.name, s.speaker, s.speech_id, s.text) for s in self.to_speeches('n', skip_size=skip_size)]
+            items = [
+                (self.name, s.speaker, s.speech_id, s.text, s.page_number)
+                for s in self.to_speeches('n', skip_size=skip_size)
+            ]
 
         elif level.startswith('speaker'):
 
-            items = [(self.name, s.speaker, s.speech_id, s.text) for s in self.to_speeches('who', skip_size=skip_size)]
+            items = [
+                (self.name, s.speaker, s.speech_id, s.text, s.page_number)
+                for s in self.to_speeches('who', skip_size=skip_size)
+            ]
 
         elif level.startswith('utterance'):
 
-            return [(self.name, u.who, u.u_id, u.text) for u in self.utterances]
+            items = [(self.name, u.who, u.u_id, u.text, u.page_number) for u in self.utterances]
 
         elif level.startswith('paragraph'):
 
             items = [
-                (self.name, u.who, f"{u.u_id}@{i}", p) for u in self.utterances for i, p in enumerate(u.paragraphs)
+                (self.name, u.who, f"{u.u_id}@{i}", p, u.page_number)
+                for u in self.utterances
+                for i, p in enumerate(u.paragraphs)
             ]
 
         else:
