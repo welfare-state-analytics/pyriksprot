@@ -4,7 +4,7 @@ import abc
 from multiprocessing import get_context
 from typing import TYPE_CHECKING, List, Tuple
 
-from .parse import ProtocolMapper, XML_Protocol
+from .parse import ProtocolMapper, XmlIterParseProtocol, XmlUntangleProtocol
 
 if TYPE_CHECKING:
     from .interface import IterateLevel
@@ -64,17 +64,17 @@ class IProtocolTextIterator(abc.ABC):
         ...
 
 
-def multiprocessing_xml_load(args) -> List[Tuple[str, str, str, str]]:
+def multiprocessing_xml_load(args) -> List[Tuple[str, str, str, str, str]]:
     """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
-    return XML_Protocol(data=args[0], skip_size=args[2]).to_text(level=args[1])
+    return XmlUntangleProtocol(data=args[0], skip_size=args[2]).to_text(level=args[1])
 
 
 class XmlProtocolTextIterator(IProtocolTextIterator):
     """Iterate ParlaClarin XML files using `untangle` wrapper."""
 
-    def load(self, filename: str) -> List[Tuple[str, str, str, str]]:
+    def load(self, filename: str) -> List[Tuple[str, str, str, str, str]]:
         """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
-        return XML_Protocol(data=filename, skip_size=self.skip_size).to_text(level=self.level)
+        return XmlUntangleProtocol(data=filename, skip_size=self.skip_size).to_text(level=self.level)
 
     def map_futures(self, imap, args: List[Tuple[str, str, int]]):
         return imap(multiprocessing_xml_load, args)
@@ -94,3 +94,19 @@ class ProtocolTextIterator(IProtocolTextIterator):
 
     def map_futures(self, imap, args):
         return imap(multiprocessing_load, args, chunksize=self.chunksize)
+
+
+def multiprocessing_xml_iter_load(args) -> List[Tuple[str, str, str, str, str]]:
+    """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
+    return XmlIterParseProtocol(data=args[0], skip_size=args[2]).to_text(level=args[1])
+
+
+class XmlIterProtocolTextIterator(IProtocolTextIterator):
+    """Reads xml files and returns a stream of (name, who, id, text, page_number).
+    Uses SAX streaming"""
+
+    def load(self, filename: str) -> List[Tuple[str, str, int]]:
+        return XmlIterParseProtocol(data=filename, skip_size=self.skip_size).to_text(level=self.level)
+
+    def map_futures(self, imap, args):
+        return imap(multiprocessing_xml_iter_load, args, chunksize=self.chunksize)

@@ -267,6 +267,7 @@ def test_speech_annotation():
         speaker="apa",
         speech_date="1999",
         speech_index=1,
+        page_number="0",
         utterances=utterances,
     )
 
@@ -283,6 +284,7 @@ def test_speech_annotation():
         speaker="apa",
         speech_date="1999",
         speech_index=1,
+        page_number="0",
         utterances=utterances,
     )
 
@@ -299,6 +301,7 @@ def test_speech_annotation():
         speaker="apa",
         speech_date="1999",
         speech_index=1,
+        page_number="0",
         utterances=utterances,
     )
 

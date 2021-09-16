@@ -162,12 +162,12 @@ class Speech(UtteranceMixIn):
     speaker: str
     speech_date: str
     speech_index: int
+    page_number: str
 
     utterances: List[Utterance] = field(default_factory=list)
 
     num_tokens: int = 0
     num_words: int = 0
-    page_number: str = ''
     delimiter: str = field(default='\n')
 
     # self.dedent: bool = True
@@ -284,7 +284,7 @@ class Protocol(UtteranceMixIn):
 
         if level.startswith('protocol'):
 
-            items = [(self.name, None, self.name, self.text, None)]
+            items = [(self.name, None, self.name, self.text, '0')]
 
         elif level.startswith('speech'):
 
@@ -333,6 +333,7 @@ class IMergeSpeechStrategy(abc.ABC):
             document_name=protocol.name,
             speech_id=self.speech_id(utterances),
             speaker=utterances[0].who,
+            page_number=utterances[0].page_number,
             speech_date=protocol.date,
             speech_index=speech_index,
             utterances=utterances,

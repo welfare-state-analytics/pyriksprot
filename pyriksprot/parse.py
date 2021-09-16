@@ -1,199 +1,298 @@
 from __future__ import annotations
 
-import os
+import abc
 import textwrap
+import xml.etree.cElementTree as ET
 from collections import defaultdict
-from io import StringIO
+from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Iterable, List, Tuple, Union
 
-import untangle  # pylint: disable=import-error
+from pyriksprot.foss import untangle
 
 from . import model
-from .utility import hasattr_path
 
 if TYPE_CHECKING:
     from .interface import IterateLevel
 
+ProtocolIterItem = Tuple[str, str, str, str, str]
+ProtocolIterItems = List[ProtocolIterItem]
 
-class XML_Utterance:
-    """Wraps a single ParlaClarin XML utterance tag."""
 
-    def __init__(self, utterance: untangle.Element, dedent: bool = True, delimiter: str = '\n'):
-
-        if not isinstance(utterance, untangle.Element):
-            raise TypeError("expected untangle.Element")
-
-        self.utterance: untangle.Element = utterance
-        self.dedent: bool = dedent
-        self.delimiter: str = delimiter
-
-    @property
-    def who(self) -> str:
-        try:
-            return self.utterance.get_attribute('who') or "undefined"
-        except (AttributeError, KeyError):
-            return 'undefined'
-
-    @property
-    def u_id(self) -> str:
-        return self.utterance.get_attribute('xml:id')
-
-    @property
-    def prev_id(self) -> str:
-        return self.utterance.get_attribute('prev')
-
-    @property
-    def next_id(self) -> str:
-        return self.utterance.get_attribute('next')
-
-    @property
-    def n(self) -> str:
-        return self.utterance.get_attribute('n')
-
-    @property
-    def paragraphs(self) -> List[str]:
-        texts: Iterable[str] = (p.cdata.strip() for p in self.utterance.get_elements('seg'))
-        if self.dedent:
-            texts = [textwrap.dedent(t).strip() for t in texts]
-        return texts
+@dataclass
+class IterUtterance:
+    page_number: str
+    u_id: str
+    who: str
+    prev_id: str
+    next_id: str
+    n: str
+    paragraphs: str
+    delimiter: str = '\n'
 
     @property
     def text(self) -> str:
-        return self.delimiter.join(self.paragraphs)
+        return self.delimiter.join(self.paragraphs).strip()
 
 
-class XML_Protocol:
-    """Wraps the XML representation of a single ParlaClarin document (protocol)"""
+class IXmlProtocol(abc.ABC):
+    def __init__(self, data: str, skip_size: int = 0, delimiter: str = '\n'):
 
-    def __init__(
-        self,
-        data: Union[str, untangle.Element],
-        skip_size: int = 0,
-        delimiter: str = '\n',
-    ):
-        """
-        Args:
-            data (untangle.Element): XML document
-        """
-        self.data: untangle.Element = None
-        if isinstance(data, untangle.Element):
-            self.data = data
-        elif isinstance(data, str):
-            if os.path.isfile(data):
-                self.data = untangle.parse(data)
-            else:
-                self.data = untangle.parse(StringIO(data))
-        else:
-            raise ValueError("invalid data for untangle")
-
-        self._utterances: List[XML_Utterance] = (
-            [XML_Utterance(u) for u in self.data.teiCorpus.TEI.text.body.div.u]
-            if hasattr_path(self.data, 'teiCorpus.TEI.text.body.div.u')
-            else []
-        )
-
+        self.data: str = data
         self.skip_size: bool = skip_size
         self.delimiter: str = delimiter
 
+        self.iterator: Iterable[IterUtterance] = self.create_iterator()
+        self.utterances: List[IterUtterance] = self.create_utterances()
+
+        self.date = self.get_date()
+        self.name = self.get_name()
+
+    @abc.abstractmethod
+    def create_iterator(self) -> Iterable[IterUtterance]:
+        return []
+
+    @abc.abstractmethod
+    def create_utterances(self) -> List[IterUtterance]:
+        ...
+
+    @abc.abstractmethod
+    def get_name(self) -> str:
+        ...
+
+    @abc.abstractmethod
+    def get_date(self) -> str:
+        ...
+
+    def __len__(self):
+        return len(self.utterances)
+
     @property
-    def date(self) -> str:
-        """Date of protocol"""
+    def text(self) -> str:
+        """Return sequence of XML_Utterances."""
+        return self.delimiter.join(x.text for x in self.utterances)
+
+    @property
+    def has_text(self) -> bool:
+        """Return sequence of XML_Utterances."""
+        return any(x.text != '' for x in self.utterances)
+
+    def to_text(self, level: IterateLevel, skip_size: int = 0) -> ProtocolIterItems:
+        """Generate text blocks from `protocol`. Yield each block as a tuple (name, who, id, text, page_number)."""
+        try:
+
+            name: str = self.name
+
+            if level.startswith('protocol'):
+
+                items = [(name, None, name, self.text, '0')]
+
+            elif level.startswith('speaker'):
+
+                data, page_numbers = defaultdict(list), {}
+                for u in self.utterances:
+                    data[u.who].append(u.text)
+                    if u.who not in page_numbers:
+                        page_numbers[u.who] = u.page_number
+
+                items = [(name, who, who, '\n'.join(data[who]), str(page_numbers[who])) for who in data]
+
+            elif level.startswith('speech'):
+
+                data, who, page_numbers = defaultdict(list), {}, {}
+                for u in self.utterances:
+                    data[u.n].append(u.text)
+                    who[u.n] = u.who
+                    if u.n not in page_numbers:
+                        page_numbers[u.n] = u.page_number
+
+                items = [(name, who[n], n, '\n'.join(data[n]), str(page_numbers[n])) for n in data]
+
+            elif level.startswith('utterance'):
+
+                items = [(name, u.who, u.u_id, u.text, str(u.page_number)) for u in self.utterances]
+
+            elif level.startswith('paragraph'):
+
+                items = [
+                    (name, u.who, f"{u.u_id}@{i}", p, str(u.page_number))
+                    for u in self.utterances
+                    for i, p in enumerate(u.paragraphs)
+                ]
+
+            if skip_size > 0:
+
+                items = [item for item in items if len(item[3]) > skip_size]
+
+            return items
+
+        except Exception as ex:
+            raise ex
+
+
+class XmlUntangleProtocol(IXmlProtocol):
+    """Wraps the XML representation of a single ParlaClarin document (protocol)"""
+
+    def __init__(self, data: Union[str, untangle.Element], skip_size: int = 0, delimiter: str = '\n'):
+
+        data: untangle.Element = (
+            data if isinstance(data, untangle.Element) else untangle.parse(data, ignore_tags={'note', 'teiHeader'})
+        )
+
+        super().__init__(data, skip_size, delimiter)
+
+    def create_iterator(self) -> Iterable[IterUtterance]:
+        return []
+
+    def create_utterances(self) -> List[IterUtterance]:
+        utterances: List[IterUtterance] = []
+        page_number: str = None
+        parent: untangle.Element = self.data.teiCorpus.TEI.text.body.div
+        for child in parent.children:
+            if child.name == 'pb':
+                page_number = child['n']
+            elif child.name == 'u':
+                utterances.append(
+                    UtteranceMapper.create(element=child, delimiter=self.delimiter, page_number=page_number)
+                )
+        return utterances
+
+    def get_date(self) -> str:
         try:
             docDate = self.data.teiCorpus.TEI.text.front.div.docDate
             return docDate[0]['when'] if isinstance(docDate, list) else docDate['when']
         except (AttributeError, KeyError):
             return None
 
-    @property
-    def name(self) -> str:
+    def get_name(self) -> str:
         """Protocol name"""
         try:
             return self.data.teiCorpus.TEI.text.front.div.head.cdata
         except (AttributeError, KeyError):
             return None
 
-    @property
-    def utterances(self) -> List[XML_Utterance]:
-        """Return sequence of XML_Utterances."""
-        return self._utterances
 
-    @property
-    def text(self) -> str:
-        """Return sequence of XML_Utterances."""
-        return self.delimiter.join(x.text for x in self._utterances)
+class UtteranceMapper:
+    """Wraps a single ParlaClarin XML utterance tag."""
 
-    def to_text(self, level: IterateLevel) -> List[Tuple[str, str, str, str]]:
-        """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
-        try:
+    @staticmethod
+    def create(
+        element: untangle.Element, page_number: str, dedent: bool = True, delimiter: str = '\n'
+    ) -> IterUtterance:
+        utterance: IterUtterance = IterUtterance(
+            page_number=page_number,
+            u_id=element.get_attribute('xml:id'),
+            who=element.get_attribute('who') or "undefined",
+            prev_id=element.get_attribute('prev'),
+            next_id=element.get_attribute('next'),
+            n=element.get_attribute('n'),
+            paragraphs=UtteranceMapper.to_paragraphs(element, dedent),
+            delimiter=delimiter,
+        )
+        return utterance
 
-            if level.startswith('protocol'):
-
-                items = [(self.name, None, self.name, self.text)]
-
-            elif level.startswith('speaker'):
-
-                data = defaultdict(list)
-                for u in self.utterances:
-                    data[u.who].append(u.text)
-
-                items = [(self.name, who, who, '\n'.join(data[who])) for who in data]
-
-            elif level.startswith('speech'):
-
-                data, who = defaultdict(list), {}
-                for u in self.utterances:
-                    data[u.n].append(u.text)
-                    who[u.n] = u.who
-
-                items = [(self.name, who[n], n, '\n'.join(data[n])) for n in data]
-
-            elif level.startswith('utterance'):
-
-                items = [(self.name, x.who, x.u_id, x.text) for x in self.utterances]
-
-            elif level.startswith('paragraph'):
-
-                items = [
-                    (self.name, u.who, f"{u.u_id}@{i}", p) for u in self.utterances for i, p in enumerate(u.paragraphs)
-                ]
-
-            if self.skip_size > 0:
-
-                return [item for item in items if len(item[3]) > self.skip_size]
-
-            return items
-
-        except Exception as ex:
-            raise ex
-            # return ex
+    @staticmethod
+    def to_paragraphs(element: untangle.Element, dedent: bool = True) -> List[str]:
+        texts: Iterable[str] = (p.cdata.strip() for p in element.get_elements('seg'))
+        if dedent:
+            texts = [textwrap.dedent(t).strip() for t in texts]
+        return texts
 
 
 class ProtocolMapper:
     @staticmethod
-    def to_protocol(
-        data: Union[str, untangle.Element],
-        skip_size: int = 0,
-    ) -> model.Protocol:
+    def to_protocol(data: Union[str, untangle.Element], skip_size: int = 0) -> model.Protocol:
         """Map XML to domain entity. Return Protocol."""
 
-        xml_protocol: XML_Protocol = XML_Protocol(data=data, skip_size=skip_size)
+        xml_protocol: XmlUntangleProtocol = XmlUntangleProtocol(data=data, skip_size=skip_size)
 
         protocol: model.Protocol = model.Protocol(
-            utterances=[ProtocolMapper.to_utterance(u) for u in xml_protocol.utterances],
+            utterances=[model.Utterance(**asdict(u)) for u in xml_protocol.utterances],
             date=xml_protocol.date,
             name=xml_protocol.name,
         )
 
         return protocol
 
-    @staticmethod
-    def to_utterance(u: XML_Utterance) -> model.Utterance:
-        """Map XML wrapper to domain entity. Return Utterance."""
-        return model.Utterance(
-            u_id=u.u_id,
-            n=u.n,
-            who=u.who,
-            prev_id=u.prev_id,
-            next_id=u.next_id,
-            paragraphs=u.paragraphs,
-        )
+
+class XmlIterParseProtocol(IXmlProtocol):  # (IProtocolTextIterator):
+    """Load ParlaClarin XML file using SAX parsing."""
+
+    def create_iterator(self) -> Iterable[IterUtterance]:
+        return XmlIterParseProtocol.XmlIterParser(self.data)
+
+    def create_utterances(self) -> List[IterUtterance]:
+        return list(self.iterator)
+
+    def get_date(self) -> str:
+        return self.iterator.doc_date
+
+    def get_name(self) -> str:
+        return self.iterator.doc_name
+
+    class XmlIterParser:
+        def __init__(self, filename: str):
+
+            self.doc_date = None
+            self.doc_name = None
+            self.filename = filename
+            self.iterator = None
+
+        def __iter__(self):
+            self.iterator = self.create_iterator()
+            return self
+
+        def __next__(self):
+            return next(self.iterator)
+
+        def create_iterator(self) -> Iterable[IterUtterance]:
+
+            context = ET.iterparse(self.filename, events=("start", "end"))
+
+            context = iter(context)
+            current_page: int = 0
+            current_utterance: dict = None
+            is_preface: bool = False
+
+            for event, elem in context:
+
+                tag = elem.tag.rpartition('}')[2]
+                value = elem.text
+
+                if event == 'start':
+
+                    if tag == "pb":
+                        current_page = elem.attrib['n']
+
+                    if tag == "u":
+                        current_utterance: IterUtterance = IterUtterance(
+                            current_page,
+                            elem.attrib.get('{http://www.w3.org/XML/1998/namespace}id'),
+                            elem.attrib.get('who'),
+                            elem.attrib.get('prev'),
+                            elem.attrib.get('next'),
+                            elem.attrib.get('n'),
+                            [],
+                        )
+
+                    if tag == "seg":
+                        current_utterance['paragraphs'].append(value)
+
+                    if tag == 'docDate' and is_preface:
+                        self.doc_date = elem.attrib.get('when')
+
+                    if tag == 'head' and is_preface:
+                        self.doc_name = value
+
+                    if tag == 'div' and elem.attrib.get('type') == 'preface':
+                        is_preface = True
+
+                if event == 'end':
+
+                    if tag == 'u':
+                        yield current_utterance
+                        current_utterance = None
+
+                    if tag == 'div' and elem.attrib.get('type') == 'preface':
+                        is_preface = False
+
+                elem.clear()
