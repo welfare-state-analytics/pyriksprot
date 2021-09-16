@@ -56,7 +56,7 @@
       </front>
       <body>
         <div>
-          <pb n="0" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-001.jp2/_view"/>
+          <pb n="0" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-000.jp2/_view"/>
           <note type="date" n="a01">
             2 Nr 32. Torsdagen den 28 juni 1958 fm.
           </note>
@@ -70,6 +70,7 @@
             <seg n="b02">Jag heter Ove.</seg><seg n="b03">Vad heter du?</seg>
           </u>
           <note n="a05">Note</note>
+          <pb n="1" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-001.jp2/_view"/>
           <note n="a06" type="speaker">B:</note>
           <u who="B" xml:id="i-3" n="c03">
             <seg n="b04">Jag heter Adam.</seg>

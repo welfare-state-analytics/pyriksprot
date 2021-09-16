@@ -70,6 +70,7 @@
             <seg n="b02">Det regnar ute.</seg><seg n="b03">Visste du det?</seg>
           </u>
           <note n="a05">Note</note>
+          <pb n="1" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-001.jp2/_view"/>
           <note n="a06" type="speaker">B:</note>
           <u who="B" xml:id="i-3" n="c03">
             <seg n="b04">Jag håller med.</seg><seg n="b05">Talmannen är snäll.</seg>
