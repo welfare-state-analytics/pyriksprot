@@ -10,7 +10,6 @@ def main(
     input_folder: str = None,
     output_filename: str = None,
 ):
-
     try:
         compute_term_frequencies(input_folder, output_filename)
     except Exception as ex:
