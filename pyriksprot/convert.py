@@ -8,7 +8,7 @@ from jinja2 import Environment, PackageLoader, Template, Undefined, select_autoe
 
 from . import model, parse
 from .dehyphenation import SwedishDehyphenatorService
-from .sparv_tokenize import default_tokenize
+from .foss.sparv_tokenize import default_tokenize
 from .utility import strip_paths
 
 __dehyphenator: SwedishDehyphenatorService = None

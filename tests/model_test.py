@@ -4,9 +4,9 @@ from typing import Callable, List
 
 import pandas as pd
 import pytest
-import untangle  # pylint: disable=import-error
 
 from pyriksprot import model, parse, persist
+from pyriksprot.foss import untangle
 
 # pylint: disable=redefined-outer-name
 

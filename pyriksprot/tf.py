@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 
 from tqdm.auto import tqdm
 
+from .foss.sparv_tokenize import default_tokenize
 from .iterators import ProtocolTextIterator, XmlProtocolTextIterator
-from .sparv_tokenize import default_tokenize
 
 
 class TermFrequencyCounter:
