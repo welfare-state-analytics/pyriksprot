@@ -1,21 +1,14 @@
-from __future__ import annotations
-
 import abc
 import textwrap
 import xml.etree.cElementTree as ET
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Iterable, List, Tuple, Union
+from typing import Callable, Iterable, List, Union
 
 from pyriksprot.foss import untangle
 
 from . import model
-
-if TYPE_CHECKING:
-    from .interface import IterateLevel
-
-ProtocolIterItem = Tuple[str, str, str, str, str]
-ProtocolIterItems = List[ProtocolIterItem]
+from .interface import IterateLevel, ProtocolIterItem
 
 
 @dataclass
@@ -76,7 +69,9 @@ class IXmlProtocol(abc.ABC):
         """Return sequence of XML_Utterances."""
         return any(x.text != '' for x in self.utterances)
 
-    def to_text(self, level: IterateLevel, skip_size: int = 0) -> ProtocolIterItems:
+    def to_text(
+        self, level: IterateLevel, skip_size: int = 0, preprocess: Callable[[str], str] = None
+    ) -> Iterable[ProtocolIterItem]:
         """Generate text blocks from `protocol`. Yield each block as a tuple (name, who, id, text, page_number)."""
         try:
 
@@ -84,7 +79,7 @@ class IXmlProtocol(abc.ABC):
 
             if level.startswith('protocol'):
 
-                items = [(name, None, name, self.text, '0')]
+                items: Iterable[ProtocolIterItem] = [ProtocolIterItem(name, None, name, self.text, '0')]
 
             elif level.startswith('speaker'):
 
@@ -94,7 +89,9 @@ class IXmlProtocol(abc.ABC):
                     if u.who not in page_numbers:
                         page_numbers[u.who] = u.page_number
 
-                items = [(name, who, who, '\n'.join(data[who]), str(page_numbers[who])) for who in data]
+                items: Iterable[ProtocolIterItem] = [
+                    ProtocolIterItem(name, who, who, '\n'.join(data[who]), str(page_numbers[who])) for who in data
+                ]
 
             elif level.startswith('speech'):
 
@@ -105,23 +102,31 @@ class IXmlProtocol(abc.ABC):
                     if u.n not in page_numbers:
                         page_numbers[u.n] = u.page_number
 
-                items = [(name, who[n], n, '\n'.join(data[n]), str(page_numbers[n])) for n in data]
+                items: Iterable[ProtocolIterItem] = [
+                    ProtocolIterItem(name, who[n], n, '\n'.join(data[n]), str(page_numbers[n])) for n in data
+                ]
 
             elif level.startswith('utterance'):
 
-                items = [(name, u.who, u.u_id, u.text, str(u.page_number)) for u in self.utterances]
+                items: Iterable[ProtocolIterItem] = [
+                    ProtocolIterItem(name, u.who, u.u_id, u.text, str(u.page_number)) for u in self.utterances
+                ]
 
             elif level.startswith('paragraph'):
 
-                items = [
-                    (name, u.who, f"{u.u_id}@{i}", p, str(u.page_number))
+                items: Iterable[ProtocolIterItem] = [
+                    ProtocolIterItem(name, u.who, f"{u.u_id}@{i}", p, str(u.page_number))
                     for u in self.utterances
                     for i, p in enumerate(u.paragraphs)
                 ]
 
+            if preprocess is not None:
+                for item in items:
+                    item.text = preprocess(item.text)
+
             if skip_size > 0:
 
-                items = [item for item in items if len(item[3]) > skip_size]
+                items = [item for item in items if len(item.text) > skip_size]
 
             return items
 
@@ -192,7 +197,7 @@ class UtteranceMapper:
 
     @staticmethod
     def to_paragraphs(element: untangle.Element, dedent: bool = True) -> List[str]:
-        texts: Iterable[str] = (p.cdata.strip() for p in element.get_elements('seg'))
+        texts: Iterable[str] = (p.cdata for p in element.get_elements('seg'))
         if dedent:
             texts = [textwrap.dedent(t).strip() for t in texts]
         return texts
@@ -236,6 +241,7 @@ class XmlIterParseProtocol(IXmlProtocol):  # (IProtocolTextIterator):
             self.doc_name = None
             self.filename = filename
             self.iterator = None
+            self.dedent: bool = True
 
         def __iter__(self):
             self.iterator = self.create_iterator()
@@ -260,39 +266,46 @@ class XmlIterParseProtocol(IXmlProtocol):  # (IProtocolTextIterator):
 
                 if event == 'start':
 
-                    if tag == "pb":
-                        current_page = elem.attrib['n']
-
-                    if tag == "u":
-                        current_utterance: IterUtterance = IterUtterance(
-                            current_page,
-                            elem.attrib.get('{http://www.w3.org/XML/1998/namespace}id'),
-                            elem.attrib.get('who'),
-                            elem.attrib.get('prev'),
-                            elem.attrib.get('next'),
-                            elem.attrib.get('n'),
-                            [],
-                        )
-
-                    if tag == "seg":
-                        current_utterance['paragraphs'].append(value)
-
-                    if tag == 'docDate' and is_preface:
-                        self.doc_date = elem.attrib.get('when')
-
                     if tag == 'head' and is_preface:
                         self.doc_name = value
 
-                    if tag == 'div' and elem.attrib.get('type') == 'preface':
+                    elif tag == 'docDate' and is_preface:
+                        self.doc_date = elem.attrib.get('when')
+
+                    elif tag == "pb":
+                        current_page = elem.attrib['n']
+
+                    elif tag == "u":
+                        is_preface = False
+                        current_utterance: IterUtterance = IterUtterance(
+                            page_number=current_page,
+                            u_id=elem.attrib.get('{http://www.w3.org/XML/1998/namespace}id'),
+                            who=elem.attrib.get('who'),
+                            prev_id=elem.attrib.get('prev'),
+                            next_id=elem.attrib.get('next'),
+                            n=elem.attrib.get('n'),
+                            paragraphs=[],
+                        )
+                    elif tag == "seg" and value is not None:
+                        value = (textwrap.dedent(value) if self.dedent else value).strip()
+                        if value:
+                            current_utterance.paragraphs.append(value)
+
+                    elif tag == 'div' and elem.attrib.get('type') == 'preface':
                         is_preface = True
 
-                if event == 'end':
+                elif event == 'end':
 
-                    if tag == 'u':
+                    if tag == "seg" and value is not None:
+                        value = (textwrap.dedent(value) if self.dedent else value).strip()
+                        if value:
+                            current_utterance.paragraphs.append(value)
+
+                    elif tag == 'u':
                         yield current_utterance
                         current_utterance = None
 
-                    if tag == 'div' and elem.attrib.get('type') == 'preface':
+                    elif tag == 'div' and elem.attrib.get('type') == 'preface':
                         is_preface = False
 
                 elem.clear()

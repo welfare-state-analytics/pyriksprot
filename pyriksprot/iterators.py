@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import abc
 from multiprocessing import get_context
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Callable, Iterable, List, Tuple
 
+from .interface import ProtocolIterItem
 from .parse import ProtocolMapper, XmlIterParseProtocol, XmlUntangleProtocol
 
 if TYPE_CHECKING:
@@ -23,6 +24,7 @@ class IProtocolTextIterator(abc.ABC):
         chunksize: int = 100,
         ordered: bool = False,
         merge_strategy: str = 'n',
+        preprocessor: Callable[[str], str] = None,
     ):
         self.filenames: List[str] = filenames
         self.iterator = None
@@ -32,6 +34,7 @@ class IProtocolTextIterator(abc.ABC):
         self.chunksize: int = chunksize
         self.ordered: int = ordered
         self.merge_strategy: str = merge_strategy
+        self.preprocessor: Callable[[str], str] = preprocessor
 
     def __iter__(self):
         self.iterator = self.create_iterator()
@@ -56,7 +59,7 @@ class IProtocolTextIterator(abc.ABC):
                     yield item
 
     @abc.abstractmethod
-    def load(self, filename: str) -> List[Tuple[str, str, str, str]]:
+    def load(self, filename: str) -> Iterable[ProtocolIterItem]:
         ...
 
     @abc.abstractmethod
@@ -64,7 +67,7 @@ class IProtocolTextIterator(abc.ABC):
         ...
 
 
-def multiprocessing_xml_load(args) -> List[Tuple[str, str, str, str, str]]:
+def multiprocessing_xml_load(args) -> Iterable[ProtocolIterItem]:
     """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
     return XmlUntangleProtocol(data=args[0], skip_size=args[2]).to_text(level=args[1])
 
@@ -72,7 +75,7 @@ def multiprocessing_xml_load(args) -> List[Tuple[str, str, str, str, str]]:
 class XmlProtocolTextIterator(IProtocolTextIterator):
     """Iterate ParlaClarin XML files using `untangle` wrapper."""
 
-    def load(self, filename: str) -> List[Tuple[str, str, str, str, str]]:
+    def load(self, filename: str) -> Iterable[ProtocolIterItem]:
         """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
         return XmlUntangleProtocol(data=filename, skip_size=self.skip_size).to_text(level=self.level)
 
@@ -89,14 +92,15 @@ class ProtocolTextIterator(IProtocolTextIterator):
 
     def load(self, filename: str) -> List[Tuple[str, str, int]]:
         return ProtocolMapper.to_protocol(data=filename, skip_size=self.skip_size).to_text(
-            self.level, skip_size=self.skip_size
+            self.level,
+            skip_size=self.skip_size,
         )
 
     def map_futures(self, imap, args):
         return imap(multiprocessing_load, args, chunksize=self.chunksize)
 
 
-def multiprocessing_xml_iter_load(args) -> List[Tuple[str, str, str, str, str]]:
+def multiprocessing_xml_iter_load(args) -> Iterable[ProtocolIterItem]:
     """Load protocol from XML. Aggregate text to `level`. Return (name, speaker, id, text)."""
     return XmlIterParseProtocol(data=args[0], skip_size=args[2]).to_text(level=args[1])
 

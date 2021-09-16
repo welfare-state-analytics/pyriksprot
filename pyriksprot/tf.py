@@ -34,7 +34,7 @@ class TermFrequencyCounter:
         texts = (
             value
             if isinstance(value, str)
-            else (t for _, _, _, t, _ in value)
+            else (x.text for x in value)
             if isinstance(value, (XmlProtocolTextIterator, ProtocolTextIterator))
             else value
         )

@@ -8,12 +8,13 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Callable, List, Literal, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Literal, Mapping, Optional, Union
 
 import pandas as pd
 from loguru import logger
 from pandas.io import json
 
+from .interface import ProtocolIterItem
 from .utility import deprecated, flatten, strip_extensions
 
 if TYPE_CHECKING:
@@ -278,46 +279,48 @@ class Protocol(UtteranceMixIn):
         speeches: List[Speech] = SpeechMergerFactory.get(merge_strategy).speeches(self, skip_size=skip_size)
         return speeches
 
-    def to_text(self, level: IterateLevel, skip_size: int = 1) -> List[Tuple[str, str, str, str, str]]:
+    def to_text(
+        self, level: IterateLevel, skip_size: int = 1, preprocess: Callable[[str], str] = None
+    ) -> Iterable[ProtocolIterItem]:
 
-        items: List[Tuple[str, str, str, str]] = []
+        items: List[ProtocolIterItem] = []
 
         if level.startswith('protocol'):
 
-            items = [(self.name, None, self.name, self.text, '0')]
+            items = [ProtocolIterItem(self.name, None, self.name, self.text, '0')]
 
         elif level.startswith('speech'):
 
             items = [
-                (self.name, s.speaker, s.speech_id, s.text, s.page_number)
+                ProtocolIterItem(self.name, s.speaker, s.speech_id, s.text, s.page_number)
                 for s in self.to_speeches('n', skip_size=skip_size)
             ]
 
         elif level.startswith('speaker'):
 
             items = [
-                (self.name, s.speaker, s.speech_id, s.text, s.page_number)
+                ProtocolIterItem(self.name, s.speaker, s.speech_id, s.text, s.page_number)
                 for s in self.to_speeches('who', skip_size=skip_size)
             ]
 
         elif level.startswith('utterance'):
 
-            items = [(self.name, u.who, u.u_id, u.text, u.page_number) for u in self.utterances]
+            items = [ProtocolIterItem(self.name, u.who, u.u_id, u.text, u.page_number) for u in self.utterances]
 
         elif level.startswith('paragraph'):
 
             items = [
-                (self.name, u.who, f"{u.u_id}@{i}", p, u.page_number)
+                ProtocolIterItem(self.name, u.who, f"{u.u_id}@{i}", p, u.page_number)
                 for u in self.utterances
                 for i, p in enumerate(u.paragraphs)
             ]
 
-        else:
-            raise ValueError(f"unexpected argument: {level}")
+        if preprocess is not None:
+            for item in items:
+                item.text = preprocess(item.text)
 
         if skip_size > 0:
-
-            items = [x for x in items if len(x[3]) > skip_size]
+            items = [item for item in items if len(item.text) > skip_size]
 
         return items
 

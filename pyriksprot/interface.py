@@ -1,10 +1,20 @@
 import abc
 import itertools
+from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Callable, List, Literal, Mapping, Union
 
 TaggedDocument = Mapping[str, List[str]]
 IterateLevel = Literal['protocol', 'speech', 'speaker', 'utterance', 'paragraph']
+
+
+@dataclass
+class ProtocolIterItem:
+    name: str
+    who: str
+    id: str
+    text: str
+    page_number: str
 
 
 class IProtocol(abc.ABC):
