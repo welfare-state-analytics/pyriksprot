@@ -152,7 +152,7 @@ def test_utterances_to_json(utterances: List[model.Utterance]):
 def test_utterances_to_pandas(utterances: List[model.Utterance]):
 
     data: pd.DataFrame = model.Utterances.to_dataframe(utterances)
-    assert data.reset_index().to_dict(orient='record') == UTTERANCES_DICTS
+    assert data.reset_index().to_dict(orient='records') == UTTERANCES_DICTS
 
 
 def test_protocol_create(utterances: List[model.Utterance]):
