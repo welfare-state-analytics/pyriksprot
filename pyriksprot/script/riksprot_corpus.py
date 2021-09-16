@@ -2,9 +2,11 @@ import sys
 
 import click
 from pyriksprot import convert_protocol
-from resources.templates import PARLA_TEMPLATES_SHORTNAMES
+from pyriksprot.resources.templates import PARLA_TEMPLATES_SHORTNAMES
 
-
+"""
+Extract a corpus of text or annotations from 
+"""
 @click.command()
 @click.argument('input_filename', type=click.STRING)
 @click.option(
@@ -32,7 +34,6 @@ def main(
         convert_protocol(input_filename, output_filename, template_name)
 
     except Exception as ex:
-        raise
         click.echo(ex)
         sys.exit(1)
 
