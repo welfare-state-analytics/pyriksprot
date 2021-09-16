@@ -21,7 +21,6 @@ repository = "https://github.com/welfare-state-analytics/pyriksprot"
 
 [tool.poetry.dependencies]
 python = "==3.8.5"
-untangle = "^1.1.1"
 Jinja2 = "^2.11.3"
 click = "^7.1.2"
 dehyphen = "^0.3.4"
