@@ -4,6 +4,7 @@ import contextlib
 import functools
 import glob
 import gzip
+import inspect
 import os
 import pathlib
 import pickle
@@ -13,6 +14,7 @@ import time
 import urllib
 import warnings
 from collections import defaultdict
+from itertools import chain
 from typing import Any, List, Set, TypeVar, Union
 
 # from snakemake.io import expand, glob_wildcards
@@ -243,3 +245,41 @@ def touch(f: str) -> None:
 
 def ensure_path(f: str) -> None:
     os.makedirs(os.path.dirname(f), exist_ok=True)
+
+
+def get_kwargs():
+    frame = inspect.currentframe().f_back
+    keys, _, _, values = inspect.getargvalues(frame)
+    kwargs = {}
+    for key in keys:
+        if key != 'self':
+            kwargs[key] = values[key]
+    return kwargs
+
+
+def parse_range_list(rl):
+    def collapse_range(ranges):
+        end = None
+        for value in ranges:
+            yield range(max(end, value.start), max(value.stop, end)) if end else value
+            end = max(end, value.stop) if end else value.stop
+
+    def split_range(value):
+        value = value.split('-')
+        for val, prev in zip(value, chain((None,), value)):
+            if val != '':
+                val = int(val)
+                if prev == '':
+                    val *= -1
+                yield val
+
+    def parse_range(r):
+        parts = list(split_range(r.strip()))
+        if len(parts) == 0:
+            return range(0, 0)
+        elif len(parts) > 2:
+            raise ValueError("Invalid range: {}".format(r))
+        return range(parts[0], parts[-1] + 1)
+
+    ranges = sorted(set(map(parse_range, rl.split(","))), key=lambda x: (x.start, x.stop))
+    return chain.from_iterable(collapse_range(ranges))

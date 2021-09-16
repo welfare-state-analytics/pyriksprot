@@ -2,10 +2,18 @@
 
 from .convert import ProtocolConverter, convert_protocol, dedent, dehyphen, pretokenize
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
+from .extract import extract_corpus_text
 from .interface import ITagger, IterateLevel, TaggedDocument
 from .iterators import IProtocolTextIterator, ProtocolTextIterator, XmlProtocolTextIterator
 from .model import ParlaClarinError, Protocol, Speech, Utterance
-from .parse import IterUtterance, ProtocolMapper, UtteranceMapper, XmlUntangleProtocol
+from .parse import (
+    IterUtterance,
+    ProtocolIterItem,
+    ProtocolIterItems,
+    ProtocolMapper,
+    UtteranceMapper,
+    XmlUntangleProtocol,
+)
 from .persist import StorageFormat, load_metadata, load_protocol, store_protocol
 from .tag import tag_protocol, tag_protocol_xml
 from .tf import TermFrequencyCounter, compute_term_frequencies
@@ -21,6 +29,7 @@ from .utility import (
     load_token_set,
     lookup,
     norm_join,
+    parse_range_list,
     path_add_date,
     path_add_sequence,
     path_add_suffix,
