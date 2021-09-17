@@ -6,7 +6,7 @@
 This is in implementation of method described in "Anforanden: Annotated and Augmented Parliamentary Debates from Sweden", Stian Rødven Eide
 Published in PARLACLARIN 2020. https://www.semanticscholar.org/paper/Anf%C3%B6randen%3A-Annotated-and-Augmented-Parliamentary-Eide/46baeb3f444a085540a1b57278de7ed4ea385b04
 
-This source code is heavily based on source code found at https://gitlab.com/Julipan/swedish-de-hyphenator/, released under GNU GPLv3.
+This source code is heavily influenced by the source code found at https://gitlab.com/Julipan/swedish-de-hyphenator/, released under GNU GPLv3.
 
 License: https://gitlab.com/Julipan/swedish-de-hyphenator/-/blob/master/LICENSE
 
