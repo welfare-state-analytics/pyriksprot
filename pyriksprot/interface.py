@@ -10,6 +10,7 @@ IterateLevel = Literal['protocol', 'speech', 'speaker', 'utterance', 'paragraph'
 
 @dataclass
 class ProtocolIterItem:
+
     name: str
     who: str
     id: str
