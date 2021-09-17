@@ -23,40 +23,17 @@ SOFTWARE.
 """
 
 # NOTE: Temporarily inlined code from Sparv v4.0.0.
-#        Sparv dependency is made optional (lacks Stanza v1.6 support which has improved performance)
+# Sparv dependency is made optional (lacks Stanza v1.6 support which has improved performance)
 
-import os
 import re
+from os.path import dirname
 from os.path import join as jj
 from typing import List
 
-# from loguru import logger
-
-# try:
-#     from sparv.core import paths
-#     from sparv.modules.segment.segment import BetterWordTokenizer
-
-#     if paths.data_dir is None:
-#         raise ValueError("run sparv setup to specify SPARV_DATADIR")
-
-#     SPARV_DATADIR = paths.data_dir
-
-# except ImportError:
-
 # pylint: disable=no-else-continue, attribute-defined-outside-init
 
-MODEL_FILENAME: str = "bettertokenizer.sv"
-SALDO_TOKENS_FILENAME: str = "bettertokenizer.sv.saldo-tokens"
-
-SPARV_DATADIR: str = os.environ.get("SPARV_DATADIR", "/data/sparv")
-MODEL_NAME: str = jj(SPARV_DATADIR, "models", "segment", MODEL_FILENAME)
-SALDO_TOKENS_NAME: str = jj(SPARV_DATADIR, "models", "segment", SALDO_TOKENS_FILENAME)
-
-
-def configure_models(model_name: str, saldo_tokens_name: str) -> None:
-    global MODEL_NAME, SALDO_TOKENS_NAME
-    MODEL_NAME = model_name
-    SALDO_TOKENS_NAME = saldo_tokens_name
+MODEL_FILENAME: str = jj(dirname(__file__), "bettertokenizer.sv")
+SALDO_TOKENS_FILENAME: str = jj(dirname(__file__), "bettertokenizer.sv.saldo-tokens")
 
 
 # This class belongs to sparv-pipeline (temporarily copied out)
@@ -189,24 +166,22 @@ class BetterWordTokenizer:
             begin += len(w)
 
 
-_TOKENIZER = None
+sparv_better_tokenizer = None
 
 
 class ModelNotFoundError(Exception):
+
     ...
 
 
 def default_tokenize(text: str) -> List[str]:
-    global _TOKENIZER, MODEL_NAME, SALDO_TOKENS_NAME
 
-    if not os.path.isfile(MODEL_NAME) or not os.path.isfile(SALDO_TOKENS_NAME):
-        raise ModelNotFoundError(
-            (
-                f"Tokenize models {SALDO_TOKENS_FILENAME} and/or {MODEL_FILENAME} not found.\n"
-                "Please use pyriksprot.tokeni.configure_models() to set model filenames."
-            )
-        )
-    _TOKENIZER = _TOKENIZER or BetterWordTokenizer(model=MODEL_NAME, token_list=SALDO_TOKENS_NAME)
-    span_tokens = list(_TOKENIZER.span_tokenize(text))
+    global sparv_better_tokenizer
+
+    sparv_better_tokenizer = sparv_better_tokenizer or BetterWordTokenizer(
+        model=MODEL_FILENAME, token_list=SALDO_TOKENS_FILENAME
+    )
+
+    span_tokens = list(sparv_better_tokenizer.span_tokenize(text))
     tokens = [text[x:y] for x, y in span_tokens]
     return tokens
