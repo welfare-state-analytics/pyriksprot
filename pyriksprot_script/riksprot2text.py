@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(".")
 from inspect import currentframe, getargvalues
 from typing import Sequence
@@ -14,25 +15,18 @@ def get_kwargs():
 
 
 """
-Extract a aggregate and/or subsetted corpus of either text or tagged text.
+Extract an aggregated subset aof ParlaClarin corpus.
 """
 LEVELS = ['protocol', 'speaker', 'speech', 'utterance', 'paragraph']
+
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target', type=click.STRING)
 @click.option('-g', '--groupby', default=None, help='Partition key(s)', multiple=True, type=click.STRING)
 @click.option('-p', '--processes', default=4, type=click.IntRange(1, 40), help='Number of processes to use')
-@click.option(
-    '-l',
-    '--level',
-    default='speaker',
-    type=click.Choice(LEVELS),
-    help='Protocol extract level',
-)
-@click.option(
-    '--keep-order', default=False, is_flag=True, help='Keep output in filename order (slower, multiproc)'
-)
+@click.option('-l', '--level', default='speaker', type=click.Choice(LEVELS), help='Protocol extract level')
+@click.option('-e', '--keep-order', default=False, is_flag=True, help='Keep output in filename order (slower, multiproc)')
 @click.option('-s', '--skip-size', default=1, type=click.IntRange(1, 1024), help='Skip blocks of char length less than')
 @click.option('-d', '--dedent', default=False, is_flag=True, help='Remove indentation')
 @click.option('-k', '--dehyphen', default=False, is_flag=True, help='Dehyphen text')

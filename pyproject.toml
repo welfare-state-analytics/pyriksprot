@@ -43,8 +43,9 @@ pytest-cov = "==2.*,>=2.11.1"
 rope = "==0.*,>=0.18.0"
 
 [tool.poetry.scripts]
-parla_transform = "scripts.parla_transform:main"
-parla_frequencies = "scripts.parla_frequencies:main"
+riksprot2any = "pyriksprot.scripts.riksprot2any:main"
+riksprot2tfs = "pyriksprot.scripts.riksprot2tfs:main"
+riksprot2text = "pyriksprot.scripts.riksprot2text:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
