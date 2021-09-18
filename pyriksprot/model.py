@@ -252,7 +252,7 @@ class Protocol(UtteranceMixIn):
         return any(utterance.text != "" for utterance in self.utterances)
 
     def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
-        """Extracts text and metadata of non-empty speeches. Returns list of dicts."""
+        """Apply text transforms. Return self."""
 
         if preprocess is None:
             return self
