@@ -1,4 +1,5 @@
 import os
+from pyriksprot.utility import strip_path_and_extension
 import uuid
 from typing import Callable, List
 
@@ -314,13 +315,13 @@ def test_speech_annotation():
     'filename, speech_count, non_empty_speech_count, strategy',
     [
         ("prot-1933--fk--5.xml", 1, 1, 'chain'),
-        ("prot-1955--ak--22.xml", 82, 79, 'chain'),
-        ('prot-199192--127.xml', 206, 206, 'chain'),
         ("prot-1933--fk--5.xml", 1, 1, 'n'),
-        ("prot-1955--ak--22.xml", 33, 32, 'n'),
-        ('prot-199192--127.xml', 51, 51, 'n'),
         ("prot-1933--fk--5.xml", 1, 1, 'who'),
-        ("prot-1955--ak--22.xml", 33, 32, 'who'),
+        ("prot-1955--ak--22.xml", 224, 224, 'chain'),
+        ("prot-1955--ak--22.xml", 38, 38, 'n'),
+        ("prot-1955--ak--22.xml", 38, 38, 'who'),
+        ('prot-199192--127.xml', 206, 206, 'chain'),
+        ('prot-199192--127.xml', 51, 51, 'n'),
         ('prot-199192--127.xml', 51, 51, 'who'),
     ],
 )
@@ -328,7 +329,10 @@ def test_protocol_to_speeches_with_different_strategies(
     filename: str, speech_count: int, non_empty_speech_count: int, strategy: str
 ):
 
-    protocol: model.Protocol = parse.ProtocolMapper.to_protocol(jj("tests", "test_data", "xml", filename))
+    path: str = jj("tests", "test_data", "source", filename.split('-')[1], filename)
+    document_name: str = strip_path_and_extension(filename)
+
+    protocol: model.Protocol = parse.ProtocolMapper.to_protocol(path)
 
     speeches = protocol.to_speeches(merge_strategy=strategy, skip_size=0)
     assert len(speeches) == speech_count, "speech count"
@@ -337,15 +341,15 @@ def test_protocol_to_speeches_with_different_strategies(
     assert len(speeches) == non_empty_speech_count
 
     assert all(x.text != "" for x in speeches)
-    assert os.path.splitext(filename)[0] == protocol.name
+    assert document_name == protocol.name
     assert protocol.date is not None
     assert protocol.has_text() == any(x.text != "" for x in speeches)
 
     speeches = protocol.to_speeches(merge_strategy=strategy, skip_size=3)
-    assert all(len(x.text) > 3 for x in speeches)
+    assert all(len(x.text) >= 3 for x in speeches)
 
     speeches = protocol.to_speeches(merge_strategy=strategy, skip_size=100)
-    assert all(len(x.text) > 100 for x in speeches)
+    assert all(len(x.text) >= 100 for x in speeches)
 
 
 @pytest.mark.parametrize(
@@ -355,8 +359,9 @@ def test_protocol_to_speeches_with_different_strategies(
     ],
 )
 def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
+    path: str = jj("tests", "test_data", "source", filename.split('-')[1], filename)
 
-    data = untangle.parse(jj("tests", "test_data", "xml", filename))
+    data = untangle.parse(path)
 
     protocol = parse.ProtocolMapper.to_protocol(data, skip_size=0)
     speeches = protocol.to_speeches(merge_strategy='n')

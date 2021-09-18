@@ -1,3 +1,4 @@
+import glob
 import os
 from typing import List
 
@@ -31,24 +32,22 @@ def test_word_frequency_counter(text):
     assert counter.frequencies.get('f', None) == 1
 
 
-@pytest.mark.parametrize('filename', [f[0] for f in TEST_PARLACLARIN_XML_FILES])
+@pytest.mark.parametrize('filename', glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True))
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
-    path: str = jj("tests", "test_data", "xml", filename)
 
-    texts = iterators.ProtocolTextIterator(filenames=[path], level='protocol')
+    texts = iterators.ProtocolTextIterator(filenames=[filename], level='protocol')
     counter: tf.TermFrequencyCounter = tf.TermFrequencyCounter()
-    protocol: model.Protocol = parse.ProtocolMapper.to_protocol(path)
+    protocol: model.Protocol = parse.ProtocolMapper.to_protocol(filename)
 
     counter.ingest(texts)
 
     assert protocol.has_text() == (len(counter.frequencies) > 0)
 
 
-@pytest.mark.parametrize('filename', [f[0] for f in TEST_PARLACLARIN_XML_FILES[:1]])
+@pytest.mark.parametrize('filename', glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True))
 def test_persist_word_frequencies(filename: List[str]):
-    path: str = jj("tests", "test_data", "xml", filename)
 
-    texts = iterators.ProtocolTextIterator(filenames=[path], level='protocol')
+    texts = iterators.ProtocolTextIterator(filenames=[filename], level='protocol')
     counter: tf.TermFrequencyCounter = tf.TermFrequencyCounter()
 
     counter.ingest(texts)

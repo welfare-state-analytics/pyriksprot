@@ -1,5 +1,7 @@
+import glob
 import os
-from typing import Iterable
+from pyriksprot.utility import strip_path_and_extension
+from typing import Iterable, List
 
 import pytest
 
@@ -7,14 +9,6 @@ from pyriksprot import iterators
 from pyriksprot.interface import ProtocolIterItem
 
 jj = os.path.join
-
-DOCUMENT_NAMES = [
-    "prot-1933--fk--5",
-    "prot-1955--ak--22",
-    "prot-197879--14",
-    "prot-199596--35",
-]
-
 
 @pytest.mark.parametrize(
     'iterator_class',
@@ -26,22 +20,24 @@ DOCUMENT_NAMES = [
 )
 def test_protocol_texts_iterator_metadata(iterator_class):
 
-    filenames = [jj("tests", "test_data", "xml", f"{name}.xml") for name in DOCUMENT_NAMES]
+    filenames = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    document_names = strip_path_and_extension(filenames)
 
     texts: Iterable[ProtocolIterItem] = list(
         iterator_class(filenames=filenames, level='protocol', skip_size=0, processes=None)
     )
 
-    assert len(texts) == 4
-    assert [x.name for x in texts] == DOCUMENT_NAMES
+    assert len(texts) == 6
+    assert [x.name for x in texts] == document_names
     assert all(x.who is None for x in texts)
-    assert [x.id for x in texts] == DOCUMENT_NAMES
+    assert [x.id for x in texts] == document_names
     assert all(x.page_number == '0' for x in texts)
 
 
 def test_xml_protocol_texts_iterator_texts():
 
-    filenames = [jj("tests", "test_data", "xml", f"{name}.xml") for name in DOCUMENT_NAMES]
+    filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    document_names: List[str] = strip_path_and_extension(filenames)
 
     texts: Iterable[ProtocolIterItem] = list(
         iterators.XmlProtocolTextIterator(filenames=filenames, level='protocol', skip_size=0, processes=None)
@@ -53,16 +49,16 @@ def test_xml_protocol_texts_iterator_texts():
     texts = list(
         iterators.XmlProtocolTextIterator(filenames=filenames, level='protocol', skip_size=0, processes=2, ordered=True)
     )
-    assert [x.name for x in texts] == DOCUMENT_NAMES
+    assert [x.name for x in texts] == document_names
 
     texts = list(iterators.XmlProtocolTextIterator(filenames=filenames, level='protocol', skip_size=1, processes=None))
-    assert len(texts) == 4
+    assert len(texts) == 6
 
     texts = list(iterators.XmlProtocolTextIterator(filenames=filenames, level='speech', skip_size=1, processes=None))
-    assert len(texts) == 34
+    assert len(texts) == 107
 
     texts = list(iterators.XmlProtocolTextIterator(filenames=filenames, level='speaker', skip_size=1, processes=None))
-    assert len(texts) == 34
+    assert len(texts) == 107
 
     texts1 = list(
         iterators.XmlProtocolTextIterator(filenames=filenames, level='utterance', skip_size=1, processes=None)
@@ -138,9 +134,8 @@ EXPECTED_STREAM = {
 )
 def test_protocol_texts_iterator(iterator_class):
 
-    # filenames = [jj("tests", "test_data", "xml", f"{name}.xml") for name in DOCUMENT_NAMES]
-    document_names = ['prot-1958-fake', 'prot-1960-fake']
-    filenames = [jj("tests", "test_data", "fake", f"{name}.xml") for name in document_names]
+    document_names: List[str] = ['prot-1958-fake', 'prot-1960-fake']
+    filenames: List[str] = [jj("tests", "test_data", "fake", f"{name}.xml") for name in document_names]
 
     texts = list(iterator_class(filenames=filenames, level='protocol', skip_size=0, processes=None))
     assert texts == EXPECTED_STREAM['protocol']
