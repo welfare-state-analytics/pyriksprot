@@ -1,5 +1,4 @@
 import os
-from pyriksprot.utility import strip_path_and_extension
 import uuid
 from typing import Callable, List
 
@@ -8,6 +7,7 @@ import pytest
 
 from pyriksprot import model, parse, persist
 from pyriksprot.foss import untangle
+from pyriksprot.utility import strip_path_and_extension
 
 # pylint: disable=redefined-outer-name
 

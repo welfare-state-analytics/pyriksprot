@@ -1,11 +1,11 @@
 import glob
 from os.path import join as jj
-from tests.utility import DEFAULT_TEST_DOCUMENT_NAMES, create_parlaclarin_corpus
 from typing import Iterable, List
-from pyriksprot.interface import ProtocolIterItem
+
 import pytest
 
 import pyriksprot
+from pyriksprot import iterators
 from pyriksprot.extract import (
     AggregateIterItem,
     ParliamentaryMemberIndex,
@@ -14,7 +14,8 @@ from pyriksprot.extract import (
     TextAggregator,
     create_grouping_hashcoder,
 )
-from pyriksprot import iterators
+from pyriksprot.interface import ProtocolIterItem
+from tests.utility import DEFAULT_TEST_DOCUMENT_NAMES, create_parlaclarin_corpus
 
 # FIXME Create simple test fixtures
 
@@ -100,6 +101,7 @@ def test_aggregator_aggregate(source_index, member_index):
         data.append(item)
 
     assert len(data) > 0
+
 
 @pytest.mark.skip(reason="WIP")
 def test_extract_corpus_text():

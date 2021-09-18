@@ -1,14 +1,15 @@
 import glob
 import os
-from pyriksprot.utility import strip_path_and_extension
 from typing import Iterable, List
 
 import pytest
 
 from pyriksprot import iterators
 from pyriksprot.interface import ProtocolIterItem
+from pyriksprot.utility import strip_path_and_extension
 
 jj = os.path.join
+
 
 @pytest.mark.parametrize(
     'iterator_class',

@@ -7,19 +7,18 @@ from functools import reduce
 from os.path import basename, dirname
 from os.path import join as jj
 from typing import Callable, Iterable, List, Literal, Mapping, Optional, Sequence, Set, Tuple
-from loguru import logger
 
 import pandas as pd
+from loguru import logger
 
 from . import iterators, utility
 from .interface import IterateLevel, ProtocolIterItem
 
 #  pylint: disable=too-many-arguments
 
-def members_of_parliament_url(branch: str='main') -> str:
-    return (
-        f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{branch}/corpus/members_of_parliament.csv'
-    )
+
+def members_of_parliament_url(branch: str = 'main') -> str:
+    return f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{branch}/corpus/members_of_parliament.csv'
 
 
 @dataclass
@@ -121,7 +120,7 @@ class SourceIndex:
         df: pd.DataFrame = pd.DataFrame(data=[x.to_dict() for x in self.source_items])
         return df
 
-    def to_csv(self, filename: str=None) -> Optional[str]:
+    def to_csv(self, filename: str = None) -> Optional[str]:
         return self.to_pandas().to_csv(filename, sep='\t', index=None)
 
     @staticmethod
@@ -130,6 +129,7 @@ class SourceIndex:
         source_items: List[SourceIndexItem] = [SourceIndexItem(**d) for d in df.to_dict('records')]
         source_index: SourceIndex = SourceIndex(source_items)
         return source_index
+
 
 TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom']
 GroupingKey = Literal[None, 'speaker', 'speech', 'party', 'gender']
@@ -154,7 +154,7 @@ class ParliamentaryMember:
 
 
 class ParliamentaryMemberIndex:
-    def __init__(self, member_source: str = None, branch: str='main'):
+    def __init__(self, member_source: str = None, branch: str = 'main'):
 
         if member_source is None:
             member_source = members_of_parliament_url(branch=branch)
@@ -188,7 +188,7 @@ def create_grouping_hashcoder(
     index_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(SourceIndexItem)})
     item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(ProtocolIterItem)})
 
-    def hashcoder(item: ProtocolIterItem, member: ParliamentaryMember, index_item: SourceIndexItem) -> Tuple[str,str]:
+    def hashcoder(item: ProtocolIterItem, member: ParliamentaryMember, index_item: SourceIndexItem) -> Tuple[str, str]:
 
         parts: List[str] = []
 
@@ -245,6 +245,7 @@ class TextAggregator:
     Temporal value is a tuple (from-year, to-year) where
 
     """
+
     def __init__(
         self,
         source_index: SourceIndex,
@@ -297,8 +298,7 @@ class TextAggregator:
                 hashcode=group_hashcode,
                 name=group_str,
                 page_number=0,
-                texts=[]
-
+                texts=[],
             )
 
         self.open[group_hashcode].add(item)
