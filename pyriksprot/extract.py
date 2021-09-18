@@ -352,6 +352,7 @@ def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
     return reduce(lambda f, g: lambda *args: f(g(*args)), fns)
 
 
+# pylint: disable=unused-argument,unused-variable
 def extract_corpus_text(
     source_folder: str = None,
     target: str = None,

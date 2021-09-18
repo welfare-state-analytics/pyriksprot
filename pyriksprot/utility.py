@@ -17,7 +17,7 @@ from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
-from typing import Any, List, Set, TypeVar, Union
+from typing import Any, List, Set, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -53,11 +53,11 @@ def sync_delta_names(
 
     # FIXME: Move files if not delete
     if delete:
-        for basename in delta_names:
-            path = jj(target_folder, f"{basename}.{target_extension}")
+        for name in delta_names:
+            path = jj(target_folder, f"{name}.{target_extension}")
             if isfile(path):
-                logger.warning(f"sync: file {basename} removed via delta sync")
-                os.unlink(jj(target_folder, f"{basename}.{target_extension}"))
+                logger.warning(f"sync: file {name} removed via delta sync")
+                os.unlink(jj(target_folder, f"{name}.{target_extension}"))
 
     if len(delta_names) == 0:
         logger.info("sync: no file was deleted")
@@ -79,8 +79,8 @@ def strip_extensions(filename: str | List[str]) -> str | List[str]:
 
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
-    basename, extension = splitext(path)
-    return f'{basename}{suffix}{extension if new_extension is None else new_extension}'
+    name, extension = splitext(path)
+    return f'{name}{suffix}{extension if new_extension is None else new_extension}'
 
 
 def path_add_timestamp(path: str, fmt: str = "%Y%m%d%H%M") -> str:

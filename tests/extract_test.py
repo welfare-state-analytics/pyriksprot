@@ -1,5 +1,4 @@
 import glob
-from os.path import join as jj
 from typing import Iterable, List
 
 import pytest
@@ -10,14 +9,12 @@ from pyriksprot.extract import (
     AggregateIterItem,
     ParliamentaryMemberIndex,
     SourceIndex,
-    SourceIndexItem,
     TextAggregator,
     create_grouping_hashcoder,
 )
 from pyriksprot.interface import ProtocolIterItem
-from tests.utility import DEFAULT_TEST_DOCUMENT_NAMES, create_parlaclarin_corpus
 
-# FIXME Create simple test fixtures
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
