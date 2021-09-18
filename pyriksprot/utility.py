@@ -11,19 +11,22 @@ import pickle
 import shutil
 import tempfile
 import time
-import urllib
 import warnings
 from collections import defaultdict
 from itertools import chain
+from os.path import basename, dirname, expanduser, isfile
+from os.path import join as jj
+from os.path import normpath, splitext
 from typing import Any, List, Set, TypeVar, Union
+from urllib.error import URLError
+from urllib.request import urlretrieve
 
-# from snakemake.io import expand, glob_wildcards
 from loguru import logger
 
 
 def norm_join(a: str, *paths: str):
     """Joins paths and normalizes resulting path to current platform (i.e. sep)"""
-    return os.path.normpath(os.path.join(a, *paths))
+    return normpath(jj(a, *paths))
 
 
 class dotdict(dict):
@@ -43,18 +46,18 @@ def sync_delta_names(
 ) -> Set(str):
     """Returns basenames in targat_folder that doesn't exist in source folder (with respectively extensions)"""
 
-    source_names = strip_paths(glob.glob(os.path.join(source_folder, "*", f"*.{source_extension}")))
-    target_names = strip_paths(glob.glob(os.path.join(target_folder, "*", f"*.{target_extension}")))
+    source_names = strip_paths(glob.glob(jj(source_folder, "*", f"*.{source_extension}")))
+    target_names = strip_paths(glob.glob(jj(target_folder, "*", f"*.{target_extension}")))
 
     delta_names = set(target_names).difference(set(source_names))
 
     # FIXME: Move files if not delete
     if delete:
         for basename in delta_names:
-            path = os.path.join(target_folder, f"{basename}.{target_extension}")
-            if os.path.isfile(path):
+            path = jj(target_folder, f"{basename}.{target_extension}")
+            if isfile(path):
                 logger.warning(f"sync: file {basename} removed via delta sync")
-                os.unlink(os.path.join(target_folder, f"{basename}.{target_extension}"))
+                os.unlink(jj(target_folder, f"{basename}.{target_extension}"))
 
     if len(delta_names) == 0:
         logger.info("sync: no file was deleted")
@@ -62,18 +65,21 @@ def sync_delta_names(
     return delta_names
 
 
-def strip_path_and_extension(filename: str) -> List[str]:
-    return os.path.splitext(os.path.basename(filename))[0]
-
-
-def strip_extensions(filename: Union[str, List[str]]) -> List[str]:
+def strip_path_and_extension(filename: str | List[str]) -> str | List[str]:
+    """Remove path and extension from filename(s). Return list."""
     if isinstance(filename, str):
-        return os.path.splitext(filename)[0]
-    return [os.path.splitext(x)[0] for x in filename]
+        return splitext(basename(filename))[0]
+    return [splitext(basename(x))[0] for x in filename]
+
+
+def strip_extensions(filename: str | List[str]) -> str | List[str]:
+    if isinstance(filename, str):
+        return splitext(filename)[0]
+    return [splitext(x)[0] for x in filename]
 
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
-    basename, extension = os.path.splitext(path)
+    basename, extension = splitext(path)
     return f'{basename}{suffix}{extension if new_extension is None else new_extension}'
 
 
@@ -86,12 +92,12 @@ def path_add_date(path: str, fmt: str = "%Y%m%d") -> str:
 
 
 def ts_data_path(directory: str, filename: str):
-    return os.path.join(directory, f'{time.strftime("%Y%m%d%H%M")}_{filename}')
+    return jj(directory, f'{time.strftime("%Y%m%d%H%M")}_{filename}')
 
 
 def data_path_ts(directory: str, path: str):
-    name, extension = os.path.splitext(path)
-    return os.path.join(directory, '{}_{}{}'.format(name, time.strftime("%Y%m%d%H%M"), extension))
+    name, extension = splitext(path)
+    return jj(directory, '{}_{}{}'.format(name, time.strftime("%Y%m%d%H%M"), extension))
 
 
 def path_add_sequence(path: str, i: int, j: int = 0) -> str:
@@ -99,13 +105,13 @@ def path_add_sequence(path: str, i: int, j: int = 0) -> str:
 
 
 def strip_path_and_add_counter(filename: str, i: int, n_zfill: int = 3):
-    return f'{os.path.basename(strip_extensions(filename))}_{str(i).zfill(n_zfill)}.txt'
+    return f'{basename(strip_extensions(filename))}_{str(i).zfill(n_zfill)}.txt'
 
 
-def strip_paths(filenames: Union[str, List[str]]) -> Union[str, List[str]]:
+def strip_paths(filenames: str | List[str]) -> str | List[str]:
     if isinstance(filenames, str):
-        return os.path.basename(filenames)
-    return [os.path.basename(filename) for filename in filenames]
+        return basename(filenames)
+    return [basename(filename) for filename in filenames]
 
 
 T = TypeVar("T")
@@ -144,7 +150,7 @@ def lookup(data, *keys):
 
 def load_token_set(filename: str) -> Set[str]:
     """Load tokens from `filename`, one token per line"""
-    if os.path.isfile(filename):
+    if isfile(filename):
         with gzip.open(filename, 'rb') as f:
             return set(f.read().decode().split('\n'))
     return set()
@@ -162,7 +168,7 @@ def store_dict(data: dict, filename: str):
 
 def load_dict(filename: str) -> defaultdict(int):
     logger.info(f"loading {filename}")
-    if os.path.isfile(filename):
+    if isfile(filename):
         with open(filename, 'rb') as fp:
             return pickle.load(fp)
     return defaultdict(int)
@@ -191,28 +197,25 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
             path.unlink()
 
 
-def download_url(url: str, root: str, filename: str = None) -> None:
-    """Download a file from a url and place it in root.
+def download_url(url: str, target_folder: str, filename: str = None) -> None:
+    """Download a file from a url and place it in `target_folder`.
     https://stackoverflow.com/a/61003039/12383895
     Args:
         url (str): URL to download file from
-        root (str): Directory to place downloaded file in
+        target_folder (str): Directory to place downloaded file in
         filename (str, optional): Name to save the file under. If None, use the basename of the URL
     """
 
-    root = os.path.expanduser(root)
-    if not filename:
-        filename = os.path.basename(url)
-    fpath = os.path.join(root, filename)
+    target_folder: str = expanduser(target_folder)
+    target_filename: str = jj(target_folder, filename or basename(url))
 
-    os.makedirs(root, exist_ok=True)
+    os.makedirs(target_folder, exist_ok=True)
 
     try:
-        urllib.request.urlretrieve(url, fpath)
-    except (urllib.error.URLError, IOError):
-        if url[:5] == 'https':
-            url = url.replace('https:', 'http:')
-            urllib.request.urlretrieve(url, fpath)
+        urlretrieve(url, target_filename)
+    except (URLError, IOError):
+        if url.startswith('https:'):
+            urlretrieve(url.replace('https:', 'http:'), target_filename)
 
 
 def deprecated(func):
@@ -244,7 +247,7 @@ def touch(f: str) -> None:
 
 
 def ensure_path(f: str) -> None:
-    os.makedirs(os.path.dirname(f), exist_ok=True)
+    os.makedirs(dirname(f), exist_ok=True)
 
 
 def get_kwargs():
