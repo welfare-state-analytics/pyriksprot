@@ -26,7 +26,7 @@ class IProtocolTextIterator(abc.ABC):
         merge_strategy: str = 'n',
         preprocessor: Callable[[str], str] = None,
     ):
-        self.filenames: List[str] = filenames
+        self.filenames: List[str] = sorted(filenames)
         self.iterator = None
         self.skip_size: int = skip_size
         self.level: IterateLevel = level

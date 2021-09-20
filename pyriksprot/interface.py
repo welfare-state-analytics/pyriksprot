@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Callable, List, Literal, Mapping, Union
 
+from pyriksprot.utility import compress
+
 TaggedDocument = Mapping[str, List[str]]
 IterateLevel = Literal['protocol', 'speech', 'speaker', 'utterance', 'paragraph']
 
@@ -16,6 +18,22 @@ class ProtocolIterItem:
     id: str
     text: str
     page_number: str
+
+    def __repr__(self) -> str:
+
+        # text2 = zlib.decompress(base64.b64decode(text_base64)).decode('utf-8')
+
+        return (
+            f"{self.name or '*'}\t"
+            f"{self.id or '?'}\t"
+            f"{self.who or '*'}\t"
+            f"{self.page_number or ''}\t"
+            f"{len(self.text)/1024.0:.2f}kB\t"
+        )
+
+    def text_z64(self) -> bytes:
+        """Compress text, return base64 encoded string."""
+        return compress(self.text)
 
 
 class IProtocol(abc.ABC):
