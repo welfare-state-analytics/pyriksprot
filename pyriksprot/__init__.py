@@ -12,6 +12,7 @@ from .tag import tag_protocol, tag_protocol_xml
 from .tf import TermFrequencyCounter, compute_term_frequencies
 from .utility import (
     data_path_ts,
+    dedent,
     deprecated,
     dict_get_by_path,
     download_url,
@@ -27,6 +28,8 @@ from .utility import (
     path_add_sequence,
     path_add_suffix,
     path_add_timestamp,
+    sanitize,
+    slugify,
     store_dict,
     store_token_set,
     strip_extensions,

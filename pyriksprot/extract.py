@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import glob
 import hashlib
 from dataclasses import dataclass, field, fields
 from functools import reduce
 from typing import Callable, Iterable, List, Literal, Mapping, Sequence, Set, Tuple
 
-from pyriksprot.utility import slugify
+from pyriksprot.utility import slugify, dedent as dedent_text
 
 from . import iterators
 from .interface import IterateLevel, ProtocolIterItem
@@ -179,15 +178,12 @@ class TextAggregator:
             yield x
 
 
-def dedent_text(text: str) -> str:
-    return text
-
-
 def dehyphen_text(text: str) -> str:
     return text
 
 
 def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
+    """Create a composed function from a list of function. Return function."""
     if len(fns) == 0:
         return None
     return reduce(lambda f, g: lambda *args: f(g(*args)), fns)
@@ -197,7 +193,7 @@ def extract_corpus_text(
     source_folder: str = None,
     target: str = None,
     level: IterateLevel = None,
-    dedent: bool = False,
+    dedent: bool = True,
     dehyphen: bool = False,
     keep_order: str = None,
     skip_size: int = 1,
@@ -218,12 +214,11 @@ def extract_corpus_text(
     source_index: SourceIndex = SourceIndex.load(source_folder=source_folder, years=years)
     member_index: ParliamentaryMemberIndex = ParliamentaryMemberIndex(f'{source_folder}/members_of_parliament.csv')
 
-    preprocessor: Callable[[str], str] = None
-    # compose(
-    #     ([dedent_text] if dedent else []) + ([dehyphen_text] if dehyphen else [])
-    # )
+    preprocessor: Callable[[str], str] = compose(
+        ([dedent_text] if dedent else []) + ([dehyphen_text] if dehyphen else [])
+    )
 
-    texts: iterators.IProtocolTextIterator = iterators.XmlIterProtocolTextIterator(
+    texts: iterators.IProtocolTextIterator = iterators.XmlProtocolTextIterator(
         filenames=source_index.paths,
         level=level,
         skip_size=skip_size,

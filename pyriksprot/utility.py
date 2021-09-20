@@ -325,3 +325,8 @@ def slugify(value: str, allow_unicode: bool = False) -> str:
         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value.lower())
     return re.sub(r'[-\s]+', '-', value).strip('-_')
+
+
+def dedent(text: str) -> str:
+    """Remove whitespaces before and after newlines"""
+    return '\n'.join(x.strip() for x in text.split('\n'))
