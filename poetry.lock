@@ -316,6 +316,19 @@ win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
 dev = ["codecov (>=2.0.15)", "colorama (>=0.3.4)", "flake8 (>=3.7.7)", "tox (>=3.9.0)", "tox-travis (>=0.12)", "pytest (>=4.6.2)", "pytest-cov (>=2.7.1)", "Sphinx (>=2.2.1)", "sphinx-autobuild (>=0.7.1)", "sphinx-rtd-theme (>=0.4.3)", "black (>=19.10b0)", "isort (>=5.1.1)"]
 
 [[package]]
+name = "lz4"
+version = "3.1.3"
+description = "LZ4 Bindings for Python"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.extras]
+docs = ["sphinx (>=1.6.0)", "sphinx-bootstrap-theme"]
+flake8 = ["flake8"]
+tests = ["pytest (!=3.3.0)", "psutil", "pytest-cov"]
+
+[[package]]
 name = "markupsafe"
 version = "2.0.1"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -485,6 +498,14 @@ description = "passive checker of Python programs"
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "pyinstrument"
+version = "4.0.3"
+description = "Call stack profiler for Python. Shows you why your code is slow!"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "pylint"
@@ -740,7 +761,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "==3.8.5"
-content-hash = "846fc913f4749257c57b71d00edee284b9f14afe3e6947dd34185873435ebe58"
+content-hash = "fb1a1c901b4499708cf67ce6dc1780966c10e02f13cd0d7be5e3da247837e44e"
 
 [metadata.files]
 appdirs = [
@@ -922,6 +943,39 @@ loguru = [
     {file = "loguru-0.5.3-py3-none-any.whl", hash = "sha256:f8087ac396b5ee5f67c963b495d615ebbceac2796379599820e324419d53667c"},
     {file = "loguru-0.5.3.tar.gz", hash = "sha256:b28e72ac7a98be3d28ad28570299a393dfcd32e5e3f6a353dec94675767b6319"},
 ]
+lz4 = [
+    {file = "lz4-3.1.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:5aa4dd12debc5cb90980e6bb26be8b1586e57b87aaf6c773b9b799bca16edd99"},
+    {file = "lz4-3.1.3-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:7cf0e6e1020dbf8ea72ff57ece3f321f603cfa54f14337b96f7b68a7c1a742b4"},
+    {file = "lz4-3.1.3-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:af1bc2952214c5a3ec6706cb86bd3e321570c62136539d32e4a57da777b002f0"},
+    {file = "lz4-3.1.3-cp36-cp36m-manylinux2010_i686.whl", hash = "sha256:57dbd50d6abeb85f8d273b9f24f0063c4b97aae07d267302101884611a2413da"},
+    {file = "lz4-3.1.3-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:1f8320b7b047ec4ba9a7de3509a067ccaac84dab2cadf629d0518760594c3b6a"},
+    {file = "lz4-3.1.3-cp36-cp36m-win32.whl", hash = "sha256:502d6dc17aca64e4dc95d6e7920dca906b5eabc1e657213bd07066c97fbc8cd3"},
+    {file = "lz4-3.1.3-cp36-cp36m-win_amd64.whl", hash = "sha256:b91fbc9571d3f3fea587ce541f38a2e71ef192075b59c2846182cb98f99862a0"},
+    {file = "lz4-3.1.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:0f889e854114f87b5f99e8c82c9bf85417468b291b99a2cb27bcdcc864841a33"},
+    {file = "lz4-3.1.3-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:c41759a97ccac751f69e48f12671c2c3e5e1ae3000d3ee5dfe750b31511d1576"},
+    {file = "lz4-3.1.3-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:0acbc2b797fe3c51917011c8d7f6c99398ae33cc4a1ca23c3a246d60bbf56fc8"},
+    {file = "lz4-3.1.3-cp37-cp37m-manylinux2010_i686.whl", hash = "sha256:c0a5f9b6962aaa4632e4385143a12f5b49ee8605a42589073e54c8f23ce111b2"},
+    {file = "lz4-3.1.3-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:3c00b56fd9aef8d3f776653c92cec262d42b6ea144e9a41b58b8c22a85f90045"},
+    {file = "lz4-3.1.3-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:4c3558f4b98adb7acee6f4b45edd848684daae6a92a5ff31f8071eb910779568"},
+    {file = "lz4-3.1.3-cp37-cp37m-win32.whl", hash = "sha256:e3029738e64a0af1b04a32a39b32b0bba0e2088f61805e074c9a7e4bc212568f"},
+    {file = "lz4-3.1.3-cp37-cp37m-win_amd64.whl", hash = "sha256:511c755d89048a2583ab88088fe451f7e3f15cde30560c058d80c9ac097dab21"},
+    {file = "lz4-3.1.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:81b54fc66555fc7653467bf5b789d0e480ab88d17c858405e326d9c898baff2e"},
+    {file = "lz4-3.1.3-cp38-cp38-manylinux1_i686.whl", hash = "sha256:57e5b0a818addacae254b9160a183122b6bc4737bc77c988b72e1c57bd22ed9e"},
+    {file = "lz4-3.1.3-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:41a388a34eab3cca6180cdb179bd8fdfcf7fd1a569f0e9e6084ad0540a0d53a9"},
+    {file = "lz4-3.1.3-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:de2aac0cfda79c5a3eda9dbed21d78dc05c4a9ac00061748c3b57ea0e4a0b6a8"},
+    {file = "lz4-3.1.3-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:d6afa929d2c8afafd8b89e898498484b145a94cf3c140bb68094a94590ab2c2a"},
+    {file = "lz4-3.1.3-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:0a3b7eeb879577f2c7c0872156c70f4ddfbb023c1198e33d54422e24fa5494ae"},
+    {file = "lz4-3.1.3-cp38-cp38-win32.whl", hash = "sha256:c25dffdb8ab9eb449aacf94ba45b3e6f573b38a1041be9370716cc68dea445a6"},
+    {file = "lz4-3.1.3-cp38-cp38-win_amd64.whl", hash = "sha256:b4b56ae630a41980b6cf17a043b57691ff1f1677425b67556453fd96257b2a9b"},
+    {file = "lz4-3.1.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:71f6f4dc48669ba3807a5cb5876048dc9b6467c3db312acf2040a61ea9487161"},
+    {file = "lz4-3.1.3-cp39-cp39-manylinux1_i686.whl", hash = "sha256:408b2c1b65697d9bc6468c987977314acefc71573b996bd86190053ae7ffe8d1"},
+    {file = "lz4-3.1.3-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:19d3b8dca0c18991ee243acf86932eb917f14e2e61dd34c7852a1088659d5499"},
+    {file = "lz4-3.1.3-cp39-cp39-manylinux2010_i686.whl", hash = "sha256:d50c9584fb355d5d51414b802f7012578240bcb259550b48de628e19cd5bff6c"},
+    {file = "lz4-3.1.3-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:38266a6fa124e3ec2ce3ed6fd34f8e86b13c588f12b005873421afb295caee2d"},
+    {file = "lz4-3.1.3-cp39-cp39-win32.whl", hash = "sha256:869734b6f0e8a19af10a75c769db179dcd3d867e29c29b3808ef884e76799071"},
+    {file = "lz4-3.1.3-cp39-cp39-win_amd64.whl", hash = "sha256:37c23ca41040751649e0266f9f267c0148db12968a0a031272ee2a99cef7c753"},
+    {file = "lz4-3.1.3.tar.gz", hash = "sha256:081ef0a3b5941cb03127f314229a1c78bd70c9c220bb3f4dd80033e707feaa18"},
+]
 markupsafe = [
     {file = "MarkupSafe-2.0.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:f9081981fe268bd86831e5c75f7de206ef275defcb82bc70740ae6dc507aee51"},
     {file = "MarkupSafe-2.0.1-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:0955295dd5eec6cb6cc2fe1698f4c6d84af2e92de33fbcac4111913cd100a6ff"},
@@ -1085,6 +1139,32 @@ pycodestyle = [
 pyflakes = [
     {file = "pyflakes-2.3.1-py2.py3-none-any.whl", hash = "sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3"},
     {file = "pyflakes-2.3.1.tar.gz", hash = "sha256:f5bc8ecabc05bb9d291eb5203d6810b49040f6ff446a756326104746cc00c1db"},
+]
+pyinstrument = [
+    {file = "pyinstrument-4.0.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:f7262dc3521286c4aa24db76387d0dcdf2e72bec10e97f3c016a523ada80419e"},
+    {file = "pyinstrument-4.0.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9cc789ca3a3fe063e6bc9adf5dbb802cc2392d0cc3db72dbc8577591d32f8464"},
+    {file = "pyinstrument-4.0.3-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:82b9f4583df41dec5b1e51f32c220a2760e9b337644950ca2d1fceefb7e5ecd7"},
+    {file = "pyinstrument-4.0.3-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:5447686b3f7364b9cc7e29bc47bd06a1c533374f921e729a930a840e1b22ab80"},
+    {file = "pyinstrument-4.0.3-cp310-cp310-win32.whl", hash = "sha256:13fa02a8593124c87ecccaa9ad5d483bc8a3bb286f41fe5ed48cfb864f6c03e9"},
+    {file = "pyinstrument-4.0.3-cp310-cp310-win_amd64.whl", hash = "sha256:7fe969e23c878332426f7f2df84a2d6e1f9677b56f4a9e4ff9ca4a6a7a90ab6f"},
+    {file = "pyinstrument-4.0.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:f8b2feba40bf43ec16c1f14b3f5371ce1a1b7c2d636979c59d496e354833830e"},
+    {file = "pyinstrument-4.0.3-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:9218f1eb435a37ade66641dc07e9e0b0b2da7146a4eec0082bf2cd8fbbcae668"},
+    {file = "pyinstrument-4.0.3-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:cdbef2760206f17c9193fbaf962b733da69cfc9cb38e78cd02096b2c411166a5"},
+    {file = "pyinstrument-4.0.3-cp37-cp37m-win32.whl", hash = "sha256:cc4794a0264e1068a5d5f82287d72c1fbfdb9760fb8d709aa712ae001f4af6ba"},
+    {file = "pyinstrument-4.0.3-cp37-cp37m-win_amd64.whl", hash = "sha256:45e5f39448a3348243c18483c9939c7cf0bb3305d484cb4ed466ab5bcce4a5ea"},
+    {file = "pyinstrument-4.0.3-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:2fdd220faa7c7715584fcf6bd2b23532ddaacc1cdb2473fc38b0170aaad18ac5"},
+    {file = "pyinstrument-4.0.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:3a399d0500ae7603790e3b32a6561817d50e7da6daa0c7ec308ef76e22779c42"},
+    {file = "pyinstrument-4.0.3-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:1bfb92d9e3e94158132b36c0470ec6b2bb5484355b2ea0c9101c32a3cbf76f03"},
+    {file = "pyinstrument-4.0.3-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:2f98b321f6e01f56ec7532c8519ab13158aa6aac61e11017a0510a758d3897aa"},
+    {file = "pyinstrument-4.0.3-cp38-cp38-win32.whl", hash = "sha256:d33387ed3d3ec02494325559957e37985c67e23ed838ba94d82494cc11237cdf"},
+    {file = "pyinstrument-4.0.3-cp38-cp38-win_amd64.whl", hash = "sha256:3b88ced15935be0dd58d4a11b0a0147467c0d58f4cace2e9bb68517464c44940"},
+    {file = "pyinstrument-4.0.3-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:bf923e8058d49c88a6c52cafe6a7bbcbbf577a5ba2336bf57269acda735e1f12"},
+    {file = "pyinstrument-4.0.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:232f413169e96bb97cf5ec1b5b2d7060bd17fc1e31351a96532aca29c004e017"},
+    {file = "pyinstrument-4.0.3-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:2f1d968362dacbf6ec8fc5d391e31c83f1b8bc06f7ebbed1ee8caad2ed95ea5b"},
+    {file = "pyinstrument-4.0.3-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:997d5b19f890dcdb69c9359a2f7764702eb5afc4aa072a28e341f95f05887d8e"},
+    {file = "pyinstrument-4.0.3-cp39-cp39-win32.whl", hash = "sha256:aba2b10adf7c89870dd1175084000a44fc019bd9d6d2ed1ed6c0277310fae1d2"},
+    {file = "pyinstrument-4.0.3-cp39-cp39-win_amd64.whl", hash = "sha256:eaa9fd274a05d05f148913200e796a8b87764c03974aa292ff0d71a3ad829aac"},
+    {file = "pyinstrument-4.0.3.tar.gz", hash = "sha256:08caf41d21ae8f24afe79c664a34af1ed1e17aa5d4441cd9b1dc15f87bbbac95"},
 ]
 pylint = [
     {file = "pylint-2.10.2-py3-none-any.whl", hash = "sha256:e178e96b6ba171f8ef51fbce9ca30931e6acbea4a155074d80cc081596c9e852"},
