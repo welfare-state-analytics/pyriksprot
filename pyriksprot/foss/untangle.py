@@ -37,7 +37,15 @@ class Element:
         self.attributes: Mapping[str, str] = attributes
         self.children: List[Element] = []
         self.is_root: bool = False
-        self.cdata: str = ""
+        self.cdatas: List[str] = []
+
+    @property
+    def cdata(self):
+        return ''.join(self.cdatas)
+
+    @cdata.setter
+    def cdata(self, cdata):
+        self.cdatas = [cdata]
 
     def add_child(self, element: "Element") -> None:
         """ Store child elements. """
@@ -45,7 +53,7 @@ class Element:
 
     def add_cdata(self, cdata: str) -> None:
         """ Store cdata """
-        self.cdata = self.cdata + cdata
+        self.cdatas.append(cdata)
 
     def get_attribute(self, key) -> Optional[str]:
         """ Get attributes by key """
@@ -150,7 +158,8 @@ class Handler(handler.ContentHandler):
         self.elements.pop()
 
     def characters(self, content: str) -> None:
-        self.elements[-1].add_cdata(content)
+        # self.elements[-1].add_cdata(content)
+        self.elements[-1].cdatas.append(content)
 
 
 def parse(filename: str, ignore_tags: Container[str] = None, **parser_features) -> Element:
