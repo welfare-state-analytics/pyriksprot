@@ -53,6 +53,12 @@ profile-tagging:
 test-data:
 	@poetry run python -c 'import tests.utility; tests.utility.create_parlaclarin_corpus()'
 
+.ONESHELL: profile-extract
+profile-extract:
+	@mkdir -p ./profile-reports \
+		&& export PYTHONPATH=. \
+		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract.py
+
 .ONESHELL: guard-clean-working-repository
 guard-clean-working-repository:
 	@status="$$(git status --porcelain)"
