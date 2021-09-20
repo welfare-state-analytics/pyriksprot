@@ -1,4 +1,7 @@
+import base64
 import glob
+import sys
+import zlib
 from typing import Iterable, List
 
 import pytest
@@ -17,9 +20,13 @@ from pyriksprot.interface import ProtocolIterItem
 # pylint: disable=redefined-outer-name
 
 
+TEST_CORPUS_FOLDER = '/data/riksdagen_corpus_data/riksdagen-corpus/corpus'
+# TEST_CORPUS_FOLDER ='tests/test_data/source'
+
+
 @pytest.fixture
 def member_index() -> ParliamentaryMemberIndex:
-    return ParliamentaryMemberIndex('tests/test_data/source/members_of_parliament.csv')
+    return ParliamentaryMemberIndex(f'{TEST_CORPUS_FOLDER}/members_of_parliament.csv')
 
 
 @pytest.fixture
@@ -35,7 +42,7 @@ def source_index() -> SourceIndex:
     # source_index = SourceIndex.read_csv('tests/test_data/source_index.csv')
 
     """Test fixture"""
-    source_index: SourceIndex = SourceIndex.load('tests/test_data/source')
+    source_index: SourceIndex = SourceIndex.load(TEST_CORPUS_FOLDER)
     return source_index
 
 
@@ -58,9 +65,9 @@ def test_create_grouping_hashcoder(source_index: SourceIndex, member_index: Parl
     assert hashcode is not None
 
 
-def test_parliamentary_index(member_index):
+def test_parliamentary_index():
 
-    # member_index = ParliamentaryMemberIndex()
+    member_index = ParliamentaryMemberIndex()
 
     assert isinstance(member_index.members, dict)
     assert len(member_index.members) > 0
@@ -78,7 +85,8 @@ def test_parliamentary_index(member_index):
 
 def test_aggregator_aggregate(source_index, member_index):
 
-    filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    # filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    filenames: List[str] = glob.glob(f'{TEST_CORPUS_FOLDER}/**/prot-*.xml', recursive=True)
 
     texts: Iterable[ProtocolIterItem] = iterators.XmlProtocolTextIterator(
         filenames=filenames, level='speaker', skip_size=0, processes=None
@@ -88,29 +96,73 @@ def test_aggregator_aggregate(source_index, member_index):
         source_index=source_index,
         member_index=member_index,
         temporal_key='year',
-        grouping_keys=['who'],
+        grouping_keys=['party'],
     )
 
     assert aggregator is not None
 
     data: List[AggregateIterItem] = []
     for item in aggregator.aggregate(texts):
+        print(item)
         data.append(item)
 
     assert len(data) > 0
 
 
-@pytest.mark.skip(reason="WIP")
 def test_extract_corpus_text():
 
-    pyriksprot.extract_corpus_text(
-        source_folder='/data/riksdagen_corpus_data/riksdagen-corpus/corpus',
-        source_pattern='**/*.xml',
-        years='1939,1940-1942',
-        target="apa/",
-        level='speaker',
-        dedent=False,
-        dehyphen=False,
-        processes=1,
-        groupby=None,
-    )
+    default_opts = {
+        'source_folder': 'tests/test_data/source',
+        'target': 'tests/output/',
+        'level': 'speaker',
+        'dedent': False,
+        'dehyphen': False,
+        'keep_order': False,
+        'skip_size': 1,
+        'processes': None,
+        'years': None,
+        'temporal_key': None,
+        'group_keys': None,
+        'create_index': False,
+        '_': {},
+    }
+
+    opts = {**default_opts, **dict(temporal_key='year', group_keys=['party'])}
+
+    opts = {
+        'source_folder': '/data/riksdagen_corpus_data/riksdagen-corpus/corpus',
+        'target': '.',
+        'level': 'speaker',
+        'dedent': False,
+        'dehyphen': False,
+        'keep_order': False,
+        'skip_size': 1,
+        'processes': None,
+        'years': '1920',
+        'temporal_key': 'year',
+        'group_keys': ('party', 'gender', 'who'),
+        'create_index': False,
+        '_': {},
+    }
+
+    pyriksprot.extract_corpus_text(**opts)
+
+    opts = {**default_opts, **dict(years='1920')}
+    pyriksprot.extract_corpus_text(**opts)
+
+
+def test_print_statement():
+    print("HEJ")
+
+    text: str = "Roger Mähler"
+
+    text_base64 = base64.b64encode(zlib.compress(text.encode('utf-8')))
+
+    print(text_base64)
+
+    text2 = zlib.decompress(base64.b64decode(text_base64)).decode('utf-8')
+
+    print(sys.getsizeof(text))
+    print(sys.getsizeof(text_base64))
+
+    print(text2)
