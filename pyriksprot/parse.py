@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 from typing import Callable, Iterable, List, Union
 
 from pyriksprot.foss import untangle
-from pyriksprot.utility import dedent
+from pyriksprot.utility import dedent as dedent_text
 
 from . import model
 from .interface import IterateLevel, ProtocolIterItem
@@ -199,7 +199,7 @@ class UtteranceMapper:
     def to_paragraphs(element: untangle.Element, dedent: bool = True) -> List[str]:
         texts: Iterable[str] = (p.cdata for p in element.get_elements('seg'))
         if dedent:
-            texts = [dedent(t) for t in texts]
+            texts = [dedent_text(t) for t in texts]
         return texts
 
 
@@ -287,7 +287,7 @@ class XmlIterParseProtocol(IXmlProtocol):  # (IProtocolTextIterator):
                             paragraphs=[],
                         )
                     elif tag == "seg" and value is not None:
-                        value = (dedent(value) if self.dedent else value).strip()
+                        value = (dedent_text(value) if self.dedent else value).strip()
                         if value:
                             current_utterance.paragraphs.append(value)
 
@@ -297,7 +297,7 @@ class XmlIterParseProtocol(IXmlProtocol):  # (IProtocolTextIterator):
                 elif event == 'end':
 
                     if tag == "seg" and value is not None:
-                        value = (dedent(value) if self.dedent else value).strip()
+                        value = (dedent_text(value) if self.dedent else value).strip()
                         if value:
                             current_utterance.paragraphs.append(value)
 
