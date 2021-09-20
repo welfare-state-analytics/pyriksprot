@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import contextlib
 import functools
 import glob
@@ -8,10 +9,13 @@ import inspect
 import os
 import pathlib
 import pickle
+import re
 import shutil
 import tempfile
 import time
+import unicodedata
 import warnings
+import zlib
 from collections import defaultdict
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
@@ -20,6 +24,8 @@ from os.path import normpath, splitext
 from typing import Any, List, Set, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
+
+import unidecode  # pylint: disable=import-error
 
 from loguru import logger
 
@@ -286,3 +292,37 @@ def parse_range_list(rl):
 
     ranges = sorted(set(map(parse_range, rl.split(","))), key=lambda x: (x.start, x.stop))
     return chain.from_iterable(collapse_range(ranges))
+
+
+def compress(text: str) -> bytes:
+    return base64.b64encode(zlib.compress(text.encode('utf-8')))
+
+
+def decompress(data: bytes) -> str:
+    return zlib.decompress(base64.b64decode(data)).decode('utf-8')
+
+
+RE_SANITIZE = re.compile(r'[^a-zåäöA-ZÅÄÖ#0-9_]')
+
+
+def sanitize(filename: str, remove_accents: bool = True) -> str:
+    if remove_accents:
+        filename = unidecode.unidecode(filename)
+    return RE_SANITIZE.sub('_', filename)
+
+
+def slugify(value: str, allow_unicode: bool = False) -> str:
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
