@@ -50,9 +50,8 @@ class ParliamentaryMemberIndex:
 
         self._members: pd.DataFrame = pd.read_csv(member_source).set_index('id', drop=False).rename_axis('')
 
-
         if len(self._members.id) != len(self._members.id.unique()):
-            duplicates: str = ', '.join(self._members[self._members.groupby('id').size()>1].id.unique().tolist())
+            duplicates: str = ', '.join(self._members[self._members.groupby('id').size() > 1].id.unique().tolist())
             logger.warning(f"Parliamentary member ID is not unique ({duplicates})")
 
         self._members = self._members.assign(
@@ -60,8 +59,7 @@ class ParliamentaryMemberIndex:
             id=self._members.id.fillna('unknown'),
             gender=self._members.gender.fillna('unknown'),
         )
-        self._members.loc[self._members.gender=='', 'gender'] = 'unknown'
-
+        self._members.loc[self._members.gender == '', 'gender'] = 'unknown'
 
         """A lookup dictionary for members"""
         self.members = {meta['id']: ParliamentaryMember(**meta) for meta in self._members.to_dict('records')}

@@ -26,7 +26,6 @@ from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import unidecode  # pylint: disable=import-error
-
 from loguru import logger
 
 

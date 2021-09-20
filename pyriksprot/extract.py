@@ -4,8 +4,9 @@ import glob
 import hashlib
 from dataclasses import dataclass, field, fields
 from functools import reduce
-from pyriksprot.utility import slugify
 from typing import Callable, Iterable, List, Literal, Mapping, Sequence, Set, Tuple
+
+from pyriksprot.utility import slugify
 
 from . import iterators
 from .interface import IterateLevel, ProtocolIterItem
@@ -41,7 +42,7 @@ def create_grouping_hashcoder(
         for attr in item_keys:
             parts[attr] = str(getattr(item, attr, "unknown") or attr)
 
-        hashcode_str = slugify('_'.join(x.lower().replace(' ','_') for x in parts.values()))
+        hashcode_str = slugify('_'.join(x.lower().replace(' ', '_') for x in parts.values()))
 
         return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
 
@@ -92,6 +93,7 @@ class AggregateIterItem:
     @property
     def n_size(self):
         return len(self.text)
+
 
 class TextAggregator:
     """Aggregate ProtocolIterItem based on time and grouping keys
@@ -221,7 +223,7 @@ def extract_corpus_text(
     #     ([dedent_text] if dedent else []) + ([dehyphen_text] if dehyphen else [])
     # )
 
-    texts: iterators.IProtocolTextIterator = iterators.XmlProtocolTextIterator(
+    texts: iterators.IProtocolTextIterator = iterators.XmlIterProtocolTextIterator(
         filenames=source_index.paths,
         level=level,
         skip_size=skip_size,
