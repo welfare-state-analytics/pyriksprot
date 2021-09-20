@@ -18,11 +18,13 @@ def get_kwargs():
 Extract an aggregated subset aof ParlaClarin corpus.
 """
 LEVELS = ['protocol', 'speaker', 'speech', 'utterance', 'paragraph']
+MODES = ['plain', 'zip', 'gzip', 'bz2', 'lzma']
 
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target', type=click.STRING)
+@click.option('-m', '--mode', default='zipfile', type=click.Choice(MODES), help='Target type')
 @click.option('-t', '--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
 @click.option('-y', '--years', default=None, help='Years to include in output', type=click.STRING)
 @click.option('-g', '--group-key', help='Partition key(s)', multiple=True, type=click.STRING)
@@ -34,10 +36,11 @@ LEVELS = ['protocol', 'speaker', 'speech', 'utterance', 'paragraph']
 @click.option('-s', '--skip-size', default=1, type=click.IntRange(1, 1024), help='Skip blocks of char length less than')
 @click.option('-d', '--dedent', default=False, is_flag=True, help='Remove indentation')
 @click.option('-k', '--dehyphen', default=False, is_flag=True, help='Dehyphen text')
-@click.option('-x', '--create-index', default=False, is_flag=True, help='Create document index')
+# @click.option('-x', '--create-index', default=False, is_flag=True, help='Create document index')
 def main(
     source_folder: str = None,
     target: str = None,
+    mode: str = None,
     years: str = None,
     temporal_key: str = None,
     level: str = None,
@@ -46,7 +49,7 @@ def main(
     keep_order: str = None,
     skip_size: int = 1,
     processes: int = 1,
-    create_index: bool = True,
+    # create_index: bool = True,
     group_key: Sequence[str] = None,
 ):
     try:
@@ -59,6 +62,7 @@ def main(
         pyriksprot.extract_corpus_text(
             source_folder=source_folder,
             target=target,
+            target_mode=mode,
             level=level,
             dedent=dedent,
             dehyphen=dehyphen,
@@ -68,7 +72,7 @@ def main(
             years=years,
             temporal_key=temporal_key,
             group_keys=group_key,
-            create_index=create_index,
+            # create_index=create_index,
         )
 
     except Exception as ex:
