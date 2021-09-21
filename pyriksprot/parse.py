@@ -4,10 +4,9 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import Callable, Iterable, List, Union
 
-from pyriksprot.foss import untangle
-from pyriksprot.utility import dedent as dedent_text
-
 from . import model
+from .convert import dedent as dedent_text
+from .foss import untangle
 from .interface import IterateLevel, ProtocolIterItem
 
 

@@ -3,6 +3,14 @@ from typing import List
 from pyriksprot import convert, model, parse
 
 
+def test_dedent():
+    assert convert.dedent("") == ""
+    assert convert.dedent("apa\napa") == "apa\napa"
+    assert convert.dedent("apa\n\napa\n") == "apa\n\napa\n"
+    assert convert.dedent("apa\n\n  apa\n") == "apa\n\napa\n"
+    assert convert.dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
+
+
 def test_convert_to_xml():
 
     template_name: str = "speeches.xml.jinja"

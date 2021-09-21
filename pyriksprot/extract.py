@@ -14,13 +14,12 @@ from typing import Any, Callable, Iterable, List, Literal, Mapping, Sequence, Se
 import pandas as pd
 from loguru import logger
 
-from pyriksprot.utility import dedent as dedent_text
-from pyriksprot.utility import slugify
-
 from . import iterators
+from .convert import dedent as dedent_text
 from .interface import IterateLevel, ProtocolIterItem
 from .member import ParliamentaryMember, ParliamentaryMemberIndex
 from .source import SourceIndex, SourceIndexItem
+from .utility import slugify
 
 TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom']
 GroupingKey = Literal[None, 'speaker', 'speech', 'party', 'gender']
@@ -282,7 +281,7 @@ def store_text(filename: str, text: str, mode: str) -> None:
             fp.write(text.encode('utf-8'))
 
     if mode == 'plain':
-        with open(filename, 'w') as fp:
+        with open(filename, 'w', encoding='utf-8') as fp:
             fp.write(text)
 
     raise ValueError(f"unknown mode {mode}")
@@ -296,7 +295,9 @@ class ZipFileDispatcher(IDispatcher):
     def open_target(self, target: Any) -> None:
         if os.path.isdir(target):
             raise ValueError("zip mode: target must be name of zip file (not folder)")
-        self.zup = zipfile.ZipFile(self.target, mode="w", compression=zipfile.ZIP_DEFLATED)
+        self.zup = zipfile.ZipFile(  # pylint: disable=consider-using-with
+            self.target, mode="w", compression=zipfile.ZIP_DEFLATED
+        )
 
     def close_target(self) -> None:
         super().close_target()
@@ -367,4 +368,3 @@ def extract_corpus_text(
             dispatcher.dispatch(item)
 
     print(f"Corpus stored in {target}.")
-

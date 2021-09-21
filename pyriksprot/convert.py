@@ -1,10 +1,9 @@
 """Convert ParlaClarin XML protocol to other text format using Jinja."""
 import os
-import textwrap
 from typing import List, Union
 
 from click import echo
-from jinja2 import Environment, PackageLoader, Template, Undefined, select_autoescape
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
 
 from . import model, parse
 from .dehyphenation import SwedishDehyphenatorService
@@ -23,11 +22,16 @@ def set_dehyphenator(**opts) -> None:
     __dehyphenator = SwedishDehyphenatorService(**opts)
 
 
+# def dedent(text: str) -> str:
+#     """Remove any white-space indentation from `text`."""
+#     if isinstance(text, Undefined):
+#         raise TypeError("dedent: jinja2.Undefined value string encountered")
+#     return textwrap.dedent(text) if text is not None else ""
+
+
 def dedent(text: str) -> str:
-    """Remove any white-space indentation from `text`."""
-    if isinstance(text, Undefined):
-        raise TypeError("dedent: jinja2.Undefined value string encountered")
-    return textwrap.dedent(text) if text is not None else ""
+    """Remove whitespaces before and after newlines"""
+    return '\n'.join(x.strip() for x in text.split('\n'))
 
 
 def dehyphen(text: str) -> str:

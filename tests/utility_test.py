@@ -1,7 +1,7 @@
 from os.path import join as jj
 from pathlib import Path
 
-from pyriksprot.utility import dedent, temporary_file
+from pyriksprot.utility import temporary_file
 
 
 def test_temporary_file():
@@ -25,11 +25,3 @@ def test_temporary_file():
         with open(filename, "r", encoding="utf-8") as fp:
             assert fp.read() == "X"
     assert not Path(filename).is_file(), "file exists"
-
-
-def test_dedent():
-    assert dedent("") == ""
-    assert dedent("apa\napa") == "apa\napa"
-    assert dedent("apa\n\napa\n") == "apa\n\napa\n"
-    assert dedent("apa\n\n  apa\n") == "apa\n\napa\n"
-    assert dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
