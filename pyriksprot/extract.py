@@ -1,20 +1,21 @@
 from __future__ import annotations
+
 import abc
 import bz2
 import gzip
-import lzma
-
 import hashlib
+import lzma
+import os
+import zipfile
 from dataclasses import dataclass, field, fields
 from functools import reduce
-import os
 from typing import Any, Callable, Iterable, List, Literal, Mapping, Sequence, Set, Tuple, Type
-import zipfile
-from loguru import logger
 
 import pandas as pd
+from loguru import logger
 
-from pyriksprot.utility import slugify, dedent as dedent_text
+from pyriksprot.utility import dedent as dedent_text
+from pyriksprot.utility import slugify
 
 from . import iterators
 from .interface import IterateLevel, ProtocolIterItem
@@ -207,59 +208,6 @@ def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
     return reduce(lambda f, g: lambda *args: f(g(*args)), fns)
 
 
-def extract_corpus_text(
-    source_folder: str = None,
-    target: str = None,
-    target_mode: str = None,
-    level: IterateLevel = None,
-    dedent: bool = True,
-    dehyphen: bool = False,
-    keep_order: str = None,
-    skip_size: int = 1,
-    processes: int = 1,
-    years: str = None,
-    temporal_key: str = None,
-    group_keys: Sequence[str] = None,
-    # create_index: bool = True,
-    **_,
-) -> None:
-    """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
-
-    Temporal key kan be any of None, 'year', 'lustrum', 'decade' or custom year periods
-    - 'year', 'lustrum', 'decade' or custom year periods given as comma separated string
-
-    """
-    print(locals())
-    source_index: SourceIndex = SourceIndex.load(source_folder=source_folder, years=years)
-    member_index: ParliamentaryMemberIndex = ParliamentaryMemberIndex(f'{source_folder}/members_of_parliament.csv')
-
-    preprocessor: Callable[[str], str] = compose(
-        ([dedent_text] if dedent else []) + ([dehyphen_text] if dehyphen else [])
-    )
-
-    texts: iterators.IProtocolTextIterator = iterators.XmlProtocolTextIterator(
-        filenames=source_index.paths,
-        level=level,
-        skip_size=skip_size,
-        processes=processes,
-        ordered=keep_order,
-        preprocessor=preprocessor,
-    )
-
-    aggregator: TextAggregator = TextAggregator(
-        source_index=source_index,
-        member_index=member_index,
-        temporal_key=temporal_key,
-        grouping_keys=group_keys,
-    )
-
-    with IDispatcher.get_cls(target_mode)(target, target_mode) as dispatcher:
-        for item in aggregator.aggregate(texts):
-            dispatcher.dispatch(item)
-
-    print(f"Corpus stored i {target}.")
-
-
 def make_header(grouping_keys: Sequence[str]) -> str:
     header: str = "period\tname\ttid\t" + '\t'.join(v for v in grouping_keys)
     return header
@@ -304,6 +252,7 @@ class IDispatcher(abc.ABC):
             return ZipFileDispatcher
         return FolderDispatcher
 
+
 class FolderDispatcher(IDispatcher):
     def open_target(self, target: Any) -> None:
         os.makedirs(target, exist_ok=True)
@@ -322,6 +271,7 @@ class FolderDispatcher(IDispatcher):
         path: str = os.path.join(self.target, f"{filename}")
         store_text(filename=path, text=text, mode=self.mode)
 
+
 def store_text(filename: str, text: str, mode: str) -> None:
 
     modules = {'gzip': (gzip, 'gz'), 'bz2': (bz2, 'bz2'), 'lzma': (lzma, 'xz')}
@@ -336,6 +286,7 @@ def store_text(filename: str, text: str, mode: str) -> None:
             fp.write(text)
 
     raise ValueError(f"unknown mode {mode}")
+
 
 class ZipFileDispatcher(IDispatcher):
     def __init__(self, target, mode):
@@ -364,3 +315,56 @@ class ZipFileDispatcher(IDispatcher):
 
 class S3Dispatcher:
     ...
+
+
+def extract_corpus_text(
+    source_folder: str = None,
+    target: str = None,
+    target_mode: str = None,
+    level: IterateLevel = None,
+    dedent: bool = True,
+    dehyphen: bool = False,
+    keep_order: str = None,
+    skip_size: int = 1,
+    processes: int = 1,
+    years: str = None,
+    temporal_key: str = None,
+    group_keys: Sequence[str] = None,
+    **_,
+) -> None:
+    """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
+
+    Temporal key kan be any of None, 'year', 'lustrum', 'decade' or custom year periods
+    - 'year', 'lustrum', 'decade' or custom year periods given as comma separated string
+
+    """
+    print(locals())
+    source_index: SourceIndex = SourceIndex.load(source_folder=source_folder, years=years)
+    member_index: ParliamentaryMemberIndex = ParliamentaryMemberIndex(f'{source_folder}/members_of_parliament.csv')
+
+    preprocessor: Callable[[str], str] = compose(
+        ([dedent_text] if dedent else []) + ([dehyphen_text] if dehyphen else [])
+    )
+
+    texts: iterators.IProtocolTextIterator = iterators.XmlProtocolTextIterator(
+        filenames=source_index.paths,
+        level=level,
+        skip_size=skip_size,
+        processes=processes,
+        ordered=keep_order,
+        preprocessor=preprocessor,
+    )
+
+    aggregator: TextAggregator = TextAggregator(
+        source_index=source_index,
+        member_index=member_index,
+        temporal_key=temporal_key,
+        grouping_keys=group_keys,
+    )
+
+    with IDispatcher.get_cls(target_mode)(target, target_mode) as dispatcher:
+        for item in aggregator.aggregate(texts):
+            dispatcher.dispatch(item)
+
+    print(f"Corpus stored in {target}.")
+
