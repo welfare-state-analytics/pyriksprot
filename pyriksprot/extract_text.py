@@ -14,15 +14,14 @@ import pandas as pd
 from loguru import logger
 
 from . import iterators
-from .convert import dedent as dedent_text
 from .dehyphenation import SwedishDehyphenatorService
 from .interface import IterateLevel, ProtocolIterItem
 from .member import ParliamentaryMember, ParliamentaryMemberIndex
 from .source import SourceIndex, SourceIndexItem
-from .utility import compose, slugify
+from .utility import compose, slugify, dedent as dedent_text
 
 TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom']
-GroupingKey = Literal[None, 'speaker', 'speech', 'party', 'gender']
+GroupingKey = Literal[None, 'who', 'speech', 'party', 'gender', 'speaker']
 
 # pylint: disable=too-many-arguments
 
