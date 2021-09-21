@@ -1,35 +1,76 @@
 import sys
+from inspect import currentframe, getargvalues
+from typing import Sequence
 
 import click
-from pyriksprot import convert_protocol
-from pyriksprot.resources.templates import PARLA_TEMPLATES_SHORTNAMES
+
+import pyriksprot
+
+sys.path.append(".")
+
+
+def get_kwargs():
+    keys, _, _, values = getargvalues(currentframe().f_back)
+    return {k: v for k, v in zip(keys, values) if k != 'self'}
+
+
+"""
+Extract an aggregated subset aof ParlaClarin corpus.
+"""
+LEVELS = ['protocol', 'speaker', 'speech', 'utterance', 'paragraph', 'who']
+MODES = ['plain', 'zip', 'gzip', 'bz2', 'lzma']
 
 
 @click.command()
-@click.argument('input_filename', type=click.STRING)
+@click.argument('source-folder', type=click.STRING)
+@click.argument('target', type=click.STRING)
+@click.option('-m', '--mode', default='zipfile', type=click.Choice(MODES), help='Target type')
+@click.option('-t', '--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
+@click.option('-y', '--years', default=None, help='Years to include in output', type=click.STRING)
+@click.option('-g', '--group-key', help='Partition key(s)', multiple=True, type=click.STRING)
+@click.option('-p', '--processes', default=None, type=click.IntRange(1, 40), help='Number of processes to use')
+@click.option('-l', '--level', default='speaker', type=click.Choice(LEVELS), help='Protocol extract level')
 @click.option(
-    '-o',
-    '--output-filename',
-    default=None,
-    help='Output filename (default stdout)',
-    type=click.STRING,
+    '-e', '--keep-order', default=False, is_flag=True, help='Keep output in filename order (slower, multiproc)'
 )
-@click.option(
-    '-t',
-    '--template-name',
-    default='speeches.xml',
-    type=click.Choice(PARLA_TEMPLATES_SHORTNAMES),
-    help='Template to use',
-)
-# @click.option('-dehyphen', '--dehyphen/--no-dehyphen', default=True, is_flag=True, help='Dehyphen text')
+@click.option('-s', '--skip-size', default=1, type=click.IntRange(1, 1024), help='Skip blocks of char length less than')
+@click.option('-d', '--dedent', default=False, is_flag=True, help='Remove indentation')
+@click.option('-k', '--dehyphen', default=False, is_flag=True, help='Dehyphen text')
 def main(
-    input_filename: str = None,
-    output_filename: str = None,
-    template_name: str = None,
+    source_folder: str = None,
+    target: str = None,
+    mode: str = None,
+    years: str = None,
+    temporal_key: str = None,
+    level: str = None,
+    dedent: bool = False,
+    dehyphen: bool = False,
+    keep_order: str = None,
+    skip_size: int = 1,
+    processes: int = 1,
+    group_key: Sequence[str] = None,
 ):
     try:
 
-        convert_protocol(input_filename, output_filename, template_name)
+        # kwargs = getargvalues(currentframe().f_back).locals['kwargs']
+
+        # for k,v in kwargs.items():
+        #     logger.info(f"{k}: {v}")
+
+        pyriksprot.extract_tagged_corpus(
+            source_folder=source_folder,
+            target=target,
+            target_mode=mode,
+            level=level,
+            dedent=dedent,
+            dehyphen=dehyphen,
+            keep_order=keep_order,
+            skip_size=skip_size,
+            processes=processes,
+            years=years,
+            temporal_key=temporal_key,
+            group_keys=group_key,
+        )
 
     except Exception as ex:
         click.echo(ex)
