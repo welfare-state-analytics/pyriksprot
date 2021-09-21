@@ -7,8 +7,8 @@ from typing import Iterable, List
 import pytest
 
 import pyriksprot
-from pyriksprot import iterators
-from pyriksprot.extract import (
+from pyriksprot import iterators, model, persist
+from pyriksprot.extract_text import (
     AggregateIterItem,
     ParliamentaryMemberIndex,
     SourceIndex,
@@ -166,3 +166,31 @@ def test_print_statement():
     print(sys.getsizeof(text_base64))
 
     print(text2)
+
+
+def test_aggregator_extract_tags():
+
+    # filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    filenames: List[str] = ['tests/test_data/source/**/prot-1973--21.zip']
+
+    protocols: Iterable[model.Protocol] = (persist.load_protocol(filename) for filename in filenames)
+
+    with pytest.raises(persist.FileIsEmptyError):
+        for protocol in protocols:
+            print(protocol.name)
+
+    filenames: List[str] = glob.glob('tests/test_data/tagged/prot-*.zip', recursive=True)
+
+    # aggregator: TextAggregator = TextAggregator(
+    #     source_index=source_index,
+    #     member_index=member_index,
+    #     temporal_key='year',
+    #     grouping_keys=['party'],
+    # )
+
+    # assert aggregator is not None
+
+    # data: List[AggregateIterItem] = []
+    # for item in aggregator.aggregate(texts):
+    #     print(item)
+    #     data.append(item)

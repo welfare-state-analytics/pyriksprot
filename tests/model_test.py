@@ -1,6 +1,8 @@
+import glob
 import os
 import uuid
 from typing import Callable, List
+from black import itertools
 
 import pandas as pd
 import pytest
@@ -409,3 +411,22 @@ def test_store_protocols(storage_format: str):
     assert [u.__dict__ for u in protocol.utterances] == [u.__dict__ for u in loaded_protocol.utterances]
 
     # os.unlink(output_filename)
+
+
+def test_load_protocols():
+
+    filenames: List[str] = ['this/is/a/non-existing/path/**/prot-1973--21.zip']
+
+    with pytest.raises(FileNotFoundError):
+        for _ in persist.load_protocols(source=filenames):
+            ...
+
+    with pytest.raises(persist.FileIsEmptyError):
+        _ = persist.load_protocol(filename='tests/test_data/tagged/prot-1973--21.zip')
+
+    filenames: List[str] = glob.glob('tests/test_data/tagged/prot-*.zip', recursive=True)
+    protocols: List[model.Protocol] = [p for p in persist.load_protocols(source=filenames)]
+
+    assert len(protocols) == 19
+
+    _ = itertools.chain(p.to_text(level='who') for p in protocols)
