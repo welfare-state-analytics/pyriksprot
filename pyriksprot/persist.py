@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 import contextlib
+import glob
 import json
 import os
+from pyriksprot.utility import is_empty
 import zipfile
-from typing import List, Literal, Optional
+from typing import Iterable, List, Literal, Optional
 
 from . import model
 
@@ -46,9 +50,9 @@ def store_protocol(
 
 
 def load_metadata(filename: str) -> Optional[dict]:
-
+    """Read metadata attributes stored in `metadata.json` """
     if not os.path.isfile(filename):
-        return None
+        raise FileNotFoundError(filename)
 
     with contextlib.suppress(Exception):
 
@@ -63,6 +67,8 @@ def load_metadata(filename: str) -> Optional[dict]:
 
             return json.loads(json_str)
 
+    return None
+
 
 PROTOCOL_LOADERS: dict = dict(
     json=model.Utterances.from_json,
@@ -70,7 +76,15 @@ PROTOCOL_LOADERS: dict = dict(
 )
 
 
+class FileIsEmptyError(Exception):
+    ...
+
+
 def load_protocol(filename: str) -> Optional[model.Protocol]:
+    """Loads a tagged protocol stored in ZIP as JSON or CSV"""
+
+    if is_empty(filename):
+        raise FileIsEmptyError(filename)
 
     metadata: dict = load_metadata(filename)
 
@@ -96,6 +110,19 @@ def load_protocol(filename: str) -> Optional[model.Protocol]:
             protocol: model.Protocol = model.Protocol(utterances=utterances, **metadata)
 
             return protocol
+
+
+def load_protocols(source: str|List, file_pattern: str = 'prot-*.zip') -> Iterable[model.Protocol]:
+
+    filenames: List[str] = (
+        glob.glob(os.path.join(source, file_pattern), recursive=True)
+        if isinstance(source, str)
+        else source
+        if isinstance(source, list)
+        else []
+    )
+
+    return (load_protocol(filename) for filename in filenames if not is_empty(filename))
 
 
 def validate_checksum(filename: str, checksum: str) -> bool:
