@@ -1,13 +1,13 @@
 # type: ignore
 
-from .convert import ProtocolConverter, convert_protocol, dedent, dehyphen, pretokenize
+from .convert import ProtocolConverter, convert_protocol, dehyphen, pretokenize
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
-from .extract import extract_corpus_text
+from .extract_text import extract_corpus_text
 from .interface import ITagger, IterateLevel, ProtocolIterItem, TaggedDocument
 from .iterators import IProtocolTextIterator, ProtocolTextIterator, XmlProtocolTextIterator
 from .model import ParlaClarinError, Protocol, Speech, Utterance
 from .parse import IterUtterance, ProtocolMapper, UtteranceMapper, XmlUntangleProtocol
-from .persist import StorageFormat, load_metadata, load_protocol, store_protocol
+from .persist import StorageFormat, load_metadata, load_protocol, load_protocols, store_protocol
 from .tag import tag_protocol, tag_protocol_xml
 from .tf import TermFrequencyCounter, compute_term_frequencies
 from .utility import (
@@ -19,6 +19,7 @@ from .utility import (
     ensure_path,
     flatten,
     hasattr_path,
+    is_empty,
     load_dict,
     load_token_set,
     lookup,
@@ -41,4 +42,5 @@ from .utility import (
     touch,
     ts_data_path,
     unlink,
+    dedent
 )

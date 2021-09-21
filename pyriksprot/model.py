@@ -296,7 +296,7 @@ class Protocol(UtteranceMixIn):
                 for s in self.to_speeches('n', skip_size=skip_size)
             ]
 
-        elif level.startswith('speaker'):
+        elif level.startswith('speaker') or level.startswith('who'):
 
             items = [
                 ProtocolIterItem(self.name, s.speaker, s.speech_id, s.text, s.page_number)
@@ -374,7 +374,7 @@ class MergeSpeechById(IMergeSpeechStrategy):
 
 class MergeSpeechByWho(IMergeSpeechStrategy):
     def merge(self, protocol: Protocol) -> List[Speech]:
-        """Create a speech per unique speaker. Return list of Speech."""
+        """Create a speech for each unique `who`. Return list of Speech."""
         data = defaultdict(list)
         for u in protocol.utterances:
             data[u.who].append(u)

@@ -17,7 +17,7 @@ def get_kwargs():
 """
 Extract an aggregated subset aof ParlaClarin corpus.
 """
-LEVELS = ['protocol', 'speaker', 'speech', 'utterance', 'paragraph']
+LEVELS = ['protocol', 'speaker', 'speech', 'utterance', 'paragraph', 'who']
 MODES = ['plain', 'zip', 'gzip', 'bz2', 'lzma']
 
 
