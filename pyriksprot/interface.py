@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Callable, List, Literal, Mapping, Union
 
-from pyriksprot.utility import compress
+from .utility import compress
 
 TaggedDocument = Mapping[str, List[str]]
-IterateLevel = Literal['protocol', 'speech', 'speaker', 'utterance', 'paragraph']
+IterateLevel = Literal['protocol', 'speech', 'speaker', 'who', 'utterance', 'paragraph']
 
 
 @dataclass
