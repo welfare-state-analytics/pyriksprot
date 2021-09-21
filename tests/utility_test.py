@@ -1,7 +1,7 @@
 from os.path import join as jj
 from pathlib import Path
 
-from pyriksprot.utility import temporary_file, dedent
+from pyriksprot.utility import dedent, temporary_file
 
 
 def test_temporary_file():

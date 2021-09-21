@@ -13,6 +13,7 @@ from .tf import TermFrequencyCounter, compute_term_frequencies
 from .utility import (
     compose,
     data_path_ts,
+    dedent,
     deprecated,
     dict_get_by_path,
     download_url,
@@ -42,5 +43,4 @@ from .utility import (
     touch,
     ts_data_path,
     unlink,
-    dedent
 )

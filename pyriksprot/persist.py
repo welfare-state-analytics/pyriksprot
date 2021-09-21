@@ -4,9 +4,10 @@ import contextlib
 import glob
 import json
 import os
-from pyriksprot.utility import is_empty
 import zipfile
 from typing import Iterable, List, Literal, Optional
+
+from pyriksprot.utility import is_empty
 
 from . import model
 
@@ -112,7 +113,7 @@ def load_protocol(filename: str) -> Optional[model.Protocol]:
             return protocol
 
 
-def load_protocols(source: str|List, file_pattern: str = 'prot-*.zip') -> Iterable[model.Protocol]:
+def load_protocols(source: str | List, file_pattern: str = 'prot-*.zip') -> Iterable[model.Protocol]:
 
     filenames: List[str] = (
         glob.glob(os.path.join(source, file_pattern), recursive=True)

@@ -333,15 +333,18 @@ def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
         return None
     return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)
 
+
 # def dedent(text: str) -> str:
 #     """Remove any white-space indentation from `text`."""
 #     if isinstance(text, Undefined):
 #         raise TypeError("dedent: jinja2.Undefined value string encountered")
 #     return textwrap.dedent(text) if text is not None else ""
 
+
 def dedent(text: str) -> str:
     """Remove whitespaces before and after newlines"""
     return '\n'.join(x.strip() for x in text.split('\n'))
+
 
 def is_empty(filename: str) -> bool:
     """Check if file is empty."""

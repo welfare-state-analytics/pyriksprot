@@ -2,10 +2,10 @@ import glob
 import os
 import uuid
 from typing import Callable, List
-from black import itertools
 
 import pandas as pd
 import pytest
+from black import itertools
 
 from pyriksprot import model, parse, persist
 from pyriksprot.foss import untangle

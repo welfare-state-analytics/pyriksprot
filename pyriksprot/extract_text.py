@@ -18,7 +18,9 @@ from .dehyphenation import SwedishDehyphenatorService
 from .interface import IterateLevel, ProtocolIterItem
 from .member import ParliamentaryMember, ParliamentaryMemberIndex
 from .source import SourceIndex, SourceIndexItem
-from .utility import compose, slugify, dedent as dedent_text
+from .utility import compose
+from .utility import dedent as dedent_text
+from .utility import slugify
 
 TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom']
 GroupingKey = Literal[None, 'who', 'speech', 'party', 'gender', 'speaker']

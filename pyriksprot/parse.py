@@ -5,9 +5,9 @@ from dataclasses import asdict, dataclass
 from typing import Callable, Iterable, List, Union
 
 from . import model
-from .utility import dedent as dedent_text
 from .foss import untangle
 from .interface import IterateLevel, ProtocolIterItem
+from .utility import dedent as dedent_text
 
 
 @dataclass
