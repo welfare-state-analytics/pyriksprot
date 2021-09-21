@@ -51,7 +51,7 @@ class ParliamentaryMemberIndex:
         self._members: pd.DataFrame = pd.read_csv(member_source).set_index('id', drop=False).rename_axis('')
 
         if len(self._members.id) != len(self._members.id.unique()):
-            duplicates: str = ', '.join(self._members[self._members.groupby('id').size() > 1].id.unique().tolist())
+            duplicates: str = ', '.join(self._members[self._members.index.duplicated()].id.tolist())
             logger.warning(f"Parliamentary member ID is not unique ({duplicates})")
 
         self._members = self._members.assign(
@@ -71,7 +71,7 @@ class ParliamentaryMemberIndex:
         if key is None:
             return None
         if key not in self.members:
-            """Add speaker id's not founs in the repository."""
+            """Add speaker id's not found into the repository."""
             self.members[key] = ParliamentaryMember(
                 id=key,
                 name=key,
