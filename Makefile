@@ -54,13 +54,13 @@ test-data:
 	@poetry run python -c 'import tests.utility; tests.utility.create_parlaclarin_corpus()'
 
 .ONESHELL: profile-extract-text
-profile-extract:-text
+profile-extract-text:
 	@mkdir -p ./profile-reports \
 		&& export PYTHONPATH=. \
 		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract_text.py
 
 .ONESHELL: profile-extract-tags
-profile-extract:-text
+profile-extract-tags:
 	@mkdir -p ./profile-reports \
 		&& export PYTHONPATH=. \
 		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract_tags.py
