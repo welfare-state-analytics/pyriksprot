@@ -8,7 +8,7 @@ from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from . import model, parse
 from .dehyphenation import SwedishDehyphenatorService
 from .foss.sparv_tokenize import default_tokenize
-from .utility import strip_paths
+from .utility import strip_paths, dedent
 
 __dehyphenator: SwedishDehyphenatorService = None
 
@@ -20,18 +20,6 @@ def get_dehyphenator() -> SwedishDehyphenatorService:
 def set_dehyphenator(**opts) -> None:
     global __dehyphenator
     __dehyphenator = SwedishDehyphenatorService(**opts)
-
-
-# def dedent(text: str) -> str:
-#     """Remove any white-space indentation from `text`."""
-#     if isinstance(text, Undefined):
-#         raise TypeError("dedent: jinja2.Undefined value string encountered")
-#     return textwrap.dedent(text) if text is not None else ""
-
-
-def dedent(text: str) -> str:
-    """Remove whitespaces before and after newlines"""
-    return '\n'.join(x.strip() for x in text.split('\n'))
 
 
 def dehyphen(text: str) -> str:

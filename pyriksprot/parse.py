@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 from typing import Callable, Iterable, List, Union
 
 from . import model
-from .convert import dedent as dedent_text
+from .utility import dedent as dedent_text
 from .foss import untangle
 from .interface import IterateLevel, ProtocolIterItem
 
@@ -80,7 +80,7 @@ class IXmlProtocol(abc.ABC):
 
                 items: Iterable[ProtocolIterItem] = [ProtocolIterItem(name, None, name, self.text, '0')]
 
-            elif level.startswith('speaker'):
+            elif level.startswith('speaker') or level.startswith('who'):
 
                 data, page_numbers = defaultdict(list), {}
                 for u in self.utterances:
