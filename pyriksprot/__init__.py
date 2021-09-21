@@ -11,6 +11,7 @@ from .persist import StorageFormat, load_metadata, load_protocol, store_protocol
 from .tag import tag_protocol, tag_protocol_xml
 from .tf import TermFrequencyCounter, compute_term_frequencies
 from .utility import (
+    compose,
     data_path_ts,
     deprecated,
     dict_get_by_path,

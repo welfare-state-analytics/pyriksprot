@@ -21,7 +21,7 @@ from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
-from typing import Any, List, Set, TypeVar
+from typing import Any, Callable, List, Sequence, Set, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -325,3 +325,10 @@ def slugify(value: str, allow_unicode: bool = False) -> str:
         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value.lower())
     return re.sub(r'[-\s]+', '-', value).strip('-_')
+
+
+def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
+    """Create a composed function from a list of function. Return function."""
+    if len(fns) == 0:
+        return None
+    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)

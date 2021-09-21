@@ -8,7 +8,6 @@ import lzma
 import os
 import zipfile
 from dataclasses import dataclass, field, fields
-from functools import reduce
 from typing import Any, Callable, Iterable, List, Literal, Mapping, Sequence, Set, Tuple, Type
 
 import pandas as pd
@@ -16,10 +15,11 @@ from loguru import logger
 
 from . import iterators
 from .convert import dedent as dedent_text
+from .dehyphenation import SwedishDehyphenatorService
 from .interface import IterateLevel, ProtocolIterItem
 from .member import ParliamentaryMember, ParliamentaryMemberIndex
 from .source import SourceIndex, SourceIndexItem
-from .utility import slugify
+from .utility import compose, slugify
 
 TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom']
 GroupingKey = Literal[None, 'speaker', 'speech', 'party', 'gender']
@@ -95,11 +95,11 @@ class AggregateIterItem:
             # f\t"{self.id or ''}"
             f"\t{self.page_number or ''}"
             f"\t{self.key_values}"
-            f"\t{self.n_size}"
+            f"\t{self.n_chars}"
         )
 
     @property
-    def n_size(self):
+    def n_chars(self):
         return len(self.text)
 
     def to_dict(self):
@@ -110,6 +110,11 @@ class AggregateIterItem:
             'n_tokens': 0,
             **self.grouping_values,
         }
+
+    @staticmethod
+    def header(grouping_keys: Sequence[str], sep: str = '\t') -> str:
+        header: str = f"period{sep}name{sep}{sep.join(v for v in grouping_keys)}{sep}n_chars{sep}"
+        return header
 
 
 class TextAggregator:
@@ -141,8 +146,8 @@ class TextAggregator:
         self.grouping_hashcoder = create_grouping_hashcoder(grouping_keys)
 
     def aggregate(self, iterator: iterators.IProtocolTextIterator) -> Iterable[AggregateIterItem]:
+        """Aggregate stream of protocol items based on grouping keys. Yield items continously."""
 
-        """Current temporal value """
         current_temporal_hashcode: str = None
         current_aggregate: Mapping[str, AggregateIterItem] = {}
         grouping_keys: Set[str] = set(self.grouping_keys)
@@ -196,24 +201,14 @@ class TextAggregator:
             yield x
 
 
-def dehyphen_text(text: str) -> str:
-    return text
-
-
-def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
-    """Create a composed function from a list of function. Return function."""
-    if len(fns) == 0:
-        return None
-    return reduce(lambda f, g: lambda *args: f(g(*args)), fns)
-
-
-def make_header(grouping_keys: Sequence[str]) -> str:
-    header: str = "period\tname\ttid\t" + '\t'.join(v for v in grouping_keys)
-    return header
-
-
 class IDispatcher(abc.ABC):
-    def __init__(self, target, mode):
+    def __init__(self, target: str, mode: Literal['plain', 'zip', 'gzip', 'bz2', 'lzma']):
+        """Dispatches text blocks to a target zink.
+
+        Args:
+            target ([type]): Target filename or folder.
+            mode ([str]): Dispatch modifier.
+        """
         self.target = target
         self.document_data: List[dict] = []
         self.document_id: int = 0
@@ -229,17 +224,21 @@ class IDispatcher(abc.ABC):
 
     @abc.abstractmethod
     def open_target(self, target: Any) -> None:
+        """Open zink."""
         ...
 
     def close_target(self) -> None:
+        """Close zink."""
         self.dispatch_index()
 
     @abc.abstractmethod
     def dispatch_index(self) -> None:
+        """Dispatch an index of dispatched documents."""
         ...
 
     @abc.abstractmethod
     def dispatch(self, item: AggregateIterItem) -> None:
+        """Dispatch textblock to zink."""
         index_item: dict = item.to_dict()
         index_item['document_id'] = self.document_id
         self.document_id += 1
@@ -247,32 +246,38 @@ class IDispatcher(abc.ABC):
 
     @staticmethod
     def get_cls(mode: str) -> Type[IDispatcher]:
+        """Return dispatcher class for `mode`."""
         if mode.startswith('zip'):
             return ZipFileDispatcher
         return FolderDispatcher
 
 
 class FolderDispatcher(IDispatcher):
+    """Dispatch text to filesystem as single files (optionally compressed)"""
+
     def open_target(self, target: Any) -> None:
         os.makedirs(target, exist_ok=True)
 
     def dispatch(self, item: AggregateIterItem) -> None:
+        """Write text file to disk."""
         super().dispatch(item)
         self.store(f'{item.temporal_key}_{item.name}.txt', item.text)
 
     def dispatch_index(self) -> None:
+        """Write index of documents to disk."""
         csv_str: str = (
             pd.DataFrame(self.document_data).set_index('document_name', drop='false').rename_axis('').to_csv(sep='\t')
         )
         self.store('document_index.csv', csv_str)
 
     def store(self, filename: str, text: str) -> None:
+        """Store text to file."""
         path: str = os.path.join(self.target, f"{filename}")
         store_text(filename=path, text=text, mode=self.mode)
 
 
 def store_text(filename: str, text: str, mode: str) -> None:
-
+    """Stores a textfile on disk - optionally compressed"""
     modules = {'gzip': (gzip, 'gz'), 'bz2': (bz2, 'bz2'), 'lzma': (lzma, 'xz')}
 
     if mode in modules:
@@ -280,7 +285,7 @@ def store_text(filename: str, text: str, mode: str) -> None:
         with module.open(f"{filename}.{extension}", 'wb') as fp:
             fp.write(text.encode('utf-8'))
 
-    if mode == 'plain':
+    elif mode == 'plain':
         with open(filename, 'w', encoding='utf-8') as fp:
             fp.write(text)
 
@@ -288,11 +293,14 @@ def store_text(filename: str, text: str, mode: str) -> None:
 
 
 class ZipFileDispatcher(IDispatcher):
+    """Dispatch text to a single zip file."""
+
     def __init__(self, target, mode):
         self.zup: zipfile.ZipFile = None
         super().__init__(target, mode)
 
     def open_target(self, target: Any) -> None:
+        """Create and open a new zip file."""
         if os.path.isdir(target):
             raise ValueError("zip mode: target must be name of zip file (not folder)")
         self.zup = zipfile.ZipFile(  # pylint: disable=consider-using-with
@@ -300,14 +308,17 @@ class ZipFileDispatcher(IDispatcher):
         )
 
     def close_target(self) -> None:
+        """Close the zip file."""
         super().close_target()
         self.zup.close()
 
     def dispatch(self, item: AggregateIterItem) -> None:
+        """Write text to zip file."""
         super().dispatch(item)
         self.zup.writestr(f'{item.temporal_key}_{item.name}.txt', item.text)
 
     def dispatch_index(self) -> None:
+        """Write index of documents to zip file."""
         csv_str: str = (
             pd.DataFrame(self.document_data).set_index('document_name', drop='false').rename_axis('').to_csv(sep='\t')
         )
@@ -316,6 +327,16 @@ class ZipFileDispatcher(IDispatcher):
 
 class S3Dispatcher:
     ...
+
+
+def create_dehyphen(data_path: str) -> SwedishDehyphenatorService:
+    opts = dict(
+        word_frequency_filename=os.path.join(data_path, 'riksdagen-corpus-term-frequencies.pkl'),
+        whitelist_filename=os.path.join(data_path, 'dehyphen_whitelist.txt.gz'),
+        whitelist_log_filename=os.path.join(data_path, 'dehyphen_whitelist_log.pkl'),
+        unresolved_filename=os.path.join(data_path, 'dehyphen_unresolved.txt.gz'),
+    )
+    return SwedishDehyphenatorService.create_dehypen(*opts)
 
 
 def extract_corpus_text(
@@ -331,6 +352,7 @@ def extract_corpus_text(
     years: str = None,
     temporal_key: str = None,
     group_keys: Sequence[str] = None,
+    data_path: str = '.',
     **_,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
@@ -339,12 +361,11 @@ def extract_corpus_text(
     - 'year', 'lustrum', 'decade' or custom year periods given as comma separated string
 
     """
-    print(locals())
     source_index: SourceIndex = SourceIndex.load(source_folder=source_folder, years=years)
     member_index: ParliamentaryMemberIndex = ParliamentaryMemberIndex(f'{source_folder}/members_of_parliament.csv')
 
     preprocessor: Callable[[str], str] = compose(
-        ([dedent_text] if dedent else []) + ([dehyphen_text] if dehyphen else [])
+        ([dedent_text] if dedent else []) + ([create_dehyphen(data_path)] if dehyphen else [])
     )
 
     texts: iterators.IProtocolTextIterator = iterators.XmlProtocolTextIterator(
