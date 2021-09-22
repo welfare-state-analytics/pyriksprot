@@ -76,7 +76,7 @@ class XmlProtocolTextIterator(IProtocolTextIterator):
     """Iterate ParlaClarin XML files using `untangle` wrapper."""
 
     def load(self, filename: str) -> Iterable[ProtocolIterItem]:
-        """Load protocol from XML. Aggregate text to `level`. Return (name, who/speaker, id, text)."""
+        """Load protocol from XML. Aggregate text to `level`. Return sequence of ProtocolIterItem."""
         return XmlUntangleProtocol(data=filename, skip_size=self.skip_size).to_text(level=self.level)
 
     def map_futures(self, imap, args: List[Tuple[str, str, int]]):
@@ -88,7 +88,7 @@ def multiprocessing_load(args):
 
 
 class ProtocolTextIterator(IProtocolTextIterator):
-    """Reads xml files and returns a stream of (name, who, id, text)"""
+    """Reads xml files using Protocol entity and returns a stream of `ProtocolIterItem`"""
 
     def load(self, filename: str) -> List[Tuple[str, str, int]]:
         return ProtocolMapper.to_protocol(data=filename, skip_size=self.skip_size).to_text(
