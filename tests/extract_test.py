@@ -171,4 +171,8 @@ def test_aggregator_extract_gender_party_no_time_period():
     }
 
     pyriksprot.extract_corpus_text(**opts)
+
     assert os.path.isfile(target_filename)
+
+    os.unlink(target_filename)
+
