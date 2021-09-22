@@ -1,6 +1,8 @@
 import base64
 import glob
+import os
 import sys
+import uuid
 import zlib
 from typing import Iterable, List
 
@@ -123,7 +125,6 @@ def test_extract_corpus_text():
         'years': None,
         'temporal_key': None,
         'group_keys': None,
-        'create_index': False,
         '_': {},
     }
 
@@ -141,7 +142,6 @@ def test_extract_corpus_text():
         'years': '1920',
         'temporal_key': 'year',
         'group_keys': ('party', 'gender', 'who'),
-        'create_index': False,
         '_': {},
     }
 
@@ -151,46 +151,24 @@ def test_extract_corpus_text():
     pyriksprot.extract_corpus_text(**opts)
 
 
-def test_print_statement():
-    print("HEJ")
+def test_aggregator_extract_gender_party_no_time_period():
 
-    text: str = "Roger Mähler"
+    target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
+    opts = {
+        'source_folder': 'tests/test_data/source',
+        'target': target_filename,
+        'target_mode': 'zip',
+        'level': 'who',
+        'dedent': False,
+        'dehyphen': False,
+        'keep_order': False,
+        'skip_size': 1,
+        'processes': None,
+        'years': '1955-1965',
+        'temporal_key': 'protocol',
+        'group_keys': ('party', 'gender'),
+        '_': {},
+    }
 
-    text_base64 = base64.b64encode(zlib.compress(text.encode('utf-8')))
-
-    print(text_base64)
-
-    text2 = zlib.decompress(base64.b64decode(text_base64)).decode('utf-8')
-
-    print(sys.getsizeof(text))
-    print(sys.getsizeof(text_base64))
-
-    print(text2)
-
-
-def test_aggregator_extract_tags():
-
-    # filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
-    filenames: List[str] = ['tests/test_data/source/**/prot-1973--21.zip']
-
-    protocols: Iterable[model.Protocol] = (persist.load_protocol(filename) for filename in filenames)
-
-    with pytest.raises(persist.FileIsEmptyError):
-        for protocol in protocols:
-            print(protocol.name)
-
-    filenames: List[str] = glob.glob('tests/test_data/tagged/prot-*.zip', recursive=True)
-
-    # aggregator: TextAggregator = TextAggregator(
-    #     source_index=source_index,
-    #     member_index=member_index,
-    #     temporal_key='year',
-    #     grouping_keys=['party'],
-    # )
-
-    # assert aggregator is not None
-
-    # data: List[AggregateIterItem] = []
-    # for item in aggregator.aggregate(texts):
-    #     print(item)
-    #     data.append(item)
+    pyriksprot.extract_corpus_text(**opts)
+    assert os.path.isfile(target_filename)

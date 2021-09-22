@@ -4,6 +4,7 @@ import glob
 from dataclasses import asdict, dataclass
 from os.path import basename, dirname
 from os.path import join as jj
+from pyriksprot.interface import ProtocolIterItem
 from typing import List, Mapping, Optional, Set, Tuple
 
 import pandas as pd
@@ -29,9 +30,14 @@ class SourceIndexItem:
         self.subfolder = basename(dirname(self.path))
         self.year = self.to_year(basename(self.path))
 
-    def temporal_hashcode(self, temporal_key: str | Mapping[str, Tuple[int, int]]) -> str:
+    def temporal_hashcode(
+        self, temporal_key: str | Mapping[str, Tuple[int, int]], item: ProtocolIterItem = None
+    ) -> str:
 
         if isinstance(temporal_key, str):
+
+            if temporal_key in ['protocol', 'none']:
+                return item.name
 
             if temporal_key == 'year':
                 return str(self.year)

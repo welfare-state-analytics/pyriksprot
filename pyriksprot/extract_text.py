@@ -22,7 +22,7 @@ from .utility import compose
 from .utility import dedent as dedent_text
 from .utility import slugify
 
-TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom']
+TemporalKey = Literal[None, 'year', 'decade', 'lustrum', 'custom', 'protocol', 'none']
 GroupingKey = Literal[None, 'who', 'speech', 'party', 'gender', 'speaker']
 
 # pylint: disable=too-many-arguments
@@ -169,7 +169,7 @@ class TextAggregator:
             if source_item is None:
                 raise ValueError(f"source item not found: {item.name}")
 
-            temporal_hashcode: str = source_item.temporal_hashcode(self.temporal_key)
+            temporal_hashcode: str = source_item.temporal_hashcode(self.temporal_key, item)
             member: ParliamentaryMember = None if item.who is None else self.member_index[item.who]
 
             if current_temporal_hashcode != temporal_hashcode:
