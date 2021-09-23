@@ -4,10 +4,11 @@ import glob
 from dataclasses import asdict, dataclass
 from os.path import basename, dirname
 from os.path import join as jj
-from pyriksprot.interface import ProtocolIterItem
 from typing import List, Mapping, Optional, Set, Tuple
 
 import pandas as pd
+
+from pyriksprot.interface import ProtocolIterItem
 
 from . import utility
 
