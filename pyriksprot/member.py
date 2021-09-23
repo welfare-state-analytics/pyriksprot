@@ -66,6 +66,8 @@ class ParliamentaryMemberIndex:
 
         """Add entry for unknown speakers"""
         self.members['unknown'] = self.unknown
+        self.parties = self.members.party.unique()
+        self.chambers = self.members.chamber.unique()
 
     def __getitem__(self, key) -> ParliamentaryMember:
         if key is None:
