@@ -22,23 +22,23 @@ jj = os.path.join
 def test_protocol_texts_iterator_metadata(iterator_class):
 
     filenames = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
-    document_names = strip_path_and_extension(filenames)
+    expected_document_names = sorted(strip_path_and_extension(filenames))
 
     texts: Iterable[ProtocolIterItem] = list(
         iterator_class(filenames=filenames, level='protocol', skip_size=0, processes=None)
     )
 
     assert len(texts) == 6
-    assert [x.name for x in texts] == document_names
+    assert [x.name for x in texts] == expected_document_names
     assert all(x.who is None for x in texts)
-    assert [x.id for x in texts] == document_names
+    assert [x.id for x in texts] == expected_document_names
     assert all(x.page_number == '0' for x in texts)
 
 
 def test_xml_protocol_texts_iterator_texts():
 
     filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
-    document_names: List[str] = strip_path_and_extension(filenames)
+    expected_document_names: List[str] = sorted(strip_path_and_extension(filenames))
 
     texts: Iterable[ProtocolIterItem] = list(
         iterators.XmlProtocolTextIterator(filenames=filenames, level='protocol', skip_size=0, processes=None)
@@ -50,7 +50,7 @@ def test_xml_protocol_texts_iterator_texts():
     texts = list(
         iterators.XmlProtocolTextIterator(filenames=filenames, level='protocol', skip_size=0, processes=2, ordered=True)
     )
-    assert [x.name for x in texts] == document_names
+    assert [x.name for x in texts] == expected_document_names
 
     texts = list(iterators.XmlProtocolTextIterator(filenames=filenames, level='protocol', skip_size=1, processes=None))
     assert len(texts) == 6
