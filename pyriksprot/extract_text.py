@@ -320,8 +320,10 @@ class ZipFileDispatcher(IDispatcher):
 
     def dispatch_index(self) -> None:
         """Write index of documents to zip file."""
+        if len(self.document_data) == 0:
+            return
         csv_str: str = (
-            pd.DataFrame(self.document_data).set_index('document_name', drop='false').rename_axis('').to_csv(sep='\t')
+            pd.DataFrame(self.document_data).set_index('document_name', drop=False).rename_axis('').to_csv(sep='\t')
         )
         self.zup.writestr('document_index.csv', csv_str)
 
