@@ -127,6 +127,8 @@ def load_protocols(source: str | List, file_pattern: str = 'prot-*.zip') -> Iter
 
 
 def validate_checksum(filename: str, checksum: str) -> bool:
+    if not os.path.isfile(filename):
+        return False
     metadata: dict = load_metadata(filename)
     if metadata is None:
         return False
