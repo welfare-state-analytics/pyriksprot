@@ -33,6 +33,14 @@ tidy-to-git: guard-clean-working-repository tidy
 		@git push
 	fi
 
+doc:
+	@poetry run pdoc pyriksprot
+
+doc3:
+	@poetry run pdoc --html --force --output-dir docs pyriksprot
+	@poetry run mv docs/pyriksprot/* docs
+	@poetry run rmdir docs/pyriksprot
+
 test: output-dir
 	@poetry run pytest $(PYTEST_ARGS) tests
 	@rm -rf ./tests/output/*
@@ -42,6 +50,9 @@ output-dir:
 
 retest:
 	@poetry run pytest $(PYTEST_ARGS) --last-failed tests
+
+test-readme:
+	@poetry run pytest --codeblocks
 
 init: tools
 	@poetry install
