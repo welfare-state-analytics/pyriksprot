@@ -1,15 +1,12 @@
-import base64
 import glob
 import os
-import sys
 import uuid
-import zlib
 from typing import Iterable, List
 
 import pytest
 
 import pyriksprot
-from pyriksprot import iterators, model, persist
+from pyriksprot import iterators
 from pyriksprot.extract_text import (
     AggregateIterItem,
     ParliamentaryMemberIndex,
@@ -22,8 +19,8 @@ from pyriksprot.interface import ProtocolIterItem
 # pylint: disable=redefined-outer-name
 
 
-TEST_CORPUS_FOLDER = '/data/riksdagen_corpus_data/riksdagen-corpus/corpus'
-# TEST_CORPUS_FOLDER ='tests/test_data/source'
+# TEST_CORPUS_FOLDER = '/data/riksdagen_corpus_data/riksdagen-corpus/corpus'
+TEST_CORPUS_FOLDER = 'tests/test_data/source'
 
 
 @pytest.fixture
@@ -75,16 +72,6 @@ def test_parliamentary_index():
     assert len(member_index.members) > 0
 
 
-# @pytest.mark.parametrize(
-#     'iterator_class',
-#     [
-#         iterators.ProtocolTextIterator,
-#         iterators.XmlProtocolTextIterator,
-#         iterators.XmlIterProtocolTextIterator,
-#     ],
-# )
-
-
 def test_aggregator_aggregate(source_index, member_index):
 
     # filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
@@ -111,44 +98,62 @@ def test_aggregator_aggregate(source_index, member_index):
     assert len(data) > 0
 
 
-def test_extract_corpus_text():
-
-    default_opts = {
-        'source_folder': 'tests/test_data/source',
-        'target': 'tests/output/',
-        'level': 'speaker',
-        'dedent': False,
-        'dehyphen': False,
-        'keep_order': False,
-        'skip_size': 1,
-        'processes': None,
-        'years': None,
-        'temporal_key': None,
-        'group_keys': None,
-        '_': {},
-    }
-
-    opts = {**default_opts, **dict(temporal_key='year', group_keys=['party'])}
+def test_extract_corpus_text_yearly_grouped():
 
     opts = {
-        'source_folder': '/data/riksdagen_corpus_data/riksdagen-corpus/corpus',
-        'target': '.',
+        'source_folder': 'tests/test_data/source',
+        'target': f'tests/output/{uuid.uuid1()}.zip',
+        'target_mode': 'zip',
         'level': 'speaker',
-        'dedent': False,
-        'dehyphen': False,
-        'keep_order': False,
-        'skip_size': 1,
-        'processes': None,
-        'years': '1920',
+        'years': None,
         'temporal_key': 'year',
-        'group_keys': ('party', 'gender', 'who'),
-        '_': {},
+        'group_keys': ['party'],
     }
 
     pyriksprot.extract_corpus_text(**opts)
 
-    opts = {**default_opts, **dict(years='1920')}
+    assert os.path.isfile(opts['target'])
+
+    os.unlink(opts['target'])
+
+
+# @pytest.mark.xfail
+def test_extract_corpus_with_no_temporal_key():
+
+    opts = {
+        'source_folder': 'tests/test_data/source',
+        'target': f'tests/output/{uuid.uuid1()}.zip',
+        'target_mode': 'zip',
+        'level': 'speaker',
+        'years': None,
+        'temporal_key': None,
+        'group_keys': ['party'],
+    }
+
     pyriksprot.extract_corpus_text(**opts)
+
+    assert os.path.isfile(opts['target'])
+
+    os.unlink(opts['target'])
+
+
+def test_extract_corpus_with_no_matching_protocols():
+
+    opts = {
+        'source_folder': 'tests/test_data/source',
+        'target': f'tests/output/{uuid.uuid1()}.zip',
+        'target_mode': 'zip',
+        'level': 'speaker',
+        'years': '1900',
+        'temporal_key': 'year',
+        'group_keys': ['party'],
+    }
+
+    pyriksprot.extract_corpus_text(**opts)
+
+    assert os.path.isfile(opts['target'])
+
+    os.unlink(opts['target'])
 
 
 def test_aggregator_extract_gender_party_no_time_period():
@@ -175,4 +180,3 @@ def test_aggregator_extract_gender_party_no_time_period():
     assert os.path.isfile(target_filename)
 
     os.unlink(target_filename)
-
