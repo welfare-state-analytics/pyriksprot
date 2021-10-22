@@ -102,7 +102,7 @@ def ts_data_path(directory: str, filename: str):
 
 def data_path_ts(directory: str, path: str):
     name, extension = splitext(path)
-    return jj(directory, '{}_{}{}'.format(name, time.strftime("%Y%m%d%H%M"), extension))
+    return jj(directory, f'{name}_{time.strftime("%Y%m%d%H%M")}{extension}')
 
 
 def path_add_sequence(path: str, i: int, j: int = 0) -> str:
@@ -286,7 +286,7 @@ def parse_range_list(rl):
         if len(parts) == 0:
             return range(0, 0)
         if len(parts) > 2:
-            raise ValueError("Invalid range: {}".format(r))
+            raise ValueError(f"Invalid range: {r}")
         return range(parts[0], parts[-1] + 1)
 
     ranges = sorted(set(map(parse_range, rl.split(","))), key=lambda x: (x.start, x.stop))

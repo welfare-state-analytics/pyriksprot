@@ -30,7 +30,7 @@ from os.path import dirname
 from os.path import join as jj
 from typing import List
 
-# pylint: disable=no-else-continue, attribute-defined-outside-init
+# pylint: disable=no-else-continue, attribute-defined-outside-init consider-using-f-string
 
 MODEL_FILENAME: str = jj(dirname(__file__), "bettertokenizer.sv")
 SALDO_TOKENS_FILENAME: str = jj(dirname(__file__), "bettertokenizer.sv.saldo-tokens")

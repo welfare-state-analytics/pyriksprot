@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# pylint: disable=no-else-continue, attribute-defined-outside-init consider-using-f-string
+
 """
  untangle
 

@@ -33,14 +33,14 @@ def pretokenize(text: str) -> str:
     return ' '.join(default_tokenize(text))
 
 
-jinja_env = Environment(
+JINJA_ENV = Environment(
     loader=PackageLoader('pyriksprot.resources', 'templates'),
     autoescape=select_autoescape(['html', 'xml']),
     trim_blocks=True,
     lstrip_blocks=True,
 )
-jinja_env.filters['dedent'] = dedent
-jinja_env.filters['dehyphen'] = dehyphen
+JINJA_ENV.filters['dedent'] = dedent
+JINJA_ENV.filters['dehyphen'] = dehyphen
 
 
 class ProtocolConverter:
@@ -52,13 +52,12 @@ class ProtocolConverter:
         Args:
             template (Union[str, Template]): Jinja template.
         """
-        global jinja_env
 
         if not template.endswith(".jinja"):
             template += ".jinja"
 
         if isinstance(template, str):
-            template = jinja_env.get_template(template)
+            template = JINJA_ENV.get_template(template)
 
         self.template: Template = template
 
