@@ -319,12 +319,12 @@ def test_speech_annotation():
         ("prot-1933--fk--5.xml", 1, 1, 'chain'),
         ("prot-1933--fk--5.xml", 1, 1, 'n'),
         ("prot-1933--fk--5.xml", 1, 1, 'who'),
-        ("prot-1955--ak--22.xml", 224, 224, 'chain'),
-        ("prot-1955--ak--22.xml", 38, 38, 'n'),
-        ("prot-1955--ak--22.xml", 38, 38, 'who'),
-        ('prot-199192--127.xml', 206, 206, 'chain'),
-        ('prot-199192--127.xml', 51, 51, 'n'),
-        ('prot-199192--127.xml', 51, 51, 'who'),
+        ("prot-1955--ak--22.xml", 223, 224, 'chain'),
+        ("prot-1955--ak--22.xml", 39, 39, 'n'),
+        ("prot-1955--ak--22.xml", 39, 39, 'who'),
+        ('prot-199192--127.xml', 205, 205, 'chain'),
+        ('prot-199192--127.xml', 53, 53, 'n'),
+        ('prot-199192--127.xml', 53, 53, 'who'),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(
