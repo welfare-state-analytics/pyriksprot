@@ -42,12 +42,13 @@ def test_create_grouping_hashcoder(
     source_index: corpus_index.CorpusSourceIndex, member_index: member.ParliamentaryMemberIndex
 ):
 
-    attributes = ['who', 'gender']
+    attributes = [interface.SegmentLevel.Who, interface.GroupingKey.Gender]
     hashcoder = merge.create_grouping_hashcoder(attributes)
 
     assert callable(hashcoder)
 
     item: interface.ProtocolSegment = interface.ProtocolSegment(
+        content_type=interface.ContentType.TaggedFrame,
         id="a",
         name="apa",
         page_number="0",
@@ -73,15 +74,14 @@ def test_segment_merger_merge(source_index, member_index):
     filenames: List[str] = glob.glob(f'{TEST_CORPUS_FOLDER}/**/prot-*.xml', recursive=True)
 
     texts: Iterable[interface.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
-        filenames=filenames, segment_level='who', segment_skip_size=0, multiproc_processes=None
+        filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=0, multiproc_processes=None
     )
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
-        content_type='text',
         source_index=source_index,
         member_index=member_index,
-        temporal_key='year',
-        grouping_keys=['party'],
+        temporal_key=interface.TemporalKey.Year,
+        grouping_keys=[interface.GroupingKey.Party],
     )
 
     assert merger is not None
@@ -99,10 +99,10 @@ def test_extract_corpus_text_yearly_grouped_by_party():
         'source_folder': 'tests/test_data/source',
         'target_name': f'tests/output/{uuid.uuid1()}.zip',
         'target_type': 'zip',
-        'segment_level': 'who',
+        'segment_level': interface.SegmentLevel.Who,
         'years': None,
-        'temporal_key': 'year',
-        'group_keys': ['party'],
+        'temporal_key': interface.TemporalKey.Year,
+        'group_keys': [interface.GroupingKey.Party],
     }
 
     parlaclarin.extract_corpus_text(**opts)
@@ -119,10 +119,10 @@ def test_extract_corpus_with_no_temporal_key():
         'source_folder': 'tests/test_data/source',
         'target_name': f'tests/output/{uuid.uuid1()}.zip',
         'target_type': 'zip',
-        'segment_level': 'who',
+        'segment_level': interface.SegmentLevel.Who,
         'years': None,
         'temporal_key': None,
-        'group_keys': ['party'],
+        'group_keys': [interface.GroupingKey.Party],
     }
 
     parlaclarin.extract_corpus_text(**opts)
@@ -138,10 +138,10 @@ def test_extract_corpus_with_no_matching_protocols():
         'source_folder': 'tests/test_data/source',
         'target_name': f'tests/output/{uuid.uuid1()}.zip',
         'target_type': 'zip',
-        'segment_level': 'who',
+        'segment_level': interface.SegmentLevel.Who,
         'years': '1900',
-        'temporal_key': 'year',
-        'group_keys': ['party'],
+        'temporal_key': interface.TemporalKey.Year,
+        'group_keys': [interface.GroupingKey.Party],
     }
 
     parlaclarin.extract_corpus_text(**opts)
@@ -158,9 +158,9 @@ def test_aggregator_extract_gender_party_no_temporal_key():
         'source_folder': 'tests/test_data/source',
         'target_name': target_filename,
         'target_type': 'zip',
-        'segment_level': 'who',
+        'segment_level': interface.SegmentLevel.Who,
         'temporal_key': None,
-        'group_keys': ('party', 'gender'),
+        'group_keys': (interface.GroupingKey.Party, interface.GroupingKey.Gender),
         'years': '1955-1965',
         'segment_skip_size': 1,
         'multiproc_keep_order': False,

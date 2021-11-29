@@ -23,7 +23,7 @@ from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
-from typing import Any, Callable, List, Sequence, Set, TypeVar
+from typing import Any, Callable, List, Literal, Sequence, Set, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -375,17 +375,17 @@ def merge_tagged_csv(csv_strings: List[str], sep: str = '\n') -> str:
     return sep.join(texts)
 
 
-def store_to_compressed_file(filename: str, text: str, mode: str) -> None:
+def store_to_compressed_file(filename: str, text: str, target_type: Literal['plain', 'gzip', 'bz2', 'lzma']) -> None:
     """Stores a textfile on disk - optionally compressed"""
     modules = {'gzip': (gzip, 'gz'), 'bz2': (bz2, 'bz2'), 'lzma': (lzma, 'xz')}
 
-    if mode in modules:
-        module, extension = modules[mode]
+    if target_type in modules:
+        module, extension = modules[str(target_type)]
         with module.open(f"{filename}.{extension}", 'wb') as fp:
             fp.write(text.encode('utf-8'))
 
-    elif mode == 'plain':
+    elif target_type == 'plain':
         with open(filename, 'w', encoding='utf-8') as fp:
             fp.write(text)
 
-    raise ValueError(f"unknown mode {mode}")
+    raise ValueError(f"unknown mode {target_type}")

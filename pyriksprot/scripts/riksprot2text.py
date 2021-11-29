@@ -3,9 +3,9 @@ from inspect import currentframe, getargvalues
 from typing import Sequence
 
 import click
+
 from pyriksprot.dispatch import TargetType
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
-
 from pyriksprot.parlaclarin import extract
 
 sys.path.append(".")

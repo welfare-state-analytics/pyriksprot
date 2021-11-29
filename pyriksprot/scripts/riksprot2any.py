@@ -3,9 +3,9 @@ from inspect import currentframe, getargvalues
 from typing import Sequence
 
 import click
+
 from pyriksprot.dispatch import TargetType
 from pyriksprot.interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
-
 from pyriksprot.tagged_corpus import extract
 
 sys.path.append(".")
@@ -21,17 +21,17 @@ def get_kwargs():
 """
 Extract an aggregated subset of a tagged ParlaCLARIN corpus.
 """
-LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
-MODES = ['plain', 'zip', 'gzip', 'bz2', 'lzma']
-CONTENT = ['text', 'tagged_text']
+SEGMENT_LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
+TARGET_TYPES = [e.value for e in TargetType]
+CONTENT_TYPES = [e.value for e in ContentType]
 
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.option('--target-type', default='zip', type=click.Choice(MODES), help='Target type')
-@click.option('--content-type', default='tagged_text', type=click.Choice(CONTENT), help='Content type to extract')
-@click.option('--segment-level', default='who', type=click.Choice(LEVELS), help='Protocol iterate level')
+@click.option('--target-type', default='zip', type=click.Choice(TARGET_TYPES), help='Target type')
+@click.option('--content-type', default='tagged_text', type=click.Choice(CONTENT_TYPES), help='Content type to extract')
+@click.option('--segment-level', default='who', type=click.Choice(SEGMENT_LEVELS), help='Protocol iterate level')
 @click.option('--segment-skip-size', default=1, type=click.IntRange(1, 1024), help='Skip smaller than threshold')
 @click.option('--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
 @click.option('--group-key', help='Partition key(s)', multiple=True, type=click.STRING)

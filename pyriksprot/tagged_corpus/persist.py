@@ -5,7 +5,7 @@ import glob
 import json
 import os
 import zipfile
-from typing import Iterable, List, Literal, Optional
+from typing import Iterable, List, Optional
 
 from pyriksprot.utility import is_empty, strip_paths
 
@@ -14,11 +14,12 @@ from .. import interface
 CHECKSUM_FILENAME: str = 'sha1_checksum.txt'
 METADATA_FILENAME: str = 'metadata.json'
 
-StorageFormat = Literal['csv', 'json']
-
 
 def store_protocol(
-    output_filename: str, protocol: interface.Protocol, checksum: str, storage_format: StorageFormat = 'json'
+    output_filename: str,
+    protocol: interface.Protocol,
+    checksum: str,
+    storage_format: interface.StorageFormat = interface.StorageFormat.JSON,
 ) -> None:
     """Store tagged protocol in `output_filename`, with metadata."""
 
@@ -29,11 +30,11 @@ def store_protocol(
             metadata: dict = dict(name=protocol.name, date=protocol.date, checksum=checksum)
             fp.writestr(METADATA_FILENAME, json.dumps(metadata, indent=4))
 
-            if storage_format == 'csv':
+            if storage_format == interface.StorageFormat.CSV:
                 utterances_csv_str: str = protocol.to_csv()
                 fp.writestr(f'{protocol.name}.csv', utterances_csv_str or "")
 
-            elif storage_format == 'json':
+            elif storage_format == interface.StorageFormat.JSON:
                 utterances_json_str: str = protocol.to_json()
                 fp.writestr(f'{protocol.name}.json', utterances_json_str or "")
 

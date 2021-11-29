@@ -64,45 +64,54 @@ def test_xml_protocol_texts_iterator_texts():
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level='protocol', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames, segment_level=None, segment_skip_size=1, multiproc_processes=None
         )
     )
     assert len(texts) == 6
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level='speech', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames,
+            segment_level=interface.SegmentLevel.Speech,
+            segment_skip_size=1,
+            multiproc_processes=None,
         )
     )
     assert len(texts) == 110
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level='who', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
     assert len(texts) == 110
 
     texts1 = list(
         parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level='utterance', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames,
+            segment_level=interface.SegmentLevel.Utterance,
+            segment_skip_size=1,
+            multiproc_processes=None,
         )
     )
     texts2 = list(
         parlaclarin.XmlSaxSegmentIterator(
-            filenames=filenames, segment_level='utterance', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames,
+            segment_level=interface.SegmentLevel.Utterance,
+            segment_skip_size=1,
+            multiproc_processes=None,
         )
     )
     assert all(''.join(texts1[i].data.split()) == ''.join(texts2[i].data.split()) for i in range(0, len(texts1)))
 
     texts1 = list(
         parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level='who', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
     texts2 = list(
         parlaclarin.XmlSaxSegmentIterator(
-            filenames=filenames, segment_level='who', segment_skip_size=1, multiproc_processes=None
+            filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
     assert all(''.join(texts1[i].data.split()) == ''.join(texts2[i].data.split()) for i in range(0, len(texts1)))
@@ -114,6 +123,7 @@ def test_xml_protocol_texts_iterator_texts():
 EXPECTED_STREAM = {
     'protocol': [
         interface.ProtocolSegment(
+            interface.ContentType.Text,
             'prot-1958-fake',
             None,
             'prot-1958-fake',
@@ -121,6 +131,7 @@ EXPECTED_STREAM = {
             '0',
         ),
         interface.ProtocolSegment(
+            interface.ContentType.Text,
             'prot-1960-fake',
             None,
             'prot-1960-fake',
@@ -129,34 +140,74 @@ EXPECTED_STREAM = {
         ),
     ],
     'speech': [
-        interface.ProtocolSegment('prot-1958-fake', 'A', 'c01', 'Hej! Detta är en mening.', '0'),
-        interface.ProtocolSegment('prot-1958-fake', 'A', 'c02', 'Jag heter Ove.\nVad heter du?', '0'),
-        interface.ProtocolSegment('prot-1958-fake', 'B', 'c03', 'Jag heter Adam.\nOve är dum.', '1'),
-        interface.ProtocolSegment('prot-1960-fake', 'A', 'c01', 'Herr Talman! Jag talar.', '0'),
-        interface.ProtocolSegment('prot-1960-fake', 'A', 'c02', 'Det regnar ute.\nVisste du det?', '0'),
-        interface.ProtocolSegment('prot-1960-fake', 'B', 'c03', 'Jag håller med.\nTalmannen är snäll.', '1'),
-        interface.ProtocolSegment('prot-1960-fake', 'C', 'c04', 'Jag håller också med.', '1'),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1958-fake', 'A', 'c01', 'Hej! Detta är en mening.', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1958-fake', 'A', 'c02', 'Jag heter Ove.\nVad heter du?', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1958-fake', 'B', 'c03', 'Jag heter Adam.\nOve är dum.', '1'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'A', 'c01', 'Herr Talman! Jag talar.', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'A', 'c02', 'Det regnar ute.\nVisste du det?', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'B', 'c03', 'Jag håller med.\nTalmannen är snäll.', '1'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'C', 'c04', 'Jag håller också med.', '1'
+        ),
     ],
     'who': [
         interface.ProtocolSegment(
-            'prot-1958-fake', 'A', 'A', 'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?', '0'
+            interface.ContentType.Text,
+            'prot-1958-fake',
+            'A',
+            'A',
+            'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
+            '0',
         ),
-        interface.ProtocolSegment('prot-1958-fake', 'B', 'B', 'Jag heter Adam.\nOve är dum.', '1'),
         interface.ProtocolSegment(
-            'prot-1960-fake', 'A', 'A', 'Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?', '0'
+            interface.ContentType.Text, 'prot-1958-fake', 'B', 'B', 'Jag heter Adam.\nOve är dum.', '1'
         ),
-        interface.ProtocolSegment('prot-1960-fake', 'B', 'B', 'Jag håller med.\nTalmannen är snäll.', '1'),
-        interface.ProtocolSegment('prot-1960-fake', 'C', 'C', 'Jag håller också med.', '1'),
+        interface.ProtocolSegment(
+            interface.ContentType.Text,
+            'prot-1960-fake',
+            'A',
+            'A',
+            'Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?',
+            '0',
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'B', 'B', 'Jag håller med.\nTalmannen är snäll.', '1'
+        ),
+        interface.ProtocolSegment(interface.ContentType.Text, 'prot-1960-fake', 'C', 'C', 'Jag håller också med.', '1'),
     ],
     'utterance': [
-        interface.ProtocolSegment('prot-1958-fake', 'A', 'i-1', 'Hej! Detta är en mening.', '0'),
-        interface.ProtocolSegment('prot-1958-fake', 'A', 'i-2', 'Jag heter Ove.\nVad heter du?', '0'),
-        interface.ProtocolSegment('prot-1958-fake', 'B', 'i-3', 'Jag heter Adam.', '1'),
-        interface.ProtocolSegment('prot-1958-fake', 'B', 'i-4', 'Ove är dum.', '1'),
-        interface.ProtocolSegment('prot-1960-fake', 'A', 'i-1', 'Herr Talman! Jag talar.', '0'),
-        interface.ProtocolSegment('prot-1960-fake', 'A', 'i-2', 'Det regnar ute.\nVisste du det?', '0'),
-        interface.ProtocolSegment('prot-1960-fake', 'B', 'i-3', 'Jag håller med.\nTalmannen är snäll.', '1'),
-        interface.ProtocolSegment('prot-1960-fake', 'C', 'i-4', 'Jag håller också med.', '1'),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1958-fake', 'A', 'i-1', 'Hej! Detta är en mening.', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1958-fake', 'A', 'i-2', 'Jag heter Ove.\nVad heter du?', '0'
+        ),
+        interface.ProtocolSegment(interface.ContentType.Text, 'prot-1958-fake', 'B', 'i-3', 'Jag heter Adam.', '1'),
+        interface.ProtocolSegment(interface.ContentType.Text, 'prot-1958-fake', 'B', 'i-4', 'Ove är dum.', '1'),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'A', 'i-1', 'Herr Talman! Jag talar.', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'A', 'i-2', 'Det regnar ute.\nVisste du det?', '0'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'B', 'i-3', 'Jag håller med.\nTalmannen är snäll.', '1'
+        ),
+        interface.ProtocolSegment(
+            interface.ContentType.Text, 'prot-1960-fake', 'C', 'i-4', 'Jag håller också med.', '1'
+        ),
     ],
 }
 
@@ -188,10 +239,10 @@ def test_protocol_texts_iterator(iterator_class):
 @pytest.mark.parametrize(
     'segment_level',
     [
-        'protocol',
-        'speech',
-        'who',
-        'utterance',
+        interface.SegmentLevel.Protocol,
+        interface.SegmentLevel.Speech,
+        interface.SegmentLevel.Who,
+        interface.SegmentLevel.Utterance,
     ],
 )
 def test_protocol_texts_iterator_levels_compare(segment_level):
@@ -218,18 +269,18 @@ def test_protocol_texts_iterator_levels_compare(segment_level):
 @pytest.mark.parametrize(
     'iterator_class, segment_level',
     [
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, 'protocol'),
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, 'speech'), # FIXME! Chain not working!!!!
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, 'who'),
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, 'utterance'),
-        (parlaclarin.XmlUntangleSegmentIterator, 'protocol'),
-        (parlaclarin.XmlUntangleSegmentIterator, 'speech'),
-        (parlaclarin.XmlUntangleSegmentIterator, 'who'),
-        (parlaclarin.XmlUntangleSegmentIterator, 'utterance'),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, 'protocol'),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, 'speech'),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, 'who'),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, 'utterance'),
+        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Protocol),
+        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Speech), # FIXME! Chain not working!!!!
+        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Who),
+        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Utterance),
+        (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Protocol),
+        (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Speech),
+        (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Who),
+        (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Utterance),
+        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Protocol),
+        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Speech),
+        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Who),
+        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Utterance),
     ],
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):

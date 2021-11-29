@@ -84,13 +84,13 @@ class XmlProtocol(abc.ABC):
 
             name: str = self.name
 
-            if segment_level == 'protocol':
+            if segment_level in [interface.SegmentLevel.Protocol, None]:
 
                 items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(interface.ContentType.Text,name, None, name, self.text, '0')
+                    interface.ProtocolSegment(interface.ContentType.Text, name, None, name, self.text, '0')
                 ]
 
-            elif segment_level == 'who':
+            elif segment_level == interface.SegmentLevel.Who:
 
                 data, page_numbers = defaultdict(list), {}
                 for u in self.utterances:
@@ -99,11 +99,13 @@ class XmlProtocol(abc.ABC):
                         page_numbers[u.who] = u.page_number
 
                 items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(interface.ContentType.Text, name, who, who, '\n'.join(data[who]), str(page_numbers[who]))
+                    interface.ProtocolSegment(
+                        interface.ContentType.Text, name, who, who, '\n'.join(data[who]), str(page_numbers[who])
+                    )
                     for who in data
                 ]
 
-            elif segment_level == 'speech':
+            elif segment_level == interface.SegmentLevel.Speech:
 
                 data, who, page_numbers = defaultdict(list), {}, {}
                 for u in self.utterances:
@@ -113,19 +115,27 @@ class XmlProtocol(abc.ABC):
                         page_numbers[u.n] = u.page_number
 
                 items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(interface.ContentType.Text,name, who[n], n, '\n'.join(data[n]), str(page_numbers[n])) for n in data
+                    interface.ProtocolSegment(
+                        interface.ContentType.Text, name, who[n], n, '\n'.join(data[n]), str(page_numbers[n])
+                    )
+                    for n in data
                 ]
 
-            elif segment_level == 'utterance':
+            elif segment_level == interface.SegmentLevel.Utterance:
 
                 items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(interface.ContentType.Text,name, u.who, u.u_id, u.text, str(u.page_number)) for u in self.utterances
+                    interface.ProtocolSegment(
+                        interface.ContentType.Text, name, u.who, u.u_id, u.text, str(u.page_number)
+                    )
+                    for u in self.utterances
                 ]
 
-            elif segment_level == 'paragraph':
+            elif segment_level == interface.SegmentLevel.Paragraph:
 
                 items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(interface.ContentType.Text,name, u.who, f"{u.u_id}@{i}", p, str(u.page_number))
+                    interface.ProtocolSegment(
+                        interface.ContentType.Text, name, u.who, f"{u.u_id}@{i}", p, str(u.page_number)
+                    )
                     for u in self.utterances
                     for i, p in enumerate(u.paragraphs)
                 ]

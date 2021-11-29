@@ -38,8 +38,8 @@ def extract_corpus_text(
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
 
-    Temporal key kan be any of None, 'year', 'lustrum', 'decade' or custom year periods
-    - 'year', 'lustrum', 'decade' or custom year periods given as comma separated string
+    Temporal key kan be any of None, 'Year', 'Lustrum', 'Decade' or custom year periods
+    - 'Year', 'Lustrum', 'Decade' or custom year periods given as comma separated string
 
 
     Args:
@@ -80,14 +80,13 @@ def extract_corpus_text(
     )
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
-        content_type='text',  # always text, no annotations in XML files
         source_index=source_index,
         member_index=member_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )
 
-    with dispatch.IDispatcher.get_cls(target_type)(target_name, target_type, content_type='text') as dispatcher:
+    with dispatch.IDispatcher.get_cls(target_type)(target_name, target_type) as dispatcher:
         for item in merger.merge(segments):
             dispatcher.dispatch(item)
 

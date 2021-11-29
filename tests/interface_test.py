@@ -132,7 +132,7 @@ def test_protocol_preprocess():
         ),
         (
             interface.MergeSpeechByChain,
-            'chain',
+            interface.MergeSpeechStrategyType.Chain,
             3,
             [{'A'}, {'B'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-4', 'i-5'],
@@ -145,7 +145,7 @@ def test_protocol_preprocess():
         ),
         (
             interface.MergeSpeechByWhoSequence,
-            'who_sequence',
+            interface.MergeSpeechStrategyType.WhoSequence,
             2,
             [{'A'}, {'B'}, {'A'}],
             ['A', 'B', 'A'],
@@ -244,15 +244,15 @@ def test_speech_annotation():
 @pytest.mark.parametrize(
     'filename, speech_count, non_empty_speech_count, strategy',
     [
-        ("prot-1933--fk--5.xml", 1, 1, 'chain'),
-        ("prot-1933--fk--5.xml", 1, 1, 'who'),
-        ("prot-1933--fk--5.xml", 1, 1, 'who_sequence'),
-        ("prot-1955--ak--22.xml", 223, 223, 'chain'),
-        ("prot-1955--ak--22.xml", 39, 39, 'who'),
-        ("prot-1955--ak--22.xml", 115, 115, 'who_sequence'),
-        ('prot-199192--127.xml', 205, 205, 'chain'),
-        ('prot-199192--127.xml', 53, 53, 'who'),
-        ('prot-199192--127.xml', 53, 53, 'who_sequence'),
+        ("prot-1933--fk--5.xml", 1, 1, interface.MergeSpeechStrategyType.Chain),
+        ("prot-1933--fk--5.xml", 1, 1, interface.MergeSpeechStrategyType.Who),
+        ("prot-1933--fk--5.xml", 1, 1, interface.MergeSpeechStrategyType.WhoSequence),
+        ("prot-1955--ak--22.xml", 223, 223, interface.MergeSpeechStrategyType.Chain),
+        ("prot-1955--ak--22.xml", 39, 39, interface.MergeSpeechStrategyType.Who),
+        ("prot-1955--ak--22.xml", 115, 115, interface.MergeSpeechStrategyType.WhoSequence),
+        ('prot-199192--127.xml', 205, 205, interface.MergeSpeechStrategyType.Chain),
+        ('prot-199192--127.xml', 53, 53, interface.MergeSpeechStrategyType.Who),
+        ('prot-199192--127.xml', 53, 53, interface.MergeSpeechStrategyType.WhoSequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(
@@ -294,12 +294,12 @@ def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
     data = untangle.parse(path)
 
     protocol = parlaclarin.ProtocolMapper.to_protocol(data, segment_skip_size=0)
-    speeches = protocol.to_speeches(merge_strategy='who_sequence')
+    speeches = protocol.to_speeches(merge_strategy=interface.MergeSpeechStrategyType.WhoSequence)
     assert len(speeches) != expected_speech_count, "speech length"
 
 
-@pytest.mark.parametrize('storage_format', ['json', 'csv'])
-def test_store_protocols(storage_format: str):
+@pytest.mark.parametrize('storage_format', [interface.StorageFormat.JSON, interface.StorageFormat.CSV])
+def test_store_protocols(storage_format: interface.StorageFormat):
     protocol: interface.Protocol = interface.Protocol(
         name='prot-1958-fake',
         date='1958',
@@ -372,11 +372,14 @@ def test_protocol_to_items():
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
     assert len(protocol.utterances) == 5
 
-    items = protocol.to_segments(content_type='text', segment_level='who')
+    items = protocol.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
     assert len(items) == len(set(d.who for d in protocol.utterances))
 
 
 def test_protocols_to_items():
     filenames: List[str] = glob.glob('tests/test_data/tagged/prot-*.zip', recursive=True)
     protocols: List[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
-    _ = itertools.chain(p.to_segments(content_type='text', segment_level='who') for p in protocols)
+    _ = itertools.chain(
+        p.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
+        for p in protocols
+    )

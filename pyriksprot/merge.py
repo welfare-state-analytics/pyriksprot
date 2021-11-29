@@ -36,7 +36,7 @@ class MergedSegmentGroup:
 
     @property
     def data(self):
-        if self.content_type == 'tagged_text':
+        if self.content_type == interface.ContentType.TaggedFrame:
             return utility.merge_tagged_csv(self.category_items, sep='\n')
         return '\n'.join(self.category_items)
 
@@ -60,7 +60,7 @@ class MergedSegmentGroup:
 
     @property
     def extension(self) -> str:
-        return 'txt' if self.content_type == 'text' else 'csv'
+        return 'txt' if self.content_type == interface.ContentType.Text else 'csv'
 
     def to_dict(self):
         return {
@@ -83,7 +83,7 @@ class SegmentMerger:
     Temporal aggregation is performed before group aggregation.
     This reducer assumes that data is sorted by the temporal key.
 
-    The temporal key can be None, 'year', 'lustrum', 'decade' or 'custom'.
+    The temporal key can be None, Year, Lustrum, Decade or Custom.
     Temporal value is a tuple (from-year, to-year)
 
     NOTE! if multiprocessing, then all items belonging to same temporal category
@@ -103,7 +103,7 @@ class SegmentMerger:
         Args:
             source_index (corpus_index.CorpusSourceIndex): Source item index.
             member_index (member.ParliamentaryMemberIndex): Parliamentar member index.
-            temporal_key (interface.TemporalKey): Temporal key Noe, 'year', 'decade', 'lustrum', 'custom', 'protocol'
+            temporal_key (interface.TemporalKey): Temporal key Noe, 'Year', 'Decade', 'Lustrum', 'Custom', 'Protocol', None
             grouping_keys (Sequence[interface.GroupingKey]): Grouping within temporal key
         """
         self.source_index: corpus_index.CorpusSourceIndex = source_index
@@ -126,7 +126,7 @@ class SegmentMerger:
         if len(grouping_keys or []) == 0:
             raise ValueError("no grouping key specified")
 
-        if 'who' in grouping_keys and iterator.segment_level == 'protocol':
+        if interface.GroupingKey.Who in grouping_keys and iterator.segment_level == 'protocol':
             raise ValueError("group by `who` not possible at protocol level.")
 
         for item in iterator:

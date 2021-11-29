@@ -3,18 +3,16 @@ from __future__ import annotations
 import abc
 import os
 import zipfile
+from enum import Enum
 from typing import Any, List, Mapping, Type
 
 import pandas as pd
 
-from .interface import ContentType
 from .merge import MergedSegmentGroup
 from .utility import store_to_compressed_file
 
-
-from enum import Enum
-
 # TargetType = Literal['plain', 'zip', 'checkpoint', 'gzip', 'bz2', 'lzma']
+
 
 class TargetType(str, Enum):
     Plain = 'plain'
@@ -24,8 +22,9 @@ class TargetType(str, Enum):
     Bz2 = 'bz2'
     Lzma = 'lzma'
 
+
 class IDispatcher(abc.ABC):
-    def __init__(self, target_name: str, target_type: TargetType, content_type: ContentType):
+    def __init__(self, target_name: str, target_type: TargetType):
         """Dispatches text blocks to a target_name zink.
 
         Args:
@@ -98,9 +97,7 @@ class FolderDispatcher(IDispatcher):
         os.makedirs(target_name, exist_ok=True)
 
     def _dispatch_item(self, item: MergedSegmentGroup) -> None:
-        extension: str = 'csv' if item.content_type == 'tagged_text' else 'txt'
-
-        filename: str = f'{item.temporal_key}_{item.name}.{self.extension}'
+        filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
         self.store(filename, item.data)
 
     def dispatch_index(self) -> None:
@@ -110,15 +107,15 @@ class FolderDispatcher(IDispatcher):
     def store(self, filename: str, text: str) -> None:
         """Store text to file."""
         path: str = os.path.join(self.target_name, f"{filename}")
-        store_to_compressed_file(filename=path, text=text, mode=self.target_type)
+        store_to_compressed_file(filename=path, text=text, target_type=self.target_type)
 
 
 class ZipFileDispatcher(IDispatcher):
     """Dispatch text to a single zip file."""
 
-    def __init__(self, target_name: str, target_type: TargetType, content_type: ContentType):
+    def __init__(self, target_name: str, target_type: TargetType):
         self.zup: zipfile.ZipFile = None
-        super().__init__(target_name, target_type, content_type)
+        super().__init__(target_name, target_type)
 
     def open_target(self, target_name: Any) -> None:
         """Create and open a new zip file."""
@@ -141,7 +138,7 @@ class ZipFileDispatcher(IDispatcher):
         self.zup.writestr('document_index.csv', csv_str)
 
     def _dispatch_item(self, item: MergedSegmentGroup) -> None:
-        filename: str = f'{item.temporal_key}_{item.name}.{self.extension}'
+        filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
         self.zup.writestr(filename, item.data)
 
 

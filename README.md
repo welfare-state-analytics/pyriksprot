@@ -130,13 +130,13 @@ target_filename: str = f'output.zip'
 opts = {
     'source_folder': '/path/to/corpus',
     'target': 'outout.zip',
-    'target_mode': 'zip',
-    'segment_level': 'who',
+    'target_mode': TargetType.Zip,
+    'segment_level': SegmentLevel.Who,
     'dedent': True,
     'dehyphen': False,
     'years': '1955-1965',
     'temporal_key': TemporalKey.Protocol,
-    'group_keys': ('party', 'gender'),
+    'group_keys': (GroupingKey.Party, GroupingKey.Gender),
 }
 
 pyriksprot.extract_corpus_text(**opts)
@@ -151,7 +151,7 @@ Iterate over protocol and speaker:
 from pyriksprot import interface, iterstors
 
 items: Iterable[interface.ProtocolSegment] = iterators.XmlProtocolTextIterator(
-    filenames=filenames, level='who', segment_skip_size=0, processes=4
+    filenames=filenames, segment_level=SegmentLevel.Who, segment_skip_size=0, processes=4
 )
 
 for item in items:
@@ -166,7 +166,7 @@ Iterate over protocol and speech, skip empty:
 from pyriksprot import interface, iterstors
 
 items: Iterable[interface.ProtocolSegment] = iterators.XmlProtocolTextIterator(
-    filenames=filenames, level='who', segment_skip_size=1, processes=4
+    filenames=filenames, segment_level=SegmentLevel.Who, segment_skip_size=1, processes=4
 )
 
 for item in items:
@@ -186,7 +186,7 @@ fix_text: Callable[[str], str] = pyriksprot.compose(
     [str.lower, pyriksprot.dedent, ftfy.fix_character_width, unidecode.unidecode ]
 )
 items: Iterable[interface.ProtocolSegment] = iterators.XmlProtocolTextIterator(
-    filenames=filenames, level='speech', segment_skip_size=1, processes=4, preprocessor=fix_text,
+    filenames=filenames, segment_level=SegmentLevel.Speech, segment_skip_size=1, processes=4, preprocessor=fix_text,
 )
 
 for item in items:

@@ -5,7 +5,7 @@ import pytest
 from pyriksprot import corpus_index, dispatch, interface, member, merge
 from pyriksprot.tagged_corpus import iterate, persist
 
-# pylint: disable=unused-variable
+# pylint: disable=unused-variable, redefined-outer-name
 
 SOURCE_FOLDER: str = './tests/test_data/tagged'
 
@@ -23,8 +23,8 @@ def member_index() -> member.ParliamentaryMemberIndex:
 @pytest.fixture
 def utterance_segments() -> List[interface.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
-    content_type: interface.ContentType = interface.ContentType.Tagged_text
-    segment_level: interface.SegmentLevel = 'utterance'
+    content_type: interface.ContentType = interface.ContentType.TaggedFrame
+    segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
     segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
@@ -50,7 +50,6 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(member_index, sourc
     temporal_key: interface.TemporalKey = None
     group_keys: List[interface.GroupingKey] = [interface.GroupingKey.Who]
     merger: merge.SegmentMerger = merge.SegmentMerger(
-        content_type='tagged_text',
         source_index=source_index,
         member_index=member_index,
         temporal_key=temporal_key,

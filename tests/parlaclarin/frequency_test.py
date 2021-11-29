@@ -16,12 +16,12 @@ TEST_PARLACLARIN_XML_FILES = [
 ]
 
 
-@pytest.mark.parametrize('text', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
-def test_word_frequency_counter(text):
+@pytest.mark.parametrize('texts', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
+def test_word_frequency_counter(texts):
 
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter()
 
-    counter.ingest(text)
+    counter.ingest(texts)
 
     assert counter.frequencies.get('a', None) == 3
     assert counter.frequencies.get('b', None) == 1

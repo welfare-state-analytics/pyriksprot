@@ -6,8 +6,6 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 
 from tqdm.auto import tqdm
 
-from pyriksprot.interface import SegmentLevel
-
 from ..foss.sparv_tokenize import default_tokenize
 from .iterate import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
 

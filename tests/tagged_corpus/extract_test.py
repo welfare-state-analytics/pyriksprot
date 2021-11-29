@@ -4,7 +4,7 @@ from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import CorpusSourceIndex, interface, member, tagged_corpus
+from pyriksprot import CorpusSourceIndex, dispatch, interface, member, tagged_corpus
 
 # pylint: disable=redefined-outer-name
 
@@ -44,16 +44,16 @@ def test_load_protocols():
     assert len(protocols) == len(filenames) - 1
 
 
-@pytest.mark.parametrize('temporal_key, group_keys', [('year', ['party'])])
+@pytest.mark.parametrize('temporal_key, group_keys', [(interface.TemporalKey.Year, [interface.GroupingKey.Party])])
 def test_extract_corpus_tags_yearly_grouped(temporal_key, group_keys):
 
     target_name = f'tests/output/{temporal_key}_{"_".join(group_keys)}_{uuid.uuid1()}.zip'
     opts = dict(
         source_folder='./tests/test_data/tagged',
         target_name=target_name,
-        target_type='zip',
-        content_type='tagged_text',
-        segment_level='who',
+        target_type=dispatch.TargetType.Zip,
+        content_type=interface.ContentType.TaggedFrame,
+        segment_level=interface.SegmentLevel.Who,
         temporal_key=temporal_key,
         group_keys=group_keys,
         multiproc_keep_order=None,
@@ -75,10 +75,10 @@ def test_extract_corpus_tags_yearly_grouped(temporal_key, group_keys):
 #     opts = {
 #         'source_folder': 'tests/test_data/source',
 #         'target_name': f'tests/output/{uuid.uuid1()}.zip',
-#         'target_type': 'zip',
-#         'segment_level': 'who',
+#         'target_type': dispatch.TargetType.Zip,
+#         'segment_level': interface.SegmentLevel.Who,
 #         'temporal_key': None,
-#         'group_keys': ['party'],
+#         'group_keys': [interface.GroupingKey.Party],
 #         'years': None,
 #     }
 
@@ -94,10 +94,10 @@ def test_extract_corpus_tags_yearly_grouped(temporal_key, group_keys):
 #     opts = {
 #         'source_folder': 'tests/test_data/source',
 #         'target_name': f'tests/output/{uuid.uuid1()}.zip',
-#         'target_type': 'zip',
-#         'segment_level': 'who',
-#         'temporal_key': 'year',
-#         'group_keys': ['party'],
+#         'target_type': dispatch.TargetType.Zip,
+#         'segment_level': interface.SegmentLevel.Who,
+#         'temporal_key': interface.TemporalKey.Year,
+#         'group_keys': [interface.GroupingKey.Party],
 #         'years': '1900',
 #     }
 
@@ -114,10 +114,10 @@ def test_extract_corpus_tags_yearly_grouped(temporal_key, group_keys):
 #     opts = {
 #         'source_folder': 'tests/test_data/source',
 #         'target_name': target_filename,
-#         'target_type': 'zip',
-#         'segment_level': 'who',
-#         'temporal_key': 'protocol',
-#         'group_keys': ('party', 'gender'),
+#         'target_type': dispatch.TargetType.Zip,
+#         'segment_level': interface.SegmentLevel.Who,
+#         'temporal_key': None,
+#         'group_keys': (interface.GroupingKey.Party, interface.GroupingKey.Gender),
 #         'years': '1955-1965',
 #         'segment_skip_size': 1,
 #         'multiproc_keep_order': False,

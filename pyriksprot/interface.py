@@ -3,15 +3,15 @@ from __future__ import annotations
 import abc
 import contextlib
 import csv
-from enum import Enum
 import hashlib
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
+from enum import Enum
 from io import StringIO
 from itertools import groupby
 from multiprocessing import get_context
-from typing import Any, Callable, Iterable, List, Literal, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, List, Mapping, Optional, Tuple, Union
 
 import pandas as pd
 from loguru import logger
@@ -25,11 +25,7 @@ from .utility import compress, flatten, merge_tagged_csv, strip_extensions
 class ParlaClarinError(ValueError):
     ...
 
-# TemporalKey = Literal[None, '', 'year', 'decade', 'lustrum', 'custom', 'protocol', 'document']
-# GroupingKey = Literal[None, 'who', 'speech', 'party', 'gender']
-# SegmentLevel = Literal['protocol', 'speech', 'who', 'utterance', 'paragraph']
-# ContentType = Literal['text', 'tagged_text']
-# StorageFormat = Literal['csv', 'json']
+
 class TemporalKey(str, Enum):
     NONE = None
     Year = 'year'
@@ -122,7 +118,7 @@ class Utterance:
         return hashlib.sha1(self.text.encode('utf-8')).hexdigest()[:16]
 
     def to_str(self, what: ContentType) -> str:
-        return self.tagged_text if what == 'tagged_text' else self.text
+        return self.tagged_text if what == ContentType.TaggedFrame else self.text
 
 
 class UtteranceHelper:
@@ -250,7 +246,7 @@ class UtteranceMixIn:
         return UtteranceHelper.to_json(self.utterances)
 
     def to_str(self, what: ContentType) -> str:
-        return self.tagged_text if what == 'tagged_text' else self.text
+        return self.tagged_text if what == ContentType.TaggedFrame else self.text
 
     @property
     def paragraphs(self) -> Optional[str]:
@@ -340,21 +336,21 @@ class Protocol(UtteranceMixIn):
         )
         return speeches
 
-    def get_content(self, target_type: ContentType) -> str:
-        return self.text if target_type == 'text' else self.tagged_text
+    def get_content(self, content_type: ContentType) -> str:
+        return self.text if content_type == ContentType.Text else self.tagged_text
 
     def _to_segments(
         self,
         content_type: ContentType,
-        segment_level: str,
+        segment_level: SegmentLevel,
         segment_skip_size: int,
-        merge_strategy: MergeSpeechStrategyType = 'who_sequence',
+        merge_strategy: MergeSpeechStrategyType = MergeSpeechStrategyType.WhoSequence,
     ) -> Iterable[dict]:
 
-        if segment_level == 'protocol':
+        if segment_level in [SegmentLevel.Protocol, None]:
             return [dict(name=self.name, who=None, id=self.name, data=self.to_str(content_type), page_number='0')]
 
-        if segment_level == 'speech':
+        if segment_level == SegmentLevel.Speech:
             return [
                 dict(
                     name=self.name,
@@ -366,7 +362,7 @@ class Protocol(UtteranceMixIn):
                 for s in self.to_speeches(merge_strategy=merge_strategy, segment_skip_size=segment_skip_size)
             ]
 
-        if segment_level == 'who':
+        if segment_level == SegmentLevel.Who:
             return [
                 dict(
                     name=self.name,
@@ -375,16 +371,18 @@ class Protocol(UtteranceMixIn):
                     data=s.to_str(content_type),
                     page_number=s.page_number,
                 )
-                for s in self.to_speeches(merge_strategy='who', segment_skip_size=segment_skip_size)
+                for s in self.to_speeches(
+                    merge_strategy=MergeSpeechStrategyType.Who, segment_skip_size=segment_skip_size
+                )
             ]
 
-        if segment_level == 'utterance':
+        if segment_level == SegmentLevel.Utterance:
             return [
                 dict(name=self.name, who=u.who, id=u.u_id, data=u.to_str(content_type), page_number=u.page_number)
                 for u in self.utterances
             ]
 
-        if segment_level == 'paragraph':
+        if segment_level == SegmentLevel.Paragraph:
             """Only text can be returned for paragraphs"""
             return [
                 dict(name=self.name, who=u.who, id=f"{u.u_id}@{i}", data=p, page_number=u.page_number)
@@ -405,7 +403,7 @@ class Protocol(UtteranceMixIn):
         """Splits protocol to sequence of text/tagged text segments
 
         Args:
-            content_type (ContentType): 'text' or 'tagged_text
+            content_type (ContentType): Ttext' or 'TaggedFrame'
             segment_level (SegmentLevel): [description]
             segment_skip_size (int, optional): [description]. Defaults to 1.
             preprocess (Callable[[str], str], optional): [description]. Defaults to None.
@@ -414,7 +412,8 @@ class Protocol(UtteranceMixIn):
             Iterable[ProtocolSegment]: [description]
         """
         segments: List[ProtocolSegment] = [
-            ProtocolSegment(**d) for d in self._to_segments(content_type, segment_level, segment_skip_size)
+            ProtocolSegment(content_type=content_type, **d)
+            for d in self._to_segments(content_type, segment_level, segment_skip_size)
         ]
 
         if preprocess is not None:
@@ -458,8 +457,8 @@ class ProtocolSegmentIterator(abc.ABC):
         self,
         *,
         filenames: List[str],
-        content_type: ContentType = 'text',
-        segment_level: SegmentLevel = 'protocol',
+        content_type: ContentType = ContentType.Text,
+        segment_level: SegmentLevel = SegmentLevel.Protocol,
         segment_skip_size: int = 1,
         multiproc_processes: int = None,
         multiproc_chunksize: int = 100,
@@ -471,8 +470,8 @@ class ProtocolSegmentIterator(abc.ABC):
 
         Args:
             filenames (List[str]): files to read
-            content_type (SegmentType, optional): Content type 'text' or 'annotation' . Defaults to 'text'.
-            segment_level (SegmentLevel, optional): Iterate segment level. Defaults to 'protocol'.
+            content_type (ContentType, optional): Content type Text or TaggedFrame . Defaults to TaggedFrame.
+            segment_level (SegmentLevel, optional): Iterate segment level. Defaults to Protocol.
             segment_skip_size (int, optional): Skip segments having char count below threshold. Defaults to 1.
             multiproc_processes (int, optional): Number of read processes. Defaults to None.
             multiproc_chunksize (int, optional): Multiprocessing multiproc_chunksize. Defaults to 100.

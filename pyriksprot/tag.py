@@ -1,7 +1,7 @@
 import abc
 import itertools
 from functools import reduce
-from typing import Any, Callable, List, Literal, Mapping, Union
+from typing import Any, Callable, List, Mapping, Union
 
 from loguru import logger
 
@@ -13,7 +13,6 @@ from .utility import ensure_path, strip_path_and_extension, touch, unlink
 CHECKSUM_FILENAME: str = 'sha1_checksum.txt'
 METADATA_FILENAME: str = 'metadata.json'
 
-StorageFormat = Literal['csv', 'json']
 TaggedDocument = Mapping[str, List[str]]
 
 
@@ -91,7 +90,7 @@ def tag_protocol_xml(
     tagger: ITagger,
     segment_skip_size: int = 5,
     force: bool = False,
-    storage_format: StorageFormat = 'json',
+    storage_format: interface.StorageFormat = interface.StorageFormat.JSON,
 ) -> None:
     """Annotate XML protocol `input_filename` to `output_filename`.
 

@@ -8,8 +8,8 @@ import pytest
 from pyriksprot import interface, tag, tagged_corpus
 
 
-@pytest.mark.parametrize('storage_format', ['json', 'csv'])
-def test_store_protocols(storage_format: str):
+@pytest.mark.parametrize('storage_format', [interface.StorageFormat.JSON, interface.StorageFormat.CSV])
+def test_store_protocols(storage_format: interface.StorageFormat):
     protocol: interface.Protocol = interface.Protocol(
         name='prot-1958-fake',
         date='1958',

@@ -13,7 +13,7 @@ def main(
     output_filename: str = None,
 ):
     try:
-        compute_term_frequencies(input_folder, output_filename)
+        compute_term_frequencies(source=input_folder, filename=output_filename)
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)
