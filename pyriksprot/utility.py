@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import base64
+import bz2
 import contextlib
 import functools
 import glob
 import gzip
 import inspect
+import lzma
 import os
 import pathlib
 import pickle
@@ -349,3 +351,41 @@ def dedent(text: str) -> str:
 def is_empty(filename: str) -> bool:
     """Check if file is empty."""
     return os.path.exists(filename) and os.stat(filename).st_size == 0
+
+
+def strip_csv_header(csv_str: str, sep: str = '\n') -> str:
+    """Remove header line from `csv_str`"""
+    if not csv_str:
+        return ''
+    idx: int = csv_str.find(sep)
+    if idx <= 0:
+        return ''
+    return csv_str[idx + 1 :]
+
+
+def merge_tagged_csv(csv_strings: List[str], sep: str = '\n') -> str:
+    """Merge tagged CSV strings into a single tagged CSV string"""
+    if len(csv_strings or []) == 0:
+        return ''
+    texts: List[str] = [csv_strings[0]]
+    for csv_string in csv_strings[1:]:
+        text = strip_csv_header(csv_string, sep=sep)
+        if text != '':
+            texts.append(text)
+    return sep.join(texts)
+
+
+def store_to_compressed_file(filename: str, text: str, mode: str) -> None:
+    """Stores a textfile on disk - optionally compressed"""
+    modules = {'gzip': (gzip, 'gz'), 'bz2': (bz2, 'bz2'), 'lzma': (lzma, 'xz')}
+
+    if mode in modules:
+        module, extension = modules[mode]
+        with module.open(f"{filename}.{extension}", 'wb') as fp:
+            fp.write(text.encode('utf-8'))
+
+    elif mode == 'plain':
+        with open(filename, 'w', encoding='utf-8') as fp:
+            fp.write(text)
+
+    raise ValueError(f"unknown mode {mode}")

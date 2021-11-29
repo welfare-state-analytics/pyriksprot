@@ -1,15 +1,20 @@
 # type: ignore
 
-from .convert import ProtocolConverter, convert_protocol, dehyphen, pretokenize
+from . import parlaclarin
+from .corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
-from .extract_text import extract_corpus_text
-from .interface import ITagger, IterateLevel, ProtocolIterItem, TaggedDocument
-from .iterators import IProtocolTextIterator, ProtocolTextIterator, XmlProtocolTextIterator
-from .model import ParlaClarinError, Protocol, Speech, Utterance
-from .parse import IterUtterance, ProtocolMapper, UtteranceMapper, XmlUntangleProtocol
-from .persist import StorageFormat, load_metadata, load_protocol, load_protocols, store_protocol
-from .tag import tag_protocol, tag_protocol_xml
-from .tf import TermFrequencyCounter, compute_term_frequencies
+from .interface import (
+    ParlaClarinError,
+    Protocol,
+    ProtocolSegment,
+    ProtocolSegmentIterator,
+    SegmentLevel,
+    Speech,
+    Utterance,
+)
+from .merge import MergedSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
+from .parlaclarin import compute_term_frequencies, pretokenize
+from .tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml
 from .utility import (
     compose,
     data_path_ts,

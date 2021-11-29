@@ -1,0 +1,8 @@
+### <protocol name="{{protocol.name|safe}}" date="{{protocol.date|safe}}">
+{% for speech in speeches %}
+### <speech who="{{speech.who|safe}}", speech_index="{{loop.index}}" speech_date="{{protocol.date}}" speech_index="{{loop.index}}">
+{% for paragraph in speech.paragraphs %}
+{{paragraph}}
+{% endfor %}
+{% endfor %}
+### </speech>
