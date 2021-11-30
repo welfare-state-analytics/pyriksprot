@@ -33,7 +33,9 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 
     """Test fixture"""
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
-        source_folder=TEST_CORPUS_FOLDER, source_pattern='**/prot-*.xml'
+        source_folder=TEST_CORPUS_FOLDER,
+        source_pattern='**/prot-*.xml',
+        skip_empty=False,
     )
     return source_index
 

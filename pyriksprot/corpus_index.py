@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, List, Mapping, Optional, Set, Tuple
 import pandas as pd
 
 from pyriksprot.interface import TemporalKey
+from pyriksprot.tagged_corpus.persist import load_metadata
 
 from . import utility
 
@@ -28,6 +29,7 @@ class CorpusSourceItem:
     name: str = None
     subfolder: str = None
     year: Optional[int] = None
+    metadata: dict | None = None
     is_empty: Optional[int] = None
 
     def __post_init__(self):
@@ -36,7 +38,8 @@ class CorpusSourceItem:
         self.name = utility.strip_path_and_extension(self.path)
         self.subfolder = basename(dirname(self.path))
         self.year = self.to_year(basename(self.path))
-        self.is_empty = utility.is_empty(self.path)
+        self.metadata = load_metadata(self.path)
+        self.is_empty = self.metadata is None
 
         if not self.name.startswith("prot-"):
             raise ValueError(f"illegal filename {self.name}")

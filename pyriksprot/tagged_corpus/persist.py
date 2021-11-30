@@ -91,7 +91,7 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
     metadata: dict = load_metadata(filename)
 
     if metadata is None:
-        return None
+        raise FileIsEmptyError(filename)
 
     with zipfile.ZipFile(filename, 'r') as fp:
 

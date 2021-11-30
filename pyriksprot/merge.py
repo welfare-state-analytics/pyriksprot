@@ -19,9 +19,9 @@ class MergedSegmentGroup:
     content_type: interface.ContentType
     temporal_key: interface.TemporalKey
     name: str
-    # who: str
     id: str
     page_number: str
+    year: int
     grouping_keys: Sequence[interface.GroupingKey]
     grouping_values: Mapping[str, str | int]
     category_items: List[interface.ProtocolSegment] = field(default_factory=list)
@@ -43,10 +43,9 @@ class MergedSegmentGroup:
 
     def __repr__(self) -> str:
         return (
+            f"{self.year}"
             f"{self.temporal_key}"
             f"\t{self.name}"
-            # f\t"{self.who or ''}"
-            # f\t"{self.id or ''}"
             f"\t{self.page_number or ''}"
             f"\t{self.key_values}"
             f"\t{self.n_chars}"
@@ -62,6 +61,7 @@ class MergedSegmentGroup:
 
     def to_dict(self):
         return {
+            'year': self.year,
             'period': self.temporal_key,
             'document_name': self.name,
             'filename': f'{self.name}.{self.extension}',
@@ -160,6 +160,7 @@ class SegmentMerger:
                     id=group_hashcode,
                     name=group_str,
                     page_number=0,
+                    year=self.to_year(source_item, self.temporal_key),
                     category_items=[],
                 )
 
@@ -168,6 +169,14 @@ class SegmentMerger:
         """Yield last group"""
         if current_group:
             yield current_group
+
+    def to_year(self, source_item: corpus_index.CorpusSourceItem, temporal_key: interface.TemporalKey) -> int:
+        """Compute a year that represents the group."""
+        if temporal_key == interface.TemporalKey.Decade:
+            return source_item.year - source_item.year % 10
+        if temporal_key == interface.TemporalKey.Lustrum:
+            return source_item.year - source_item.year % 5
+        return source_item.year
 
 
 def create_grouping_hashcoder(
@@ -186,9 +195,12 @@ def create_grouping_hashcoder(
         item: interface.ProtocolSegment,
         parla_member: member.ParliamentaryMember,
         source_item: corpus_index.CorpusSourceItem,
-    ) -> Tuple[str, str]:
+    ) -> Tuple[dict, str, str]:
 
         parts: Mapping[str, str | int] = {}
+
+        if len(grouping_keys) == 0:
+            return (parts, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
 
         for attr in member_keys:
             parts[attr] = str(getattr(parla_member, attr, "unknown") or attr)

@@ -33,6 +33,7 @@ def tagged_protocol_level_groups(
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Protocol,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
+        segment_skip_size=1,
     )
     groups = merge.SegmentMerger(
         source_index=source_index, member_index=member_index, temporal_key=None, grouping_keys=None

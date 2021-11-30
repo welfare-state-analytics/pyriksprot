@@ -344,8 +344,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 def test_load_protocols_with_non_existing_file():
     filename: str = 'this/is/a/non-existing/path/**/prot-1973--21.zip'
     with pytest.raises(FileNotFoundError):
-        for _ in tagged_corpus.load_protocol(filename=filename):
-            ...
+        _ = tagged_corpus.load_protocol(filename=filename)
 
 
 def test_load_protocol_with_empty_existing_file():
