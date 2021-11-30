@@ -5,6 +5,7 @@ from typing import List
 
 from loguru import logger
 
+from pyriksprot import interface
 from pyriksprot.utility import download_url
 
 DEFAULT_DOWNLOAD_BRANCH = "dev"
@@ -56,3 +57,125 @@ def create_parlaclarin_corpus(
     download_members_of_parliament(target_folder, branch)
     logger.info(f"downloading test protocols: {', '.join(protocols)}")
     download_parliamentary_protocols(protocols, target_folder, create_subfolder=True, branch=branch)
+
+
+TAGGED_CSV_STR = (
+    "token\tlemma\tpos\txpos\n"
+    "Hej\thej\tIN\tIN\n"
+    "!\t!\tMID\tMID\n"
+    "Detta\tdetta\tPN\tPN.NEU.SIN.DEF.SUB+OBJ\n"
+    "är\tvara\tVB\tVB.PRS.AKT\n"
+    "ett\ten\tDT\tDT.NEU.SIN.IND\n"
+    "test\ttest\tNN\tNN.NEU.SIN.IND.NOM\n"
+    "!\t!\tMAD\tMAD\n"
+    "'\t\tMAD\tMAD\n"
+    '"\t\tMAD\tMAD'
+)
+
+UTTERANCES_DICTS = [
+    {
+        'u_id': 'i-1',
+        'n': 'c01',
+        'who': 'A',
+        'prev_id': None,
+        'next_id': 'i-2',
+        'paragraphs': 'Hej! Detta är en mening.',
+        'annotation': TAGGED_CSV_STR,
+        'checksum': '107d28f2f90d3ccc',
+    },
+    {
+        'u_id': 'i-2',
+        'n': 'c02',
+        'who': 'A',
+        'prev_id': 'i-1',
+        'next_id': None,
+        'paragraphs': 'Jag heter Ove.@#@Vad heter du?',
+        'annotation': TAGGED_CSV_STR,
+        'checksum': '9c3ee2212f9db2eb',
+    },
+    {
+        'u_id': 'i-3',
+        'n': 'c03',
+        'who': 'B',
+        'prev_id': None,
+        'next_id': None,
+        'paragraphs': 'Jag heter Adam.',
+        'annotation': TAGGED_CSV_STR,
+        'checksum': '8a2880190e158a8a',
+    },
+    {
+        'u_id': 'i-4',
+        'n': 'c03',
+        'who': 'B',
+        'prev_id': None,
+        'next_id': None,
+        'paragraphs': 'Ove är dum.',
+        'annotation': TAGGED_CSV_STR,
+        'checksum': '13ed9d8bf4098390',
+    },
+    {
+        'u_id': 'i-5',
+        'n': 'c09',
+        'who': 'A',
+        'prev_id': None,
+        'next_id': None,
+        'annotation': 'token\tlemma\tpos\txpos\nHej\thej\tIN\tIN\n!\t!\tMID\tMID\nDetta\tdetta\tPN\tPN.NEU.SIN.DEF.SUB+OBJ\när\tvara\tVB\tVB.PRS.AKT\nett\ten\tDT\tDT.NEU.SIN.IND\ntest\ttest\tNN\tNN.NEU.SIN.IND.NOM\n!\t!\tMAD\tMAD\n\'\t\tMAD\tMAD\n"\t\tMAD\tMAD',
+        'paragraphs': 'Adam är dum.',
+        'checksum': 'a2f0635f8991d206',
+    },
+]
+
+
+def create_utterances() -> List[interface.Utterance]:
+    return [
+        interface.Utterance(
+            u_id='i-1',
+            n='c01',
+            who='A',
+            prev_id=None,
+            next_id='i-2',
+            paragraphs=['Hej! Detta är en mening.'],
+            delimiter='\n',
+            annotation=TAGGED_CSV_STR,
+        ),
+        interface.Utterance(
+            u_id='i-2',
+            n='c02',
+            who='A',
+            prev_id='i-1',
+            next_id=None,
+            paragraphs=['Jag heter Ove.', 'Vad heter du?'],
+            delimiter='\n',
+            annotation=TAGGED_CSV_STR,
+        ),
+        interface.Utterance(
+            u_id='i-3',
+            n='c03',
+            who='B',
+            prev_id=None,
+            next_id=None,
+            paragraphs=['Jag heter Adam.'],
+            delimiter='\n',
+            annotation=TAGGED_CSV_STR,
+        ),
+        interface.Utterance(
+            u_id='i-4',
+            n='c03',
+            who='B',
+            prev_id=None,
+            next_id=None,
+            paragraphs=['Ove är dum.'],
+            delimiter='\n',
+            annotation=TAGGED_CSV_STR,
+        ),
+        interface.Utterance(
+            u_id='i-5',
+            n='c09',
+            who='A',
+            prev_id=None,
+            next_id=None,
+            paragraphs=['Adam är dum.'],
+            delimiter='\n',
+            annotation=TAGGED_CSV_STR,
+        ),
+    ]

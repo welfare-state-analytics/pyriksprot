@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="{{protocol.name|safe}}" date="{{protocol.date|safe}}">
+    {% for speech in speeches %}
+    <speech who="{{speech.who|safe}}" speech_id="{{speech.speech_id|safe}}" speech_date="{{protocol.date}}" speech_index="{{loop.index}}">
+      {% for paragraph in speech.paragraphs %}
+        <paragraph>
+{{paragraph|e}}
+        </paragraph>
+      {% endfor %}
+    </speech>
+    {% endfor %}
+</protocol>

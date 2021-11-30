@@ -73,7 +73,7 @@ class ParliamentaryMemberIndex:
         if key is None:
             return None
         if key not in self.members:
-            """Add speaker id's not found into the repository."""
+            """Add member id's not found into the repository."""
             self.members[key] = ParliamentaryMember(
                 id=key,
                 name=key,

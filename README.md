@@ -8,7 +8,7 @@ This package is intended to cover the following use cases:
 
 ### Extract "text documents" from the Parla-CLARIN XML files
 
-Text can be extracted from the XML files at different granularity (paragraphs, utterance, speech, speaker, protocol). The text can be grouped (combined) into larger temporal blocks based on time (year, lustrum, decade or custom periods). Within each of these block the text in turn can be grouped by speaker attributes (who, party, gender).
+Text can be extracted from the XML files at different granularity (paragraphs, utterance, speech, who, protocol). The text can be grouped (combined) into larger temporal blocks based on time (year, lustrum, decade or custom periods). Within each of these block the text in turn can be grouped by speaker attributes (who, party, gender).
 
 The text extraction can done using the `riksprot2text` utility, which is a CLI interface installed with the package, or in Python code using the API that this package exposes. The Python API exposed both streaming (SAX based) methods and a domain model API (i.e. Python classes representing protocols, speeches and utterances).
 
@@ -75,8 +75,8 @@ Options:
   -y, --years TEXT                Years to include in output
   -g, --group-key TEXT            Partition key(s)
   -p, --processes INTEGER RANGE   Number of processes to use
-  -l, --level [protocol|speaker|speech|utterance|paragraph|who]
-                                  Protocol extract level
+  -l, --segment-level [protocol|speech|utterance|paragraph|who]
+                                  Protocol extract segment level
   -e, --keep-order                Keep output in filename order (slower, multiproc)
 
   -s, --skip-size INTEGER RANGE   Skip blocks of char length less than
@@ -130,13 +130,13 @@ target_filename: str = f'output.zip'
 opts = {
     'source_folder': '/path/to/corpus',
     'target': 'outout.zip',
-    'target_mode': 'zip',
-    'level': 'who',
+    'target_mode': TargetType.Zip,
+    'segment_level': SegmentLevel.Who,
     'dedent': True,
     'dehyphen': False,
     'years': '1955-1965',
-    'temporal_key': 'protocol',
-    'group_keys': ('party', 'gender'),
+    'temporal_key': TemporalKey.Protocol,
+    'group_keys': (GroupingKey.Party, GroupingKey.Gender),
 }
 
 pyriksprot.extract_corpus_text(**opts)
@@ -150,8 +150,8 @@ Iterate over protocol and speaker:
 
 from pyriksprot import interface, iterstors
 
-items: Iterable[interface.ProtocolIterItem] = iterators.XmlProtocolTextIterator(
-    filenames=filenames, level='speaker', skip_size=0, processes=4
+items: Iterable[interface.ProtocolSegment] = iterators.XmlProtocolTextIterator(
+    filenames=filenames, segment_level=SegmentLevel.Who, segment_skip_size=0, processes=4
 )
 
 for item in items:
@@ -165,8 +165,8 @@ Iterate over protocol and speech, skip empty:
 
 from pyriksprot import interface, iterstors
 
-items: Iterable[interface.ProtocolIterItem] = iterators.XmlProtocolTextIterator(
-    filenames=filenames, level='speaker', skip_size=1, processes=4
+items: Iterable[interface.ProtocolSegment] = iterators.XmlProtocolTextIterator(
+    filenames=filenames, segment_level=SegmentLevel.Who, segment_skip_size=1, processes=4
 )
 
 for item in items:
@@ -185,8 +185,8 @@ import unidecode
 fix_text: Callable[[str], str] = pyriksprot.compose(
     [str.lower, pyriksprot.dedent, ftfy.fix_character_width, unidecode.unidecode ]
 )
-items: Iterable[interface.ProtocolIterItem] = iterators.XmlProtocolTextIterator(
-    filenames=filenames, level='speech', skip_size=1, processes=4, preprocessor=fix_text,
+items: Iterable[interface.ProtocolSegment] = iterators.XmlProtocolTextIterator(
+    filenames=filenames, segment_level=SegmentLevel.Speech, segment_skip_size=1, processes=4, preprocessor=fix_text,
 )
 
 for item in items:

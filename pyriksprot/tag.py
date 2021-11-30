@@ -1,41 +1,80 @@
-from typing import List, Literal
+import abc
+import itertools
+from functools import reduce
+from typing import Any, Callable, List, Mapping, Union
 
 from loguru import logger
 
-from . import interface, model, parse, persist
+from . import interface
+from .parlaclarin import parse
+from .tagged_corpus import persist
 from .utility import ensure_path, strip_path_and_extension, touch, unlink
 
 CHECKSUM_FILENAME: str = 'sha1_checksum.txt'
 METADATA_FILENAME: str = 'metadata.json'
 
-StorageFormat = Literal['csv', 'json']
-
-# @deprecated
-# def bulk_tag_protocols(tagger: ITagger, protocols: List[Protocol], skip_size: int = 5) -> List[List[dict]]:
-
-#     speech_items: List[Dict[str, Any]] = []
-#     protocol_refs = {}
-
-#     for protocol in protocols:
-#         idx = len(speech_items)
-#         speech_items.extend(protocol.to_dict(skip_size=skip_size))
-#         protocol_refs[protocol.name] = (idx, len(speech_items) - idx)
-
-#     speech_items: List[Dict[str, Any]] = tag_speech_items(tagger, speech_items)
-
-#     protocol_speech_items = []
-#     for protocol in protocols:
-#         idx, n_count = protocol_refs[protocol.name]
-#         protocol_speech_items.append(speech_items[idx : idx + n_count])
-
-#     return protocol_speech_items
+TaggedDocument = Mapping[str, List[str]]
 
 
-def tag_protocol(tagger: interface.ITagger, protocol: model.Protocol, preprocess=False) -> model.Protocol:
+class ITagger(abc.ABC):
+    def __init__(self, preprocessors: Callable[[str], str] = None):
+        self.preprocessors: Callable[[str], str] = preprocessors or []
+
+    def tag(self, text: Union[str, List[str]], preprocess: bool = True) -> List[TaggedDocument]:
+        """Tag text. Return dict if lists."""
+        if isinstance(text, str):
+            text = [text]
+
+        if not isinstance(text, list):
+            return ValueError("invalid type")
+
+        if len(text) == 0:
+            return []
+
+        if preprocess:
+            text: List[str] = [self.preprocess(d) for d in text]
+
+        tagged_documents = self._tag(text)
+
+        return tagged_documents
+
+    @abc.abstractmethod
+    def _tag(self, text: Union[str, List[str]]) -> List[TaggedDocument]:
+        ...
+
+    @abc.abstractmethod
+    def _to_dict(self, tagged_document: Any) -> TaggedDocument:
+        return {}
+
+    @staticmethod
+    def to_csv(tagged_document: TaggedDocument, sep='\t') -> str:
+        """Converts a TaggedDocument to a TSV string"""
+
+        tokens, lemmas, pos, xpos = (
+            tagged_document['token'],
+            tagged_document['lemma'],
+            tagged_document['pos'],
+            tagged_document['xpos'],
+        )
+        csv_str = '\n'.join(
+            itertools.chain(
+                [f"token{sep}lemma{sep}pos{sep}xpos"],
+                (f"{tokens[i]}{sep}{lemmas[i]}{sep}{pos[i]}{sep}{xpos[i]}" for i in range(0, len(tokens))),
+            )
+        )
+        return csv_str
+
+    def preprocess(self, text: str) -> str:
+        """Transform `text` with preprocessors."""
+        text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
+        return text
+
+
+def tag_protocol(tagger: ITagger, protocol: interface.Protocol, preprocess=False) -> interface.Protocol:
 
     texts = [u.text for u in protocol.utterances]
 
-    documents: List[interface.TaggedDocument] = tagger.tag(texts, preprocess=preprocess)
+    documents: List[TaggedDocument] = tagger.tag(texts, preprocess=preprocess)
 
     for i, document in enumerate(documents):
         protocol.utterances[i].annotation = tagger.to_csv(document)
@@ -48,10 +87,10 @@ def tag_protocol(tagger: interface.ITagger, protocol: model.Protocol, preprocess
 def tag_protocol_xml(
     input_filename: str,
     output_filename: str,
-    tagger: interface.ITagger,
-    skip_size: int = 5,
+    tagger: ITagger,
+    segment_skip_size: int = 5,
     force: bool = False,
-    storage_format: StorageFormat = 'json',
+    storage_format: interface.StorageFormat = interface.StorageFormat.JSON,
 ) -> None:
     """Annotate XML protocol `input_filename` to `output_filename`.
 
@@ -65,9 +104,11 @@ def tag_protocol_xml(
 
         ensure_path(output_filename)
 
-        protocol: model.Protocol = parse.ProtocolMapper.to_protocol(input_filename, skip_size=skip_size)
+        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+            input_filename, segment_skip_size=segment_skip_size
+        )
 
-        if not protocol.has_text():
+        if not protocol.has_text:
 
             unlink(output_filename)
             touch(output_filename)
