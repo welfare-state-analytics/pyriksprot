@@ -4,8 +4,6 @@ import hashlib
 from dataclasses import dataclass, field, fields
 from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple
 
-from loguru import logger
-
 from . import corpus_index, interface, member, utility
 
 # pylint: disable=too-many-arguments
