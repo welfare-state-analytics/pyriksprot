@@ -30,7 +30,9 @@ CONTENT_TYPES = [e.value for e in ContentType]
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
 @click.option('--target-type', default='zip', type=click.Choice(TARGET_TYPES), help='Target type')
-@click.option('--content-type', default='tagged_text', type=click.Choice(CONTENT_TYPES), help='Content type to extract')
+@click.option(
+    '--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Content type to extract'
+)
 @click.option('--segment-level', default='who', type=click.Choice(SEGMENT_LEVELS), help='Protocol iterate level')
 @click.option('--segment-skip-size', default=1, type=click.IntRange(1, 1024), help='Skip smaller than threshold')
 @click.option('--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
@@ -55,7 +57,7 @@ def main(
 
         extract.extract_corpus_tags(
             source_folder=source_folder,
-            content_type=content_type,
+            content_type=ContentType(content_type),
             target_name=target_name,
             target_type=target_type,
             segment_level=segment_level,
