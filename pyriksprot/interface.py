@@ -19,7 +19,7 @@ from pandas.io import json
 
 from .utility import compress, flatten, merge_tagged_csv, strip_extensions
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, no-member
 
 
 class ParlaClarinError(ValueError):

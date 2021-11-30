@@ -37,7 +37,7 @@ class Element:
     def __init__(self, name: str, attributes: Mapping[str, str]):
         self.name: str = name
         self.attributes: Mapping[str, str] = attributes
-        self.children: List[Element] = []
+        self.children: List["Element"] = []
         self.is_root: bool = False
         self.cdatas: List[str] = []
 
