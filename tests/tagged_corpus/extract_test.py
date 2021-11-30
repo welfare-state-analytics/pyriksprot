@@ -12,6 +12,17 @@ from pyriksprot import CorpusSourceIndex, dispatch, interface, member, tagged_co
 # TEST_CORPUS_FOLDER = '/data/riksdagen_corpus_data/annotated'
 TEST_CORPUS_FOLDER = 'tests/test_data/tagged'
 
+DEFAULT_OPTS = dict(
+    source_folder='./tests/test_data/tagged',
+    target_type=dispatch.TargetType.Zip,
+    content_type=interface.ContentType.TaggedFrame,
+    segment_level=interface.SegmentLevel.Who,
+    multiproc_keep_order=None,
+    multiproc_processes=1,
+    years=None,
+    segment_skip_size=1,
+)
+
 
 @pytest.fixture
 def member_index() -> member.ParliamentaryMemberIndex:
@@ -30,6 +41,9 @@ def test_create_source_index_for_tagged_corpus():
     corpus_source: str = './tests/test_data/tagged'
     source_index = CorpusSourceIndex.load(source_folder=corpus_source, source_pattern='**/prot-*.zip')
     assert isinstance(source_index, CorpusSourceIndex)
+    assert len(source_index) == 19
+
+    source_index = CorpusSourceIndex.load(source_folder=corpus_source, source_pattern='**/prot-*.zip', skip_empty=False)
     assert len(source_index) == 20
 
 
@@ -44,49 +58,30 @@ def test_load_protocols():
     assert len(protocols) == len(filenames) - 1
 
 
-@pytest.mark.parametrize('temporal_key, group_keys', [(interface.TemporalKey.Year, [interface.GroupingKey.Party])])
-def test_extract_corpus_tags_yearly_grouped(temporal_key, group_keys):
+@pytest.mark.parametrize(
+    'temporal_key, group_keys',
+    [
+        (interface.TemporalKey.Year, [interface.GroupingKey.Party]),
+        (interface.TemporalKey.Year, []),
+        (interface.TemporalKey.Protocol, []),
+        (None, []),
+    ],
+)
+def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
 
     target_name = f'tests/output/{temporal_key}_{"_".join(group_keys)}_{uuid.uuid1()}.zip'
-    opts = dict(
-        source_folder='./tests/test_data/tagged',
-        target_name=target_name,
-        target_type=dispatch.TargetType.Zip,
-        content_type=interface.ContentType.TaggedFrame,
-        segment_level=interface.SegmentLevel.Who,
-        temporal_key=temporal_key,
-        group_keys=group_keys,
-        multiproc_keep_order=None,
-        multiproc_processes=1,
-        years=None,
-        segment_skip_size=1,
-    )
+    opts = {
+        **DEFAULT_OPTS,
+        **dict(
+            target_name=target_name,
+            temporal_key=temporal_key,
+            group_keys=group_keys,
+        ),
+    }
 
     tagged_corpus.extract_corpus_tags(**opts)
-
     assert os.path.isfile(opts['target_name'])
-
-    # os.unlink(opts['target_name'])
-
-
-# # @pytest.mark.xfail
-# def test_extract_corpus_with_no_temporal_key():
-
-#     opts = {
-#         'source_folder': 'tests/test_data/source',
-#         'target_name': f'tests/output/{uuid.uuid1()}.zip',
-#         'target_type': dispatch.TargetType.Zip,
-#         'segment_level': interface.SegmentLevel.Who,
-#         'temporal_key': None,
-#         'group_keys': [interface.GroupingKey.Party],
-#         'years': None,
-#     }
-
-#     pyriksprot.extract_corpus_text(**opts)
-
-#     assert os.path.isfile(opts['target_name'])
-
-#     os.unlink(opts['target_name'])
+    os.unlink(opts['target_name'])
 
 
 # def test_extract_corpus_with_no_matching_protocols():

@@ -387,5 +387,5 @@ def store_to_compressed_file(filename: str, text: str, target_type: Literal['pla
     elif target_type == 'plain':
         with open(filename, 'w', encoding='utf-8') as fp:
             fp.write(text)
-
-    raise ValueError(f"unknown mode {target_type}")
+    else:
+        raise ValueError(f"unknown mode {target_type}")

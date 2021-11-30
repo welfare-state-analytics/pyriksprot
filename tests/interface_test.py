@@ -98,7 +98,7 @@ def test_protocol_create(utterances: List[interface.Utterance]):
     assert protocol.name == 'prot-1958-fake'
     assert protocol.date == '1958'
     assert protocol.has_text, 'has text'
-    assert protocol.checksum() == 'c2e64f5dead6d180c1f05316811742e55601d625', 'checksum'
+    assert protocol.checksum() == '7e5112f9db8c8462d89fac08714ce15b432d7733', 'checksum'
 
     assert protocol.text == '\n'.join(text.text for text in utterances)
 
@@ -113,7 +113,7 @@ def test_protocol_preprocess():
 
     protocol.preprocess(preprocess=preprocess)
 
-    assert protocol.text == "APA\nAPA\nAPA\nAPA\nAPA"
+    assert protocol.text == 'APA\nAPA\nAPA\nAPA\nAPA\nAPA'
 
 
 @pytest.mark.parametrize(
@@ -124,7 +124,7 @@ def test_protocol_preprocess():
             'who',
             2,
             [{'A'}, {'B'}],
-            ['A', 'B'],
+            ['i-1', 'i-3'],
             [
                 'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?\nAdam är dum.',
                 'Jag heter Adam.\nOve är dum.',
@@ -133,7 +133,7 @@ def test_protocol_preprocess():
         (
             interface.MergeSpeechByChain,
             interface.MergeSpeechStrategyType.Chain,
-            3,
+            4,
             [{'A'}, {'B'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-4', 'i-5'],
             [
@@ -146,9 +146,9 @@ def test_protocol_preprocess():
         (
             interface.MergeSpeechByWhoSequence,
             interface.MergeSpeechStrategyType.WhoSequence,
-            2,
+            3,
             [{'A'}, {'B'}, {'A'}],
-            ['A', 'B', 'A'],
+            ['i-1', 'i-3', 'i-5'],
             [
                 'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
                 'Jag heter Adam.\nOve är dum.',
@@ -252,7 +252,7 @@ def test_speech_annotation():
         ("prot-1955--ak--22.xml", 115, 115, interface.MergeSpeechStrategyType.WhoSequence),
         ('prot-199192--127.xml', 205, 205, interface.MergeSpeechStrategyType.Chain),
         ('prot-199192--127.xml', 53, 53, interface.MergeSpeechStrategyType.Who),
-        ('prot-199192--127.xml', 53, 53, interface.MergeSpeechStrategyType.WhoSequence),
+        ('prot-199192--127.xml', 177, 177, interface.MergeSpeechStrategyType.WhoSequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(

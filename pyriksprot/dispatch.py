@@ -107,7 +107,7 @@ class FolderDispatcher(IDispatcher):
     def store(self, filename: str, text: str) -> None:
         """Store text to file."""
         path: str = os.path.join(self.target_name, f"{filename}")
-        store_to_compressed_file(filename=path, text=text, target_type=self.target_type)
+        store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
 
 
 class ZipFileDispatcher(IDispatcher):

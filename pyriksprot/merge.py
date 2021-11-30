@@ -110,24 +110,27 @@ class SegmentMerger:
         self.member_index: member.ParliamentaryMemberIndex = member_index
         self.temporal_key: interface.TemporalKey = temporal_key
         self.custom_temporal_specification = None
-        self.grouping_keys: Sequence[interface.GroupingKey] = grouping_keys
-        self.grouping_hashcoder = create_grouping_hashcoder(grouping_keys)
+        self.grouping_keys: Sequence[interface.GroupingKey] = grouping_keys or []
+        self.grouping_hashcoder = create_grouping_hashcoder(self.grouping_keys)
 
-    def merge(self, iterator: interface.ProtocolSegmentIterator) -> Iterable[Mapping[str, MergedSegmentGroup]]:
+    def merge(
+        self, iterator: List[interface.ProtocolSegment] | interface.ProtocolSegmentIterator
+    ) -> Iterable[Mapping[str, MergedSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
         current_temporal_hashcode: str = None
         current_group: Mapping[str, MergedSegmentGroup] = {}
         grouping_keys: Set[str] = set(self.grouping_keys)
 
-        if iterator.segment_level is None:
-            raise ValueError("protocol iter level cannot be None")
+        # if len(grouping_keys or []) == 0:
+        #     raise ValueError("no grouping key specified")
 
-        if len(grouping_keys or []) == 0:
-            raise ValueError("no grouping key specified")
+        if hasattr(iterator, 'segment_level'):
 
-        if interface.GroupingKey.Who in grouping_keys and iterator.segment_level == 'protocol':
-            raise ValueError("group by `who` not possible at protocol level.")
+            if iterator.segment_level == interface.SegmentLevel.Protocol:
+
+                if len(grouping_keys) > 0:
+                    raise ValueError("cannot group by key when segement level is entire protocol.")
 
         for item in iterator:
 
@@ -140,9 +143,10 @@ class SegmentMerger:
             who: member.ParliamentaryMember = None if item.who is None else self.member_index[item.who]
 
             if current_temporal_hashcode != temporal_hashcode:
-                logger.info(f"aggregating {temporal_hashcode}")
+                # logger.info(f"aggregating {temporal_hashcode}")
                 """Yield previous group"""
-                yield current_group
+                if current_group:
+                    yield current_group
 
                 current_group, current_temporal_hashcode = {}, temporal_hashcode
 
@@ -164,7 +168,8 @@ class SegmentMerger:
             current_group[group_hashcode].add(item)
 
         """Yield last group"""
-        yield current_group
+        if current_group:
+            yield current_group
 
 
 def create_grouping_hashcoder(

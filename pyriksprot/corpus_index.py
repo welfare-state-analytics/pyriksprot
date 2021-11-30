@@ -45,7 +45,7 @@ class CorpusSourceItem:
         self, temporal_key: TemporalKey | Mapping[str, Tuple[int, int]], item: iterate.ProtocolSegment = None
     ) -> str:
 
-        if isinstance(temporal_key, (TemporalKey, str)):
+        if isinstance(temporal_key, (TemporalKey, str, type(None))):
 
             if temporal_key in [None, '', 'document', 'protocol']:
                 """No temporal key gives a group per document/protocol"""

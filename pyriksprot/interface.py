@@ -55,7 +55,7 @@ class SegmentLevel(str, Enum):
 
 class ContentType(str, Enum):
     Text = 'text'
-    TaggedFrame = 'tagged_text'
+    TaggedFrame = 'tagged_frame'
 
 
 class StorageFormat(str, Enum):
@@ -499,6 +499,7 @@ class ProtocolSegmentIterator(abc.ABC):
 
     def create_iterator(self) -> Iterable[ProtocolSegment]:
 
+        fx = self.preprocessor
         if self.multiproc_processes > 1:
             args: List[Tuple[str, str, str, int]] = [
                 (name, self.content_type, self.segment_level, self.segment_skip_size) for name in self.filenames
@@ -508,10 +509,14 @@ class ProtocolSegmentIterator(abc.ABC):
                 futures = self.map_futures(imap=imap, args=args)
                 for payload in futures:
                     for item in payload:
+                        if fx:
+                            item.data = fx(item.data)
                         yield item
         else:
             for filename in self.filenames:
                 for item in self.load(filename=filename):
+                    if fx:
+                        item.data = fx(item.data)
                     yield item
 
     @abc.abstractmethod
@@ -567,16 +572,16 @@ class MergeSpeechByWho(IMergeSpeechStrategy):
     def split(self, utterances: Protocol) -> List[List[Utterance]]:
         """Create a speech for each unique `who`. Return list of Speech."""
         data = defaultdict(list)
-        for u in utterances:
+        for u in utterances or []:
             data[u.who].append(u)
-        return [data[who] for who in enumerate(data)]
+        return [data[who] for who in data]
 
 
 class MergeSpeechByWhoSequence(IMergeSpeechStrategy):
     """Merge sequences with same `who` into a speech """
 
     def split(self, utterances: List[Utterance]) -> List[List[Utterance]]:
-        who_sequences: List[List[Utterance]] = [x for x in groupby(utterances, key=lambda x: x.who)]
+        who_sequences: List[List[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.who)]
         return who_sequences
 
 

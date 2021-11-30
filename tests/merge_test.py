@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from pyriksprot import corpus_index, dispatch, interface, member, merge
+from pyriksprot import corpus_index, interface, member, merge
 from pyriksprot.tagged_corpus import iterate, persist
 
 # pylint: disable=unused-variable, redefined-outer-name
@@ -12,7 +12,9 @@ SOURCE_FOLDER: str = './tests/test_data/tagged'
 
 @pytest.fixture
 def source_index() -> corpus_index.CorpusSourceIndex:
-    return corpus_index.CorpusSourceIndex.load(source_folder=SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None)
+    return corpus_index.CorpusSourceIndex.load(
+        source_folder=SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
+    )
 
 
 @pytest.fixture
@@ -21,7 +23,7 @@ def member_index() -> member.ParliamentaryMemberIndex:
 
 
 @pytest.fixture
-def utterance_segments() -> List[interface.ProtocolSegment]:
+def utterance_segments(source_index) -> List[interface.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
@@ -37,11 +39,8 @@ def utterance_segments() -> List[interface.ProtocolSegment]:
 
 def test_segment_merger_merge_on_protocol_level_group_by_who(member_index, source_index, utterance_segments):
 
-    target_name: str = './output'
-    target_type: dispatch.TargetType = dispatch.TargetType.Zip
-
     """Load source protocols to simplify tests"""
-    protocols: List[interface.Protocol] = persist.load_protocols(source=SOURCE_FOLDER)
+    protocols: List[interface.Protocol] = list(persist.load_protocols(source=SOURCE_FOLDER))
 
     """Check that iterator yields all utterances"""
     assert len(utterance_segments) == sum(map(len, protocols))
@@ -57,6 +56,6 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(member_index, sourc
     )
 
     groups = merger.merge(utterance_segments)
-    assert len(groups) == len(source_index)
 
-    assert groups is not None
+    groups = list(groups)
+    assert len(groups) == len(source_index)
