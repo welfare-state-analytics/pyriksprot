@@ -59,12 +59,20 @@ class MergedSegmentGroup:
     def extension(self) -> str:
         return 'txt' if self.content_type == interface.ContentType.Text else 'csv'
 
+    @property
+    def filename(self) -> str:
+        if self.temporal_key is None or self.temporal_key == self.name:
+            filename: str = f'{self.name}.{self.extension}'
+        else:
+            filename: str = f'{self.temporal_key}_{self.name}.{self.extension}'
+        return filename
+
     def to_dict(self):
         return {
             'year': self.year,
             'period': self.temporal_key,
             'document_name': self.name,
-            'filename': f'{self.name}.{self.extension}',
+            'filename': self.filename,
             'n_tokens': 0,
             **self.grouping_values,
         }

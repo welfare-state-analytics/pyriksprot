@@ -56,6 +56,7 @@ def test_create_grouping_hashcoder(
         page_number="0",
         data="hej",
         who="alexis_bjorkman_7f7c23",
+        year=1955,
     )
     hashcode = hashcoder(item, member_index['alexis_bjorkman_7f7c23'], source_index)
 

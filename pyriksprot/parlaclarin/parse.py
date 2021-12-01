@@ -62,6 +62,9 @@ class XmlProtocol(abc.ABC):
     def __len__(self):
         return len(self.utterances)
 
+    def get_year(self):
+        return int(self.get_date()[:4])
+
     @property
     def text(self) -> str:
         """Return sequence of XML_Utterances."""
@@ -87,7 +90,9 @@ class XmlProtocol(abc.ABC):
             if segment_level in [interface.SegmentLevel.Protocol, None]:
 
                 items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(interface.ContentType.Text, name, None, name, self.text, '0')
+                    interface.ProtocolSegment(
+                        interface.ContentType.Text, name, None, name, self.text, '0', self.get_year()
+                    )
                 ]
 
             elif segment_level == interface.SegmentLevel.Who:
@@ -100,7 +105,13 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, who, who, '\n'.join(data[who]), str(page_numbers[who])
+                        interface.ContentType.Text,
+                        name,
+                        who,
+                        who,
+                        '\n'.join(data[who]),
+                        str(page_numbers[who]),
+                        self.get_year(),
                     )
                     for who in data
                 ]
@@ -116,7 +127,13 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, who[n], n, '\n'.join(data[n]), str(page_numbers[n])
+                        interface.ContentType.Text,
+                        name,
+                        who[n],
+                        n,
+                        '\n'.join(data[n]),
+                        str(page_numbers[n]),
+                        self.get_year(),
                     )
                     for n in data
                 ]
@@ -125,7 +142,7 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, u.who, u.u_id, u.text, str(u.page_number)
+                        interface.ContentType.Text, name, u.who, u.u_id, u.text, str(u.page_number), self.get_year()
                     )
                     for u in self.utterances
                 ]
@@ -134,7 +151,7 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, u.who, f"{u.u_id}@{i}", p, str(u.page_number)
+                        interface.ContentType.Text, name, u.who, f"{u.u_id}@{i}", p, str(u.page_number), self.get_year()
                     )
                     for u in self.utterances
                     for i, p in enumerate(u.paragraphs)

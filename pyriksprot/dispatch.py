@@ -4,14 +4,17 @@ import abc
 import os
 import zipfile
 from enum import Enum
-from typing import Any, List, Mapping, Type
+from typing import Any, List, Type, Union
 
 import pandas as pd
+
+from pyriksprot.interface import ProtocolSegment
 
 from .merge import MergedSegmentGroup
 from .utility import store_to_compressed_file
 
 # TargetType = Literal['plain', 'zip', 'checkpoint', 'gzip', 'bz2', 'lzma']
+DispatchItem = Union[MergedSegmentGroup, ProtocolSegment]
 
 
 class TargetType(str, Enum):
@@ -57,8 +60,8 @@ class IDispatcher(abc.ABC):
         """Dispatch an index of dispatched documents."""
         ...
 
-    def dispatch(self, group: Mapping[str, MergedSegmentGroup]) -> None:
-        for item in group.values():
+    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
+        for item in dispatch_items:
             self._dispatch_index_item(item)
             self._dispatch_item(item)
 
@@ -66,7 +69,7 @@ class IDispatcher(abc.ABC):
         self.document_data = []
         self.document_id: int = 0
 
-    def _dispatch_index_item(self, item: MergedSegmentGroup) -> None:
+    def _dispatch_index_item(self, item: DispatchItem) -> None:
         self.document_data.append({**item.to_dict(), **{'document_id': self.document_id}})
         self.document_id += 1
 
@@ -137,9 +140,8 @@ class ZipFileDispatcher(IDispatcher):
         csv_str: str = self.document_index_str()
         self.zup.writestr('document_index.csv', csv_str)
 
-    def _dispatch_item(self, item: MergedSegmentGroup) -> None:
-        filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
-        self.zup.writestr(filename, item.data)
+    def _dispatch_item(self, item: DispatchItem) -> None:
+        self.zup.writestr(item.filename, item.data)
 
 
 class CheckpointDispatcher(ZipFileDispatcher):
@@ -151,20 +153,19 @@ class CheckpointDispatcher(ZipFileDispatcher):
     def close_target(self) -> None:
         return
 
-    def dispatch(self, group: Mapping[str, MergedSegmentGroup]) -> None:
+    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
         """Item is a Mapping in this case."""
         self._reset_index()
-        items: List[MergedSegmentGroup] = group.values()
-        if len(items) == 0:
+        if len(dispatch_items) == 0:
             return
         # FIXME: Only allowed for `protocol` level
-        checkpoint_name: str = f'{items[0].name}.zip'
-        sub_folder: str = items[0].name.split('-')[1]
+        checkpoint_name: str = f'{dispatch_items[0].name}.zip'
+        sub_folder: str = dispatch_items[0].name.split('-')[1]
         path: str = os.path.join(self.target_name, sub_folder)
         os.makedirs(path, exist_ok=True)
         with zipfile.ZipFile(checkpoint_name, mode="w", compression=zipfile.ZIP_DEFLATED) as zup:
             self.zup = zup
-            super().dispatch(group)
+            super().dispatch(dispatch_items)
         self.dispatch_index()
 
 

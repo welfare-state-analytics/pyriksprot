@@ -105,6 +105,10 @@ class Utterance:
         self.page_number: Optional[str] = page_number
 
     @property
+    def document_name(self) -> str:
+        return f'{self.who}_{self.u_id}'
+
+    @property
     def tagged_text(self) -> str:
         return self.annotation
 
@@ -321,6 +325,9 @@ class Protocol(UtteranceMixIn):
 
         return self
 
+    def get_year(self) -> int:
+        return int(self.date[:4])
+
     def checksum(self) -> Optional[str]:
         """Compute checksum for entire text."""
         with contextlib.suppress(Exception):
@@ -353,7 +360,7 @@ class Protocol(UtteranceMixIn):
         if segment_level == SegmentLevel.Speech:
             return [
                 dict(
-                    name=self.name,
+                    name=s.document_name,
                     who=s.who,
                     id=s.speech_id,
                     data=s.to_str(content_type),
@@ -365,7 +372,7 @@ class Protocol(UtteranceMixIn):
         if segment_level == SegmentLevel.Who:
             return [
                 dict(
-                    name=self.name,
+                    name=s.document_name,
                     who=s.who,
                     id=s.speech_id,
                     data=s.to_str(content_type),
@@ -378,12 +385,21 @@ class Protocol(UtteranceMixIn):
 
         if segment_level == SegmentLevel.Utterance:
             return [
-                dict(name=self.name, who=u.who, id=u.u_id, data=u.to_str(content_type), page_number=u.page_number)
+                dict(
+                    name=f'{self.name}_{u.document_name}',
+                    who=u.who,
+                    id=u.u_id,
+                    data=u.to_str(content_type),
+                    page_number=u.page_number,
+                )
                 for u in self.utterances
             ]
 
         if segment_level == SegmentLevel.Paragraph:
-            """Only text can be returned for paragraphs"""
+            """Only text can be returned for paragraphs
+            FIXME: Fixa namn!
+            """
+
             return [
                 dict(name=self.name, who=u.who, id=f"{u.u_id}@{i}", data=p, page_number=u.page_number)
                 for u in self.utterances
@@ -412,7 +428,7 @@ class Protocol(UtteranceMixIn):
             Iterable[ProtocolSegment]: [description]
         """
         segments: List[ProtocolSegment] = [
-            ProtocolSegment(content_type=content_type, **d)
+            ProtocolSegment(content_type=content_type, year=self.get_year(), **d)
             for d in self._to_segments(content_type, segment_level, segment_skip_size)
         ]
 
@@ -435,6 +451,7 @@ class ProtocolSegment:
     id: str
     data: str
     page_number: str
+    year: int
 
     def __repr__(self) -> str:
         return (
@@ -448,6 +465,24 @@ class ProtocolSegment:
     def data_z64(self) -> bytes:
         """Compress text, return base64 encoded string."""
         return compress(self.data)
+
+    def to_dict(self):
+        return {
+            'year': self.year,
+            'period': self.year,
+            'who': self.who,
+            'document_name': self.name,
+            'filename': self.filename,
+            'n_tokens': 0,            
+        }
+
+    @property
+    def extension(self) -> str:
+        return 'txt' if self.content_type == ContentType.Text else 'csv'
+
+    @property
+    def filename(self) -> str:
+        return f'{self.name}.{self.extension}'
 
 
 class ProtocolSegmentIterator(abc.ABC):
@@ -487,7 +522,7 @@ class ProtocolSegmentIterator(abc.ABC):
         self.speech_merge_strategy: str = speech_merge_strategy  # FIXME: used??
         self.multiproc_processes: int = multiproc_processes or 1
         self.multiproc_chunksize: int = multiproc_chunksize
-        self.multiproc_keep_order: int = multiproc_keep_order
+        self.multiproc_keep_order: bool = multiproc_keep_order
         self.preprocessor: Callable[[str], str] = preprocessor
 
     def __iter__(self):
@@ -538,7 +573,7 @@ class IMergeSpeechStrategy(abc.ABC):
             utterances = protocol.utterances
 
         return Speech(
-            document_name=protocol.name,
+            document_name=f'{protocol.name}_{utterances[0].who}_{utterances[0].u_id}',
             speech_id=utterances[0].u_id,
             who=utterances[0].who,
             page_number=utterances[0].page_number,
