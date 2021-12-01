@@ -35,7 +35,8 @@ disable=invalid-name,
         duplicate-code,
         consider-using-from-import,
         consider-using-dict-items,
-        unused-private-member
+        unused-private-member,
+        bad-option-value
         # apply-builtin,
         # backtick,
         # bad-inline-option,
