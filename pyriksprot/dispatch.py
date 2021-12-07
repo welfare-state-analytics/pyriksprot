@@ -2,19 +2,18 @@ from __future__ import annotations
 
 import abc
 import os
+import sys
 import zipfile
 from enum import Enum
+from types import ModuleType
 from typing import Any, List, Type, Union
 
 import pandas as pd
 
-from pyriksprot.interface import ProtocolSegment
-
-from .merge import MergedSegmentGroup
-from .utility import store_to_compressed_file
+from . import interface, merge, utility
 
 # TargetType = Literal['plain', 'zip', 'checkpoint', 'gzip', 'bz2', 'lzma']
-DispatchItem = Union[MergedSegmentGroup, ProtocolSegment]
+DispatchItem = Union[merge.MergedSegmentGroup, interface.ProtocolSegment]
 
 
 class TargetType(str, Enum):
@@ -27,6 +26,9 @@ class TargetType(str, Enum):
 
 
 class IDispatcher(abc.ABC):
+
+    name: str = 'parent'
+
     def __init__(self, target_name: str, target_type: TargetType):
         """Dispatches text blocks to a target_name zink.
 
@@ -74,7 +76,7 @@ class IDispatcher(abc.ABC):
         self.document_id += 1
 
     @abc.abstractmethod
-    def _dispatch_item(self, item: MergedSegmentGroup) -> None:
+    def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
         ...
 
     @staticmethod
@@ -92,14 +94,20 @@ class IDispatcher(abc.ABC):
         )
         return csv_str
 
+    @staticmethod
+    def dispatchers() -> List[ModuleType]:
+        return utility.find_subclasses(sys.modules[__name__], IDispatcher)
+
 
 class FolderDispatcher(IDispatcher):
     """Dispatch text to filesystem as single files (optionally compressed)"""
 
+    name: str = 'plain'
+
     def open_target(self, target_name: Any) -> None:
         os.makedirs(target_name, exist_ok=True)
 
-    def _dispatch_item(self, item: MergedSegmentGroup) -> None:
+    def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
         filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
         self.store(filename, item.data)
 
@@ -110,11 +118,34 @@ class FolderDispatcher(IDispatcher):
     def store(self, filename: str, text: str) -> None:
         """Store text to file."""
         path: str = os.path.join(self.target_name, f"{filename}")
-        store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
+        utility.store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
+
+
+# class FeatherDispatcher(IDispatcher):
+#     """Dispatch feather to filesystem as single files (optionally compressed)"""
+#     name: str = 'feather'
+
+#     def open_target(self, target_name: Any) -> None:
+#         os.makedirs(target_name, exist_ok=True)
+
+#     def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
+#         filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
+#         self.store(filename, item.data)
+
+#     def dispatch_index(self) -> None:
+#         """Write index of documents to disk."""
+#         self.store('document_index.csv', self.document_index_str())
+
+#     def store(self, filename: str, text: str) -> None:
+#         """Store text to file."""
+#         path: str = os.path.join(self.target_name, f"{filename}")
+#         utility.store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
 
 
 class ZipFileDispatcher(IDispatcher):
     """Dispatch text to a single zip file."""
+
+    name: str = 'zip'
 
     def __init__(self, target_name: str, target_type: TargetType):
         self.zup: zipfile.ZipFile = None
@@ -147,6 +178,8 @@ class ZipFileDispatcher(IDispatcher):
 class CheckpointDispatcher(ZipFileDispatcher):
     """Store as sequence of zipped CSV files (stream of Checkpoint)."""
 
+    name: str = 'checkpoint'
+
     def open_target(self, target_name: Any) -> None:
         return
 
@@ -163,7 +196,7 @@ class CheckpointDispatcher(ZipFileDispatcher):
         sub_folder: str = dispatch_items[0].name.split('-')[1]
         path: str = os.path.join(self.target_name, sub_folder)
         os.makedirs(path, exist_ok=True)
-        with zipfile.ZipFile(checkpoint_name, mode="w", compression=zipfile.ZIP_DEFLATED) as zup:
+        with zipfile.ZipFile(checkpoint_name, mode="w", compression=zipfile.ZIP_STORED) as zup:
             self.zup = zup
             super().dispatch(dispatch_items)
         self.dispatch_index()

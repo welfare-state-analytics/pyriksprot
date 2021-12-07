@@ -18,14 +18,17 @@ TARGET_TYPES = [e.value for e in dispatch.TargetType]
 def main(
     source_folder: str = None, target_name: str = None, target_type: str = None, content_type: str = 'tagged_frame'
 ):
+    content_type: interface.ContentType = interface.ContentType(content_type)
+    target_type: dispatch.TargetType = dispatch.TargetType(target_type)
+    segment_level: interface.SegmentLevel = interface.SegmentLevel.Speech
 
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
     )
     segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
-        content_type=interface.ContentType(content_type),
-        segment_level=interface.SegmentLevel.Protocol,
+        content_type=content_type,
+        segment_level=segment_level,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
     )
 

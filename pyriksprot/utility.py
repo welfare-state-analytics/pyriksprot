@@ -23,7 +23,8 @@ from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
-from typing import Any, Callable, List, Literal, Sequence, Set, TypeVar
+from types import ModuleType
+from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -389,3 +390,11 @@ def store_to_compressed_file(filename: str, text: str, target_type: Literal['pla
             fp.write(text)
     else:
         raise ValueError(f"unknown mode {target_type}")
+
+
+def find_subclasses(module: ModuleType, parent: Type) -> List[Type]:
+    return [
+        cls
+        for _, cls in inspect.getmembers(module)
+        if inspect.isclass(cls) and issubclass(cls, parent) and cls is not parent
+    ]

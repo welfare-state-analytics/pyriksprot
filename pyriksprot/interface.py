@@ -473,7 +473,7 @@ class ProtocolSegment:
             'who': self.who,
             'document_name': self.name,
             'filename': self.filename,
-            'n_tokens': 0,            
+            'n_tokens': 0,
         }
 
     @property
