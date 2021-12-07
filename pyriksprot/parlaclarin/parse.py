@@ -91,7 +91,14 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, None, name, self.text, '0', self.get_year()
+                        protocol_name=self.name,
+                        content_type=interface.ContentType.Text,
+                        name=name,
+                        who=None,
+                        id=name,
+                        data=self.text,
+                        page_number='0',
+                        year=self.get_year(),
                     )
                 ]
 
@@ -105,13 +112,14 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text,
-                        name,
-                        who,
-                        who,
-                        '\n'.join(data[who]),
-                        str(page_numbers[who]),
-                        self.get_year(),
+                        protocol_name=self.name,
+                        content_type=interface.ContentType.Text,
+                        name=name,
+                        who=who,
+                        id=who,
+                        data='\n'.join(data[who]),
+                        page_number=str(page_numbers[who]),
+                        year=self.get_year(),
                     )
                     for who in data
                 ]
@@ -127,13 +135,14 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text,
-                        name,
-                        who[n],
-                        n,
-                        '\n'.join(data[n]),
-                        str(page_numbers[n]),
-                        self.get_year(),
+                        protocol_name=self.name,
+                        content_type=interface.ContentType.Text,
+                        name=name,
+                        who=who[n],
+                        id=n,
+                        data='\n'.join(data[n]),
+                        page_number=str(page_numbers[n]),
+                        year=self.get_year(),
                     )
                     for n in data
                 ]
@@ -142,18 +151,32 @@ class XmlProtocol(abc.ABC):
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, u.who, u.u_id, u.text, str(u.page_number), self.get_year()
+                        protocol_name=self.name,
+                        content_type=interface.ContentType.Text,
+                        name=f'{self.name}_{i+1:03}',
+                        who=u.who,
+                        id=u.u_id,
+                        data=u.text,
+                        page_number=str(u.page_number),
+                        year=self.get_year(),
                     )
-                    for u in self.utterances
+                    for i, u in enumerate(self.utterances)
                 ]
 
             elif segment_level == interface.SegmentLevel.Paragraph:
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
-                        interface.ContentType.Text, name, u.who, f"{u.u_id}@{i}", p, str(u.page_number), self.get_year()
+                        protocol_name=self.name,
+                        content_type=interface.ContentType.Text,
+                        name=f'{self.name}_{j+1:03}_{i+1:03}',
+                        who=u.who,
+                        id=f"{u.u_id}@{i}",
+                        data=p,
+                        page_number=str(u.page_number),
+                        year=self.get_year(),
                     )
-                    for u in self.utterances
+                    for j, u in enumerate(self.utterances)
                     for i, p in enumerate(u.paragraphs)
                 ]
 

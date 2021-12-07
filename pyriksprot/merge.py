@@ -140,7 +140,7 @@ class SegmentMerger:
 
         for item in iterator:
 
-            source_item: corpus_index.CorpusSourceItem = self.source_index[item.name]
+            source_item: corpus_index.CorpusSourceItem = self.source_index[item.protocol_name]
 
             if source_item is None:
                 raise ValueError(f"source item not found: {item.name}")

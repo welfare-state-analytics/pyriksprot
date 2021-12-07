@@ -52,7 +52,7 @@ class CorpusSourceItem:
 
             if temporal_key in [None, '', 'document', 'protocol']:
                 """No temporal key gives a group per document/protocol"""
-                return item.name
+                return item.protocol_name
 
             if temporal_key == TemporalKey.Year:
                 return str(self.year)

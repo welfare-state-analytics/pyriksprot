@@ -123,6 +123,7 @@ def test_xml_protocol_texts_iterator_texts():
 EXPECTED_STREAM = {
     'protocol': [
         interface.ProtocolSegment(
+            'prot-1958-fake',
             interface.ContentType.Text,
             'prot-1958-fake',
             None,
@@ -132,6 +133,7 @@ EXPECTED_STREAM = {
             1958,
         ),
         interface.ProtocolSegment(
+            'prot-1960-fake',
             interface.ContentType.Text,
             'prot-1960-fake',
             None,
@@ -143,31 +145,81 @@ EXPECTED_STREAM = {
     ],
     'speech': [
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'A', 'c01', 'Hej! Detta är en mening.', '0', 1958
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-001',
+            'A',
+            'c01',
+            'Hej! Detta är en mening.',
+            '0',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'A', 'c02', 'Jag heter Ove.\nVad heter du?', '0', 1958
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-002',
+            'A',
+            'c02',
+            'Jag heter Ove.\nVad heter du?',
+            '0',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'B', 'c03', 'Jag heter Adam.\nOve är dum.', '1', 1958
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-003',
+            'B',
+            'c03',
+            'Jag heter Adam.\nOve är dum.',
+            '1',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'A', 'c01', 'Herr Talman! Jag talar.', '0', 1960
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-004',
+            'A',
+            'c01',
+            'Herr Talman! Jag talar.',
+            '0',
+            1960,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'A', 'c02', 'Det regnar ute.\nVisste du det?', '0', 1960
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-005',
+            'A',
+            'c02',
+            'Det regnar ute.\nVisste du det?',
+            '0',
+            1960,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'B', 'c03', 'Jag håller med.\nTalmannen är snäll.', '1', 1960
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-006',
+            'B',
+            'c03',
+            'Jag håller med.\nTalmannen är snäll.',
+            '1',
+            1960,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'C', 'c04', 'Jag håller också med.', '1', 1960
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-007',
+            'C',
+            'c04',
+            'Jag håller också med.',
+            '1',
+            1960,
         ),
     ],
     'who': [
         interface.ProtocolSegment(
-            interface.ContentType.Text,
             'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-001',
             'A',
             'A',
             'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
@@ -175,11 +227,19 @@ EXPECTED_STREAM = {
             1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'B', 'B', 'Jag heter Adam.\nOve är dum.', '1', 1958
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-002',
+            'B',
+            'B',
+            'Jag heter Adam.\nOve är dum.',
+            '1',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text,
             'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-003',
             'A',
             'A',
             'Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?',
@@ -187,34 +247,106 @@ EXPECTED_STREAM = {
             1960,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'B', 'B', 'Jag håller med.\nTalmannen är snäll.', '1', 1960
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-004',
+            'B',
+            'B',
+            'Jag håller med.\nTalmannen är snäll.',
+            '1',
+            1960,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'C', 'C', 'Jag håller också med.', '1', 1960
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-005',
+            'C',
+            'C',
+            'Jag håller också med.',
+            '1',
+            1960,
         ),
     ],
     'utterance': [
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'A', 'i-1', 'Hej! Detta är en mening.', '0', 1958
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-001',
+            'A',
+            'i-1',
+            'Hej! Detta är en mening.',
+            '0',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'A', 'i-2', 'Jag heter Ove.\nVad heter du?', '0', 1958
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-002',
+            'A',
+            'i-2',
+            'Jag heter Ove.\nVad heter du?',
+            '0',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1958-fake', 'B', 'i-3', 'Jag heter Adam.', '1', 1958
-        ),
-        interface.ProtocolSegment(interface.ContentType.Text, 'prot-1958-fake', 'B', 'i-4', 'Ove är dum.', '1', 1958),
-        interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'A', 'i-1', 'Herr Talman! Jag talar.', '0', 1960
-        ),
-        interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'A', 'i-2', 'Det regnar ute.\nVisste du det?', '0', 1960
-        ),
-        interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'B', 'i-3', 'Jag håller med.\nTalmannen är snäll.', '1', 1960
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-003',
+            'B',
+            'i-3',
+            'Jag heter Adam.',
+            '1',
+            1958,
         ),
         interface.ProtocolSegment(
-            interface.ContentType.Text, 'prot-1960-fake', 'C', 'i-4', 'Jag håller också med.', '1', 1960
+            'prot-1958-fake',
+            interface.ContentType.Text,
+            'prot-1958-fake-004',
+            'B',
+            'i-4',
+            'Ove är dum.',
+            '1',
+            1958,
+        ),
+        interface.ProtocolSegment(
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-005',
+            'A',
+            'i-1',
+            'Herr Talman! Jag talar.',
+            '0',
+            1960,
+        ),
+        interface.ProtocolSegment(
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-006',
+            'A',
+            'i-2',
+            'Det regnar ute.\nVisste du det?',
+            '0',
+            1960,
+        ),
+        interface.ProtocolSegment(
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-007',
+            'B',
+            'i-3',
+            'Jag håller med.\nTalmannen är snäll.',
+            '1',
+            1960,
+        ),
+        interface.ProtocolSegment(
+            'prot-1960-fake',
+            interface.ContentType.Text,
+            'prot-1960-fake-008',
+            'C',
+            'i-4',
+            'Jag håller också med.',
+            '1',
+            1960,
         ),
     ],
 }

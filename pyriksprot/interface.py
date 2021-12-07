@@ -270,6 +270,7 @@ class UtteranceMixIn:
 class Speech(UtteranceMixIn):
     """Entity that represents a (processed) speech within a single document."""
 
+    protocol_name: str
     document_name: str
     speech_id: str
     who: str
@@ -386,13 +387,13 @@ class Protocol(UtteranceMixIn):
         if segment_level == SegmentLevel.Utterance:
             return [
                 dict(
-                    name=f'{self.name}_{u.document_name}',
+                    name=f'{self.name}_{i+1:03}',
                     who=u.who,
                     id=u.u_id,
                     data=u.to_str(content_type),
                     page_number=u.page_number,
                 )
-                for u in self.utterances
+                for i, u in enumerate(self.utterances)
             ]
 
         if segment_level == SegmentLevel.Paragraph:
@@ -401,8 +402,14 @@ class Protocol(UtteranceMixIn):
             """
 
             return [
-                dict(name=self.name, who=u.who, id=f"{u.u_id}@{i}", data=p, page_number=u.page_number)
-                for u in self.utterances
+                dict(
+                    name=f'{self.name}_{j+1:03}_{i+1:03}',
+                    who=u.who,
+                    id=f"{u.u_id}@{i}",
+                    data=p,
+                    page_number=u.page_number,
+                )
+                for j, u in enumerate(self.utterances)
                 for i, p in enumerate(u.paragraphs)
             ]
 
@@ -428,7 +435,7 @@ class Protocol(UtteranceMixIn):
             Iterable[ProtocolSegment]: [description]
         """
         segments: List[ProtocolSegment] = [
-            ProtocolSegment(content_type=content_type, year=self.get_year(), **d)
+            ProtocolSegment(protocol_name=self.name, content_type=content_type, year=self.get_year(), **d)
             for d in self._to_segments(content_type, segment_level, segment_skip_size)
         ]
 
@@ -445,6 +452,7 @@ class Protocol(UtteranceMixIn):
 @dataclass
 class ProtocolSegment:
 
+    protocol_name: str
     content_type: ContentType
     name: str
     who: str
@@ -471,6 +479,7 @@ class ProtocolSegment:
             'year': self.year,
             'period': self.year,
             'who': self.who,
+            'protocol_name': self.protocol_name,
             'document_name': self.name,
             'filename': self.filename,
             'n_tokens': 0,
@@ -573,7 +582,8 @@ class IMergeSpeechStrategy(abc.ABC):
             utterances = protocol.utterances
 
         return Speech(
-            document_name=f'{protocol.name}_{utterances[0].who}_{utterances[0].u_id}',
+            protocol_name=protocol.name,
+            document_name=f'{protocol.name}_{speech_index:03}',
             speech_id=utterances[0].u_id,
             who=utterances[0].who,
             page_number=utterances[0].page_number,

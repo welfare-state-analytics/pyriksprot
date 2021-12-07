@@ -50,6 +50,7 @@ def test_create_grouping_hashcoder(
     assert callable(hashcoder)
 
     item: interface.ProtocolSegment = interface.ProtocolSegment(
+        protocol_name="apa",
         content_type=interface.ContentType.TaggedFrame,
         id="a",
         name="apa",

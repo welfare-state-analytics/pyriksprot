@@ -171,11 +171,11 @@ def test_merge_speech_by_strategy(
         assert len(speeches) == expected_count
 
         for i, speech in enumerate(speeches):
+            assert speech.speech_index == i + 1
             assert speech.speech_date == protocol.date
-            assert speech.document_name == protocol.name
+            assert speech.document_name == f'{protocol.name}_{speech.speech_index:03}'
             assert speech.speech_name.startswith(protocol.name)
             assert speech.delimiter == '\n'
-            assert speech.speech_index == i + 1
             for interface.utterance in speech.utterances:
                 assert interface.utterance.who == speech.who
 
@@ -193,7 +193,8 @@ def test_speech_annotation():
         interface.Utterance(u_id='i-3', who="apa", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
-        document_name="prot-apa",
+        protocol_name="prot-01",
+        document_name="prot-01-001",
         speech_id="s-1",
         who="apa",
         speech_date="1999",
@@ -210,7 +211,8 @@ def test_speech_annotation():
         interface.Utterance(u_id='i-3', who="apa", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
-        document_name="prot-apa",
+        protocol_name="prot-01",
+        document_name="prot-01-001",
         speech_id="s-1",
         who="apa",
         speech_date="1999",
@@ -227,7 +229,8 @@ def test_speech_annotation():
         interface.Utterance(u_id='i-3', who="apa", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
-        document_name="prot-apa",
+        protocol_name="prot-01",
+        document_name="prot-01-001",
         speech_id="s-1",
         who="apa",
         speech_date="1999",
