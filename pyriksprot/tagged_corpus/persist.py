@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import glob
 import json
 import os
@@ -53,23 +52,20 @@ def store_protocol(
 
 def load_metadata(filename: str) -> Optional[dict]:
     """Read metadata attributes stored in `metadata.json` """
-    if not os.path.isfile(filename):
-        raise FileNotFoundError(filename)
+    if is_empty(filename) or not zipfile.is_zipfile(filename):
+        # logger.warning(f'Skipping {os.path.basename(filename)} (corrupt or empty zip)')
+        return None
 
-    with contextlib.suppress(Exception):
+    with zipfile.ZipFile(filename, 'r') as fp:
 
-        with zipfile.ZipFile(filename, 'r') as fp:
+        filenames: List[str] = [f.filename for f in fp.filelist]
 
-            filenames: List[str] = [f.filename for f in fp.filelist]
+        if METADATA_FILENAME not in filenames:
+            return None
 
-            if METADATA_FILENAME not in filenames:
-                return None
+        json_str = fp.read(METADATA_FILENAME).decode('utf-8')
 
-            json_str = fp.read(METADATA_FILENAME).decode('utf-8')
-
-            return json.loads(json_str)
-
-    return None
+        return json.loads(json_str)
 
 
 PROTOCOL_LOADERS: dict = dict(
@@ -85,7 +81,7 @@ class FileIsEmptyError(Exception):
 def load_protocol(filename: str) -> Optional[interface.Protocol]:
     """Loads a tagged protocol stored in ZIP as JSON or CSV"""
 
-    if is_empty(filename):
+    if is_empty(filename) or not zipfile.is_zipfile(filename):
         raise FileIsEmptyError(filename)
 
     metadata: dict = load_metadata(filename)
