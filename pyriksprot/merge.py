@@ -61,7 +61,7 @@ class MergedSegmentGroup:
 
     @property
     def filename(self) -> str:
-        if self.temporal_key is None or self.temporal_key == self.name:
+        if self.temporal_key is None or self.name.startswith(self.temporal_key):
             filename: str = f'{self.name}.{self.extension}'
         else:
             filename: str = f'{self.temporal_key}_{self.name}.{self.extension}'
