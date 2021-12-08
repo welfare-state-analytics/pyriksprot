@@ -1,8 +1,7 @@
 import click
-from tqdm import tqdm
 
-from pyriksprot import corpus_index, dispatch, interface
-from pyriksprot.tagged_corpus import iterate
+from pyriksprot import dispatch, interface
+from pyriksprot.tagged_corpus import extract
 
 CONTENT_TYPES = [e.value for e in interface.ContentType]
 TARGET_TYPES = [e.value for e in dispatch.TargetType]
@@ -11,7 +10,7 @@ TARGET_TYPES = [e.value for e in dispatch.TargetType]
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.option('--target-type', default='zip', type=click.Choice(TARGET_TYPES), help='Target type')
+@click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
 @click.option(
     '--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Content type to extract'
 )
@@ -20,25 +19,31 @@ def main(
 ):
     content_type: interface.ContentType = interface.ContentType(content_type)
     target_type: dispatch.TargetType = dispatch.TargetType(target_type)
-    segment_level: interface.SegmentLevel = interface.SegmentLevel.Speech
 
-    source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
-        source_folder=source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
-    )
-    segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
-        filenames=source_index.paths,
+    extract.extract_corpus_tags(
+        source_folder=source_folder,
+        target_name=target_name,
         content_type=content_type,
-        segment_level=segment_level,
+        target_type=target_type,
+        segment_level=interface.SegmentLevel.Speech,
+        segment_skip_size=1,
+        years=None,
+        temporal_key=None,
+        group_keys=None,
+        multiproc_keep_order=None,
+        multiproc_processes=1,
+        multiproc_chunksize=100,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
     )
 
-    with dispatch.IDispatcher.get_cls(target_type)(
-        target_name=target_name,
-        target_type=dispatch.TargetType.Zip,
-    ) as dispatcher:
-        for segment in tqdm(segments):
-            dispatcher.dispatch([segment])
-
 
 if __name__ == "__main__":
-    main()
+    # main()
+
+    from click.testing import CliRunner
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ['/data/riksdagen_corpus_data/tagged_frames/', '/data/riksdagen_corpus_data/tagged-speech-corpus']
+    )
+    print(result.output)
