@@ -48,7 +48,7 @@ def test_folder_with_zips_dispatch(tagged_protocol_level_groups):
         target_type=dispatch.TargetType.Gzip,
     ) as dispatcher:
         for group in tagged_protocol_level_groups:
-            dispatcher.dispatch(group.values())
+            dispatcher.dispatch(list(group.values()))
     assert os.path.isdir(target_name)
 
 
@@ -60,5 +60,5 @@ def test_zip_file_dispatch(tagged_protocol_level_groups):
         target_type=dispatch.TargetType.Zip,
     ) as dispatcher:
         for group in tagged_protocol_level_groups:
-            dispatcher.dispatch(group.values())
+            dispatcher.dispatch(list(group.values()))
     assert os.path.isfile(target_name)
