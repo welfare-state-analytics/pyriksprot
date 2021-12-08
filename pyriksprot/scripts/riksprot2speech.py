@@ -1,3 +1,5 @@
+import zipfile
+
 import click
 
 from pyriksprot import dispatch, interface
@@ -5,6 +7,11 @@ from pyriksprot.tagged_corpus import extract
 
 CONTENT_TYPES = [e.value for e in interface.ContentType]
 TARGET_TYPES = [e.value for e in dispatch.TargetType]
+COMPRESSION_TYPES = {
+    "DEFLATED": zipfile.ZIP_DEFLATED,
+    "STORED": zipfile.ZIP_STORED,
+    "LZMA": zipfile.ZIP_LZMA,
+}
 
 
 @click.command()
@@ -12,13 +19,24 @@ TARGET_TYPES = [e.value for e in dispatch.TargetType]
 @click.argument('target-name', type=click.STRING)
 @click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
 @click.option(
+    '--compression-type',
+    default='DEFLATED',
+    type=click.Choice(list(COMPRESSION_TYPES.values())),
+    help='Target compression type',
+)
+@click.option(
     '--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Content type to extract'
 )
 def main(
-    source_folder: str = None, target_name: str = None, target_type: str = None, content_type: str = 'tagged_frame'
+    source_folder: str = None,
+    target_name: str = None,
+    target_type: str = None,
+    content_type: str = 'tagged_frame',
+    compression_type: str = 'DEFLATED',
 ):
     content_type: interface.ContentType = interface.ContentType(content_type)
     target_type: dispatch.TargetType = dispatch.TargetType(target_type)
+    compression: int = COMPRESSION_TYPES[compression_type]
 
     extract.extract_corpus_tags(
         source_folder=source_folder,
@@ -34,6 +52,7 @@ def main(
         multiproc_processes=1,
         multiproc_chunksize=100,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
+        compression=compression,
     )
 
 

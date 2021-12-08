@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import zipfile
 from typing import Sequence
 
 from .. import corpus_index, dispatch, interface, member, merge
@@ -22,6 +23,7 @@ def extract_corpus_tags(
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
     speech_merge_strategy: interface.MergeSpeechStrategyType = 'who_sequence',
+    compression: int = zipfile.ZIP_LZMA,
     **_,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
@@ -70,7 +72,11 @@ def extract_corpus_tags(
         grouping_keys=group_keys,
     )
 
-    with dispatch.IDispatcher.get_cls(target_type)(target_type=target_type, target_name=target_name) as dispatcher:
+    with dispatch.IDispatcher.get_cls(target_type)(
+        target_type=target_type,
+        target_name=target_name,
+        compression=compression,
+    ) as dispatcher:
         for item in merger.merge(texts):
             dispatcher.dispatch(list(item.values()))
 

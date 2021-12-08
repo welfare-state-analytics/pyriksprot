@@ -31,7 +31,7 @@ class IDispatcher(abc.ABC):
 
     name: str = 'parent'
 
-    def __init__(self, target_name: str, target_type: TargetType):
+    def __init__(self, target_name: str, target_type: TargetType, **kwargs):
         """Dispatches text blocks to a target_name zink.
 
         Args:
@@ -42,6 +42,7 @@ class IDispatcher(abc.ABC):
         self.document_data: List[dict] = []
         self.document_id: int = 0
         self.target_type: TargetType = target_type
+        self.kwargs: dict = kwargs
 
     def __enter__(self) -> IDispatcher:
         self.open_target(self.target_name)
@@ -149,9 +150,9 @@ class ZipFileDispatcher(IDispatcher):
 
     name: str = 'zip'
 
-    def __init__(self, target_name: str, target_type: TargetType):
+    def __init__(self, target_name: str, target_type: TargetType, **kwargs):
         self.zup: zipfile.ZipFile = None
-        super().__init__(target_name, target_type)
+        super().__init__(target_name, target_type, **kwargs)
 
     def open_target(self, target_name: Any) -> None:
         """Create and open a new zip file."""
@@ -204,12 +205,13 @@ class CheckpointDispatcher(IDispatcher):
         checkpoint_name: str = f'{dispatch_items[0].temporal_key}.zip'
         sub_folder: str = dispatch_items[0].temporal_key.split('-')[1]
         path: str = jj(self.target_name, sub_folder)
+        compression: int = self.kwargs.get('compression', zipfile.ZIP_LZMA)
 
         os.makedirs(path, exist_ok=True)
 
         self._reset_index()
 
-        with zipfile.ZipFile(jj(path, checkpoint_name), mode="w", compression=zipfile.ZIP_LZMA) as fp:
+        with zipfile.ZipFile(jj(path, checkpoint_name), mode="w", compression=compression) as fp:
 
             for item in dispatch_items:
                 fp.writestr(item.filename, item.data)
