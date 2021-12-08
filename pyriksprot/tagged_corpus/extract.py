@@ -48,7 +48,9 @@ def extract_corpus_tags(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
     member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(
-        f'{source_folder}/members_of_parliament.csv'
+        member_source=None,
+        branch='dev',
+        # member_source=f'{source_folder}/members_of_parliament.csv', branch='main'
     )
     texts: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
@@ -70,6 +72,6 @@ def extract_corpus_tags(
 
     with dispatch.IDispatcher.get_cls(target_type)(target_type=target_type, target_name=target_name) as dispatcher:
         for item in merger.merge(texts):
-            dispatcher.dispatch(item.values())
+            dispatcher.dispatch(list(item.values()))
 
     print(f"Corpus stored in {target_name}.")
