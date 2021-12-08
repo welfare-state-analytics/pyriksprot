@@ -38,12 +38,12 @@ def main(
 
 
 if __name__ == "__main__":
-    # main()
+    main()
 
-    from click.testing import CliRunner
+    # from click.testing import CliRunner
 
-    runner = CliRunner()
-    result = runner.invoke(
-        main, ['/data/riksdagen_corpus_data/tagged_frames/', '/data/riksdagen_corpus_data/tagged-speech-corpus']
-    )
-    print(result.output)
+    # runner = CliRunner()
+    # result = runner.invoke(
+    #     main, ['/data/riksdagen_corpus_data/tagged_frames/', '/data/riksdagen_corpus_data/tagged-speech-corpus']
+    # )
+    # print(result.output)
