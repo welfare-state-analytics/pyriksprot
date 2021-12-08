@@ -15,6 +15,8 @@ from . import interface, merge, utility
 # TargetType = Literal['plain', 'zip', 'checkpoint', 'gzip', 'bz2', 'lzma']
 DispatchItem = Union[merge.MergedSegmentGroup, interface.ProtocolSegment]
 
+jj = os.path.join
+
 
 class TargetType(str, Enum):
     Plain = 'plain'
@@ -117,7 +119,7 @@ class FolderDispatcher(IDispatcher):
 
     def store(self, filename: str, text: str) -> None:
         """Store text to file."""
-        path: str = os.path.join(self.target_name, f"{filename}")
+        path: str = jj(self.target_name, f"{filename}")
         utility.store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
 
 
@@ -175,7 +177,7 @@ class ZipFileDispatcher(IDispatcher):
         self.zup.writestr(item.filename, item.data)
 
 
-class CheckpointDispatcher(ZipFileDispatcher):
+class CheckpointDispatcher(IDispatcher):
     """Store as sequence of zipped CSV files (stream of Checkpoint)."""
 
     name: str = 'checkpoint'
@@ -186,20 +188,36 @@ class CheckpointDispatcher(ZipFileDispatcher):
     def close_target(self) -> None:
         return
 
+    def _dispatch_item(self, item: DispatchItem) -> None:
+        return
+
+    def dispatch_index(self) -> None:
+        return
+
     def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
         """Item is a Mapping in this case."""
         self._reset_index()
         if len(dispatch_items) == 0:
             return
         # FIXME: Only allowed for `protocol` level
-        checkpoint_name: str = f'{dispatch_items[0].name}.zip'
-        sub_folder: str = dispatch_items[0].name.split('-')[1]
-        path: str = os.path.join(self.target_name, sub_folder)
+        # NOTE: temporal_key is protocol name at `protocol` level
+        checkpoint_name: str = f'{dispatch_items[0].temporal_key}.zip'
+        sub_folder: str = dispatch_items[0].temporal_key.split('-')[1]
+        path: str = jj(self.target_name, sub_folder)
+
         os.makedirs(path, exist_ok=True)
-        with zipfile.ZipFile(checkpoint_name, mode="w", compression=zipfile.ZIP_STORED) as zup:
-            self.zup = zup
-            super().dispatch(dispatch_items)
-        self.dispatch_index()
+
+        self._reset_index()
+
+        with zipfile.ZipFile(jj(path, checkpoint_name), mode="w", compression=zipfile.ZIP_LZMA) as fp:
+
+            for item in dispatch_items:
+                fp.writestr(item.filename, item.data)
+                self._dispatch_index_item(item)
+
+            if len(self.document_data) == 0:
+                fp.writestr('document_index.csv', self.document_index_str())
+                self._reset_index()
 
 
 # class SingleTaggedFrameDispatcher(IDispatcher):
@@ -221,4 +239,4 @@ class CheckpointDispatcher(ZipFileDispatcher):
 
 
 class S3Dispatcher:
-    ...
+    name: str = 'S3'
