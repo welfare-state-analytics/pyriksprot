@@ -88,6 +88,6 @@ def extract_corpus_text(
 
     with dispatch.IDispatcher.get_cls(target_type)(target_name, target_type) as dispatcher:
         for item in merger.merge(segments):
-            dispatcher.dispatch(item.values())
+            dispatcher.dispatch(list(item.values()))
 
     print(f"Corpus stored in {target_name}.")
