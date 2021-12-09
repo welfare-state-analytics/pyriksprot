@@ -89,8 +89,8 @@ class CorpusSourceItem:
 class CorpusSourceIndex:
     def __init__(self, source_items: List[CorpusSourceItem]):
 
-        self.source_items = source_items
-        self.lookup = {x.name: x for x in self.source_items}
+        self.source_items: List[CorpusSourceItem] = source_items
+        self.lookup: dict = {x.name: x for x in self.source_items}
 
     def __getitem__(self, key: str) -> CorpusSourceItem:
         return self.lookup.get(key)
