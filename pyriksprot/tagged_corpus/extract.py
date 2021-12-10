@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import zipfile
 from typing import Sequence
+from loguru import logger
 
 from tqdm import tqdm
 
@@ -48,9 +49,11 @@ def extract_corpus_tags(
         multiproc_processes (int, optional): Number of processes during iterate. Defaults to 1.
         multiproc_chunksize (int, optional): Chunksize to use per process during iterate. Defaults to 100.
     """
+    logger.info("creating index over corpus source item...")
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
+    logger.info("loading index over parliamentary persons...")
     member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(
         source_folder=None,
         branch='dev',
@@ -67,6 +70,7 @@ def extract_corpus_tags(
         speech_merge_strategy=speech_merge_strategy,
         preprocessor=None,
     )
+
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
         member_index=member_index,
@@ -79,7 +83,16 @@ def extract_corpus_tags(
         target_name=target_name,
         compression=compression,
     ) as dispatcher:
-        for item in tqdm(merger.merge(texts)):
+
+        n_total: int = len(source_index.source_items)
+
+        for item in tqdm(merger.merge(texts), total=n_total, miniters=10):
+            if not item:
+                logger.error("merge returned empty data")
+                continue
+            # else:
+            # logger.info(item[list(item.keys())[0]].temporal_key)
             dispatcher.dispatch(list(item.values()))
+
 
     print(f"Corpus stored in {target_name}.")
