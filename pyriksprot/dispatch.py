@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+from collections import defaultdict
 import os
 import sys
 import zipfile
@@ -28,6 +29,7 @@ class TargetType(str, Enum):
     Gzip = 'gzip'
     Bz2 = 'bz2'
     Lzma = 'lzma'
+    Feather_ID = 'feather_id'
 
 
 class IDispatcher(abc.ABC):
@@ -272,6 +274,85 @@ class FeatherDispatcher(FolderDispatcher):
 
         target_name: str = os.path.join(self.target_name, 'document_index.feather')
         document_index.to_feather(target_name)  # pylint: disable=no-member
+
+class FeatherDispatcherWithID(FolderDispatcher):
+    """Store merged group items in a single tagged frame.
+
+    NOTE! This dispatcher is ONLY tested for segements at a Speech level.
+
+    """
+
+    name: str = 'feather_id'
+
+    def _dispatch_item(self, item: DispatchItem) -> None:
+        return
+
+    def __init__(self, target_name: str, target_type: TargetType, **kwargs):
+        super().__init__(target_name, target_type, **kwargs)
+        self.token2id: defaultdict = defaultdict()
+        self.token2id.default_factory = self.token2id.__len__
+
+    
+
+    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
+
+        if len(dispatch_items) == 0:
+            return
+
+        first_item: DispatchItem = dispatch_items[0]
+
+        sub_folder: str = first_item.temporal_key.split('-')[1]
+        path: str = jj(self.target_name, sub_folder)
+        target_name: str = jj(path, f'{first_item.temporal_key}.feather')
+
+        if first_item.grouping_keys:
+            raise ValueError('FeatherDispatcher currently only valid for intra-protocol dispatch segments')
+
+        def fg(token):
+            return self.token2id[token]
+
+        # FIXME: Add guard for temporal key not in in year/decade/lustrum/custom
+        os.makedirs(path, exist_ok=True)
+
+        tagged_frames: List[pd.DataFrame] = []
+        for item in dispatch_items:
+            tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t', quoting=3, dtype=str) 
+            tagged_frame['document_id'] = self.document_id
+            tagged_frame['token_id'] = tagged_frame.token.apply(fg)
+            tagged_frame['lemma_id'] = tagged_frame.lemma.apply(fg)
+            tagged_frame.drop(columns=['lemma', 'token'],inplace=True)
+            tagged_frames.append(tagged_frame)
+            item.n_tokens = len(tagged_frame)
+            self._dispatch_index_item(item)
+
+        total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
+
+        """Reduce size of data frame"""
+        if 'xpos' in total_frame.columns:
+            total_frame.drop(columns='xpos', inplace=True)
+
+        total_frame.to_feather(target_name)
+
+    def dispatch_index(self) -> None:
+        """Write index of documents to disk."""
+
+        if len(self.document_data) == 0:
+            return
+
+        document_index: pd.DataFrame = self.document_index()
+
+        for column_name in ['Unnamed: 0', 'period']:
+            if column_name in document_index.columns:
+                document_index.drop(columns=column_name, inplace=True)  # pylint: disable=no-member
+
+        document_index['year'] = trim_series_type(document_index.year)  # pylint: disable=no-member
+        document_index['n_tokens'] = trim_series_type(document_index.n_tokens)  # pylint: disable=no-member
+        document_index['document_id'] = trim_series_type(document_index.document_id)  # pylint: disable=no-member
+
+        document_index.to_feather(os.path.join(self.target_name, 'document_index.feather'))  # pylint: disable=no-member
+
+        vocabulary = pd.DataFrame(data={'token':self.token2id.keys(), 'token_id':self.token2id.values()})
+        vocabulary.to_feather(os.path.join(self.target_name, 'token2id.feather'))  # pylint: disable=no-member
 
 
 def trim_series_type(series: pd.Series) -> pd.Series:
