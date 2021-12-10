@@ -397,9 +397,7 @@ class Protocol(UtteranceMixIn):
             ]
 
         if segment_level == SegmentLevel.Paragraph:
-            """Only text can be returned for paragraphs
-            FIXME: Fixa namn!
-            """
+            """Only text can be returned for paragraphs"""
 
             return [
                 dict(
@@ -460,15 +458,19 @@ class ProtocolSegment:
     data: str
     page_number: str
     year: int
+    n_tokens: int = 0
 
     def __repr__(self) -> str:
         return (
+            f"{self.protocol_name or '*'}\t"
             f"{self.name or '*'}\t"
-            f"{self.id or '?'}\t"
             f"{self.who or '*'}\t"
+            f"{self.id or '?'}\t"
+            f"{self.data or '?'}\t"
             f"{self.page_number or ''}\t"
-            f"{len(self.data)/1024.0:.2f}kB\t"
         )
+
+    #            f"{len(self.data)/1024.0:.2f}kB\t"
 
     def data_z64(self) -> bytes:
         """Compress text, return base64 encoded string."""
@@ -482,7 +484,7 @@ class ProtocolSegment:
             'protocol_name': self.protocol_name,
             'document_name': self.name,
             'filename': self.filename,
-            'n_tokens': 0,
+            'n_tokens': self.n_tokens,
         }
 
     @property
@@ -644,7 +646,7 @@ class MergeSpeechByChain(IMergeSpeechStrategy):
 
             if next_id is not None:
                 if next_id != u.u_id:
-                    logger.error(
+                    logger.warning(
                         f"{protocol.name}.u[{u.u_id}]: current u.id differs from previous u.next_id '{next_id}'"
                     )
 
