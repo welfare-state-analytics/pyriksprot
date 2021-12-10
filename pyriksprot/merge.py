@@ -4,6 +4,8 @@ import hashlib
 from dataclasses import dataclass, field, fields
 from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple, Type
 
+from loguru import logger
+
 from . import corpus_index, interface, member, utility
 
 # pylint: disable=too-many-arguments
@@ -125,59 +127,66 @@ class SegmentMerger:
     ) -> Iterable[Mapping[str, MergedSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
-        current_temporal_hashcode: str = None
-        current_group: Mapping[str, MergedSegmentGroup] = {}
-        grouping_keys: Set[str] = set(self.grouping_keys)
+        try:
+            current_temporal_category: str = None
+            current_group: Mapping[str, MergedSegmentGroup] = {}
+            grouping_keys: Set[str] = set(self.grouping_keys)
 
-        # if len(grouping_keys or []) == 0:
-        #     raise ValueError("no grouping key specified")
+            # if len(grouping_keys or []) == 0:
+            #     raise ValueError("no grouping key specified")
 
-        if hasattr(iterator, 'segment_level'):
+            if hasattr(iterator, 'segment_level'):
 
-            if iterator.segment_level == interface.SegmentLevel.Protocol:
+                if iterator.segment_level == interface.SegmentLevel.Protocol:
 
-                if len(grouping_keys) > 0:
-                    raise ValueError("cannot group by key when segement level is entire protocol.")
+                    if len(grouping_keys) > 0:
+                        raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
 
-        for item in iterator:
+            for item in iterator:
 
-            source_item: corpus_index.CorpusSourceItem = self.source_index[item.protocol_name]
+                source_item: corpus_index.CorpusSourceItem = self.source_index[item.protocol_name]
 
-            if source_item is None:
-                raise ValueError(f"source item not found: {item.name}")
+                if source_item is None:
+                    logger.error(f"source item not found: {item.name}")
+                    # raise ValueError(f"source item not found: {item.name}")
+                    continue
 
-            temporal_hashcode: str = source_item.temporal_category(self.temporal_key, item)
-            who: member.ParliamentaryRole = None if item.who is None else self.member_index[item.who]
+                temporal_category: str = source_item.temporal_category(self.temporal_key, item)
+                who: member.ParliamentaryRole = None if item.who is None else self.member_index[item.who]
 
-            if current_temporal_hashcode != temporal_hashcode:
-                # logger.info(f"aggregating {temporal_hashcode}")
-                """Yield previous group"""
-                if current_group:
-                    yield current_group
+                if current_temporal_category != temporal_category:
 
-                current_group, current_temporal_hashcode = {}, temporal_hashcode
+                    """Yield previous group"""
+                    if current_group:
+                        yield current_group
 
-            grouping_values, group_str, group_hashcode = self.grouping_hashcoder(item, who, source_item)
+                    current_group, current_temporal_category = {}, temporal_category
 
-            if group_hashcode not in current_group:
+                grouping_values, group_str, group_hashcode = self.grouping_hashcoder(item, who, source_item)
 
-                current_group[group_hashcode] = MergedSegmentGroup(
-                    content_type=item.content_type,
-                    temporal_key=temporal_hashcode,
-                    grouping_keys=self.grouping_keys,
-                    grouping_values=grouping_values,
-                    id=group_hashcode,
-                    name=group_str,
-                    page_number=0,
-                    year=self.to_year(source_item, self.temporal_key),
-                    category_items=[],
-                )
+                if group_hashcode not in current_group:
 
-            current_group[group_hashcode].add(item)
+                    current_group[group_hashcode] = MergedSegmentGroup(
+                        content_type=item.content_type,
+                        temporal_key=temporal_category,
+                        grouping_keys=self.grouping_keys,
+                        grouping_values=grouping_values,
+                        id=group_hashcode,
+                        name=group_str,
+                        page_number=0,
+                        year=self.to_year(source_item, self.temporal_key),
+                        category_items=[],
+                    )
 
-        """Yield last group"""
-        if current_group:
-            yield current_group
+                current_group[group_hashcode].add(item)
+
+            """Yield last group"""
+            if current_group:
+                yield current_group
+
+        except Exception as ex:
+            logger.exception(ex)
+            raise
 
     def to_year(self, source_item: corpus_index.CorpusSourceItem, temporal_key: interface.TemporalKey) -> int:
         """Compute a year that represents the group."""
