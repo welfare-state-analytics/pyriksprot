@@ -85,17 +85,15 @@ class XmlProtocol(abc.ABC):
         """Generate text blocks from `protocol`. Yield each block as a tuple (name, who, id, text, page_number)."""
         try:
 
-            name: str = self.name
-
             if segment_level in [interface.SegmentLevel.Protocol, None]:
 
                 items: Iterable[interface.ProtocolSegment] = [
                     interface.ProtocolSegment(
                         protocol_name=self.name,
                         content_type=interface.ContentType.Text,
-                        name=name,
+                        name=self.name,
                         who=None,
-                        id=name,
+                        id=self.name,
                         data=self.text,
                         page_number='0',
                         year=self.get_year(),
@@ -114,14 +112,14 @@ class XmlProtocol(abc.ABC):
                     interface.ProtocolSegment(
                         protocol_name=self.name,
                         content_type=interface.ContentType.Text,
-                        name=name,
+                        name=f'{self.name}_{i+1:03}',
                         who=who,
                         id=who,
                         data='\n'.join(data[who]),
                         page_number=str(page_numbers[who]),
                         year=self.get_year(),
                     )
-                    for who in data
+                    for i, who in enumerate(data)
                 ]
 
             elif segment_level == interface.SegmentLevel.Speech:
@@ -137,14 +135,14 @@ class XmlProtocol(abc.ABC):
                     interface.ProtocolSegment(
                         protocol_name=self.name,
                         content_type=interface.ContentType.Text,
-                        name=name,
+                        name=f'{self.name}_{i+1:03}',
                         who=who[n],
                         id=n,
                         data='\n'.join(data[n]),
                         page_number=str(page_numbers[n]),
                         year=self.get_year(),
                     )
-                    for n in data
+                    for i, n in enumerate(data)
                 ]
 
             elif segment_level == interface.SegmentLevel.Utterance:
