@@ -19,7 +19,7 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 
 @pytest.fixture
 def member_index() -> member.ParliamentaryMemberIndex:
-    return member.ParliamentaryMemberIndex(f'{SOURCE_FOLDER}/members_of_parliament.csv')
+    return member.ParliamentaryMemberIndex(source_folder=f'{SOURCE_FOLDER}', branch='dev')
 
 
 @pytest.fixture

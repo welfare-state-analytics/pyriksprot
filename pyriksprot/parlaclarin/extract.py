@@ -62,7 +62,7 @@ def extract_corpus_text(
         source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
     )
     member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(
-        f'{source_folder}/members_of_parliament.csv'
+        source_folder=f'{source_folder}', branch='dev'
     )
 
     preprocessor: Callable[[str], str] = utility.compose(

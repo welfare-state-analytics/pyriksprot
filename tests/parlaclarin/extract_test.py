@@ -3,6 +3,7 @@ import os
 import uuid
 from typing import Iterable, List, Mapping
 
+import pandas as pd
 import pytest
 
 from pyriksprot import corpus_index, interface, member, merge, parlaclarin
@@ -15,29 +16,14 @@ TEST_CORPUS_FOLDER = 'tests/test_data/source'
 
 
 @pytest.fixture
-def member_index() -> member.ParliamentaryMemberIndex:
-    return member.ParliamentaryMemberIndex(f'{TEST_CORPUS_FOLDER}/members_of_parliament.csv')
-
-
-@pytest.fixture
 def source_index() -> corpus_index.CorpusSourceIndex:
 
-    """Load from folder"""
-    # source_folder = '/data/riksdagen_corpus_data/riksdagen-corpus/corpus'
-    # source_folder = 'tests/test_data/xml'
-    # source_index: CorpusSourceIndex = CorpusSourceIndex.load(source_folder)
-    # source_index.to_csv('tests/test_data/source_index.csv')
-
-    """Read from file"""
-    # source_index = CorpusSourceIndex.read_csv('tests/test_data/source_index.csv')
-
-    """Test fixture"""
-    source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
+    items: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=TEST_CORPUS_FOLDER,
         source_pattern='**/prot-*.xml',
         skip_empty=False,
     )
-    return source_index
+    return items
 
 
 def test_create_grouping_hashcoder(
@@ -66,9 +52,9 @@ def test_create_grouping_hashcoder(
 
 def test_parliamentary_index():
 
-    member_index = member.ParliamentaryMemberIndex()
+    member_index = member.ParliamentaryMemberIndex(branch='dev')
 
-    assert isinstance(member_index.members, dict)
+    assert isinstance(member_index.members, pd.DataFrame)
     assert len(member_index.members) > 0
 
 

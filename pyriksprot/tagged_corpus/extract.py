@@ -3,6 +3,8 @@ from __future__ import annotations
 import zipfile
 from typing import Sequence
 
+from tqdm import tqdm
+
 from .. import corpus_index, dispatch, interface, member, merge
 from . import iterate
 
@@ -50,7 +52,7 @@ def extract_corpus_tags(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
     member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(
-        member_source=None,
+        source_folder=None,
         branch='dev',
         # member_source=f'{source_folder}/members_of_parliament.csv', branch='main'
     )
@@ -77,7 +79,7 @@ def extract_corpus_tags(
         target_name=target_name,
         compression=compression,
     ) as dispatcher:
-        for item in merger.merge(texts):
+        for item in tqdm(merger.merge(texts)):
             dispatcher.dispatch(list(item.values()))
 
     print(f"Corpus stored in {target_name}.")

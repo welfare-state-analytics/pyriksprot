@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field, fields
-from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple
+from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple, Type
 
 from . import corpus_index, interface, member, utility
 
@@ -25,6 +25,7 @@ class MergedSegmentGroup:
     grouping_keys: Sequence[interface.GroupingKey]
     grouping_values: Mapping[str, str | int]
     category_items: List[interface.ProtocolSegment] = field(default_factory=list)
+    n_tokens: int = 0
 
     """Groups keys values, as a comma separated string"""
     key_values: str = field(init=False, default='')
@@ -73,7 +74,7 @@ class MergedSegmentGroup:
             'period': self.temporal_key,
             'document_name': self.name,
             'filename': self.filename,
-            'n_tokens': 0,
+            'n_tokens': self.n_tokens,
             **self.grouping_values,
         }
 
@@ -146,7 +147,7 @@ class SegmentMerger:
                 raise ValueError(f"source item not found: {item.name}")
 
             temporal_hashcode: str = source_item.temporal_category(self.temporal_key, item)
-            who: member.ParliamentaryMember = None if item.who is None else self.member_index[item.who]
+            who: member.ParliamentaryRole = None if item.who is None else self.member_index[item.who]
 
             if current_temporal_hashcode != temporal_hashcode:
                 # logger.info(f"aggregating {temporal_hashcode}")
@@ -187,21 +188,27 @@ class SegmentMerger:
         return source_item.year
 
 
+def props(cls: Type) -> List[str]:
+    return [i for i in cls.__dict__.keys() if i[:1] != '_']
+
+
 def create_grouping_hashcoder(
     grouping_keys: Sequence[str],
-) -> Callable[[interface.ProtocolSegment, member.ParliamentaryMember, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[interface.ProtocolSegment, member.ParliamentaryRole, corpus_index.CorpusSourceItem], str]:
 
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: Set[str] = set(grouping_keys)
 
-    member_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(member.ParliamentaryMember)})
+    member_keys: Set[str] = grouping_keys.intersection(
+        {name for name in props(member.ParliamentaryRole(id='a', role_type='unknown', name='a'))}
+    )
     index_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
     item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(interface.ProtocolSegment)})
 
     def hashcoder(
         item: interface.ProtocolSegment,
-        parla_member: member.ParliamentaryMember,
+        parla_member: member.ParliamentaryRole,
         source_item: corpus_index.CorpusSourceItem,
     ) -> Tuple[dict, str, str]:
 
