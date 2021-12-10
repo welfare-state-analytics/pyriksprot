@@ -4,7 +4,7 @@ from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import CorpusSourceIndex, dispatch, interface, member, tagged_corpus
+from pyriksprot import CorpusSourceIndex, dispatch, interface, tagged_corpus
 
 # pylint: disable=redefined-outer-name
 
@@ -22,11 +22,6 @@ DEFAULT_OPTS = dict(
     years=None,
     segment_skip_size=1,
 )
-
-
-@pytest.fixture
-def member_index() -> member.ParliamentaryMemberIndex:
-    return member.ParliamentaryMemberIndex(f'{TEST_CORPUS_FOLDER}/members_of_parliament.csv')
 
 
 def test_glob_protocols():
