@@ -5,10 +5,12 @@ import os
 import sys
 import zipfile
 from enum import Enum
-from types import ModuleType
+from io import StringIO
 from typing import Any, List, Type, Union
 
+import numpy as np
 import pandas as pd
+from loguru import logger
 
 from . import interface, merge, utility
 
@@ -22,6 +24,7 @@ class TargetType(str, Enum):
     Plain = 'plain'
     Zip = 'zip'
     Checkpoint = 'checkpoint'
+    Feather = 'feather'
     Gzip = 'gzip'
     Bz2 = 'bz2'
     Lzma = 'lzma'
@@ -85,20 +88,26 @@ class IDispatcher(abc.ABC):
     @staticmethod
     def get_cls(target_type: TargetType) -> Type[IDispatcher]:
         """Return dispatcher class for `target_type`."""
-        if target_type == 'zip':
-            return ZipFileDispatcher
-        if target_type == 'checkpoint':
-            return CheckpointDispatcher
+        dispatchers: List[Type[IDispatcher]] = IDispatcher.dispatchers()
+        for dispatcher in dispatchers:
+            if dispatcher.name == target_type:
+                return dispatcher
+        logger.warning(f"unknown dispatcher {target_type}: falling back to FolderDispatcher ")
         return FolderDispatcher
 
+    def document_index(self) -> pd.DataFrame:
+        document_index: pd.DataFrame = pd.DataFrame(self.document_data)
+        # (
+        #     .set_index('document_name', drop=False).rename_axis('')
+        # )
+        return document_index
+
     def document_index_str(self) -> str:
-        csv_str: str = (
-            pd.DataFrame(self.document_data).set_index('document_name', drop=False).rename_axis('').to_csv(sep='\t')
-        )
+        csv_str: str = self.document_index().to_csv(sep='\t')
         return csv_str
 
     @staticmethod
-    def dispatchers() -> List[ModuleType]:
+    def dispatchers() -> List[Type]:
         return utility.find_subclasses(sys.modules[__name__], IDispatcher)
 
 
@@ -122,27 +131,6 @@ class FolderDispatcher(IDispatcher):
         """Store text to file."""
         path: str = jj(self.target_name, f"{filename}")
         utility.store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
-
-
-# class FeatherDispatcher(IDispatcher):
-#     """Dispatch feather to filesystem as single files (optionally compressed)"""
-#     name: str = 'feather'
-
-#     def open_target(self, target_name: Any) -> None:
-#         os.makedirs(target_name, exist_ok=True)
-
-#     def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
-#         filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
-#         self.store(filename, item.data)
-
-#     def dispatch_index(self) -> None:
-#         """Write index of documents to disk."""
-#         self.store('document_index.csv', self.document_index_str())
-
-#     def store(self, filename: str, text: str) -> None:
-#         """Store text to file."""
-#         path: str = os.path.join(self.target_name, f"{filename}")
-#         utility.store_to_compressed_file(filename=path, text=text, target_type=self.target_type.value)
 
 
 class ZipFileDispatcher(IDispatcher):
@@ -171,7 +159,7 @@ class ZipFileDispatcher(IDispatcher):
         """Write index of documents to zip file."""
         if len(self.document_data) == 0:
             return
-        csv_str: str = self.document_index_str()
+        csv_str: str = self.document_index().to_csv(sep='\t')
         self.zup.writestr('document_index.csv', csv_str)
 
     def _dispatch_item(self, item: DispatchItem) -> None:
@@ -196,8 +184,9 @@ class CheckpointDispatcher(IDispatcher):
         return
 
     def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
-        """Item is a Mapping in this case."""
+
         self._reset_index()
+
         if len(dispatch_items) == 0:
             return
         # FIXME: Only allowed for `protocol` level
@@ -208,8 +197,6 @@ class CheckpointDispatcher(IDispatcher):
         compression: int = self.kwargs.get('compression', zipfile.ZIP_LZMA)
 
         os.makedirs(path, exist_ok=True)
-
-        self._reset_index()
 
         with zipfile.ZipFile(jj(path, checkpoint_name), mode="w", compression=compression) as fp:
 
@@ -222,22 +209,75 @@ class CheckpointDispatcher(IDispatcher):
                 self._reset_index()
 
 
-# class SingleTaggedFrameDispatcher(IDispatcher):
-#     """Store as sequence of zipped CSV files (stream of Checkpoint)."""
+class FeatherDispatcher(FolderDispatcher):
+    """Store merged group items in a single tagged frame.
 
-#     def open_target(self, target_name: Any) -> None:
-#         ...
+    NOTE! This dispatcher is ONLY tested for segements at a Speech level.
 
-#     def dispatch(self, group: Mapping[str, MergedSegmentGroup]) -> None:
-#         """Item is a Mapping in this case."""
-#         self.document_data = []
-#         self.document_id: int = 0
-#         with zipfile.ZipFile(self.target_name, mode="w", compression=zipfile.ZIP_DEFLATED) as zup:
-#             for value in group.values():
-#                 super().dispatch(value)
-#                 zup.writestr(f'{group.temporal_key}_{group.name}.txt', group.data)
-#             csv_str: str = self.document_index_str()
-#             zup.writestr('document_index.csv', csv_str)
+    """
+
+    name: str = 'feather'
+
+    def _dispatch_item(self, item: DispatchItem) -> None:
+        return
+
+    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
+
+        if len(dispatch_items) == 0:
+            return
+
+        sub_folder: str = dispatch_items[0].temporal_key.split('-')[1]
+        path: str = jj(self.target_name, sub_folder)
+        target_name: str = jj(path, f'{dispatch_items[0].temporal_key}.feather')
+
+        if dispatch_items[0].grouping_keys:
+            raise ValueError('FeatherDispatcher currently only valid for intra-protocol dispatch segments')
+
+        # FIXME: Add guard for temporal key in year/decade/lustrum/custom
+        os.makedirs(path, exist_ok=True)
+
+        tagged_frames: List[pd.DataFrame] = []
+        for item in dispatch_items:
+            tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t')
+            tagged_frame['document_id'] = self.document_id
+            tagged_frames.append(tagged_frame)
+            item.n_tokens = len(tagged_frame)
+            self._dispatch_index_item(item)
+
+        total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
+
+        """Reduce size of data frame"""
+        if 'xpos' in total_frame.columns:
+            total_frame.drop(columns='xpos', inplace=True)
+
+        total_frame.to_feather(target_name)
+
+    def dispatch_index(self) -> None:
+        """Write index of documents to disk."""
+
+        if len(self.document_data) == 0:
+            return
+
+        document_index: pd.DataFrame = self.document_index()
+
+        for column_name in ['Unnamed: 0', 'period']:
+            if column_name in document_index.columns:
+                document_index.drop(columns=column_name, inplace=True)  # pylint: disable=no-member
+
+        document_index['year'] = trim_series_type(document_index.year)  # pylint: disable=no-member
+        document_index['n_tokens'] = trim_series_type(document_index.n_tokens)  # pylint: disable=no-member
+        document_index['document_id'] = trim_series_type(document_index.document_id)  # pylint: disable=no-member
+
+        target_name: str = os.path.join(self.target_name, 'document_index.feather')
+        document_index.to_feather(target_name)  # pylint: disable=no-member
+
+
+def trim_series_type(series: pd.Series) -> pd.Series:
+    max_value: int = series.max()
+    for np_type in [np.int16, np.int32]:
+        if max_value < np.iinfo(np_type).max:
+            return series.astype(np_type)
+    return series
 
 
 class S3Dispatcher:
