@@ -495,6 +495,9 @@ class ProtocolSegment:
     def filename(self) -> str:
         return f'{self.name}.{self.extension}'
 
+    @property
+    def temporal_key(self) -> str:
+        return self.name
 
 class ProtocolSegmentIterator(abc.ABC):
     ...
