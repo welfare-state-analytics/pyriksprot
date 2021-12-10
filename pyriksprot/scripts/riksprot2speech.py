@@ -27,12 +27,14 @@ COMPRESSION_TYPES = {
 @click.option(
     '--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Content type to extract'
 )
+@click.option('--processes', default=1, type=click.INT, help='Number of processes')
 def main(
     source_folder: str = None,
     target_name: str = None,
     target_type: str = None,
     content_type: str = 'tagged_frame',
     compression_type: str = 'DEFLATED',
+    processes: int = 1,
 ):
     content_type: interface.ContentType = interface.ContentType(content_type.lower())
     target_type: dispatch.TargetType = dispatch.TargetType(target_type.lower())
@@ -48,9 +50,9 @@ def main(
         years=None,
         temporal_key=None,
         group_keys=None,
-        multiproc_keep_order=None,
-        multiproc_processes=1,
-        multiproc_chunksize=100,
+        multiproc_keep_order=False,
+        multiproc_processes=processes,
+        multiproc_chunksize=10,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
         compression=compression,
     )
@@ -58,7 +60,7 @@ def main(
 
 if __name__ == "__main__":
 
-    if False:  # pylint: disable=using-constant-test
+    if True:  # pylint: disable=using-constant-test
 
         main()
 
@@ -73,8 +75,10 @@ if __name__ == "__main__":
                 '/data/riksdagen_corpus_data/tagged-speech-corpus.feather',
                 '--target-type',
                 'feather',
-                '--compression-type',
-                'LZMA',
+                # '--compression-type',
+                # 'LZMA',
+                '--processes',
+                1,
             ],
         )
         print(result.output)
