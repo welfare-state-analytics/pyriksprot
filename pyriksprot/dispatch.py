@@ -226,14 +226,16 @@ class FeatherDispatcher(FolderDispatcher):
         if len(dispatch_items) == 0:
             return
 
-        sub_folder: str = dispatch_items[0].temporal_key.split('-')[1]
-        path: str = jj(self.target_name, sub_folder)
-        target_name: str = jj(path, f'{dispatch_items[0].temporal_key}.feather')
+        first_item: DispatchItem = dispatch_items[0]
 
-        if dispatch_items[0].grouping_keys:
+        sub_folder: str = first_item.temporal_key.split('-')[1]
+        path: str = jj(self.target_name, sub_folder)
+        target_name: str = jj(path, f'{first_item.temporal_key}.feather')
+
+        if first_item.grouping_keys:
             raise ValueError('FeatherDispatcher currently only valid for intra-protocol dispatch segments')
 
-        # FIXME: Add guard for temporal key in year/decade/lustrum/custom
+        # FIXME: Add guard for temporal key not in in year/decade/lustrum/custom
         os.makedirs(path, exist_ok=True)
 
         tagged_frames: List[pd.DataFrame] = []
