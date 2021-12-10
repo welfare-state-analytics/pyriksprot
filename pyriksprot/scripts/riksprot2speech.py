@@ -21,7 +21,7 @@ COMPRESSION_TYPES = {
 @click.option(
     '--compression-type',
     default='DEFLATED',
-    type=click.Choice(list(COMPRESSION_TYPES.values())),
+    type=click.Choice(list(COMPRESSION_TYPES.keys())),
     help='Target compression type',
 )
 @click.option(
@@ -34,9 +34,9 @@ def main(
     content_type: str = 'tagged_frame',
     compression_type: str = 'DEFLATED',
 ):
-    content_type: interface.ContentType = interface.ContentType(content_type)
-    target_type: dispatch.TargetType = dispatch.TargetType(target_type)
-    compression: int = COMPRESSION_TYPES[compression_type]
+    content_type: interface.ContentType = interface.ContentType(content_type.lower())
+    target_type: dispatch.TargetType = dispatch.TargetType(target_type.lower())
+    compression: int = COMPRESSION_TYPES[compression_type.upper()]
 
     extract.extract_corpus_tags(
         source_folder=source_folder,
@@ -57,12 +57,24 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
 
-    # from click.testing import CliRunner
+    if False:  # pylint: disable=using-constant-test
 
-    # runner = CliRunner()
-    # result = runner.invoke(
-    #     main, ['/data/riksdagen_corpus_data/tagged_frames/', '/data/riksdagen_corpus_data/tagged-speech-corpus']
-    # )
-    # print(result.output)
+        main()
+
+    else:
+        from click.testing import CliRunner
+
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                '/data/riksdagen_corpus_data/tagged_frames',
+                '/data/riksdagen_corpus_data/tagged-speech-corpus.feather',
+                '--target-type',
+                'feather',
+                '--compression-type',
+                'LZMA',
+            ],
+        )
+        print(result.output)
