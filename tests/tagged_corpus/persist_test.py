@@ -44,6 +44,8 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
     loaded_protocol: interface.Protocol = tagged_corpus.load_protocol(output_filename)
 
+    assert loaded_protocol is not None
+
     assert protocol.name == loaded_protocol.name
     assert protocol.date == loaded_protocol.date
     assert [u.__dict__ for u in protocol.utterances] == [u.__dict__ for u in loaded_protocol.utterances]

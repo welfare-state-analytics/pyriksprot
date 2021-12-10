@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import glob
 import os
 import uuid
@@ -337,6 +339,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
     loaded_protocol: interface.Protocol = tagged_corpus.load_protocol(output_filename)
 
+    assert loaded_protocol is not None
     assert protocol.name == loaded_protocol.name
     assert protocol.date == loaded_protocol.date
     assert [u.__dict__ for u in protocol.utterances] == [u.__dict__ for u in loaded_protocol.utterances]
@@ -346,13 +349,15 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
 def test_load_protocols_with_non_existing_file():
     filename: str = 'this/is/a/non-existing/path/**/prot-1973--21.zip'
-    with pytest.raises(FileNotFoundError):
-        _ = tagged_corpus.load_protocol(filename=filename)
+    protocol: interface.Protocol | None = tagged_corpus.load_protocol(filename=filename)
+    assert protocol is None
 
 
 def test_load_protocol_with_empty_existing_file():
-    with pytest.raises(tagged_corpus.FileIsEmptyError):
-        _ = tagged_corpus.load_protocol(filename='tests/test_data/tagged/prot-1973--21.zip')
+    protocol: interface.Protocol | None = tagged_corpus.load_protocol(
+        filename='tests/test_data/tagged/prot-1973--21.zip'
+    )
+    assert protocol is None
 
 
 def test_load_protocols_from_filenames():
@@ -372,6 +377,8 @@ def test_protocol_to_items():
     filename: str = 'tests/test_data/tagged/prot-198990--15.zip'
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
+
+    assert protocol is not None
     assert len(protocol.utterances) == 5
 
     items = protocol.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)

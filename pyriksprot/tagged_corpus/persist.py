@@ -82,12 +82,12 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
     """Loads a tagged protocol stored in ZIP as JSON or CSV"""
 
     if is_empty(filename) or not zipfile.is_zipfile(filename):
-        raise FileIsEmptyError(filename)
+        return None
 
     metadata: dict = load_metadata(filename)
 
     if metadata is None:
-        raise FileIsEmptyError(filename)
+        return None
 
     with zipfile.ZipFile(filename, 'r') as fp:
 
@@ -113,9 +113,7 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
 
 def load_protocols(source: str | List, file_pattern: str = 'prot-*.zip') -> Iterable[interface.Protocol]:
 
-    filenames = glob_protocols(source, file_pattern)
-
-    return (load_protocol(filename) for filename in filenames if not is_empty(filename))
+    return (p for p in (load_protocol(filename) for filename in glob_protocols(source, file_pattern)) if p is not None)
 
 
 def glob_protocols(source: str, file_pattern: str, strip_path: bool = False):
