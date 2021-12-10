@@ -240,7 +240,7 @@ class FeatherDispatcher(FolderDispatcher):
 
         tagged_frames: List[pd.DataFrame] = []
         for item in dispatch_items:
-            tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t')
+            tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t', quoting=3, dtype=str) 
             tagged_frame['document_id'] = self.document_id
             tagged_frames.append(tagged_frame)
             item.n_tokens = len(tagged_frame)
