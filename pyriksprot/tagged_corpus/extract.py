@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import zipfile
 from typing import Sequence
-from loguru import logger
 
+from loguru import logger
 from tqdm import tqdm
 
 from .. import corpus_index, dispatch, interface, member, merge
@@ -16,7 +15,8 @@ def extract_corpus_tags(
     source_folder: str = None,
     target_name: str = None,
     content_type: interface.ContentType = interface.ContentType.TaggedFrame,
-    target_type: dispatch.TargetType = None,
+    target_type: str = None,
+    compress_type: dispatch.CompressType = dispatch.CompressType.Lzma,
     segment_level: interface.SegmentLevel = None,
     segment_skip_size: int = 1,
     years: str = None,
@@ -26,7 +26,6 @@ def extract_corpus_tags(
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
     speech_merge_strategy: interface.MergeSpeechStrategyType = 'who_sequence',
-    compression: int = zipfile.ZIP_LZMA,
     **_,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
@@ -78,10 +77,8 @@ def extract_corpus_tags(
         grouping_keys=group_keys,
     )
 
-    with dispatch.IDispatcher.get_cls(target_type)(
-        target_type=target_type,
-        target_name=target_name,
-        compression=compression,
+    with dispatch.IDispatcher.dispatcher(target_type)(
+        target_name=target_name, compress_type=compress_type
     ) as dispatcher:
 
         n_total: int = len(source_index.source_items)
@@ -93,6 +90,5 @@ def extract_corpus_tags(
             # else:
             # logger.info(item[list(item.keys())[0]].temporal_key)
             dispatcher.dispatch(list(item.values()))
-
 
     print(f"Corpus stored in {target_name}.")

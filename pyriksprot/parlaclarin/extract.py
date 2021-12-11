@@ -34,6 +34,7 @@ def extract_corpus_text(
     dedent: bool = True,
     dehyphen: bool = False,
     data_path: str = '.',
+    compress_type: dispatch.CompressType = dispatch.CompressType.Zip,
     **_,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
@@ -86,7 +87,7 @@ def extract_corpus_text(
         grouping_keys=group_keys,
     )
 
-    with dispatch.IDispatcher.get_cls(target_type)(target_name, target_type) as dispatcher:
+    with dispatch.IDispatcher.dispatcher(target_type)(target_name, compress_type=compress_type) as dispatcher:
         for item in merger.merge(segments):
             dispatcher.dispatch(list(item.values()))
 

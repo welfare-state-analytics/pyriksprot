@@ -1,49 +1,32 @@
-import zipfile
-
 import click
 
 from pyriksprot import dispatch, interface
 from pyriksprot.tagged_corpus import extract
 
 CONTENT_TYPES = [e.value for e in interface.ContentType]
-TARGET_TYPES = [e.value for e in dispatch.TargetType]
-COMPRESSION_TYPES = {
-    "DEFLATED": zipfile.ZIP_DEFLATED,
-    "STORED": zipfile.ZIP_STORED,
-    "LZMA": zipfile.ZIP_LZMA,
-}
+TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
+COMPRESS_TYPES = dispatch.CompressType.values()
 
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
 @click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
-@click.option(
-    '--compression-type',
-    default='DEFLATED',
-    type=click.Choice(list(COMPRESSION_TYPES.keys())),
-    help='Target compression type',
-)
-@click.option(
-    '--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Content type to extract'
-)
+@click.option('--compress-type', default='zip', type=click.Choice(COMPRESS_TYPES), help='Compress type')
+@click.option('--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Text or tags')
 @click.option('--processes', default=1, type=click.INT, help='Number of processes')
 def main(
     source_folder: str = None,
     target_name: str = None,
     target_type: str = None,
     content_type: str = 'tagged_frame',
-    compression_type: str = 'DEFLATED',
+    compress_type: str = 'zip',
     processes: int = 1,
 ):
-    content_type: interface.ContentType = interface.ContentType(content_type.lower())
-    target_type: dispatch.TargetType = dispatch.TargetType(target_type.lower())
-    compression: int = COMPRESSION_TYPES[compression_type.upper()]
-
     extract.extract_corpus_tags(
         source_folder=source_folder,
         target_name=target_name,
-        content_type=content_type,
+        content_type=interface.ContentType(content_type.lower()),
         target_type=target_type,
         segment_level=interface.SegmentLevel.Speech,
         segment_skip_size=1,
@@ -54,7 +37,7 @@ def main(
         multiproc_processes=processes,
         multiproc_chunksize=10,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
-        compression=compression,
+        compress_type=dispatch.CompressType(compress_type.lower()),
     )
 
 

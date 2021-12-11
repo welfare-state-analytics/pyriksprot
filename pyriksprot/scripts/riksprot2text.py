@@ -4,7 +4,7 @@ from typing import Sequence
 
 import click
 
-from pyriksprot.dispatch import TargetType
+from pyriksprot import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
 from pyriksprot.parlaclarin import extract
 
@@ -22,13 +22,15 @@ def get_kwargs():
 Extract an aggregated subset of ParlaCLARIN XML corpus.
 """
 LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
-MODES = ['plain', 'zip', 'gzip', 'bz2', 'lzma']
+TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
+COMPRESS_TYPES = dispatch.CompressType.values()
 
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.option('--target-type', default='zip', type=click.Choice(MODES), help='Target type')
+@click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
+@click.option('--compress-type', default='zip', type=click.Choice(COMPRESS_TYPES), help='Compress type')
 @click.option('--segment-level', default='who', type=click.Choice(LEVELS), help='Protocol iterate level')
 @click.option('--segment-skip-size', default=1, type=click.IntRange(1, 1024), help='Skip smaller than threshold')
 @click.option('--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
@@ -41,7 +43,8 @@ MODES = ['plain', 'zip', 'gzip', 'bz2', 'lzma']
 def main(
     source_folder: str = None,
     target_name: str = None,
-    target_type: TargetType = None,
+    target_type: str = None,
+    compress_type: str = "zip",
     segment_level: SegmentLevel = None,
     segment_skip_size: int = 1,
     temporal_key: TemporalKey = None,
@@ -58,6 +61,7 @@ def main(
             source_folder=source_folder,
             target_name=target_name,
             target_type=target_type,
+            compress_type=dispatch.CompressType(compress_type.lower()),
             segment_level=segment_level,
             segment_skip_size=segment_skip_size,
             temporal_key=temporal_key,

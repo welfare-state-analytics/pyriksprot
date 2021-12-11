@@ -130,7 +130,7 @@ target_filename: str = f'output.zip'
 opts = {
     'source_folder': '/path/to/corpus',
     'target': 'outout.zip',
-    'target_mode': TargetType.Zip,
+    'target_type': 'files-in-zip',
     'segment_level': SegmentLevel.Who,
     'dedent': True,
     'dehyphen': False,

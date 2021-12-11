@@ -108,7 +108,12 @@ class ParliamentaryMemberIndex:
         )
 
     def to_dataframe(self):
-        return pd.DataFrame(data=[x.__dict__ for x in self.individuals.values()]).set_index('id',drop=False).rename_axis('').drop(columns=['property_bag'])
+        return (
+            pd.DataFrame(data=[x.__dict__ for x in self.individuals.values()])
+            .set_index('id', drop=False)
+            .rename_axis('')
+            .drop(columns=['property_bag'])
+        )
 
     def __init__(self, *, source_folder: str = None, branch: str = 'main'):
 

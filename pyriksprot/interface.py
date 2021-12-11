@@ -499,6 +499,7 @@ class ProtocolSegment:
     def temporal_key(self) -> str:
         return self.name
 
+
 class ProtocolSegmentIterator(abc.ABC):
     ...
 

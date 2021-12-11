@@ -140,7 +140,9 @@ class SegmentMerger:
                 if iterator.segment_level == interface.SegmentLevel.Protocol:
 
                     if len(grouping_keys) > 0:
-                        raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
+                        raise ValueError(
+                            "cannot group by key (within protocol) when segement level is entire protocol."
+                        )
 
             for item in iterator:
 

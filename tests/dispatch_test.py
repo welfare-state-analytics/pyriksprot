@@ -40,9 +40,9 @@ def tagged_speeches(
 
 def test_folder_with_zips_dispatch(tagged_speeches):
     target_name: str = f'./tests/output/{uuid.uuid1()}'
-    with dispatch.FolderDispatcher(
+    with dispatch.FilesInFolderDispatcher(
         target_name=target_name,
-        target_type=dispatch.TargetType.Gzip,
+        compress_type=dispatch.CompressType.Plain,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -51,9 +51,9 @@ def test_folder_with_zips_dispatch(tagged_speeches):
 
 def test_zip_file_dispatch(tagged_speeches):
     target_name: str = f'./tests/output/{uuid.uuid1()}.zip'
-    with dispatch.ZipFileDispatcher(
+    with dispatch.FilesInZipDispatcher(
         target_name=target_name,
-        target_type=dispatch.TargetType.Zip,
+        compress_type=dispatch.CompressType.Zip,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -68,16 +68,22 @@ def test_find_dispatch_class():
 
     assert len(dispatch_keys) > 0
 
-    expected_keys: Set[str] = {'checkpoint', 'feather', 'zip', 'plain'}
+    expected_keys: Set[str] = {
+        'files-in-zip',
+        'single-tagged-frame-per-group',
+        'single-id-tagged-frame-per-group',
+        'checkpoint-per-group',
+        'files-in-folder',
+    }
     assert expected_keys.intersection(dispatch_keys) == expected_keys
 
 
 def test_checkpoint_dispatch(tagged_speeches, source_index: corpus_index.CorpusSourceIndex):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
-    with dispatch.CheckpointDispatcher(
+    with dispatch.CheckpointPerGroupDispatcher(
         target_name=target_name,
-        target_type=dispatch.TargetType.Zip,
+        compress_type=dispatch.CompressType.Zip,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -91,12 +97,15 @@ def test_checkpoint_dispatch(tagged_speeches, source_index: corpus_index.CorpusS
     assert (files_in_index - files_on_disk) == set()
 
 
-def test_feather_dispatch(tagged_speeches, source_index: corpus_index.CorpusSourceIndex):
+@pytest.mark.parametrize('cls', [dispatch.SingleTaggedFrameDispatcher, dispatch.SingleIdTaggedFrameDispatcher])
+def test_single_feather_per_group_dispatch(
+    tagged_speeches, source_index: corpus_index.CorpusSourceIndex, cls: Type[dispatch.IDispatcher]
+):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
-    with dispatch.FeatherDispatcher(
+    with cls(
         target_name=target_name,
-        target_type=dispatch.TargetType.Checkpoint,
+        compress_type=dispatch.CompressType.Feather,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))

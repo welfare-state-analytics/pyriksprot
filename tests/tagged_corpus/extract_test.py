@@ -4,7 +4,7 @@ from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import CorpusSourceIndex, dispatch, interface, tagged_corpus
+from pyriksprot import CorpusSourceIndex, interface, tagged_corpus
 
 # pylint: disable=redefined-outer-name
 
@@ -14,7 +14,7 @@ TEST_CORPUS_FOLDER = 'tests/test_data/tagged'
 
 DEFAULT_OPTS = dict(
     source_folder='./tests/test_data/tagged',
-    target_type=dispatch.TargetType.Zip,
+    target_type='files-in-zip',
     content_type=interface.ContentType.TaggedFrame,
     segment_level=interface.SegmentLevel.Who,
     multiproc_keep_order=None,
@@ -77,46 +77,3 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     tagged_corpus.extract_corpus_tags(**opts)
     assert os.path.isfile(opts['target_name'])
     os.unlink(opts['target_name'])
-
-
-# def test_extract_corpus_with_no_matching_protocols():
-
-#     opts = {
-#         'source_folder': 'tests/test_data/source',
-#         'target_name': f'tests/output/{uuid.uuid1()}.zip',
-#         'target_type': dispatch.TargetType.Zip,
-#         'segment_level': interface.SegmentLevel.Who,
-#         'temporal_key': interface.TemporalKey.Year,
-#         'group_keys': [interface.GroupingKey.Party],
-#         'years': '1900',
-#     }
-
-#     pyriksprot.extract_corpus_text(**opts)
-
-#     assert os.path.isfile(opts['target_name'])
-
-#     os.unlink(opts['target_name'])
-
-
-# def test_aggregator_extract_gender_party_no_time_period():
-
-#     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
-#     opts = {
-#         'source_folder': 'tests/test_data/source',
-#         'target_name': target_filename,
-#         'target_type': dispatch.TargetType.Zip,
-#         'segment_level': interface.SegmentLevel.Who,
-#         'temporal_key': None,
-#         'group_keys': (interface.GroupingKey.Party, interface.GroupingKey.Gender),
-#         'years': '1955-1965',
-#         'segment_skip_size': 1,
-#         'multiproc_keep_order': False,
-#         'multiproc_processes': None,
-#         '_': {},
-#     }
-
-#     pyriksprot.extract_corpus_text(**opts)
-
-#     assert os.path.isfile(target_filename)
-
-#     os.unlink(target_filename)

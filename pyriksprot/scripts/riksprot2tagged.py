@@ -4,8 +4,7 @@ from typing import Sequence
 
 import click
 
-from pyriksprot.dispatch import TargetType
-from pyriksprot.interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
+from pyriksprot import dispatch, interface
 from pyriksprot.tagged_corpus import extract
 
 sys.path.append(".")
@@ -22,17 +21,17 @@ def get_kwargs():
 Extract an aggregated subset of a tagged ParlaCLARIN corpus.
 """
 SEGMENT_LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
-TARGET_TYPES = [e.value for e in TargetType]
-CONTENT_TYPES = [e.value for e in ContentType]
+TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
+COMPRESS_TYPES = dispatch.CompressType.values()
+CONTENT_TYPES = [e.value for e in interface.ContentType]
 
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.option('--target-type', default='zip', type=click.Choice(TARGET_TYPES), help='Target type')
-@click.option(
-    '--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Content type to extract'
-)
+@click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
+@click.option('--compress-type', default='zip', type=click.Choice(COMPRESS_TYPES), help='Compress type')
+@click.option('--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Text or tags')
 @click.option('--segment-level', default='who', type=click.Choice(SEGMENT_LEVELS), help='Protocol iterate level')
 @click.option('--segment-skip-size', default=1, type=click.IntRange(1, 1024), help='Skip smaller than threshold')
 @click.option('--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
@@ -43,12 +42,13 @@ CONTENT_TYPES = [e.value for e in ContentType]
 def main(
     source_folder: str = None,
     target_name: str = None,
-    content_type: ContentType = None,
-    target_type: TargetType = None,
-    segment_level: SegmentLevel = None,
+    target_type: str = None,
+    compress_type: str = "zip",
+    content_type: str = 'tagged_frame',
+    segment_level: interface.SegmentLevel = None,
     segment_skip_size: int = 1,
-    temporal_key: TemporalKey = None,
-    group_key: Sequence[GroupingKey] = None,
+    temporal_key: interface.TemporalKey = None,
+    group_key: Sequence[interface.GroupingKey] = None,
     years: str = None,
     multiproc_processes: int = 1,
     multiproc_keep_order: str = None,
@@ -57,7 +57,7 @@ def main(
 
         extract.extract_corpus_tags(
             source_folder=source_folder,
-            content_type=ContentType(content_type),
+            content_type=interface.ContentType(content_type),
             target_name=target_name,
             target_type=target_type,
             segment_level=segment_level,
@@ -68,6 +68,7 @@ def main(
             multiproc_keep_order=multiproc_keep_order,
             multiproc_processes=multiproc_processes,
             multiproc_chunksize=100,
+            compress_type=dispatch.CompressType(compress_type.lower()),
         )
 
     except Exception as ex:
