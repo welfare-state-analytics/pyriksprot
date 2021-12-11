@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.foss.pos_tags import PoS_TAGS_SCHEMES, PoS_Tag_Scheme
+
 from . import interface, merge, utility
 
 DispatchItem = Union[merge.MergedSegmentGroup, interface.ProtocolSegment]
@@ -64,8 +66,11 @@ class IDispatcher(abc.ABC):
         return self
 
     def __exit__(self, _type, _value, _traceback):  # pylint: disable=unused-argument
+        """If the suite was exited due to an exception, and the return value from the __exit__() method was false,
+        the exception is reraised. If the return value was true, the exception is suppressed, and execution
+        continues with the statement following the with statement."""
         self.close_target()
-        return True
+        return False
 
     @abc.abstractmethod
     def open_target(self, target_name: Any) -> None:
@@ -321,16 +326,16 @@ class SingleIdTaggedFrameDispatcher(SingleTaggedFrameDispatcher):
         super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
         self.token2id: defaultdict = defaultdict()
         self.token2id.default_factory = self.token2id.__len__
+        self.pos_schema: PoS_Tag_Scheme = PoS_TAGS_SCHEMES.SUC
 
     def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
         fg = lambda t: self.token2id[t]
+        pg = self.pos_schema.pos_to_id.get
         tagged_frame['token_id'] = tagged_frame.token.apply(fg)
         tagged_frame['lemma_id'] = tagged_frame.lemma.apply(fg)  # pylint: disable=no-member
-        # FIXME: PoS-ID
-        # tagged_frame['pos_id'] = tagged_frame.pos_id.apply(SUC_Tags.get)
-
-        tagged_frame.drop(columns=['lemma', 'token'], inplace=True)  # pylint: disable=no-member
+        tagged_frame['pos_id'] = tagged_frame.pos.apply(pg)  # pylint: disable=no-member
+        tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')  # pylint: disable=no-member
         return tagged_frame
 
     def dispatch_index(self) -> None:
