@@ -50,7 +50,7 @@ class CorpusSourceItem:
 
         if isinstance(temporal_key, (TemporalKey, str, type(None))):
 
-            if temporal_key in [None, '', 'document', 'protocol']:
+            if temporal_key in [None, '', 'document', 'protocol', TemporalKey.NONE]:
                 """No temporal key gives a group per document/protocol"""
                 return item.protocol_name
 
