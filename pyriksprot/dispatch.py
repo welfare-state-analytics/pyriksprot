@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from pyriksprot.foss.pos_tags import PoS_TAGS_SCHEMES, PoS_Tag_Scheme
+from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 
 from . import interface, merge, utility
 
