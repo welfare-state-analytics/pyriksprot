@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 import shutil
-from os.path import join, isdir
+from os.path import dirname, isdir, join
 from typing import Sequence
 
 from loguru import logger
@@ -27,7 +28,12 @@ def extract_corpus_tags(
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
     speech_merge_strategy: interface.MergeSpeechStrategyType = 'who_sequence',
-    force: bool=False,
+    force: bool = False,
+    skip_lemma: bool = False,
+    skip_text: bool = False,
+    skip_puncts: bool = False,
+    skip_stopwords: bool = False,
+    lowercase: bool = True,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
 
@@ -48,6 +54,10 @@ def extract_corpus_tags(
         multiproc_keep_order (str, optional): Force correct iterate yield order when multiprocessing. Defaults to None.
         multiproc_processes (int, optional): Number of processes during iterate. Defaults to 1.
         multiproc_chunksize (int, optional): Chunksize to use per process during iterate. Defaults to 100.
+        force (bool, optional): Clear target if it exists. Defaults to False
+        skip_lemma (bool, optional): Defaults to False
+        skip_text (bool, optional): Defaults to False
+        lowercase (bool, optional): Defaults to False
     """
     logger.info("creating index over corpus source item...")
 
@@ -56,6 +66,23 @@ def extract_corpus_tags(
             shutil.rmtree(target_name, ignore_errors=True)
         else:
             raise ValueError(f"target {target_name} exists (use --force to override")
+
+    dispatch_opts: dict = {
+        'lowercase': lowercase,
+    }
+
+    if skip_lemma or skip_text:
+        if target_type not in ('single-tagged-frame-per-group', 'single-id-tagged-frame-per-group'):
+            raise ValueError(f"lemma/text skip not implemented for {target_type}")
+        dispatch_opts = {
+            **dispatch_opts,
+            **dict(
+                skip_lemma=skip_lemma,
+                skip_text=skip_text,
+                skip_puncts=skip_puncts,
+                skip_stopwords=skip_stopwords,
+            ),
+        }
 
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
@@ -86,7 +113,7 @@ def extract_corpus_tags(
     )
 
     with dispatch.IDispatcher.dispatcher(target_type)(
-        target_name=target_name, compress_type=compress_type
+        target_name=target_name, compress_type=compress_type, **dispatch_opts
     ) as dispatcher:
 
         n_total: int = len(source_index.source_items)
@@ -97,6 +124,6 @@ def extract_corpus_tags(
                 continue
             dispatcher.dispatch(list(item.values()))
 
-    member_index.to_dataframe().to_json(join(target_name, 'person_index.json'))
+    member_index.to_dataframe().to_json(join(dirname(target_name), 'person_index.json'))
 
     print(f"Corpus stored in {target_name}.")

@@ -14,13 +14,14 @@ import pandas as pd
 from loguru import logger
 
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
+from pyriksprot.foss.stopwords import STOPWORDS
 
 from . import interface, merge, utility
 
 DispatchItem = Union[merge.MergedSegmentGroup, interface.ProtocolSegment]
 
 jj = os.path.join
-
+# pylint: disable=no-member
 TargetTypeKey = Literal[
     'files-in-zip',
     'single-tagged-frame-per-group',
@@ -28,6 +29,7 @@ TargetTypeKey = Literal[
     'checkpoint-per-group',
     'files-in-folder',
 ]
+
 
 class CompressType(str, Enum):
     Plain = 'plain'
@@ -67,6 +69,8 @@ class IDispatcher(abc.ABC):
         self.document_id: int = 0
         self.compress_type: CompressType = compress_type
         self.kwargs: dict = kwargs
+        self.lowercase: bool = kwargs.get('lowercase', False)
+        self.skip_stopwords: bool = kwargs.get('skip_stopwords', False)
 
     def __enter__(self) -> IDispatcher:
         self.open_target(self.target_name)
@@ -165,7 +169,8 @@ class FilesInFolderDispatcher(IDispatcher):
 
     def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
         filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
-        self.store(filename, item.data)
+        # FIXME: POS is made lowercase!
+        self.store(filename, item.data.lower() if self.lowercase else item.data)
 
     def dispatch_index(self) -> None:
         """Write index of documents to disk."""
@@ -202,7 +207,8 @@ class FilesInZipDispatcher(IDispatcher):
         self.zup.writestr('document_index.csv', csv_str)
 
     def _dispatch_item(self, item: DispatchItem) -> None:
-        self.zup.writestr(item.filename, item.data)
+        # FIXME: POS is made lowercase!
+        self.zup.writestr(item.filename, item.data.lower() if self.lowercase else item.data)
 
 
 class CheckpointPerGroupDispatcher(IDispatcher):
@@ -243,7 +249,8 @@ class CheckpointPerGroupDispatcher(IDispatcher):
         ) as fp:
 
             for item in dispatch_items:
-                fp.writestr(item.filename, item.data)
+                # FIXME: POS is made lowercase!
+                fp.writestr(item.filename, item.data.lower() if self.lowercase else item.data)
                 self._dispatch_index_item(item)
 
             if len(self.document_data) > 0:
@@ -260,6 +267,9 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
 
     def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
         super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+        self.skip_text: bool = kwargs.get('skip_text', False)
+        self.skip_lemma: bool = kwargs.get('skip_lemma', False)
+        self.skip_puncts: bool = kwargs.get('skip_puncts', False)
 
     name: str = 'single-tagged-frame-per-group'
 
@@ -285,7 +295,9 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
 
         tagged_frames: List[pd.DataFrame] = []
         for item in dispatch_items:
+
             tagged_frame: pd.DataFrame = self.create_tagged_frame(item)
+
             tagged_frames.append(tagged_frame)
             item.n_tokens = len(tagged_frame)
             self._dispatch_index_item(item)
@@ -295,11 +307,29 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
         self.store(filename=target_name, data=total_frame)
 
     def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:
+
         tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t', quoting=3, dtype=str)
         tagged_frame['document_id'] = self.document_id
-        """Reduce size of frame"""
+
         if 'xpos' in tagged_frame.columns:
-            tagged_frame.drop(columns='xpos', inplace=True)  # pylint: disable=no-member
+            tagged_frame.drop(columns='xpos', inplace=True)
+
+        if self.skip_stopwords:
+            tagged_frame = tagged_frame[~tagged_frame.token.lower().isin(STOPWORDS)]
+
+        if self.skip_puncts:
+            tagged_frame = tagged_frame[~tagged_frame.pos.isin(['MID', 'MAD', 'PAD'])]
+
+        if self.skip_text:
+            tagged_frame.drop(columns='token', inplace=True)
+        elif self.lowercase:
+            tagged_frame['token'] = tagged_frame['token'].str.lower()
+
+        if self.skip_lemma:
+            tagged_frame.drop(columns='lemma', inplace=True)
+        elif self.lowercase:
+            tagged_frame['lemma'] = tagged_frame['lemma'].str.lower()
+            assert not tagged_frame.lemma.isna().any(), "YOU SHALL UPDATE LEMMA FROM TEXT"
 
         return tagged_frame
 
@@ -313,11 +343,11 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
 
         for column_name in ['Unnamed: 0', 'period']:
             if column_name in document_index.columns:
-                document_index.drop(columns=column_name, inplace=True)  # pylint: disable=no-member
+                document_index.drop(columns=column_name, inplace=True)
 
-        document_index['year'] = trim_series_type(document_index.year)  # pylint: disable=no-member
-        document_index['n_tokens'] = trim_series_type(document_index.n_tokens)  # pylint: disable=no-member
-        document_index['document_id'] = trim_series_type(document_index.document_id)  # pylint: disable=no-member
+        document_index['year'] = trim_series_type(document_index.year)
+        document_index['n_tokens'] = trim_series_type(document_index.n_tokens)
+        document_index['document_id'] = trim_series_type(document_index.document_id)
 
         self.store(filename=jj(self.target_name, 'document_index.csv'), data=document_index)
 
@@ -339,10 +369,15 @@ class SingleIdTaggedFrameDispatcher(SingleTaggedFrameDispatcher):
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
         fg = lambda t: self.token2id[t]
         pg = self.pos_schema.pos_to_id.get
-        tagged_frame['token_id'] = tagged_frame.token.apply(fg)
-        tagged_frame['lemma_id'] = tagged_frame.lemma.apply(fg)  # pylint: disable=no-member
-        tagged_frame['pos_id'] = tagged_frame.pos.apply(pg)  # pylint: disable=no-member
-        tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')  # pylint: disable=no-member
+
+        if not self.skip_text:
+            tagged_frame['token_id'] = tagged_frame.token.apply(fg)
+
+        if not self.skip_lemma:
+            tagged_frame['lemma_id'] = tagged_frame.lemma.apply(fg)
+
+        tagged_frame['pos_id'] = tagged_frame.pos.apply(pg).astype(np.int8)
+        tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
         return tagged_frame
 
     def dispatch_index(self) -> None:

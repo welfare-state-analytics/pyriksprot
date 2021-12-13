@@ -7,6 +7,8 @@ CONTENT_TYPES = [e.value for e in interface.ContentType]
 TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
 COMPRESS_TYPES = dispatch.CompressType.values()
 
+# pylint: disable=too-many-arguments
+
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
@@ -15,6 +17,11 @@ COMPRESS_TYPES = dispatch.CompressType.values()
 @click.option('--compress-type', default='zip', type=click.Choice(COMPRESS_TYPES), help='Compress type')
 @click.option('--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Text or tags')
 @click.option('--processes', default=1, type=click.INT, help='Number of processes')
+@click.option('--skip-lemma', default=False, type=click.BOOL, help='Skip lemma')
+@click.option('--skip-text', default=False, type=click.BOOL, help='Skip text')
+@click.option('--skip-puncts', default=False, type=click.BOOL, help='Skip puncts')
+@click.option('--skip-stopwords', default=False, type=click.BOOL, help='Skip stopwords')
+@click.option('--lowercase', default=True, type=click.BOOL, help='Lowercase tokem/text')
 def main(
     source_folder: str = None,
     target_name: str = None,
@@ -22,6 +29,11 @@ def main(
     content_type: str = 'tagged_frame',
     compress_type: str = 'zip',
     processes: int = 1,
+    skip_lemma: bool = False,
+    skip_text: bool = False,
+    skip_puncts: bool = False,
+    skip_stopwords: bool = False,
+    lowercase: bool = True,
 ):
     extract.extract_corpus_tags(
         source_folder=source_folder,
@@ -38,6 +50,11 @@ def main(
         multiproc_chunksize=10,
         speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
         compress_type=dispatch.CompressType(compress_type.lower()),
+        skip_lemma=skip_lemma,
+        skip_text=skip_text,
+        skip_puncts=skip_puncts,
+        skip_stopwords=skip_stopwords,
+        lowercase=lowercase,
     )
 
 

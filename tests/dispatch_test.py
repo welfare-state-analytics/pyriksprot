@@ -3,6 +3,7 @@ import os
 import uuid
 from typing import List, Mapping, Set, Type
 
+import pandas as pd
 import pytest
 
 from pyriksprot import corpus_index, dispatch, interface, member, merge, utility
@@ -121,3 +122,24 @@ def test_single_feather_per_group_dispatch(
 
     assert (files_in_index - files_on_disk) == set()
     assert os.path.isfile(os.path.join(target_name, 'document_index.feather'))
+
+
+@pytest.mark.parametrize('cls', [dispatch.SingleTaggedFrameDispatcher, dispatch.SingleIdTaggedFrameDispatcher])
+def test_single_feather_per_group_dispatch_with_skips(tagged_speeches, cls: Type[dispatch.IDispatcher]):
+
+    target_name: str = f'./tests/output/{uuid.uuid1()}'
+    with cls(
+        target_name=target_name,
+        compress_type=dispatch.CompressType.Feather,
+        lowercase=True,
+        skip_text=True,
+    ) as dispatcher:
+        for group in tagged_speeches:
+            dispatcher.dispatch(list(group.values()))
+
+    assert os.path.isdir(target_name)
+
+    files_on_disk: Set[str] = [x for x in glob.glob(os.path.join(target_name, '**/prot-*.feather'), recursive=True)]
+
+    tagged_frame = pd.read_feather(files_on_disk[0])
+    assert True
