@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import glob
 from dataclasses import asdict, dataclass
-from os.path import basename, dirname
+from os.path import basename, dirname, isdir
 from os.path import join as jj
 from typing import TYPE_CHECKING, List, Mapping, Optional, Set, Tuple
 
@@ -105,6 +105,9 @@ class CorpusSourceIndex:
     def load(
         *, source_folder: str, source_pattern: str, years: Optional[str | Set[int]] = None, skip_empty: bool = True
     ) -> "CorpusSourceIndex":
+
+        if not isdir(source_folder):
+            raise ValueError(f"folder {source_folder} not found")
 
         paths: List[str] = glob.glob(jj(source_folder, source_pattern), recursive=True)
 
