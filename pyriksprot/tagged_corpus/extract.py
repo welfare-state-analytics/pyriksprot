@@ -1,5 +1,6 @@
 from __future__ import annotations
-
+import shutil
+from os.path import join, isdir
 from typing import Sequence
 
 from loguru import logger
@@ -26,7 +27,7 @@ def extract_corpus_tags(
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
     speech_merge_strategy: interface.MergeSpeechStrategyType = 'who_sequence',
-    **_,
+    force: bool=False,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
 
@@ -49,6 +50,13 @@ def extract_corpus_tags(
         multiproc_chunksize (int, optional): Chunksize to use per process during iterate. Defaults to 100.
     """
     logger.info("creating index over corpus source item...")
+
+    if isdir(target_name):
+        if force:
+            shutil.rmtree(target_name, ignore_errors=True)
+        else:
+            raise ValueError(f"target {target_name} exists (use --force to override")
+
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
@@ -87,8 +95,8 @@ def extract_corpus_tags(
             if not item:
                 logger.error("merge returned empty data")
                 continue
-            # else:
-            # logger.info(item[list(item.keys())[0]].temporal_key)
             dispatcher.dispatch(list(item.values()))
+
+    member_index.to_dataframe().to_json(join(target_name, 'person_index.json'))
 
     print(f"Corpus stored in {target_name}.")
