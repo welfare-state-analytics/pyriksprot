@@ -7,7 +7,7 @@ import zipfile
 from collections import defaultdict
 from enum import Enum
 from io import StringIO
-from typing import Any, List, Type, Union
+from typing import Any, List, Literal, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -21,6 +21,13 @@ DispatchItem = Union[merge.MergedSegmentGroup, interface.ProtocolSegment]
 
 jj = os.path.join
 
+TargetTypeKey = Literal[
+    'files-in-zip',
+    'single-tagged-frame-per-group',
+    'single-id-tagged-frame-per-group',
+    'checkpoint-per-group',
+    'files-in-folder',
+]
 
 class CompressType(str, Enum):
     Plain = 'plain'
