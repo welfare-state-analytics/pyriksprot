@@ -315,7 +315,7 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
             tagged_frame.drop(columns='xpos', inplace=True)
 
         if self.skip_stopwords:
-            tagged_frame = tagged_frame[~tagged_frame.token.lower().isin(STOPWORDS)]
+            tagged_frame = tagged_frame[~tagged_frame.token.str.lower().isin(STOPWORDS)]
 
         if self.skip_puncts:
             tagged_frame = tagged_frame[~tagged_frame.pos.isin(['MID', 'MAD', 'PAD'])]
