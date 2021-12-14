@@ -165,6 +165,7 @@ class SegmentMerger:
                     current_group, current_temporal_category = {}, temporal_category
 
                 grouping_values, group_str, group_hashcode = self.grouping_hashcoder(item, who, source_item)
+                grouping_values['who'] = item.who
 
                 if group_hashcode not in current_group:
 
