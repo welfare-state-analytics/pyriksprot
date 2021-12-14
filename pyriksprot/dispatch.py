@@ -287,8 +287,8 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
         path: str = jj(self.target_name, sub_folder)
         target_name: str = jj(path, f'{first_item.temporal_key}.csv')
 
-        if first_item.grouping_keys:
-            raise ValueError('FeatherDispatcher currently only valid for intra-protocol dispatch segments')
+        # if first_item.grouping_keys:
+        #     raise ValueError('FeatherDispatcher currently only valid for intra-protocol dispatch segments')
 
         # FIXME: Add guard for temporal key not in in year/decade/lustrum/custom
         os.makedirs(path, exist_ok=True)
@@ -308,28 +308,35 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
 
     def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:
 
+        pads: set = {'MID', 'MAD', 'PAD'}
         tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t', quoting=3, dtype=str)
         tagged_frame['document_id'] = self.document_id
 
+        drop_columns: List[str] = []
+
         if 'xpos' in tagged_frame.columns:
-            tagged_frame.drop(columns='xpos', inplace=True)
+            drop_columns.append('xpos')
 
-        if self.skip_stopwords:
-            tagged_frame = tagged_frame[~tagged_frame.token.str.lower().isin(STOPWORDS)]
-
-        if self.skip_puncts:
-            tagged_frame = tagged_frame[~tagged_frame.pos.isin(['MID', 'MAD', 'PAD'])]
+        if self.skip_stopwords and self.skip_puncts:
+            tagged_frame = tagged_frame[~(tagged_frame.token.str.lower().isin(STOPWORDS) | tagged_frame.pos.isin(pads))]
+        else:
+            if self.skip_stopwords:
+                tagged_frame = tagged_frame[~tagged_frame.token.str.lower().isin(STOPWORDS)]
+            if self.skip_puncts:
+                tagged_frame = tagged_frame[~tagged_frame.pos.isin(pads)]
 
         if self.skip_text:
-            tagged_frame.drop(columns='token', inplace=True)
+            drop_columns.append('token')
         elif self.lowercase:
             tagged_frame['token'] = tagged_frame['token'].str.lower()
 
         if self.skip_lemma:
-            tagged_frame.drop(columns='lemma', inplace=True)
+            drop_columns.append('lemma')
         elif self.lowercase:
-            tagged_frame['lemma'] = tagged_frame['lemma'].str.lower()
+            tagged_frame['lemma'] = tagged_frame['lemma'].str.lower().fillna('')
             assert not tagged_frame.lemma.isna().any(), "YOU SHALL UPDATE LEMMA FROM TEXT"
+
+        tagged_frame = tagged_frame.drop(columns=drop_columns)
 
         return tagged_frame
 
