@@ -74,7 +74,7 @@ profile-extract-text:
 profile-extract-tags:
 	@mkdir -p ./profile-reports \
 		&& export PYTHONPATH=. \
-		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract_tags.py
+		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract_tagged_frames.py
 
 .ONESHELL: guard-clean-working-repository
 guard-clean-working-repository:
