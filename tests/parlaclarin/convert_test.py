@@ -1,3 +1,4 @@
+from os.path import join as jj
 from typing import List
 
 import pytest
@@ -5,9 +6,8 @@ import pytest
 from pyriksprot import interface
 from pyriksprot.parlaclarin import convert, parse
 
-from os.path import join as jj
-
 from ..utility import PARLACLARIN_FAKE_FOLDER
+
 
 @pytest.mark.skip(reason="deprecated")
 def test_convert_to_xml():
@@ -40,7 +40,7 @@ Ove är dum.
 
     assert result == expected
 
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(jj(PARLACLARIN_FAKE_FOLDER,"prot-1958-fake.xml"))
+    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"))
     speeches: List[interface.Speech] = protocol.to_speeches(merge_strategy='who_sequence')
 
     result: str = converter.convert(protocol, speeches, "prot-200203--18.xml")

@@ -8,6 +8,7 @@ import pytest
 
 from pyriksprot import corpus_index, dispatch, interface, member, merge, utility
 from pyriksprot.tagged_corpus import iterate
+
 from .utility import TAGGED_SOURCE_FOLDER
 
 # pylint: disable=unused-variable, redefined-outer-name

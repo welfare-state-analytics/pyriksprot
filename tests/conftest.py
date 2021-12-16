@@ -1,5 +1,7 @@
-import pytest
 from os.path import isdir
+
+import pytest
+
 from pyriksprot import member
 
 from .utility import PARLACLARIN_SOURCE_BRANCH, PARLACLARIN_SOURCE_FOLDER, create_parlaclarin_corpus

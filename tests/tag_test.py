@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pyriksprot
+
 from .utility import PARLACLARIN_FAKE_FOLDER
 
 

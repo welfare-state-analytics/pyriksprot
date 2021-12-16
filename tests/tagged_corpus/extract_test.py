@@ -5,6 +5,7 @@ from typing import Iterable, List
 import pytest
 
 from pyriksprot import CorpusSourceIndex, interface, tagged_corpus
+
 from ..utility import TAGGED_SOURCE_FOLDER
 
 # pylint: disable=redefined-outer-name

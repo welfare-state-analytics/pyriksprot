@@ -12,7 +12,13 @@ from black import itertools
 from pyriksprot import interface, parlaclarin, tagged_corpus, utility
 from pyriksprot.foss import untangle
 
-from .utility import PARLACLARIN_SOURCE_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_utterances
+from .utility import (
+    PARLACLARIN_SOURCE_FOLDER,
+    TAGGED_SOURCE_FOLDER,
+    TAGGED_SOURCE_PATTERN,
+    UTTERANCES_DICTS,
+    create_utterances,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -254,7 +260,7 @@ def test_speech_annotation():
         # ("prot-1933--fk--5.xml", 1, 1, interface.MergeSpeechStrategyType.WhoSequence),
         # ("prot-1955--ak--22.xml", 190, 190, interface.MergeSpeechStrategyType.Chain),
         # ("prot-1955--ak--22.xml", 53, 53, interface.MergeSpeechStrategyType.Who),
-        #("prot-1955--ak--22.xml", 149, 149, interface.MergeSpeechStrategyType.WhoSequence),
+        # ("prot-1955--ak--22.xml", 149, 149, interface.MergeSpeechStrategyType.WhoSequence),
         # ('prot-199192--127.xml', 224, 224, interface.MergeSpeechStrategyType.Chain),
         ('prot-199192--127.xml', 51, 51, interface.MergeSpeechStrategyType.Who),
         ('prot-199192--127.xml', 208, 208, interface.MergeSpeechStrategyType.WhoSequence),
@@ -355,7 +361,7 @@ def test_load_protocols_with_non_existing_file():
 
 def test_load_protocol_with_empty_existing_file():
     protocol: interface.Protocol | None = tagged_corpus.load_protocol(
-        filename=jj(TAGGED_SOURCE_FOLDER,'prot-1973--21.zip')
+        filename=jj(TAGGED_SOURCE_FOLDER, 'prot-1973--21.zip')
     )
     assert protocol is None
 
