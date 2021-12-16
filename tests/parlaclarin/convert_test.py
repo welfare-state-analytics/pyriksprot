@@ -5,12 +5,16 @@ import pytest
 from pyriksprot import interface
 from pyriksprot.parlaclarin import convert, parse
 
+from os.path import join as jj
+
+from ..utility import PARLACLARIN_FAKE_FOLDER
 
 @pytest.mark.skip(reason="deprecated")
 def test_convert_to_xml():
 
     template_name: str = "speeches.xml.jinja"
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol("tests/test_data/fake/prot-1958-fake.xml")
+    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"))
+
     speeches: List[interface.Speech] = protocol.to_speeches(merge_strategy='who_sequence')
 
     assert protocol is not None
@@ -36,7 +40,7 @@ Ove är dum.
 
     assert result == expected
 
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol("tests/test_data/fake/prot-1958-fake.xml")
+    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(jj(PARLACLARIN_FAKE_FOLDER,"prot-1958-fake.xml"))
     speeches: List[interface.Speech] = protocol.to_speeches(merge_strategy='who_sequence')
 
     result: str = converter.convert(protocol, speeches, "prot-200203--18.xml")
@@ -58,7 +62,7 @@ Ove är dum.
     assert result == expected
 
     protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
-        "tests/test_data/fake/prot-1958-fake.xml",
+        jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"),
     )
     speeches: List[interface.Speech] = protocol.to_speeches(merge_strategy='who')
 

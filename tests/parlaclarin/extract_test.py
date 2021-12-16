@@ -8,18 +8,16 @@ import pytest
 
 from pyriksprot import corpus_index, dispatch, interface, member, merge, parlaclarin
 
+from ..utility import PARLACLARIN_SOURCE_BRANCH, PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN
+
 # pylint: disable=redefined-outer-name
-
-
-# TEST_CORPUS_FOLDER = '/data/riksdagen_corpus_data/riksdagen-corpus/corpus'
-TEST_CORPUS_FOLDER = 'tests/test_data/source'
 
 
 @pytest.fixture
 def source_index() -> corpus_index.CorpusSourceIndex:
 
     items: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
-        source_folder=TEST_CORPUS_FOLDER,
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
         source_pattern='**/prot-*.xml',
         skip_empty=False,
     )
@@ -52,7 +50,7 @@ def test_create_grouping_hashcoder(
 
 def test_parliamentary_index():
 
-    member_index = member.ParliamentaryMemberIndex(branch='dev')
+    member_index = member.ParliamentaryMemberIndex(branch=PARLACLARIN_SOURCE_BRANCH)
 
     assert isinstance(member_index.members, pd.DataFrame)
     assert len(member_index.members) > 0
@@ -60,8 +58,7 @@ def test_parliamentary_index():
 
 def test_segment_merger_merge(source_index, member_index):
 
-    # filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
-    filenames: List[str] = glob.glob(f'{TEST_CORPUS_FOLDER}/**/prot-*.xml', recursive=True)
+    filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
     texts: Iterable[interface.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=0, multiproc_processes=None
@@ -88,7 +85,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     parlaclarin.extract_corpus_text(
-        source_folder='tests/test_data/source',
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
         target_name=target_name,
         target_type='files-in-zip',
         compress_type=dispatch.CompressType.Zip,
@@ -108,7 +105,7 @@ def test_extract_corpus_with_no_temporal_key():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     parlaclarin.extract_corpus_text(
-        source_folder='tests/test_data/source',
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -126,7 +123,7 @@ def test_extract_corpus_with_no_matching_protocols():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     parlaclarin.extract_corpus_text(
-        source_folder='tests/test_data/source',
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -145,7 +142,7 @@ def test_aggregator_extract_gender_party_no_temporal_key():
     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
 
     parlaclarin.extract_corpus_text(
-        source_folder='tests/test_data/source',
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
         target_name=target_filename,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,

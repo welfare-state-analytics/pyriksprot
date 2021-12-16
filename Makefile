@@ -61,7 +61,7 @@ profile-tagging:
 	@mkdir -p ./profile-reports
 	@poetry run python -m pyinstrument -r html -o ./.profile-reports/$(RUN_TIMESTAMP)_tagging-pyinstrument.html ./tests/profile_tagging.py
 
-test-data:
+test-parlaclarin-data:
 	@poetry run python -c 'import tests.utility; tests.utility.create_parlaclarin_corpus()'
 
 .ONESHELL: profile-extract-text

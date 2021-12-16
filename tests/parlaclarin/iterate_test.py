@@ -5,6 +5,7 @@ from typing import Iterable, List
 import pytest
 
 from pyriksprot import interface, parlaclarin, utility
+from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 
 jj = os.path.join
 
@@ -19,7 +20,7 @@ jj = os.path.join
 )
 def test_protocol_texts_iterator_metadata(iterator_class):
 
-    filenames = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    filenames = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
     expected_document_names = sorted(utility.strip_path_and_extension(filenames))
 
     texts: Iterable[interface.ProtocolSegment] = list(
@@ -35,7 +36,7 @@ def test_protocol_texts_iterator_metadata(iterator_class):
 
 def test_xml_protocol_texts_iterator_texts():
 
-    filenames: List[str] = glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True)
+    filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
     expected_document_names: List[str] = sorted(utility.strip_path_and_extension(filenames))
 
     texts: Iterable[interface.ProtocolSegment] = list(
@@ -77,14 +78,14 @@ def test_xml_protocol_texts_iterator_texts():
             multiproc_processes=None,
         )
     )
-    assert len(texts) == 110
+    assert len(texts) == 118
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
-    assert len(texts) == 110
+    assert len(texts) == 118
 
     texts1 = list(
         parlaclarin.XmlUntangleSegmentIterator(
@@ -363,7 +364,7 @@ EXPECTED_STREAM = {
 def test_protocol_texts_iterator(iterator_class):
 
     document_names: List[str] = ['prot-1958-fake', 'prot-1960-fake']
-    filenames: List[str] = [jj("tests", "test_data", "fake", f"{name}.xml") for name in document_names]
+    filenames: List[str] = [jj(PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
 
     segments: List[interface.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=None)
@@ -387,7 +388,7 @@ def test_protocol_texts_iterator(iterator_class):
 )
 def test_protocol_texts_iterator_levels_compare(segment_level):
 
-    filenames = [jj("tests", "test_data", "fake", f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
+    filenames = [jj(PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
 
     texts1 = list(
         parlaclarin.XmlUntangleSegmentIterator(
@@ -425,7 +426,7 @@ def test_protocol_texts_iterator_levels_compare(segment_level):
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):
 
-    filenames = [jj("tests", "test_data", "fake", f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
+    filenames = [jj(PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
     texts = list(
         iterator_class(filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None)
     )

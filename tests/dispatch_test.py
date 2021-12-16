@@ -8,16 +8,15 @@ import pytest
 
 from pyriksprot import corpus_index, dispatch, interface, member, merge, utility
 from pyriksprot.tagged_corpus import iterate
+from .utility import TAGGED_SOURCE_FOLDER
 
 # pylint: disable=unused-variable, redefined-outer-name
-
-SOURCE_FOLDER: str = './tests/test_data/tagged'
 
 
 @pytest.fixture
 def source_index() -> corpus_index.CorpusSourceIndex:
     return corpus_index.CorpusSourceIndex.load(
-        source_folder=SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
+        source_folder=TAGGED_SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
     )
 
 

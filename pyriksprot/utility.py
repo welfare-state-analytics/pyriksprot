@@ -212,7 +212,7 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
             path.unlink()
 
 
-def download_url(url: str, target_folder: str, filename: str = None) -> None:
+def download_url(*, url: str, target_folder: str, filename: str = None) -> None:
     """Download a file from a url and place it in `target_folder`.
     https://stackoverflow.com/a/61003039/12383895
     Args:
@@ -226,6 +226,7 @@ def download_url(url: str, target_folder: str, filename: str = None) -> None:
 
     os.makedirs(target_folder, exist_ok=True)
 
+    logger.info(f'downloading: {filename}')
     try:
         urlretrieve(url, target_filename)
     except (URLError, IOError):

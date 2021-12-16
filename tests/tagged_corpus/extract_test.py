@@ -5,15 +5,13 @@ from typing import Iterable, List
 import pytest
 
 from pyriksprot import CorpusSourceIndex, interface, tagged_corpus
+from ..utility import TAGGED_SOURCE_FOLDER
 
 # pylint: disable=redefined-outer-name
 
 
-# TEST_CORPUS_FOLDER = '/data/riksdagen_corpus_data/annotated'
-TEST_CORPUS_FOLDER = 'tests/test_data/tagged'
-
 DEFAULT_OPTS = dict(
-    source_folder='./tests/test_data/tagged',
+    source_folder=TAGGED_SOURCE_FOLDER,
     target_type='files-in-zip',
     content_type=interface.ContentType.TaggedFrame,
     segment_level=interface.SegmentLevel.Who,
@@ -25,7 +23,7 @@ DEFAULT_OPTS = dict(
 
 
 def test_glob_protocols():
-    corpus_source: str = './tests/test_data/tagged'
+    corpus_source: str = TAGGED_SOURCE_FOLDER
     filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, file_pattern='prot-*.zip', strip_path=True)
     assert len(filenames) == 20
     """Empty files should be included"""
@@ -33,7 +31,7 @@ def test_glob_protocols():
 
 
 def test_create_source_index_for_tagged_corpus():
-    corpus_source: str = './tests/test_data/tagged'
+    corpus_source: str = TAGGED_SOURCE_FOLDER
     source_index = CorpusSourceIndex.load(source_folder=corpus_source, source_pattern='**/prot-*.zip')
     assert isinstance(source_index, CorpusSourceIndex)
     assert len(source_index) == 19
@@ -43,7 +41,7 @@ def test_create_source_index_for_tagged_corpus():
 
 
 def test_load_protocols():
-    corpus_source: str = './tests/test_data/tagged'
+    corpus_source: str = TAGGED_SOURCE_FOLDER
     filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, file_pattern='prot-*.zip')
 
     protocol_iter: Iterable[interface.Protocol] = tagged_corpus.load_protocols(corpus_source)

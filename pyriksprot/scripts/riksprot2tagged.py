@@ -39,6 +39,7 @@ CONTENT_TYPES = [e.value for e in interface.ContentType]
 @click.option('--years', default=None, help='Years to include in output', type=click.STRING)
 @click.option('--multiproc-processes', default=None, type=click.IntRange(1, 40), help='Number of processes to use')
 @click.option('--multiproc-keep-order', default=False, is_flag=True, help='Process is sort order (slower, multiproc)')
+@click.option('--branch', default='main', type=click.STRING, help='Default branch for metadata')
 def main(
     source_folder: str = None,
     target_name: str = None,
@@ -52,6 +53,7 @@ def main(
     years: str = None,
     multiproc_processes: int = 1,
     multiproc_keep_order: str = None,
+    branch: str = 'main',
 ):
     try:
 
@@ -69,6 +71,7 @@ def main(
             multiproc_processes=multiproc_processes,
             multiproc_chunksize=100,
             compress_type=dispatch.CompressType(compress_type.lower()),
+            branch=branch,
         )
 
     except Exception as ex:

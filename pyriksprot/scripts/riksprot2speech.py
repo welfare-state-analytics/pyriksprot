@@ -22,6 +22,7 @@ COMPRESS_TYPES = dispatch.CompressType.values()
 @click.option('--skip-puncts', default=False, type=click.BOOL, is_flag=True, help='Skip puncts')
 @click.option('--skip-stopwords', default=False, type=click.BOOL, is_flag=True, help='Skip stopwords')
 @click.option('--lowercase', default=True, type=click.BOOL, is_flag=True, help='Lowercase tokem/text')
+@click.option('--branch', default='main', type=click.STRING, help='Default branch for metadata')
 def main(
     source_folder: str = None,
     target_name: str = None,
@@ -34,6 +35,7 @@ def main(
     skip_puncts: bool = False,
     skip_stopwords: bool = False,
     lowercase: bool = True,
+    branch: str = 'main',
 ):
     extract.extract_corpus_tags(
         source_folder=source_folder,
@@ -55,6 +57,7 @@ def main(
         skip_puncts=skip_puncts,
         skip_stopwords=skip_stopwords,
         lowercase=lowercase,
+        branch=branch,
     )
 
 

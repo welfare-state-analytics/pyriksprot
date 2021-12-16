@@ -5,6 +5,7 @@ from typing import List
 import pytest
 
 from pyriksprot import interface, parlaclarin, utility
+from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 
 jj = os.path.join
 
@@ -31,7 +32,7 @@ def test_word_frequency_counter(texts):
     assert counter.frequencies.get('f', None) == 1
 
 
-@pytest.mark.parametrize('filename', glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True))
+@pytest.mark.parametrize('filename', glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True))
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
@@ -43,7 +44,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
     assert protocol.has_text == (len(counter.frequencies) > 0)
 
 
-@pytest.mark.parametrize('filename', glob.glob('tests/test_data/source/**/prot-*.xml', recursive=True))
+@pytest.mark.parametrize('filename', glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True))
 def test_persist_word_frequencies(filename: List[str]):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
@@ -88,7 +89,7 @@ def test_persist_word_frequencies(filename: List[str]):
     ],
 )
 def test_compute_word_frequencies(document_name: str, expected_frequencies: dict):
-    filename: str = jj("tests", "test_data", "fake", f"{document_name}.xml")
+    filename: str = jj(PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
 
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
         counts: parlaclarin.TermFrequencyCounter = parlaclarin.compute_term_frequencies(

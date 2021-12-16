@@ -3,6 +3,7 @@ import os
 import pytest
 
 from pyriksprot import interface, parlaclarin
+from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_FOLDER
 
 jj = os.path.join
 
@@ -10,7 +11,7 @@ jj = os.path.join
 def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(
-        jj("tests", "test_data", "fake", "prot-1958-fake.xml")
+        jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
     )
 
     assert protocol is not None
@@ -28,12 +29,11 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
     'filename',
     [
         ("prot-197879--14.xml"),
-        ("prot-199596--35.xml"),
     ],
 )
 def test_parlaclarin_xml_with_no_utterances(filename):
 
-    path: str = jj("tests", "test_data", "source", filename.split('-')[1], filename)
+    path: str = jj(PARLACLARIN_SOURCE_FOLDER, filename.split('-')[1], filename)
 
     protocol = parlaclarin.ProtocolMapper.to_protocol(path, segment_skip_size=0)
 
@@ -43,7 +43,7 @@ def test_parlaclarin_xml_with_no_utterances(filename):
 
 
 def test_to_protocol_by_untangle():
-    filename = jj("tests", "test_data", "fake", "prot-1958-fake.xml")
+    filename = jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
 
     protocol: parlaclarin.XmlUntangleProtocol = parlaclarin.XmlUntangleProtocol(filename)
 

@@ -5,21 +5,21 @@ import pytest
 from pyriksprot import corpus_index, interface, member, merge
 from pyriksprot.tagged_corpus import iterate, persist
 
-# pylint: disable=unused-variable, redefined-outer-name
+from .utility import PARLACLARIN_SOURCE_BRANCH, TAGGED_SOURCE_FOLDER
 
-SOURCE_FOLDER: str = './tests/test_data/tagged'
+# pylint: disable=unused-variable, redefined-outer-name
 
 
 @pytest.fixture
 def source_index() -> corpus_index.CorpusSourceIndex:
     return corpus_index.CorpusSourceIndex.load(
-        source_folder=SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
+        source_folder=TAGGED_SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
     )
 
 
 @pytest.fixture
 def member_index() -> member.ParliamentaryMemberIndex:
-    return member.ParliamentaryMemberIndex(source_folder=f'{SOURCE_FOLDER}', branch='dev')
+    return member.ParliamentaryMemberIndex(source_folder=TAGGED_SOURCE_FOLDER, branch=PARLACLARIN_SOURCE_BRANCH)
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def utterance_segments(source_index) -> List[interface.ProtocolSegment]:
 def test_segment_merger_merge_on_protocol_level_group_by_who(member_index, source_index, utterance_segments):
 
     """Load source protocols to simplify tests"""
-    protocols: List[interface.Protocol] = list(persist.load_protocols(source=SOURCE_FOLDER))
+    protocols: List[interface.Protocol] = list(persist.load_protocols(source=TAGGED_SOURCE_FOLDER))
 
     """Check that iterator yields all utterances"""
     assert len(utterance_segments) == sum(map(len, protocols))
