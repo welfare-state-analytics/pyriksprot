@@ -20,7 +20,6 @@ def main():
         multiproc_processes=None,
         multiproc_chunksize=100,
         force=True,
-        branch='main',
     )
 
 

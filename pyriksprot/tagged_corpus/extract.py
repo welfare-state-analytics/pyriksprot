@@ -34,7 +34,6 @@ def extract_corpus_tags(
     skip_puncts: bool = False,
     skip_stopwords: bool = False,
     lowercase: bool = True,
-    branch: str = 'main',
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
 
@@ -89,10 +88,7 @@ def extract_corpus_tags(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
     logger.info("loading index over parliamentary persons...")
-    member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(
-        source_folder=None,
-        branch=branch,
-    )
+    member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(source=source_folder, tag=None)
     texts: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,

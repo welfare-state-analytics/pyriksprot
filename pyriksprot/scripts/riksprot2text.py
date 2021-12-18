@@ -8,8 +8,6 @@ from pyriksprot import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
 from pyriksprot.parlaclarin import extract
 
-sys.path.append(".")
-
 # pylint: disable=too-many-arguments
 
 

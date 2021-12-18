@@ -35,7 +35,6 @@ def extract_corpus_text(
     dehyphen: bool = False,
     data_path: str = '.',
     compress_type: dispatch.CompressType = dispatch.CompressType.Zip,
-    branch: str = 'main',
     **_,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
@@ -63,9 +62,7 @@ def extract_corpus_text(
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
     )
-    member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(
-        source_folder=f'{source_folder}', branch=branch
-    )
+    member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(source=source_folder)
 
     preprocessor: Callable[[str], str] = utility.compose(
         ([utility.dedent] if dedent else []) + ([create_dehyphen(data_path)] if dehyphen else [])

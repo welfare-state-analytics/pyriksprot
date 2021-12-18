@@ -5,7 +5,7 @@ import pytest
 from pyriksprot import corpus_index, interface, member, merge
 from pyriksprot.tagged_corpus import iterate, persist
 
-from .utility import PARLACLARIN_SOURCE_BRANCH, TAGGED_SOURCE_FOLDER
+from .utility import TAGGED_SOURCE_FOLDER
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -19,7 +19,7 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 
 @pytest.fixture
 def member_index() -> member.ParliamentaryMemberIndex:
-    return member.ParliamentaryMemberIndex(source_folder=TAGGED_SOURCE_FOLDER, branch=PARLACLARIN_SOURCE_BRANCH)
+    return member.ParliamentaryMemberIndex(source=TAGGED_SOURCE_FOLDER)
 
 
 @pytest.fixture

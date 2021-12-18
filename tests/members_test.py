@@ -2,13 +2,11 @@ import pandas as pd
 
 from pyriksprot import member as pm
 
-from .utility import PARLACLARIN_SOURCE_BRANCH
+from .utility import PARLACLARIN_SOURCE_FOLDER
 
 
 def test_load_parliamentary_members():
-    persons: pm.ParliamentaryRole = pm.ParliamentaryMemberIndex.load_members(
-        pm.members_of_parliament_url(branch=PARLACLARIN_SOURCE_BRANCH)
-    )
+    persons: pm.ParliamentaryRole = pm.ParliamentaryMemberIndex.load_members(source=PARLACLARIN_SOURCE_FOLDER, tag=None)
 
     assert len(persons) > 0
 
@@ -19,7 +17,7 @@ def test_load_parliamentary_members():
 def test_load_ministers():
     party_abbrevs: dict = {}
     persons: pd.DataFrame = pm.ParliamentaryMemberIndex.load_ministers(
-        pm.ministers_url(branch=PARLACLARIN_SOURCE_BRANCH), party_abbrevs
+        source=PARLACLARIN_SOURCE_FOLDER, party_abbrevs=party_abbrevs
     )
 
     assert len(persons) > 0
@@ -31,7 +29,7 @@ def test_load_ministers():
 def test_load_speakers():
     party_abbrevs: dict = {}
     persons: pd.DataFrame = pm.ParliamentaryMemberIndex.load_speakers(
-        pm.speakers_url(branch=PARLACLARIN_SOURCE_BRANCH), party_abbrevs
+        source=PARLACLARIN_SOURCE_FOLDER, party_abbrevs=party_abbrevs
     )
 
     assert len(persons) > 0
@@ -42,7 +40,7 @@ def test_load_speakers():
 
 
 def test_load_roles():
-    persons: pd.DataFrame = pm.ParliamentaryMemberIndex(branch=PARLACLARIN_SOURCE_BRANCH)
+    persons: pd.DataFrame = pm.ParliamentaryMemberIndex(source=PARLACLARIN_SOURCE_FOLDER)
 
     assert len(persons) > 0
 

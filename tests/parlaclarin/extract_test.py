@@ -8,7 +8,7 @@ import pytest
 
 from pyriksprot import corpus_index, dispatch, interface, member, merge, parlaclarin
 
-from ..utility import PARLACLARIN_SOURCE_BRANCH, PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN
+from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 
 # pylint: disable=redefined-outer-name
 
@@ -50,7 +50,7 @@ def test_create_grouping_hashcoder(
 
 def test_parliamentary_index():
 
-    member_index = member.ParliamentaryMemberIndex(branch=PARLACLARIN_SOURCE_BRANCH)
+    member_index = member.ParliamentaryMemberIndex(source=PARLACLARIN_SOURCE_FOLDER)
 
     assert isinstance(member_index.members, pd.DataFrame)
     assert len(member_index.members) > 0
