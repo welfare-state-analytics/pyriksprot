@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Iterable, List, Tuple
 
+import pandas as pd
+
 from ..interface import Protocol, ProtocolSegment, ProtocolSegmentIterator
 from . import persist
 
@@ -35,3 +37,8 @@ class ProtocolIterator(ProtocolSegmentIterator):
 
     def map_futures(self, imap, args):
         return imap(multiprocessing_load, args, chunksize=self.multiproc_chunksize)
+
+    def to_segment_index(self) -> pd.DataFrame:
+        """Iterate and return a meta data index over segments."""
+        segment_index: pd.DataFrame = pd.DataFrame([x.to_dict() for x in self])
+        return segment_index
