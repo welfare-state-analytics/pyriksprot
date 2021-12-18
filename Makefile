@@ -1,3 +1,5 @@
+include .env
+
 .DEFAULT_GOAL=lint
 
 SHELL := /bin/bash

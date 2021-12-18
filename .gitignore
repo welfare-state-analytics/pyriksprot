@@ -105,7 +105,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -148,3 +147,4 @@ data
 deprecated
 profile-reports
 html
+data_link

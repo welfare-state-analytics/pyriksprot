@@ -3,19 +3,18 @@ import shutil
 from os.path import join as jj
 from typing import List
 
+from dotenv import load_dotenv
 from loguru import logger
 
 from pyriksprot import interface
 from pyriksprot.utility import download_url
 
-PARLACLARIN_SOURCE_BRANCH = "main"
+load_dotenv()
+
+PARLACLARIN_SOURCE_TAG = os.environ("CORPUS_REPOSITORY_TAG")
 PARLACLARIN_SOURCE_FOLDER = 'tests/test_data/source/parlaclarin'
 PARLACLARIN_SOURCE_PATTERN = f'{PARLACLARIN_SOURCE_FOLDER}/**/prot-*.xml'
 PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
-
-MEMBERS_FILENAME = f'{PARLACLARIN_SOURCE_FOLDER}/members_of_parliament.csv'
-MINISTERS_FILENAME = f'{PARLACLARIN_SOURCE_FOLDER}/ministers.csv'
-SPEAKERS_FILENAME = f'{PARLACLARIN_SOURCE_FOLDER}/talman.csv'
 
 TAGGED_SOURCE_FOLDER = 'tests/test_data/source/tagged_frames'
 TAGGED_SOURCE_PATTERN = f'{TAGGED_SOURCE_FOLDER}/prot-*.zip'
@@ -30,35 +29,37 @@ DEFAULT_TEST_DOCUMENT_NAMES = [
 ]
 
 
-def github_source_url(branch: str = PARLACLARIN_SOURCE_BRANCH):
-    return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{branch}/corpus"
+def _metadata_url(*, filename: str, tag: str) -> str:
+    return f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/{filename}'
 
 
-def download_metadata_url(*, filename: str, branch: str = PARLACLARIN_SOURCE_BRANCH) -> str:
-    return f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{branch}/corpus/{filename}'
+def _protocol_uri(filename: str, sub_folder: str, tag: str) -> str:
+    if not filename.endswith('.xml'):
+        filename = f"{filename}.xml"
+    return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{tag}/corpus/{sub_folder}/{filename}"
 
 
-def download_parliamentary_protocols(
-    protocols: List[str], target_folder: str, create_subfolder: bool = True, branch: str = PARLACLARIN_SOURCE_BRANCH
+def _download_parliamentary_protocols(
+    protocols: List[str], target_folder: str, create_subfolder: bool, tag: str
 ) -> None:
     os.makedirs(target_folder, exist_ok=True)
     for filename in protocols:
-        if not filename.endswith('.xml'):
-            filename = f"{filename}.xml"
-        subfolder: str = filename.split('-')[1]
-        url: str = f'{github_source_url(branch)}/{subfolder}/{filename}'
-        target_subfolder = target_folder if not create_subfolder else jj(target_folder, subfolder)
-        download_url(url=url, target_folder=target_subfolder, filename=filename)
+        sub_folder: str = filename.split('-')[1]
+        download_url(
+            url=_protocol_uri(filename=filename, sub_folder=sub_folder, tag=tag),
+            target_folder=target_folder if not create_subfolder else jj(target_folder, sub_folder),
+            filename=filename,
+        )
 
 
-def download_parliamentary_metadata(target_folder: str, branch: str = PARLACLARIN_SOURCE_BRANCH):
+def _download_parliamentary_metadata(target_folder: str, tag: str = PARLACLARIN_SOURCE_TAG):
     for filename in ['members_of_parliament.csv', 'ministers.csv', 'talman.csv']:
-        url: str = download_metadata_url(filename=filename, branch=branch)
+        url: str = _metadata_url(filename=filename, tag=tag)
         download_url(url=url, target_folder=target_folder, filename=filename)
 
 
 def create_parlaclarin_corpus(
-    protocols: List[str] = None, target_folder: str = PARLACLARIN_SOURCE_FOLDER, branch: str = PARLACLARIN_SOURCE_BRANCH
+    protocols: List[str] = None, target_folder: str = PARLACLARIN_SOURCE_FOLDER, tag: str = PARLACLARIN_SOURCE_TAG
 ) -> None:
 
     if protocols is None:
@@ -68,10 +69,10 @@ def create_parlaclarin_corpus(
     os.makedirs(target_folder, exist_ok=True)
 
     logger.info("downloading parliamentary metadata")
-    download_parliamentary_metadata(target_folder, branch)
+    _download_parliamentary_metadata(target_folder, tag)
 
     logger.info(f"downloading test protocols: {', '.join(protocols)}")
-    download_parliamentary_protocols(protocols, target_folder, create_subfolder=True, branch=branch)
+    _download_parliamentary_protocols(protocols, target_folder, create_subfolder=True, tag=tag)
 
 
 TAGGED_CSV_STR = (
