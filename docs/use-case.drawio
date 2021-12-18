@@ -1,0 +1,37 @@
+<mxfile host="65bd71144e">
+    <diagram id="5AXZ9LgI25YOor3XNkfN" name="Page-1">
+        <mxGraphModel dx="594" dy="391" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#FFFFFF" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="6" value="EXTRACT" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="140" y="250" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="TAG" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="140" y="110" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" style="edgeStyle=none;html=1;labelBackgroundColor=#FFFFFF;fontFamily=Helvetica;fontColor=#000000;strokeColor=#000000;" edge="1" parent="1" source="8" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="SEGMENT" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="170" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" style="edgeStyle=none;html=1;labelBackgroundColor=#FFFFFF;fontFamily=Helvetica;fontColor=#000000;strokeColor=#000000;" edge="1" parent="1" source="9" target="6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="MERGE" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="310" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="StanzaTagger" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="10" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="Hunpos" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="10" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="Sparv" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Helvetica;" vertex="1" parent="1">
+                    <mxGeometry x="380" y="80" width="120" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
