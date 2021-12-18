@@ -34,6 +34,7 @@ def extract_corpus_tags(
     skip_puncts: bool = False,
     skip_stopwords: bool = False,
     lowercase: bool = True,
+    progress: bool = True,
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
 
@@ -114,7 +115,7 @@ def extract_corpus_tags(
 
         n_total: int = len(source_index.source_items)
 
-        for item in tqdm(merger.merge(texts), total=n_total, miniters=10):
+        for item in tqdm(merger.merge(texts), total=n_total, miniters=10, disable=not progress):
             if not item:
                 logger.error("merge returned empty data")
                 continue

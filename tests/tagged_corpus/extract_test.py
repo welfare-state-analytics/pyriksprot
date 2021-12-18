@@ -73,6 +73,6 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
         ),
     }
 
-    tagged_corpus.extract_corpus_tags(**opts)
+    tagged_corpus.extract_corpus_tags(**opts, progress=False)
     assert os.path.isfile(opts['target_name'])
     os.unlink(opts['target_name'])

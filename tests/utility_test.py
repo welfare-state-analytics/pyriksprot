@@ -2,9 +2,16 @@ import os
 from os.path import join as jj
 from pathlib import Path
 
+import pytest
+
 from pyriksprot.utility import dedent, temporary_file
 
-from .utility import setup_parlaclarin_test_corpus, setup_tagged_frames_test_corpus
+from .utility import (
+    PARLACLARIN_SOURCE_FOLDER,
+    TAGGED_SOURCE_FOLDER,
+    setup_parlaclarin_test_corpus,
+    setup_tagged_frames_test_corpus,
+)
 
 
 def test_temporary_file():
@@ -38,10 +45,12 @@ def test_dedent():
     assert dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
 
 
+@pytest.mark.skipif(condition=os.path.isdir(PARLACLARIN_SOURCE_FOLDER), reason="Test data found")
 def test_setup_parlaclarin_test_corpus():
     setup_parlaclarin_test_corpus()
 
 
+@pytest.mark.skipif(condition=os.path.isdir(TAGGED_SOURCE_FOLDER), reason="Test data found")
 def test_setup_tagged_frames_corpus():
     source_folder: str = os.environ["PARLACLARIN_TAGGED_FOLDER"]
     setup_tagged_frames_test_corpus(source_folder=source_folder)
