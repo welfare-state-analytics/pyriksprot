@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from pyriksprot import interface
-from pyriksprot.utility import download_url
+from pyriksprot.utility import download_url, replace_extension
 
 load_dotenv()
 
-PARLACLARIN_SOURCE_TAG = os.environ("CORPUS_REPOSITORY_TAG")
+PARLACLARIN_SOURCE_TAG = os.environ["CORPUS_REPOSITORY_TAG"]
 PARLACLARIN_SOURCE_FOLDER = 'tests/test_data/source/parlaclarin'
 PARLACLARIN_SOURCE_PATTERN = f'{PARLACLARIN_SOURCE_FOLDER}/**/prot-*.xml'
 PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
@@ -19,13 +19,13 @@ PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
 TAGGED_SOURCE_FOLDER = 'tests/test_data/source/tagged_frames'
 TAGGED_SOURCE_PATTERN = f'{TAGGED_SOURCE_FOLDER}/prot-*.zip'
 
-DEFAULT_TEST_DOCUMENT_NAMES = [
+TEST_DOCUMENTS = [
     "prot-1933--fk--5",
     "prot-1955--ak--22",
     "prot-197879--14",
     "prot-199596--35",
-    'prot-199192--127.xml',
-    'prot-199192--21.xml',
+    'prot-199192--127',
+    'prot-199192--21',
 ]
 
 
@@ -34,8 +34,6 @@ def _metadata_url(*, filename: str, tag: str) -> str:
 
 
 def _protocol_uri(filename: str, sub_folder: str, tag: str) -> str:
-    if not filename.endswith('.xml'):
-        filename = f"{filename}.xml"
     return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{tag}/corpus/{sub_folder}/{filename}"
 
 
@@ -45,6 +43,7 @@ def _download_parliamentary_protocols(
     os.makedirs(target_folder, exist_ok=True)
     for filename in protocols:
         sub_folder: str = filename.split('-')[1]
+        filename: str = replace_extension(filename, 'xml')
         download_url(
             url=_protocol_uri(filename=filename, sub_folder=sub_folder, tag=tag),
             target_folder=target_folder if not create_subfolder else jj(target_folder, sub_folder),
@@ -58,12 +57,12 @@ def _download_parliamentary_metadata(target_folder: str, tag: str = PARLACLARIN_
         download_url(url=url, target_folder=target_folder, filename=filename)
 
 
-def create_parlaclarin_corpus(
+def setup_parlaclarin_test_corpus(
     protocols: List[str] = None, target_folder: str = PARLACLARIN_SOURCE_FOLDER, tag: str = PARLACLARIN_SOURCE_TAG
 ) -> None:
 
     if protocols is None:
-        protocols = DEFAULT_TEST_DOCUMENT_NAMES
+        protocols = TEST_DOCUMENTS
 
     shutil.rmtree(target_folder, ignore_errors=True)
     os.makedirs(target_folder, exist_ok=True)
@@ -73,6 +72,27 @@ def create_parlaclarin_corpus(
 
     logger.info(f"downloading test protocols: {', '.join(protocols)}")
     _download_parliamentary_protocols(protocols, target_folder, create_subfolder=True, tag=tag)
+
+
+def setup_tagged_frames_test_corpus(
+    source_folder: str,
+    target_folder: str = TAGGED_SOURCE_FOLDER,
+    protocols: List[str] = None,
+) -> None:
+    protocols = protocols or TEST_DOCUMENTS
+    shutil.rmtree(target_folder, ignore_errors=True)
+    os.makedirs(target_folder, exist_ok=True)
+    for name in protocols:
+        filename: str = replace_extension(name, 'zip')
+        subfolder: str = filename.split('-')[1]
+        source_filename: str = jj(source_folder, subfolder, filename)
+        if not os.path.isfile(source_filename):
+            logger.warning(f"test data: test file {name} not found")
+            continue
+        shutil.copy(src=source_filename, dst=jj(target_folder, filename))
+
+    for filename in ['members_of_parliament.csv', 'ministers.csv', 'talman.csv']:
+        shutil.copy(src=jj(PARLACLARIN_SOURCE_FOLDER, filename), dst=jj(target_folder, filename))
 
 
 TAGGED_CSV_STR = (
