@@ -369,22 +369,22 @@ def test_load_protocol_with_empty_existing_file():
 def test_load_protocols_from_filenames():
     filenames: List[str] = glob.glob(TAGGED_SOURCE_PATTERN, recursive=True)
     protocols: List[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
-    assert len(protocols) == 19
+    assert len(protocols) == 5
 
 
 def test_load_protocols_from_folder():
     protocols: List[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=TAGGED_SOURCE_FOLDER)]
-    assert len(protocols) == 19
+    assert len(protocols) == 5
 
 
 def test_protocol_to_items():
 
-    filename: str = jj(TAGGED_SOURCE_FOLDER, 'prot-198990--15.zip')
+    filename: str = jj(TAGGED_SOURCE_FOLDER, 'prot-199192--127.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
 
     assert protocol is not None
-    assert len(protocol.utterances) == 5
+    assert len(protocol.utterances) == 274
 
     items = protocol.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
     assert len(items) == len(set(d.who for d in protocol.utterances))
