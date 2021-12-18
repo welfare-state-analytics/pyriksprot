@@ -31,7 +31,7 @@ The extracted text can be stored as optionally compressed plain text files on di
 
 ```bash
 cd some-folder \
-git clone --branch "specify-branch" --depth 1 https://github.com/welfare-state-analytics/riksdagen-corpus.git
+git clone --branch "tag" tags/"tag" --depth 1 https://github.com/welfare-state-analytics/riksdagen-corpus.git
 cd riksdagen-corpus
 git config core.quotepath off
 
