@@ -11,28 +11,31 @@ from loguru import logger
 # pylint: disable=no-member, too-many-instance-attributes
 
 
-def github_uri(name: str, branch: str) -> str:
-    return f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{branch}/corpus/{name}.csv'
+def github_uri(*, name: str, tag: str) -> str:
+    return f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/{name}.csv'
 
 
-def persons_uri(*, source: str, name: str, branch: str = 'main') -> str:
-    if source and isfile(source):
-        return source
-    if source and isfile(join(source, name)):
-        return join(source, name)
-    return github_uri(name, branch=branch)
+def metadata_uri(*, source: str, name: str, tag: str) -> str:
+    """Returns URI to `name` entities databases."""
+
+    if source:
+        for filename in [source, join(source, name), join(source, f'{name}.csv')]:
+            if isfile(filename):
+                return filename
+
+    if tag is None:
+        raise ValueError(f"{name} not found: no git tag specified")
+
+    logger.warning(f"{name} not found: falling back to git tag {tag}")
+    return github_uri(name=name, tag=tag)
 
 
-def members_of_parliament_url(source: str = None, branch: str = 'main') -> str:
-    return persons_uri(source=source, name='members_of_parliament', branch=branch)
+def ministers_url(*, source: str, tag: str) -> str:
+    return metadata_uri(source=source, name='ministers', tag=tag)
 
 
-def ministers_url(source: str = None, branch: str = 'main') -> str:
-    return persons_uri(source=source, name='ministers', branch=branch)
-
-
-def speakers_url(source: str = None, branch: str = 'main') -> str:
-    return persons_uri(source=source, name='talman', branch=branch)
+def speakers_url(*, source: str, tag: str) -> str:
+    return metadata_uri(source=source, name='talman', tag=tag)
 
 
 class ParliamentaryRole:
@@ -79,61 +82,24 @@ class ParliamentaryRole:
         # self.twittername: str = twittername
 
 
-# class ParliamentaryMember(ParliamentaryRole):
-#     def __init__(self):
-#         self.gender = "unknown"
-#         self.party = "government"
-#         self.party_abbrev: str = "gov"
-#         # self.born: str = None
-
-
-# class Minister(ParliamentaryRole):
-#     def __post__init(self):
-#         self.chamber: str = "n/a"
-
-
 class ParliamentaryMemberIndex:
     """
     Repository for  members of the parliament.
     """
 
-    def create_unknown(self, key: str):
-        return ParliamentaryRole(
-            id=key,
-            role_type="unknown",
-            name="unknown",
-            party="Unknown",
-            party_abbrev="",
-            gender="",
-        )
+    def __init__(self, *, source: str, tag: str = None):
 
-    def to_dataframe(self):
-        return (
-            pd.DataFrame(data=[x.__dict__ for x in self.individuals.values()])
-            .set_index('id', drop=False)
-            .rename_axis('')
-            .drop(columns=['property_bag'])
-        )
+        if source is None and tag is None:
+            raise ValueError("git fallback not allowed without tag specified tag")
 
-    def __init__(self, *, source_folder: str = None, branch: str = 'main'):
-
-        if source_folder and isinstance(source_folder, str):
-            if not isdir(source_folder):
+        if isinstance(source, str):
+            if not isdir(source):
                 raise ValueError("argument `source_folder` must be an existing folder")
 
-        self.members: pd.DataFrame = self.load_members(members_of_parliament_url(source=source_folder, branch=branch))
-        self.party_abbrevs: dict = (
-            self.members[~self.members.party_abbrev.isna()]
-            .groupby(['party'])
-            .agg({'party_abbrev': lambda x: list(set(x))[0]})
-            .party_abbrev.to_dict()
-        )
-        self.ministers: pd.DataFrame = self.load_ministers(
-            ministers_url(source=source_folder, branch=branch), party_abbrevs=self.party_abbrevs
-        )
-        self.speakers: pd.DataFrame = self.load_speakers(
-            speakers_url(source=source_folder, branch=branch), party_abbrevs=self.party_abbrevs
-        )
+        self.members: pd.DataFrame = self.load_members(source=source, tag=tag)
+        self.party_abbrevs: dict = self.get_party_abbrevs(self.members)
+        self.ministers: pd.DataFrame = self.load_ministers(source=source, party_abbrevs=self.party_abbrevs, tag=tag)
+        self.speakers: pd.DataFrame = self.load_speakers(source=source, party_abbrevs=self.party_abbrevs, tag=tag)
 
         self.individuals: dict = {
             meta['id']: ParliamentaryRole(role_type=role_type, **meta)
@@ -150,10 +116,20 @@ class ParliamentaryMemberIndex:
         self.parties = self.members.party.unique()
         self.chambers = self.members.chamber.unique()
 
-    @staticmethod
-    def load_members(source: str) -> pd.DataFrame:
+    def get_party_abbrevs(self, members: pd.DataFrame) -> pd.DataFrame:
+        return (
+            members[~members.party_abbrev.isna()]
+            .groupby(['party'])
+            .agg({'party_abbrev': lambda x: list(set(x))[0]})
+            .party_abbrev.to_dict()
+        )
 
-        persons: pd.DataFrame = pd.read_csv(source).set_index('id', drop=False).rename_axis('')
+    @staticmethod
+    def load_members(*, source: str, tag: str = None) -> pd.DataFrame:
+
+        uri: str = metadata_uri(source=source, name='members_of_parliament', tag=tag)
+
+        persons: pd.DataFrame = pd.read_csv(uri).set_index('id', drop=False).rename_axis('')
 
         if len(persons.id) != len(persons.id.unique()):
             duplicates: str = ', '.join(persons[persons.index.duplicated()].id.tolist())
@@ -169,11 +145,14 @@ class ParliamentaryMemberIndex:
         return persons
 
     @staticmethod
-    def load_ministers(source: str, party_abbrevs: dict) -> pd.DataFrame:
+    def load_ministers(*, source: str, party_abbrevs: dict, tag: str = None) -> pd.DataFrame:
+
+        uri: str = metadata_uri(source=source, name='ministers', tag=tag)
+
         first = lambda x: list(x)[0]
         unique_str = lambda x: ' '.join(set(x))
 
-        persons: pd.DataFrame = pd.read_csv(source)
+        persons: pd.DataFrame = pd.read_csv(uri, sep=',')
 
         persons = persons.assign(id=persons.id.fillna('unknown'))
 
@@ -218,12 +197,14 @@ class ParliamentaryMemberIndex:
         return persons
 
     @staticmethod
-    def load_speakers(source: str, party_abbrevs: dict) -> pd.DataFrame:
+    def load_speakers(*, source: str, party_abbrevs: dict, tag: str = None) -> pd.DataFrame:
+
+        uri: str = metadata_uri(source=source, name='talman', tag=tag)
 
         first = lambda x: list(x)[0]
         unique_str = lambda x: ' '.join(set(x))
 
-        persons: pd.DataFrame = pd.read_csv(source)
+        persons: pd.DataFrame = pd.read_csv(uri, sep=',')
 
         persons = persons.assign(id=persons.id.fillna('unknown'))
 
@@ -281,3 +262,21 @@ class ParliamentaryMemberIndex:
 
     def __len__(self) -> int:
         return len(self.individuals)
+
+    def create_unknown(self, key: str):
+        return ParliamentaryRole(
+            id=key,
+            role_type="unknown",
+            name="unknown",
+            party="Unknown",
+            party_abbrev="",
+            gender="",
+        )
+
+    def to_dataframe(self):
+        return (
+            pd.DataFrame(data=[x.__dict__ for x in self.individuals.values()])
+            .set_index('id', drop=False)
+            .rename_axis('')
+            .drop(columns=['property_bag'])
+        )
