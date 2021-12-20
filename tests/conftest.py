@@ -35,7 +35,6 @@ if not isdir(TAGGED_SOURCE_FOLDER):
     )
 
 
-
 @pytest.fixture
 def caplog(_caplog):
     class PropogateHandler(logging.Handler):
