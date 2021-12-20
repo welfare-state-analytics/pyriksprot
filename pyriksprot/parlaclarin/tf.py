@@ -17,7 +17,7 @@ class TermFrequencyCounter:
         frequencies (Dict[str, int]): Term frequencies.
     """
 
-    def __init__(self, tokenizer: Callable[[str], List[str]] = None, do_lower_case: bool = True):
+    def __init__(self, tokenizer: Callable[[str], List[str]] = None, do_lower_case: bool = True, progress: bool = True):
         """
         Args:
             tokenizer (Callable[[str], List[str]], optional): Tokenizer to use when ingesting tokens. Defaults to None.
@@ -26,6 +26,7 @@ class TermFrequencyCounter:
 
         self._tokenize: Callable[[Any], List[str]] = tokenizer or default_tokenize
         self._do_lower_case: bool = do_lower_case
+        self._progress: bool = progress
 
         self.frequencies: Dict[str, int] = defaultdict(int)
 
@@ -38,7 +39,7 @@ class TermFrequencyCounter:
             if isinstance(value, (XmlUntangleSegmentIterator, XmlProtocolSegmentIterator))
             else value
         )
-        for text in tqdm(texts):
+        for text in tqdm(texts, disable=not self._progress):
             if self._do_lower_case:
                 text = text.lower()
             for word in self._tokenize(text):
@@ -68,6 +69,7 @@ def compute_term_frequencies(
     segment_skip_size: int = 1,
     multiproc_processes: int = 2,
     multiproc_keep_order: bool = False,
+    progress: bool = True,
 ) -> TermFrequencyCounter:
     """Compute (corpus) term frequency for documents in `source `.
 
@@ -105,7 +107,7 @@ def compute_term_frequencies(
                 multiproc_keep_order=multiproc_keep_order,
             )
 
-        counter = TermFrequencyCounter()
+        counter = TermFrequencyCounter(progress=progress)
 
         counter.ingest(texts)
 

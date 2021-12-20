@@ -76,6 +76,7 @@ norecursedirs = [
     "profile-reports",
     "tmp",
 ]
+filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.black]
 skip_string_normalization = true

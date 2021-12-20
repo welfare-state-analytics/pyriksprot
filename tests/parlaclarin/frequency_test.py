@@ -21,7 +21,7 @@ TEST_PARLACLARIN_XML_FILES = [
 @pytest.mark.parametrize('texts', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
 def test_word_frequency_counter(texts):
 
-    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter()
+    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
 
     counter.ingest(texts)
 
@@ -37,7 +37,7 @@ def test_word_frequency_counter(texts):
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
-    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter()
+    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(filename)
 
     counter.ingest(texts)
@@ -49,7 +49,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 def test_persist_word_frequencies(filename: List[str]):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
-    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter()
+    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
 
     counter.ingest(texts)
 
@@ -94,7 +94,9 @@ def test_compute_word_frequencies(document_name: str, expected_frequencies: dict
 
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
         counts: parlaclarin.TermFrequencyCounter = parlaclarin.compute_term_frequencies(
-            source=[filename], filename=store_name
+            source=[filename],
+            filename=store_name,
+            progress=False,
         )
         assert os.path.isfile(store_name)
 
@@ -102,7 +104,10 @@ def test_compute_word_frequencies(document_name: str, expected_frequencies: dict
 
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
         counts: parlaclarin.TermFrequencyCounter = parlaclarin.compute_term_frequencies(
-            source=[filename], filename=store_name, multiproc_processes=2
+            source=[filename],
+            filename=store_name,
+            multiproc_processes=2,
+            progress=False,
         )
         assert os.path.isfile(store_name)
 
