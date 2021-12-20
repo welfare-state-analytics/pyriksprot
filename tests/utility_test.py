@@ -9,6 +9,7 @@ from pyriksprot.utility import dedent, temporary_file
 from .utility import (
     PARLACLARIN_SOURCE_FOLDER,
     TAGGED_SOURCE_FOLDER,
+    TEST_DOCUMENTS,
     setup_parlaclarin_test_corpus,
     setup_tagged_frames_test_corpus,
 )
@@ -47,10 +48,16 @@ def test_dedent():
 
 @pytest.mark.skipif(condition=os.path.isdir(PARLACLARIN_SOURCE_FOLDER), reason="Test data found")
 def test_setup_parlaclarin_test_corpus():
-    setup_parlaclarin_test_corpus()
+    setup_parlaclarin_test_corpus(
+        protocols=TEST_DOCUMENTS,
+        target_folder=PARLACLARIN_SOURCE_FOLDER,
+    )
 
 
 @pytest.mark.skipif(condition=os.path.isdir(TAGGED_SOURCE_FOLDER), reason="Test data found")
 def test_setup_tagged_frames_corpus():
-    source_folder: str = os.environ["PARLACLARIN_TAGGED_FOLDER"]
-    setup_tagged_frames_test_corpus(source_folder=source_folder)
+    setup_tagged_frames_test_corpus(
+        protocols=TEST_DOCUMENTS,
+        source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
+        target_folder=TAGGED_SOURCE_FOLDER,
+    )

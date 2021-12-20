@@ -28,6 +28,15 @@ TEST_DOCUMENTS = [
     'prot-199192--21',
 ]
 
+METADATA_FILENAMES = [
+    'members_of_parliament.csv',
+    'members_of_parliament_sk.csv',
+    'ministers.csv',
+    'talman.csv',
+    'suppleants.csv',
+    'party_mapping.json',
+]
+
 
 def _metadata_url(*, filename: str, tag: str) -> str:
     return f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/{filename}'
@@ -52,13 +61,13 @@ def _download_parliamentary_protocols(
 
 
 def _download_parliamentary_metadata(target_folder: str, tag: str = PARLACLARIN_SOURCE_TAG):
-    for filename in ['members_of_parliament.csv', 'ministers.csv', 'talman.csv']:
+    for filename in METADATA_FILENAMES:
         url: str = _metadata_url(filename=filename, tag=tag)
         download_url(url=url, target_folder=target_folder, filename=filename)
 
 
 def setup_parlaclarin_test_corpus(
-    protocols: List[str] = None, target_folder: str = PARLACLARIN_SOURCE_FOLDER, tag: str = PARLACLARIN_SOURCE_TAG
+    *, protocols: List[str] = None, target_folder: str = PARLACLARIN_SOURCE_FOLDER, tag: str = PARLACLARIN_SOURCE_TAG
 ) -> None:
 
     if protocols is None:
@@ -75,9 +84,10 @@ def setup_parlaclarin_test_corpus(
 
 
 def setup_tagged_frames_test_corpus(
+    *,
     source_folder: str,
-    target_folder: str = TAGGED_SOURCE_FOLDER,
     protocols: List[str] = None,
+    target_folder: str = TAGGED_SOURCE_FOLDER,
 ) -> None:
     protocols = protocols or TEST_DOCUMENTS
     shutil.rmtree(target_folder, ignore_errors=True)
@@ -91,7 +101,7 @@ def setup_tagged_frames_test_corpus(
             continue
         shutil.copy(src=source_filename, dst=jj(target_folder, filename))
 
-    for filename in ['members_of_parliament.csv', 'ministers.csv', 'talman.csv']:
+    for filename in METADATA_FILENAMES:
         shutil.copy(src=jj(PARLACLARIN_SOURCE_FOLDER, filename), dst=jj(target_folder, filename))
 
 

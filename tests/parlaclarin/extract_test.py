@@ -52,8 +52,12 @@ def test_parliamentary_index():
 
     member_index = member.ParliamentaryMemberIndex(source=PARLACLARIN_SOURCE_FOLDER)
 
-    assert isinstance(member_index.members, pd.DataFrame)
-    assert len(member_index.members) > 0
+    assert isinstance(member_index.members_of_parliament, pd.DataFrame)
+    assert len(member_index.members_of_parliament) > 0
+    assert len(member_index.members_of_parliament_sk) > 0
+    assert len(member_index.ministers) > 0
+    assert len(member_index.speakers) > 0
+    assert len(member_index.persons) > 0
 
 
 def test_segment_merger_merge(source_index, member_index):

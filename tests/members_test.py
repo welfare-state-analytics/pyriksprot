@@ -5,13 +5,36 @@ from pyriksprot import member as pm
 from .utility import PARLACLARIN_SOURCE_FOLDER
 
 
-def test_load_parliamentary_members():
+def test_load_party_abbrevs():
+    party_abbrevs: dict = pm.ParliamentaryMemberIndex.load_party_abbrevs(source=PARLACLARIN_SOURCE_FOLDER, tag=None)
+
+    assert len(party_abbrevs) > 0
+
+
+def test_load_members_of_parliament():
     persons: pm.ParliamentaryRole = pm.ParliamentaryMemberIndex.load_members(source=PARLACLARIN_SOURCE_FOLDER, tag=None)
 
     assert len(persons) > 0
 
     assert 'adam_hult_d8d379' in persons.index
     assert 'magdalena_andersson_minister_2021' not in persons.index
+
+
+def test_load_members_of_parliament_sk():
+    party_abbrevs: dict = pm.ParliamentaryMemberIndex.load_party_abbrevs(source=PARLACLARIN_SOURCE_FOLDER, tag=None)
+    persons: pm.ParliamentaryRole = pm.ParliamentaryMemberIndex.load_members(
+        source=PARLACLARIN_SOURCE_FOLDER, tag=None, party_abbrevs=party_abbrevs, name='members_of_parliament_sk'
+    )
+
+    assert len(persons) > 0
+
+
+def test_load_suppleants():
+    persons: pm.ParliamentaryRole = pm.ParliamentaryMemberIndex.load_suppleants(
+        source=PARLACLARIN_SOURCE_FOLDER, tag=None
+    )
+
+    assert len(persons) > 0
 
 
 def test_load_ministers():
