@@ -23,8 +23,8 @@ COMPRESS_TYPES = dispatch.CompressType.values()
 @click.option('--skip-stopwords', default=False, type=click.BOOL, is_flag=True, help='Skip stopwords')
 @click.option('--lowercase', default=True, type=click.BOOL, is_flag=True, help='Lowercase tokem/text')
 def main(
-    source_folder: str = None,
-    target_name: str = None,
+    source_folder: str,
+    target_name: str,
     target_type: str = None,
     content_type: str = 'tagged_frame',
     compress_type: str = 'zip',

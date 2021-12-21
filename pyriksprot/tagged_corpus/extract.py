@@ -121,6 +121,6 @@ def extract_corpus_tags(
                 continue
             dispatcher.dispatch(list(item.values()))
 
-    member_index.to_dataframe().to_json(join(dirname(target_name), 'person_index.json'))
+    member_index.store(target_name if isdir(target_name) else dirname(target_name))
 
-    print(f"Corpus stored in {target_name}.")
+    logger.info(f"Corpus stored in {target_name}.")

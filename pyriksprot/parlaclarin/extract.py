@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import os
+from os.path import dirname, isdir, join
 from typing import Callable, Sequence
+
+from loguru import logger
 
 from .. import corpus_index, dehyphenation, dispatch, interface, member, merge, utility
 from . import iterate
@@ -89,4 +92,6 @@ def extract_corpus_text(
         for item in merger.merge(segments):
             dispatcher.dispatch(list(item.values()))
 
-    print(f"Corpus stored in {target_name}.")
+    member_index.store(target_name if isdir(target_name) else dirname(target_name))
+
+    logger.info(f"Corpus stored in {target_name}.")

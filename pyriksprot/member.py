@@ -2,8 +2,9 @@
 Index of members of the parliament.
 """
 import json
+import zipfile
 from datetime import date
-from os.path import isdir, isfile, join
+from os.path import isdir, isfile, join, splitext
 from typing import Any, List, Literal
 
 import pandas as pd
@@ -394,10 +395,18 @@ class ParliamentaryMemberIndex:
             gender="",
         )
 
-    def to_dataframe(self):
-        return (
-            pd.DataFrame(data=[x.__dict__ for x in self.id2person.values()])
-            .set_index('id', drop=False)
-            .rename_axis('')
-            .drop(columns=['property_bag'])
-        )
+    def store(self, target_name: str) -> None:
+
+        if isdir(target_name):
+            target_name = join(target_name, 'person_index.zip')
+
+        _, extension = splitext(target_name)
+        if extension == '.csv':
+            self.persons.to_csv(target_name, sep='\t')
+        elif extension == '.json':
+            self.persons.to_json(target_name)
+        elif extension == '.zip':
+            with zipfile.ZipFile(file=target_name, mode="w", compression=zipfile.ZIP_DEFLATED) as fp:
+                fp.writestr("person_index.csv", self.persons.to_csv(sep='\t'))
+        else:
+            raise ValueError(f"unknown store type: {extension}")
