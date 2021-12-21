@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from os.path import dirname, isdir, join
+from os.path import dirname, isdir
 from typing import Callable, Sequence
 
 from loguru import logger
