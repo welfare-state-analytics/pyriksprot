@@ -1,10 +1,11 @@
 import os
 import uuid
+from os.path import isdir, isfile, join
 from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import CorpusSourceIndex, interface, tagged_corpus
+from pyriksprot import CorpusSourceIndex, dispatch, interface, tagged_corpus
 
 from ..utility import TAGGED_SOURCE_FOLDER
 
@@ -74,5 +75,41 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     }
 
     tagged_corpus.extract_corpus_tags(**opts, progress=False)
-    assert os.path.isfile(opts['target_name'])
+    assert isfile(opts['target_name'])
     os.unlink(opts['target_name'])
+
+
+def test_extract_speeches():
+    ...
+    compress_type: dispatch.CompressType = dispatch.CompressType.Feather
+    target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{compress_type}'
+    target_type: str = 'single-id-tagged-frame-per-group'
+
+    tagged_corpus.extract_corpus_tags(
+        source_folder=TAGGED_SOURCE_FOLDER,
+        target_name=target_name,
+        content_type=interface.ContentType.TaggedFrame,
+        target_type=target_type,
+        compress_type=compress_type,
+        segment_level=interface.SegmentLevel.Speech,
+        segment_skip_size=1,
+        years=None,
+        temporal_key=interface.TemporalKey.NONE,
+        group_keys=None,
+        multiproc_keep_order=None,
+        multiproc_processes=1,
+        multiproc_chunksize=100,
+        speech_merge_strategy='who_sequence',
+        force=False,
+        skip_lemma=False,
+        skip_text=True,
+        skip_puncts=True,
+        skip_stopwords=True,
+        lowercase=True,
+        progress=True,
+    )
+
+    assert isdir(target_name)
+    assert isfile(join(target_name, f'document_index.{compress_type}'))
+    assert isfile(join(target_name, f'token2id.{compress_type}'))
+    assert isfile(join(target_name, 'person_index.zip'))
