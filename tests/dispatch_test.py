@@ -1,6 +1,6 @@
 import glob
-import os
 import uuid
+from os.path import basename, isdir, isfile, join
 from typing import List, Mapping, Set, Type
 
 import pandas as pd
@@ -36,6 +36,7 @@ def tagged_speeches(
     groups = merge.SegmentMerger(
         source_index=source_index, member_index=member_index, temporal_key=None, grouping_keys=None
     ).merge(segments)
+    groups = list(groups)
     return groups
 
 
@@ -47,7 +48,7 @@ def test_folder_with_zips_dispatch(tagged_speeches):
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
-    assert os.path.isdir(target_name)
+    assert isdir(target_name)
 
 
 def test_zip_file_dispatch(tagged_speeches):
@@ -58,7 +59,7 @@ def test_zip_file_dispatch(tagged_speeches):
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
-    assert os.path.isfile(target_name)
+    assert isfile(target_name)
 
 
 def test_find_dispatch_class():
@@ -73,6 +74,7 @@ def test_find_dispatch_class():
         'files-in-zip',
         'single-tagged-frame-per-group',
         'single-id-tagged-frame-per-group',
+        'single-id-tagged-frame',
         'checkpoint-per-group',
         'files-in-folder',
     }
@@ -89,16 +91,23 @@ def test_checkpoint_dispatch(tagged_speeches, source_index: corpus_index.CorpusS
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
 
-    assert os.path.isdir(target_name)
+    assert isdir(target_name)
 
-    files_on_disk: Set[str] = set(
-        os.path.basename(x) for x in glob.glob(os.path.join(target_name, '**/prot-*.zip'), recursive=True)
-    )
+    files_on_disk: Set[str] = set(basename(x) for x in glob.glob(join(target_name, '**/prot-*.zip'), recursive=True))
     files_in_index: Set[str] = set(source_index.filenames)
     assert (files_in_index - files_on_disk) == set()
 
 
-@pytest.mark.parametrize('cls', [dispatch.SingleTaggedFrameDispatcher, dispatch.SingleIdTaggedFrameDispatcher])
+def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip_ext: bool = True) -> Set[str]:
+    files: List[str] = set(basename(x) for x in glob.glob(join(folder, pattern), recursive=True))
+    if strip_path:
+        files = {basename(x) for x in files}
+    if strip_ext:
+        files = {utility.strip_extensions(x) for x in files}
+    return files
+
+
+@pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch(
     tagged_speeches, source_index: corpus_index.CorpusSourceIndex, cls: Type[dispatch.IDispatcher]
 ):
@@ -111,35 +120,40 @@ def test_single_feather_per_group_dispatch(
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
 
-    assert os.path.isdir(target_name)
+    assert isdir(target_name)
 
-    files_on_disk: Set[str] = set(
-        utility.strip_extensions(
-            os.path.basename(x) for x in glob.glob(os.path.join(target_name, '**/prot-*.feather'), recursive=True)
-        )
-    )
+    files_on_disk: Set[str] = files_in_folder(target_name, pattern='**/prot-*.feather')
     files_in_index: Set[str] = set(utility.strip_extensions(source_index.filenames))
 
     assert (files_in_index - files_on_disk) == set()
-    assert os.path.isfile(os.path.join(target_name, 'document_index.feather'))
+    assert isfile(join(target_name, 'document_index.feather'))
 
 
-@pytest.mark.parametrize('cls', [dispatch.SingleTaggedFrameDispatcher, dispatch.SingleIdTaggedFrameDispatcher])
-def test_single_feather_per_group_dispatch_with_skips(tagged_speeches, cls: Type[dispatch.IDispatcher]):
+@pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
+def test_single_feather_per_group_dispatch_with_skips(
+    tagged_speeches, source_index: corpus_index.CorpusSourceIndex, cls: Type[dispatch.IDispatcher]
+):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with cls(
-        target_name=target_name,
-        compress_type=dispatch.CompressType.Feather,
-        lowercase=True,
-        skip_text=True,
+        target_name=target_name, compress_type=dispatch.CompressType.Feather, lowercase=True, skip_text=True
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
 
-    assert os.path.isdir(target_name)
+    assert isdir(target_name)
 
-    files_on_disk: Set[str] = [x for x in glob.glob(os.path.join(target_name, '**/prot-*.feather'), recursive=True)]
+    files_on_disk: Set[str] = files_in_folder(target_name, pattern='**/prot-*.feather')
+    files_in_index: Set[str] = set(utility.strip_extensions(source_index.filenames))
+    assert (files_in_index - files_on_disk) == set()
 
-    tagged_frame = pd.read_feather(files_on_disk[0])
+    """Assert that token column has been dropped"""
+    any_basename: str = utility.strip_extensions(source_index.filenames[0])
+    any_filename: str = join(target_name, any_basename.split('-')[1], f"{any_basename}.feather")
+
+    tagged_frame: pd.DataFrame = pd.read_feather(any_filename)
+
+    assert 'token_id' not in tagged_frame.columns
+    assert 'token' not in tagged_frame.columns
+
     assert True
