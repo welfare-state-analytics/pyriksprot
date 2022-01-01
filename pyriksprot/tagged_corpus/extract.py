@@ -17,7 +17,7 @@ def extract_corpus_tags(
     source_folder: str = None,
     target_name: str = None,
     content_type: interface.ContentType = interface.ContentType.TaggedFrame,
-    target_type: str = None,
+    target_type: dispatch.TargetTypeKey = None,
     compress_type: dispatch.CompressType = dispatch.CompressType.Lzma,
     segment_level: interface.SegmentLevel = None,
     segment_skip_size: int = 1,
@@ -73,7 +73,11 @@ def extract_corpus_tags(
     }
 
     if skip_lemma or skip_text:
-        if target_type not in ('single-tagged-frame-per-group', 'single-id-tagged-frame-per-group'):
+        if target_type not in (
+            'single-tagged-frame-per-group',
+            'single-id-tagged-frame-per-group',
+            'single-id-tagged-frame',
+        ):
             raise ValueError(f"lemma/text skip not implemented for {target_type}")
         dispatch_opts = {
             **dispatch_opts,

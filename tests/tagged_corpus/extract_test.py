@@ -79,11 +79,11 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     os.unlink(opts['target_name'])
 
 
-def test_extract_speeches():
+@pytest.mark.parametrize('target_type', ['single-id-tagged-frame-per-group', 'single-id-tagged-frame'])
+def test_extract_speeches(target_type: str):
     ...
     compress_type: dispatch.CompressType = dispatch.CompressType.Feather
     target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{compress_type}'
-    target_type: str = 'single-id-tagged-frame-per-group'
 
     tagged_corpus.extract_corpus_tags(
         source_folder=TAGGED_SOURCE_FOLDER,

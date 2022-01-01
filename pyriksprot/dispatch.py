@@ -26,6 +26,7 @@ TargetTypeKey = Literal[
     'files-in-zip',
     'single-tagged-frame-per-group',
     'single-id-tagged-frame-per-group',
+    'single-id-tagged-frame',
     'checkpoint-per-group',
     'files-in-folder',
 ]
@@ -124,7 +125,8 @@ class IDispatcher(abc.ABC):
     def store(self, filename: str, data: str | pd.DataFrame) -> None:
         """Store text to file."""
 
-        path: str = jj(self.target_name, f"{filename}")
+        if not os.path.split(filename)[0]:
+            filename = jj(self.target_name, f"{filename}")
 
         if isinstance(data, pd.DataFrame):
 
@@ -135,7 +137,7 @@ class IDispatcher(abc.ABC):
             data = data.to_csv(sep='\t')
 
         if isinstance(data, str):
-            utility.store_str(filename=path, text=data, compress_type=self.compress_type.value)
+            utility.store_str(filename=filename, text=data, compress_type=self.compress_type.value)
 
     @staticmethod
     def dispatchers() -> List[Type]:
@@ -258,7 +260,7 @@ class CheckpointPerGroupDispatcher(IDispatcher):
                 self._reset_index()
 
 
-class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
+class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     """Store merged group items in a single tagged frame.
 
     NOTE! This dispatcher is ONLY tested for Speech level segments.
@@ -281,18 +283,6 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
         if len(dispatch_items) == 0:
             return
 
-        first_item: DispatchItem = dispatch_items[0]
-
-        sub_folder: str = first_item.temporal_key.split('-')[1]
-        path: str = jj(self.target_name, sub_folder)
-        target_name: str = jj(path, f'{first_item.temporal_key}.csv')
-
-        # if first_item.grouping_keys:
-        #     raise ValueError('FeatherDispatcher currently only valid for intra-protocol dispatch segments')
-
-        # FIXME: Add guard for temporal key not in in year/decade/lustrum/custom
-        os.makedirs(path, exist_ok=True)
-
         tagged_frames: List[pd.DataFrame] = []
         for item in dispatch_items:
 
@@ -302,9 +292,19 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
             item.n_tokens = len(tagged_frame)
             self._dispatch_index_item(item)
 
-        total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
+        if len(tagged_frames) > 0:
 
-        self.store(filename=target_name, data=total_frame)
+            total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
+
+            self.flush(total_frame, dispatch_items)
+
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: List[DispatchItem]):
+        temporal_key: str = dispatch_items[0].temporal_key
+        sub_folder: str = temporal_key.split('-')[1]
+        path: str = jj(self.target_name, sub_folder)
+        os.makedirs(path, exist_ok=True)
+        target_name: str = jj(path, f'{temporal_key}.csv')
+        self.store(filename=target_name, data=tagged_frame)
 
     def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:
 
@@ -359,7 +359,7 @@ class SingleTaggedFrameDispatcher(FilesInFolderDispatcher):
         self.store(filename=jj(self.target_name, 'document_index.csv'), data=document_index)
 
 
-class SingleIdTaggedFrameDispatcher(SingleTaggedFrameDispatcher):
+class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
     """Store merged group items in a single tagged frame.
     NOTE! This dispatcher is ONLY tested for Speech level segments.
     """
@@ -369,6 +369,7 @@ class SingleIdTaggedFrameDispatcher(SingleTaggedFrameDispatcher):
     def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
         super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
         self.token2id: defaultdict = defaultdict()
+        self.tfs: defaultdict = defaultdict()
         self.token2id.default_factory = self.token2id.__len__
         self.pos_schema: PoS_Tag_Scheme = PoS_TAGS_SCHEMES.SUC
 
@@ -399,6 +400,25 @@ class SingleIdTaggedFrameDispatcher(SingleTaggedFrameDispatcher):
             }
         )
         self.store(filename=jj(self.target_name, 'token2id.csv'), data=vocabulary)
+
+
+class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
+    """Store merged group items in a single, global tagged frame."""
+
+    name: str = 'single-id-tagged-frame'
+    corpus_name: str = "corpus.feather"
+
+    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
+        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+        self.tagged_frames: List[pd.DataFrame] = []
+
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: List[DispatchItem]):
+        self.tagged_frames.append(tagged_frame)
+
+    def close_target(self) -> None:
+        super().close_target()
+        total_frame: pd.DataFrame = pd.concat(self.tagged_frames, ignore_index=True)
+        self.store(filename=self.corpus_name, data=total_frame)
 
 
 def trim_series_type(series: pd.Series) -> pd.Series:
