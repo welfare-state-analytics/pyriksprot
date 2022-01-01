@@ -3,6 +3,8 @@ from os.path import basename
 from pyriksprot import dispatch, interface, tagged_corpus
 
 
+# pylint: disable=redefined-outer-name
+
 def main(target_type: dispatch.TargetTypeKey, source_folder: str):
 
     tagged_corpus.extract_corpus_tags(
