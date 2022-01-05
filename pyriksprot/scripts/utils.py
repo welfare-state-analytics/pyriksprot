@@ -11,7 +11,6 @@ from .. import utility
 CLI_LOG_PATH = './logs'
 
 
-
 TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
 COMPRESS_TYPES = dispatch.CompressType.values()
 CONTENT_TYPES = [e.value for e in interface.ContentType]

@@ -2,6 +2,7 @@ import click
 
 from pyriksprot import dispatch, interface
 from pyriksprot.tagged_corpus import extract
+
 from .utils import option2, update_arguments_from_options_file
 
 # pylint: disable=too-many-arguments, unused-argument

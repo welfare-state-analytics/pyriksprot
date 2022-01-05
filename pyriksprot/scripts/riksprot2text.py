@@ -22,6 +22,7 @@ def get_kwargs():
 Extract an aggregated subset of ParlaCLARIN XML corpus.
 """
 
+
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
