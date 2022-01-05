@@ -29,6 +29,7 @@ from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import unidecode  # pylint: disable=import-error
+import yaml
 from loguru import logger
 
 
@@ -406,3 +407,27 @@ def find_subclasses(module: ModuleType, parent: Type) -> List[Type]:
         for _, cls in inspect.getmembers(module)
         if inspect.isclass(cls) and issubclass(cls, parent) and cls is not parent
     ]
+
+
+def read_yaml(file: Any) -> dict:
+    """Read yaml file. Return dict."""
+    if isinstance(file, str) and any(file.endswith(x) for x in ('.yml', '.yaml')):
+        with open(file, "r", encoding='utf-8') as fp:
+            return yaml.load(fp, Loader=yaml.FullLoader)
+    data: List[dict] = yaml.load(file, Loader=yaml.FullLoader)
+    return {} if len(data) == 0 else data[0]
+
+
+def write_yaml(data: dict, file: str) -> None:
+    """Write yaml to file.."""
+    with open(file, "w", encoding='utf-8') as fp:
+        return yaml.dump(data=data, stream=fp)
+
+
+def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
+    """Update dict `data` with values found in `yaml_file`."""
+    if yaml_file is None:
+        return data
+    options: dict = read_yaml(yaml_file)
+    data.update(options)
+    return data
