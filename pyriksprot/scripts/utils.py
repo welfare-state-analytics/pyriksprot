@@ -32,7 +32,7 @@ CLI_OPTIONS = {
     '--skip-puncts': dict(default=False, type=click.BOOL, is_flag=True, help='Skip puncts'),
     '--skip-stopwords': dict(default=False, type=click.BOOL, is_flag=True, help='Skip stopwords'),
     '--skip-text': dict(default=False, type=click.BOOL, is_flag=True, help='Skip text'),
-    '--target-type': dict(default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type'),
+    '--target-type': dict(default='single-id-tagged-frame-per-group', type=click.Choice(TARGET_TYPES), help='Target type'),
     '--temporal-key': dict(default=None, help='Temporal partition key(s)', type=click.STRING),
     '--years': dict(default=None, help='Years to include in output', type=click.STRING),
     '--force': dict(default=False, help='Force remove of existing files', is_flag=True),
@@ -67,6 +67,13 @@ def update_arguments_from_options_file(
 
 
 def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename') -> None:
+    def fix_value(v: Any):
+        if isinstance(v, tuple):
+            v = list(v)
+        # if isinstance(v, list):
+        #     if len(v) == 1:
+        #         v = v[0]
+        return v
 
     cli_command: str = utility.strip_path_and_extension(sys.argv[0])
 
@@ -75,7 +82,7 @@ def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,option
     os.makedirs(log_dir, exist_ok=True)
 
     log_name: str = utility.ts_data_path(log_dir, f"{cli_command}.yml")
-    log_args: dict = {k: v for k, v in args.items() if k not in skip_keys.split(',')}
+    log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(',')}
     utility.write_yaml(log_args, log_name)
 
 

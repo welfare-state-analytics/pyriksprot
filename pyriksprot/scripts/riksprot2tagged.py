@@ -25,8 +25,8 @@ Extract an aggregated subset of a tagged ParlaCLARIN corpus.
 
 
 @click.command()
-@click.argument('source-folder', type=click.STRING)
-@click.argument('target-name', type=click.STRING)
+@click.argument('source-folder', type=click.STRING, required=False)
+@click.argument('target-name', type=click.STRING, required=False)
 @option2('--options-filename')
 @option2('--target-type')
 @option2('--compress-type')
@@ -56,9 +56,7 @@ def main(
     force: bool = False,
 ):
     try:
-        arguments: dict = update_arguments_from_options_file(
-            arguments=locals(), filename_key='options_filename'
-        )
+        arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
         arguments['content_type'] = interface.ContentType(arguments['content_type'])
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 
@@ -74,31 +72,29 @@ def main(
 
 if __name__ == "__main__":
 
-    if False:
-        main()
+    main()
 
-    else:
-        from click.testing import CliRunner
+    # from click.testing import CliRunner
 
-        runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                './data/tagged_protocols_1965',
-                'test_65',
-                '--compress-type',
-                'feather',
-                '--content-type',
-                'tagged_frame',
-                '--group-key',
-                'who',
-                '--segment-level',
-                'who',
-                '--target-type',
-                'single-id-tagged-frame-per-group',
-                '--temporal-key',
-                'year',
-                '--force',
-            ],
-        )
-        print(result.output)
+    # runner = CliRunner()
+    # result = runner.invoke(
+    #     main,
+    #     [
+    #         './data/tagged_protocols_1965',
+    #         'test_65',
+    #         '--compress-type',
+    #         'feather',
+    #         '--content-type',
+    #         'tagged_frame',
+    #         '--group-key',
+    #         'who',
+    #         '--segment-level',
+    #         'who',
+    #         '--target-type',
+    #         'single-id-tagged-frame-per-group',
+    #         '--temporal-key',
+    #         'year',
+    #         '--force',
+    #     ],
+    # )
+    # print(result.output)
