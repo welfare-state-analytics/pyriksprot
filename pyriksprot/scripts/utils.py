@@ -32,7 +32,9 @@ CLI_OPTIONS = {
     '--skip-puncts': dict(default=False, type=click.BOOL, is_flag=True, help='Skip puncts'),
     '--skip-stopwords': dict(default=False, type=click.BOOL, is_flag=True, help='Skip stopwords'),
     '--skip-text': dict(default=False, type=click.BOOL, is_flag=True, help='Skip text'),
-    '--target-type': dict(default='single-id-tagged-frame-per-group', type=click.Choice(TARGET_TYPES), help='Target type'),
+    '--target-type': dict(
+        default='single-id-tagged-frame-per-group', type=click.Choice(TARGET_TYPES), help='Target type'
+    ),
     '--temporal-key': dict(default=None, help='Temporal partition key(s)', type=click.STRING),
     '--years': dict(default=None, help='Years to include in output', type=click.STRING),
     '--force': dict(default=False, help='Force remove of existing files', is_flag=True),
