@@ -8,7 +8,9 @@ from pyriksprot import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
 from pyriksprot.parlaclarin import extract
 
-# pylint: disable=too-many-arguments
+from .utils import option2, update_arguments_from_options_file
+
+# pylint: disable=too-many-arguments, unused-argument
 
 
 def get_kwargs():
@@ -19,26 +21,24 @@ def get_kwargs():
 """
 Extract an aggregated subset of ParlaCLARIN XML corpus.
 """
-LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
-TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
-COMPRESS_TYPES = dispatch.CompressType.values()
-
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
-@click.option('--compress-type', default='zip', type=click.Choice(COMPRESS_TYPES), help='Compress type')
-@click.option('--segment-level', default='who', type=click.Choice(LEVELS), help='Protocol iterate level')
-@click.option('--segment-skip-size', default=1, type=click.IntRange(1, 1024), help='Skip smaller than threshold')
-@click.option('--temporal-key', default=None, help='Temporal partition key(s)', type=click.STRING)
-@click.option('--group-key', help='Partition key(s)', multiple=True, type=click.STRING)
-@click.option('--years', default=None, help='Years to include in output', type=click.STRING)
-@click.option('--multiproc-processes', default=None, type=click.IntRange(1, 40), help='Number of processes to use')
-@click.option('--multiproc-keep-order', default=False, is_flag=True, help='Process is sort order (slower, multiproc)')
-@click.option('--dedent', default=False, is_flag=True, help='Remove indentation')
-@click.option('--dehyphen', default=False, is_flag=True, help='Dehyphen text')
+@option2('--options-filename')
+@option2('--target-type')
+@option2('--compress-type')
+@option2('--segment-level')
+@option2('--segment-skip-size')
+@option2('--temporal-key')
+@option2('--group-key')
+@option2('--years')
+@option2('--multiproc-processes')
+@option2('--multiproc-keep-order')
+@option2('--dedent')
+@option2('--dehyphen')
 def main(
+    options_filename: str = None,
     source_folder: str = None,
     target_name: str = None,
     target_type: str = None,
@@ -54,23 +54,11 @@ def main(
     dehyphen: bool = False,
 ):
     try:
-
-        extract.extract_corpus_text(
-            source_folder=source_folder,
-            target_name=target_name,
-            target_type=target_type,
-            compress_type=dispatch.CompressType(compress_type.lower()),
-            segment_level=segment_level,
-            segment_skip_size=segment_skip_size,
-            temporal_key=temporal_key,
-            group_keys=group_key,
-            years=years,
-            multiproc_keep_order=multiproc_keep_order,
-            multiproc_processes=multiproc_processes,
-            multiproc_chunksize=100,
-            dedent=dedent,
-            dehyphen=dehyphen,
-        )
+        arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
+        arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
+        arguments['group_keys'] = arguments['group_key']
+        del arguments['group_key']
+        extract.extract_corpus_text(**arguments)
 
     except Exception as ex:
         click.echo(ex)

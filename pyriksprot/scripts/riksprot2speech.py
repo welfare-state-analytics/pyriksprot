@@ -2,59 +2,56 @@ import click
 
 from pyriksprot import dispatch, interface
 from pyriksprot.tagged_corpus import extract
+from .utils import option2, update_arguments_from_options_file
 
-CONTENT_TYPES = [e.value for e in interface.ContentType]
-TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
-COMPRESS_TYPES = dispatch.CompressType.values()
-
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, unused-argument
 
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.option('--target-type', default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type')
-@click.option('--compress-type', default='lzma', type=click.Choice(COMPRESS_TYPES), help='Compress type')
-@click.option('--content-type', default='tagged_frame', type=click.Choice(CONTENT_TYPES), help='Text or tags')
-@click.option('--processes', default=1, type=click.INT, help='Number of processes')
-@click.option('--skip-lemma', default=False, type=click.BOOL, is_flag=True, help='Skip lemma')
-@click.option('--skip-text', default=False, type=click.BOOL, is_flag=True, help='Skip text')
-@click.option('--skip-puncts', default=False, type=click.BOOL, is_flag=True, help='Skip puncts')
-@click.option('--skip-stopwords', default=False, type=click.BOOL, is_flag=True, help='Skip stopwords')
-@click.option('--lowercase', default=True, type=click.BOOL, is_flag=True, help='Lowercase tokem/text')
+@option2('--options-filename')
+@option2('--target-type')
+@option2('--compress-type')
+@option2('--content-type')
+@option2('--multiproc-processes')
+@option2('--skip-lemma')
+@option2('--skip-text')
+@option2('--skip-puncts')
+@option2('--skip-stopwords')
+@option2('--lowercase')
 def main(
+    options_filename: str = None,
     source_folder: str = None,
     target_name: str = None,
     target_type: str = None,
     content_type: str = 'tagged_frame',
-    compress_type: str = 'zip',
-    processes: int = 1,
+    compress_type: str = 'feather',
+    multiproc_processes: int = 1,
     skip_lemma: bool = False,
     skip_text: bool = False,
     skip_puncts: bool = False,
     skip_stopwords: bool = False,
     lowercase: bool = True,
 ):
+    arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
+    arguments['content_type'] = interface.ContentType(arguments['content_type'])
+    arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
+
     extract.extract_corpus_tags(
-        source_folder=source_folder,
-        target_name=target_name,
-        content_type=interface.ContentType(content_type.lower()),
-        target_type=target_type,
-        segment_level=interface.SegmentLevel.Speech,
-        segment_skip_size=1,
-        years=None,
-        temporal_key=None,
-        group_keys=None,
-        multiproc_keep_order=False,
-        multiproc_processes=processes,
-        multiproc_chunksize=10,
-        speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
-        compress_type=dispatch.CompressType(compress_type.lower()),
-        skip_lemma=skip_lemma,
-        skip_text=skip_text,
-        skip_puncts=skip_puncts,
-        skip_stopwords=skip_stopwords,
-        lowercase=lowercase,
+        **{
+            **arguments,
+            **dict(
+                segment_level=interface.SegmentLevel.Speech,
+                segment_skip_size=1,
+                years=None,
+                temporal_key=None,
+                group_keys=None,
+                multiproc_keep_order=False,
+                multiproc_chunksize=10,
+                speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
+            ),
+        }
     )
 
 
