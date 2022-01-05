@@ -38,6 +38,7 @@ Extract an aggregated subset of a tagged ParlaCLARIN corpus.
 @option2('--years')
 @option2('--multiproc-processes')
 @option2('--multiproc-keep-order')
+@option2('--force')
 @click.pass_context
 def main(
     ctx,
@@ -54,6 +55,7 @@ def main(
     years: str = None,
     multiproc_processes: int = 1,
     multiproc_keep_order: str = None,
+    force: bool = False,
 ):
     try:
         arguments: dict = update_arguments_from_options_file(

@@ -35,6 +35,7 @@ CLI_OPTIONS = {
     '--target-type': dict(default='checkpoint', type=click.Choice(TARGET_TYPES), help='Target type'),
     '--temporal-key': dict(default=None, help='Temporal partition key(s)', type=click.STRING),
     '--years': dict(default=None, help='Years to include in output', type=click.STRING),
+    '--force': dict(default=False, help='Force remove of existing files', is_flag=True),
 }
 
 

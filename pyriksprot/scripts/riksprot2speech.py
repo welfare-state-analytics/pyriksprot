@@ -21,6 +21,7 @@ from .utils import option2, update_arguments_from_options_file
 @option2('--skip-puncts')
 @option2('--skip-stopwords')
 @option2('--lowercase')
+@option2('--force')
 def main(
     options_filename: str = None,
     source_folder: str = None,
@@ -34,6 +35,7 @@ def main(
     skip_puncts: bool = False,
     skip_stopwords: bool = False,
     lowercase: bool = True,
+    force: bool = False,
 ):
     arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
     arguments['content_type'] = interface.ContentType(arguments['content_type'])

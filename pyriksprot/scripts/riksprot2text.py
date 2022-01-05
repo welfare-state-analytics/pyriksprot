@@ -38,6 +38,7 @@ Extract an aggregated subset of ParlaCLARIN XML corpus.
 @option2('--multiproc-keep-order')
 @option2('--dedent')
 @option2('--dehyphen')
+@option2('--force')
 def main(
     options_filename: str = None,
     source_folder: str = None,
@@ -53,6 +54,7 @@ def main(
     multiproc_keep_order: str = None,
     dedent: bool = False,
     dehyphen: bool = False,
+    force: bool = False,
 ):
     try:
         arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
