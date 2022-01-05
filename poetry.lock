@@ -940,6 +940,23 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "typer"
+version = "0.4.0"
+description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+click = ">=7.1.1,<9.0.0"
+
+[package.extras]
+all = ["colorama (>=0.4.3,<0.5.0)", "shellingham (>=1.3.0,<2.0.0)"]
+dev = ["autoflake (>=1.3.1,<2.0.0)", "flake8 (>=3.8.3,<4.0.0)"]
+doc = ["mkdocs (>=1.1.2,<2.0.0)", "mkdocs-material (>=5.4.0,<6.0.0)", "markdown-include (>=0.5.1,<0.6.0)"]
+test = ["shellingham (>=1.3.0,<2.0.0)", "pytest (>=4.4.0,<5.4.0)", "pytest-cov (>=2.10.0,<3.0.0)", "coverage (>=5.2,<6.0)", "pytest-xdist (>=1.32.0,<2.0.0)", "pytest-sugar (>=0.9.4,<0.10.0)", "mypy (==0.910)", "black (>=19.10b0,<20.0b0)", "isort (>=5.0.6,<6.0.0)"]
+
+[[package]]
 name = "typing-extensions"
 version = "4.0.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -1016,7 +1033,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "==3.8.5"
-content-hash = "8fbfc86c19bcc013833778d6affdf7d78e230013e5b824b1ebdff615e471b65e"
+content-hash = "75c3e3394a51b6a634f647479dc4bc4b70766420bb3f07bbba4f10211ee88417"
 
 [metadata.files]
 appdirs = [
@@ -1876,6 +1893,10 @@ typed-ast = [
     {file = "typed_ast-1.5.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:a2b8d7007f6280e36fa42652df47087ac7b0a7d7f09f9468f07792ba646aac2d"},
     {file = "typed_ast-1.5.1-cp39-cp39-win_amd64.whl", hash = "sha256:b6d17f37f6edd879141e64a5db17b67488cfeffeedad8c5cec0392305e9bc775"},
     {file = "typed_ast-1.5.1.tar.gz", hash = "sha256:484137cab8ecf47e137260daa20bafbba5f4e3ec7fda1c1e69ab299b75fa81c5"},
+]
+typer = [
+    {file = "typer-0.4.0-py3-none-any.whl", hash = "sha256:d81169725140423d072df464cad1ff25ee154ef381aaf5b8225352ea187ca338"},
+    {file = "typer-0.4.0.tar.gz", hash = "sha256:63c3aeab0549750ffe40da79a1b524f60e08a2cbc3126c520ebf2eeaf507f5dd"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.1-py3-none-any.whl", hash = "sha256:7f001e5ac290a0c0401508864c7ec868be4e701886d5b573a9528ed3973d9d3b"},
