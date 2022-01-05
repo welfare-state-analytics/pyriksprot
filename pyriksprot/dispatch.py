@@ -300,7 +300,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
     def flush(self, tagged_frame: pd.DataFrame, dispatch_items: List[DispatchItem]):
         temporal_key: str = dispatch_items[0].temporal_key
-        sub_folder: str = temporal_key.split('-')[1]
+        sub_folder: str = temporal_key.split('-')[1] if '-' in temporal_key else temporal_key
         path: str = jj(self.target_name, sub_folder)
         os.makedirs(path, exist_ok=True)
         target_name: str = jj(path, f'{temporal_key}.csv')
