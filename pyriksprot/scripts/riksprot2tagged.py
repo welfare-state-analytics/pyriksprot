@@ -39,9 +39,7 @@ Extract an aggregated subset of a tagged ParlaCLARIN corpus.
 @option2('--multiproc-processes')
 @option2('--multiproc-keep-order')
 @option2('--force')
-@click.pass_context
 def main(
-    ctx,
     options_filename: str = None,
     source_folder: str = None,
     target_name: str = None,
@@ -59,12 +57,14 @@ def main(
 ):
     try:
         arguments: dict = update_arguments_from_options_file(
-            arguments=locals(), filename_key='options_filename', ctx=ctx
+            arguments=locals(), filename_key='options_filename'
         )
         arguments['content_type'] = interface.ContentType(arguments['content_type'])
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
+
         arguments['group_keys'] = arguments['group_key']
         del arguments['group_key']
+
         extract.extract_corpus_tags(**arguments)
 
     except Exception as ex:
@@ -98,6 +98,7 @@ if __name__ == "__main__":
                 'single-id-tagged-frame-per-group',
                 '--temporal-key',
                 'year',
+                '--force',
             ],
         )
         print(result.output)
