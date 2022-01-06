@@ -8,7 +8,11 @@ multiproc_processes: null
 segment_level: who
 segment_skip_size: 1
 source_folder: /data/riksdagen_corpus_data/tagged_frames_v0.3.0_20201218/
-target_name: ./data/tagged_frames_v0.3.0_20201218_year_who.feather
+target_name: ./data/tagged_frames_v0.3.0_20201218.id.year.who.feather
 target_type: single-id-tagged-frame-per-group
 temporal_key: year
+skip_lemma: false
+skip_text: true
+skip_puncts: true
+skip_stopwords: false
 years: null
