@@ -4,6 +4,8 @@ from typing import Sequence
 
 import click
 
+sys.path.insert(0, '.')
+
 from pyriksprot import dispatch, interface
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 from pyriksprot.tagged_corpus import extract
@@ -36,6 +38,10 @@ Extract an aggregated subset of a tagged ParlaCLARIN corpus.
 @option2('--temporal-key')
 @option2('--group-key')
 @option2('--years')
+@option2('--skip-lemma')
+@option2('--skip-text')
+@option2('--skip-puncts')
+@option2('--skip-stopwords')
 @option2('--multiproc-processes')
 @option2('--multiproc-keep-order')
 @option2('--force')
@@ -51,6 +57,10 @@ def main(
     temporal_key: interface.TemporalKey = None,
     group_key: Sequence[interface.GroupingKey] = None,
     years: str = None,
+    skip_lemma: bool = False,
+    skip_text: bool = False,
+    skip_puncts: bool = False,
+    skip_stopwords: bool = False,
     multiproc_processes: int = 1,
     multiproc_keep_order: str = None,
     force: bool = False,
@@ -80,21 +90,8 @@ if __name__ == "__main__":
     # result = runner.invoke(
     #     main,
     #     [
-    #         './data/tagged_protocols_1965',
-    #         'test_65',
-    #         '--compress-type',
-    #         'feather',
-    #         '--content-type',
-    #         'tagged_frame',
-    #         '--group-key',
-    #         'who',
-    #         '--segment-level',
-    #         'who',
-    #         '--target-type',
-    #         'single-id-tagged-frame-per-group',
-    #         '--temporal-key',
-    #         'year',
-    #         '--force',
+    #         '--options-filename',
+    #         'sample_opts/riksprot2tagged_year_who.yml'
     #     ],
     # )
     # print(result.output)
