@@ -64,17 +64,19 @@ class MergedSegmentGroup:
 
     @property
     def filename(self) -> str:
+        return f'{self.document_name}.{self.extension}'
+
+    @property
+    def document_name(self) -> str:
         if self.temporal_value is None or self.name.startswith(self.temporal_value):
-            filename: str = f'{self.name}.{self.extension}'
-        else:
-            filename: str = f'{self.temporal_value}_{self.name}.{self.extension}'
-        return filename
+            return self.name
+        return f'{self.temporal_value}_{self.name}'
 
     def to_dict(self):
         return {
             'year': self.year,
             'period': self.temporal_value,
-            'document_name': self.name,
+            'document_name': self.document_name,
             'filename': self.filename,
             'n_tokens': self.n_tokens,
             **self.grouping_values,
