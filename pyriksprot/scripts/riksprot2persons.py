@@ -1,8 +1,11 @@
-import typer
+import click
 
 from pyriksprot import member
 
 
+@click.command()
+@click.argument('source-folder', type=click.STRING)
+@click.argument('target-name', type=click.STRING)
 def main(source_folder: str, target_name: str) -> None:
     """Compile and store index of parliamentary persons found in source folder.
 
@@ -17,4 +20,4 @@ def main(source_folder: str, target_name: str) -> None:
 
 if __name__ == "__main__":
 
-    typer.run(main)
+    main()  # pylint: disable=no-value-for-parameter

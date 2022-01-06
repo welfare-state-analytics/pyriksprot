@@ -33,7 +33,6 @@ Unidecode = "*"
 pyarrow = "*"
 more-itertools = "*"
 python-dotenv = "*"
-typer = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 black = "==20.*,>=20.8.0.b1"
