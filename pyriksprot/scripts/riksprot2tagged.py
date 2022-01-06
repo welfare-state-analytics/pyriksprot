@@ -4,11 +4,12 @@ from typing import Sequence
 
 import click
 
-sys.path.insert(0, '.')
-
 from pyriksprot import dispatch, interface
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 from pyriksprot.tagged_corpus import extract
+
+sys.path.insert(0, '.')
+
 
 sys.path.insert(0, '.')
 
