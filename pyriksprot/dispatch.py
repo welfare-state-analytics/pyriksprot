@@ -170,7 +170,7 @@ class FilesInFolderDispatcher(IDispatcher):
         os.makedirs(target_name, exist_ok=True)
 
     def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
-        filename: str = f'{item.temporal_key}_{item.name}.{item.extension}'
+        filename: str = f'{item.temporal_value}_{item.name}.{item.extension}'
         # FIXME: POS is made lowercase!
         self.store(filename, item.data.lower() if self.lowercase else item.data)
 
@@ -240,8 +240,8 @@ class CheckpointPerGroupDispatcher(IDispatcher):
         if len(dispatch_items) == 0:
             return
 
-        checkpoint_name: str = f'{dispatch_items[0].temporal_key}.zip'
-        sub_folder: str = dispatch_items[0].temporal_key.split('-')[1]
+        checkpoint_name: str = f'{dispatch_items[0].temporal_value}.zip'
+        sub_folder: str = dispatch_items[0].temporal_value.split('-')[1]
         path: str = jj(self.target_name, sub_folder)
 
         os.makedirs(path, exist_ok=True)
@@ -299,11 +299,11 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             self.flush(total_frame, dispatch_items)
 
     def flush(self, tagged_frame: pd.DataFrame, dispatch_items: List[DispatchItem]):
-        temporal_key: str = dispatch_items[0].temporal_key
-        sub_folder: str = temporal_key.split('-')[1] if '-' in temporal_key else temporal_key
+        temporal_value: str = dispatch_items[0].temporal_value
+        sub_folder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, sub_folder)
         os.makedirs(path, exist_ok=True)
-        target_name: str = jj(path, f'{temporal_key}.csv')
+        target_name: str = jj(path, f'{temporal_value}.csv')
         self.store(filename=target_name, data=tagged_frame)
 
     def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:

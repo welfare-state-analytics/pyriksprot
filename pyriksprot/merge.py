@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field, fields
-from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple, Type
+from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple, Type, Union
 
 from loguru import logger
 
@@ -19,7 +19,7 @@ class SegmentCategoryClosed(Exception):
 class MergedSegmentGroup:
 
     content_type: interface.ContentType
-    temporal_key: interface.TemporalKey
+    temporal_value: Union[int, str]
     name: str
     id: str
     page_number: str
@@ -47,7 +47,7 @@ class MergedSegmentGroup:
     def __repr__(self) -> str:
         return (
             f"{self.year}"
-            f"{self.temporal_key}"
+            f"{self.temporal_value}"
             f"\t{self.name}"
             f"\t{self.page_number or ''}"
             f"\t{self.key_values}"
@@ -64,16 +64,16 @@ class MergedSegmentGroup:
 
     @property
     def filename(self) -> str:
-        if self.temporal_key is None or self.name.startswith(self.temporal_key):
+        if self.temporal_value is None or self.name.startswith(self.temporal_value):
             filename: str = f'{self.name}.{self.extension}'
         else:
-            filename: str = f'{self.temporal_key}_{self.name}.{self.extension}'
+            filename: str = f'{self.temporal_value}_{self.name}.{self.extension}'
         return filename
 
     def to_dict(self):
         return {
             'year': self.year,
-            'period': self.temporal_key,
+            'period': self.temporal_value,
             'document_name': self.name,
             'filename': self.filename,
             'n_tokens': self.n_tokens,
@@ -171,7 +171,7 @@ class SegmentMerger:
 
                     current_group[group_hashcode] = MergedSegmentGroup(
                         content_type=item.content_type,
-                        temporal_key=temporal_category,
+                        temporal_value=temporal_category,
                         grouping_keys=self.grouping_keys,
                         grouping_values=grouping_values,
                         id=group_hashcode,
