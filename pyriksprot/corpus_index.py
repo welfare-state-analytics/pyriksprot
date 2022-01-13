@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import glob
+import json
 from dataclasses import asdict, dataclass
 from os.path import basename, dirname, isdir
 from os.path import join as jj
 from typing import TYPE_CHECKING, List, Mapping, Optional, Set, Tuple
+from zipfile import ZipFile
 
 import pandas as pd
 
@@ -15,6 +17,8 @@ from . import utility
 
 if TYPE_CHECKING:
     from . import iterate
+
+METADATA_FILENAME: str = 'metadata.json'
 
 """
 Creates a recursive index of files in a source folder that match given pattern.
@@ -74,8 +78,17 @@ class CorpusSourceItem:
         raise ValueError(f"temporal period failed for {self.name}")
 
     def to_year(self, filename: str) -> Optional[int]:
+        date_split = lambda date, idx: int(date.split("-")[idx][:4])
+
         try:
-            return int(filename.split("-")[1][:4])
+            with ZipFile(self.path, 'r') as zipped_file:
+                with zipped_file.open(METADATA_FILENAME) as meta:
+                    date_str = json.load(meta)['date']
+                    return date_split(date_str, 0)
+        except Exception:
+            ...
+        try:
+            return date_split(filename, 1)
         except ValueError:
             ...
         return None
