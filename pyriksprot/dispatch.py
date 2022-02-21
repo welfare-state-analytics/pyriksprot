@@ -29,6 +29,7 @@ TargetTypeKey = Literal[
     'single-id-tagged-frame',
     'checkpoint-per-group',
     'files-in-folder',
+    'one-hot-sparse',
 ]
 
 
