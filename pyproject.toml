@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriksprot"
-version = "2022.1.1"
+version = "2022.2.0"
 description = "Python API for Riksdagens Protokoll"
 authors = ["Roger Mähler <roger.mahler@hotmail.com>"]
 packages = [
@@ -12,7 +12,7 @@ classifiers = [
     'Topic :: Software Development',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
 ]
 license = "Apache-2.0"
 readme = "README.md"
@@ -20,7 +20,7 @@ homepage = "https://westac.se"
 repository = "https://github.com/welfare-state-analytics/pyriksprot"
 
 [tool.poetry.dependencies]
-python = "==3.8.5"
+python = "==3.9.10"
 Jinja2 = "*"
 click = "*"
 pandas = "*"
