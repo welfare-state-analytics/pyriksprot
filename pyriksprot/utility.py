@@ -431,3 +431,24 @@ def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
     options: dict = read_yaml(yaml_file)
     data.update(options)
     return data
+
+
+def download_protocols(*, protocols: List[str], target_folder: str, create_subfolder: bool, tag: str) -> None:
+    """Downloads protocols. Used only in tests."""
+
+    def _protocol_uri(filename: str, sub_folder: str, tag: str) -> str:
+        return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{tag}/corpus/protocols/{sub_folder}/{filename}"
+
+    shutil.rmtree(target_folder, ignore_errors=True)
+    os.makedirs(target_folder, exist_ok=True)
+
+    logger.info(f"downloading test protocols: {', '.join(protocols)}")
+
+    for filename in protocols:
+        sub_folder: str = filename.split('-')[1]
+        filename: str = replace_extension(filename, 'xml')
+        download_url(
+            url=_protocol_uri(filename=filename, sub_folder=sub_folder, tag=tag),
+            target_folder=target_folder if not create_subfolder else jj(target_folder, sub_folder),
+            filename=filename,
+        )
