@@ -71,8 +71,8 @@ if __name__ == "__main__":
         result = runner.invoke(
             main,
             [
-                '/data/riksdagen_corpus_data/tagged_frames',
-                '/data/riksdagen_corpus_data/tagged-speech-corpus.feather',
+                '/data/westac/riksdagen_corpus_data/tagged_frames',
+                '/data/westac/riksdagen_corpus_data/tagged-speech-corpus.feather',
                 '--target-type',
                 'feather',
                 # '--compression-type',
