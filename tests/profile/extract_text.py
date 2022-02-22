@@ -3,7 +3,7 @@ from pyriksprot import interface, parlaclarin
 
 def main():
     opts = {
-        'source_folder': '/data/riksdagen_corpus_data/riksdagen-corpus/corpus',
+        'source_folder': '/data/westac/riksdagen_corpus_data/riksdagen-corpus/corpus',
         'target_name': '.',
         'segment_level': interface.SegmentLevel.Who,
         'temporal_key': interface.TemporalKey.Year,
