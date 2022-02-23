@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from pyriksprot import interface
-from pyriksprot.utility import download_url, replace_extension
 from pyriksprot import metadata as md
+from pyriksprot.utility import replace_extension
 
 load_dotenv()
 
@@ -33,11 +33,15 @@ TEST_DOCUMENTS = [
 
 
 def sample_xml_corpus_exists():
-    return all(os.path.isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", f"{x}.xml")) for x in TEST_DOCUMENTS)
+    return all(
+        os.path.isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
+    )
 
 
 def sample_metadata_exists():
-    return all(os.path.isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename)) for filename in md.METADATA_FILENAMES)
+    return all(
+        os.path.isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename)) for filename in md.METADATA_FILENAMES
+    )
 
 
 def sample_tagged_corpus_exists():
