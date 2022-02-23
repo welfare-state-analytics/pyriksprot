@@ -3,22 +3,22 @@ from pathlib import Path
 
 import pytest
 
-from pyriksprot.utility import dedent, temporary_file,  download_protocols
 from pyriksprot.metadata import download_metadata
-
+from pyriksprot.utility import dedent, download_protocols, temporary_file
 
 from .utility import (
     PARLACLARIN_SOURCE_FOLDER,
     PARLACLARIN_SOURCE_TAG,
     TAGGED_SOURCE_FOLDER,
     TEST_DOCUMENTS,
-    sample_xml_corpus_exists,
     sample_metadata_exists,
     sample_tagged_corpus_exists,
+    sample_xml_corpus_exists,
     setup_sample_tagged_frames_corpus,
 )
 
 jj = os.path.join
+
 
 def test_temporary_file():
 
@@ -51,18 +51,21 @@ def test_dedent():
     assert dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
 
 
-#@pytest.mark.skipif(condition=sample_metadata_exists(), reason="Test data found")
+# @pytest.mark.skipif(condition=sample_metadata_exists(), reason="Test data found")
 def test_setup_sample_metadata():
 
     target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
     download_metadata(target_folder, PARLACLARIN_SOURCE_TAG)
+
 
 @pytest.mark.skipif(condition=sample_xml_corpus_exists(), reason="Test data found")
 def test_setup_sample_xml_corpus():
 
     protocols: list[str] = TEST_DOCUMENTS
     target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols")
-    download_protocols(protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=PARLACLARIN_SOURCE_TAG)
+    download_protocols(
+        protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=PARLACLARIN_SOURCE_TAG
+    )
 
 
 @pytest.mark.skipif(condition=sample_tagged_corpus_exists(), reason="Test data found")
@@ -72,3 +75,17 @@ def test_setup_sample_tagged_frames_corpus():
         source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
         target_folder=TAGGED_SOURCE_FOLDER,
     )
+
+
+def test_apa():
+
+    if not sample_metadata_exists():
+        target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
+        download_metadata("metadata", PARLACLARIN_SOURCE_TAG)
+
+    if not sample_xml_corpus_exists():
+        protocols: list[str] = TEST_DOCUMENTS
+        target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols")
+        download_protocols(
+            protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=PARLACLARIN_SOURCE_TAG
+        )

@@ -13,6 +13,7 @@ from .interface import (
     Utterance,
 )
 from .merge import MergedSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
+from .metadata import create_metadata_db, download_metadata
 from .parlaclarin import compute_term_frequencies, pretokenize
 from .tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml
 from .utility import (
@@ -21,6 +22,7 @@ from .utility import (
     dedent,
     deprecated,
     dict_get_by_path,
+    download_protocols,
     download_url,
     ensure_path,
     flatten,
