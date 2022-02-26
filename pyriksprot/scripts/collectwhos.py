@@ -2,25 +2,30 @@ import os
 import sys
 
 import click
-import pandas as pd
 
 from pyriksprot import metadata as md
 
 
 @click.command()
 @click.argument('corpus_folder', type=click.STRING)
-@click.argument('target', type=click.STRING)
+@click.argument('documents_filename', type=click.STRING)
+@click.argument('utterances_filename', type=click.STRING)
 @click.option('--force', type=click.BOOL, is_flag=True, help='Force overwrite', default=False)
-def main(corpus_folder: str, target: str, force: bool = False) -> None:
+def main(corpus_folder: str, documents_filename: str, utterances_filename: str, force: bool = False) -> None:
     try:
-        whos: pd.DataFrame = md.collect_utterance_whos(
+        documents, utterances = md.generate_utterance_index(
             corpus_folder=corpus_folder,
         )
 
-        if os.path.isfile(target) and not force:
-            raise ValueError("file exists, use --force to overwrite")
+        for filename in [documents_filename, utterances_filename]:
+            if os.path.isfile(filename):
+                if not force:
+                    raise ValueError("file exists, use --force to overwrite")
+                os.unlink(filename)
 
-        whos.set_index('hash').to_csv(target)
+        documents.to_csv(documents_filename, sep="\t")
+        utterances.to_csv(utterances_filename, sep="\t")
+
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)

@@ -28,6 +28,7 @@ from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
+import requests
 import unidecode  # pylint: disable=import-error
 import yaml
 from loguru import logger
@@ -233,6 +234,20 @@ def download_url(*, url: str, target_folder: str, filename: str = None) -> None:
     except (URLError, IOError):
         if url.startswith('https:'):
             urlretrieve(url.replace('https:', 'http:'), target_filename)
+
+
+def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
+
+    if os.path.isfile(target_name):
+        if not force:
+            raise ValueError("File exists, use `force=True` to overwrite")
+        os.unlink(target_name)
+
+    ensure_path(target_name)
+
+    with open(target_name, 'w', encoding="utf-8") as fp:
+        data: str = requests.get(url, allow_redirects=True).content.decode("utf-8")
+        fp.write(data)
 
 
 def deprecated(func):

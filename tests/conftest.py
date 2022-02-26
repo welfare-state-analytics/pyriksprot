@@ -9,7 +9,7 @@ import pytest
 from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import
 from loguru import logger
 
-from pyriksprot import download_metadata, download_protocols, member
+from pyriksprot import download_protocols, member, metadata
 from tests.utility import (
     PARLACLARIN_SOURCE_FOLDER,
     PARLACLARIN_SOURCE_TAG,
@@ -28,7 +28,7 @@ def member_index() -> member.ParliamentaryMemberIndex:
 
 if not sample_metadata_exists():
     target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
-    download_metadata("metadata", PARLACLARIN_SOURCE_TAG)
+    metadata.download_to_folder(tag=PARLACLARIN_SOURCE_TAG, folder=target_folder)
 
 if not sample_xml_corpus_exists():
     protocols: list[str] = TEST_DOCUMENTS

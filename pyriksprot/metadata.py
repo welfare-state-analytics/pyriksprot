@@ -5,30 +5,34 @@ import os
 import shutil
 import sqlite3
 from contextlib import closing
+from os.path import dirname, isfile, isdir
+from typing import Any
+from loguru import logger
 
 import numpy as np
 import pandas as pd
-import requests
-from loguru import logger
 from tqdm import tqdm
 
 from . import interface
 from .parlaclarin import parse
-from .utility import download_url
+from .utility import download_url_to_file
 
 jj = os.path.join
 
-# create the dataframe from a query
-# df = pd.read_sql_query("SELECT * FROM userdata", cnx)
+
+def input_unknown_url(tag: str = "main"):
+    return (
+        f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/input/matching/unknowns.csv"
+    )
 
 
 RIKSPROT_METADATA_TABLES: dict = {
     'government': {
-        '+government_id': 'integer primary key',
-        'government': 'text not null',
+        # '+government_id': 'integer primary key',
+        'government': 'text primary key not null',
         'start': 'date',
         'end': 'date',
-        ':options:': {'auto_increment': 'government_id'},
+        # ':options:': {'auto_increment': 'government_id'},
         ':index:': {},
     },
     'location_specifier': {
@@ -85,15 +89,21 @@ RIKSPROT_METADATA_TABLES: dict = {
         'twitter': 'text',  # primary key',
         'person_id': 'text references person (person_id) not null',
     },
+    'input_unknown': {
+        'protocol_id': 'text',  # primary key',
+        'hash': 'text',
+        'gender': 'text',
+        'party': 'text',
+        'other': 'text',
+        ':url:': input_unknown_url,
+    },
 }
 
-RIKSPROT_METADATA_BASE_URL: str = (
-    "https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{}/corpus/metadata/{}.csv"
-)
+METADATA_FILENAMES = [f"{x}.csv" for x in RIKSPROT_METADATA_TABLES.keys()]
 
 
-def table_url(tablename: str, branch: str = "main") -> str:
-    return RIKSPROT_METADATA_BASE_URL.format(branch, tablename)
+def table_url(tablename: str, tag: str = "main") -> str:
+    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/metadata/{tablename}.csv"
 
 
 def register_numpy_adapters():
@@ -106,25 +116,20 @@ def register_numpy_adapters():
     sqlite3.register_adapter(-np.inf, lambda _: "'-Infinity'")
 
 
-def load_metadata_table(tablename: str, folder: str = None, branch: str = None, **opts) -> pd.DataFrame:
+def smart_load_table(tablename: str, folder: str = None, branch: str = None, **opts) -> pd.DataFrame:
     if bool(folder is None) == bool(branch is None):
         raise ValueError("either folder or branch must be set - not both")
     if isinstance(branch, str):
         tablename: str = table_url(tablename, branch)
     elif isinstance(folder, str):
-        tablename: str = os.path.join(folder, f"{tablename}.csv")
+        tablename: str = jj(folder, f"{tablename}.csv")
     table: pd.DataFrame = pd.read_csv(tablename, **opts)
     return table
 
 
-def query_db(query: str, db: sqlite3.Connection) -> list[tuple]:
-    with closing(db.cursor()) as cursor:
-        return cursor.execute(query).fetchall()
+def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
 
-
-def to_folder(branch: str, folder: str, force: bool = False) -> None:
-
-    if os.path.isdir(folder):
+    if isdir(folder):
         if not force:
             raise ValueError("Folder exists, use `force=True` to overwrite")
         shutil.rmtree(folder, ignore_errors=True)
@@ -132,25 +137,33 @@ def to_folder(branch: str, folder: str, force: bool = False) -> None:
     os.makedirs(folder, exist_ok=True)
 
     for tablename in RIKSPROT_METADATA_TABLES:
-        target_name: str = os.path.join(folder, f"{tablename}.csv")
-        with open(target_name, 'w', encoding="utf-8") as fp:
-            url: str = table_url(tablename=tablename, branch=branch)
-            data: str = requests.get(url, allow_redirects=True).content.decode("utf-8")
-            fp.write(data)
+        target_name: str = jj(folder, f"{tablename}.csv")
+        url: str = table_url(tablename=tablename, tag=tag)
+        download_url_to_file(url, target_name, force)
+        # download_url(url, target_folder, filename)
 
+    download_url_to_file(input_unknown_url(tag=tag), "input_unknown", force)
 
-def create_metadata_db(database_name: str, branch: str = None, folder: str = None, force: bool = False):
+def fx_or_url(url: Any, tag: str) -> str:
+    return url(tag) if callable(url) else url
 
-    if os.path.isfile(database_name):
+def create_database(
+    database_filename: str,
+    branch: str = None,
+    folder: str = None,
+    force: bool = False,
+):
+
+    os.makedirs(dirname(database_filename), exist_ok=True)
+
+    if isfile(database_filename):
         if not force:
             raise ValueError("DB exists, use `force=True` to overwrite")
-        os.remove(database_name)
+        os.remove(database_filename)
 
-    db = sqlite3.connect(database_name)
+    db = sqlite3.connect(database_filename)
 
     register_numpy_adapters()
-
-    sqlite3.register_adapter(np.int64, int)
 
     lf = '\n' + (12 * ' ')
 
@@ -165,10 +178,14 @@ def create_metadata_db(database_name: str, branch: str = None, folder: str = Non
             cursor.executescript(sql_ddl)
 
     for tablename, specification in RIKSPROT_METADATA_TABLES.items():
+        logger.info(f"loading table: {tablename}")
 
         column_names: list[str] = [k for k in specification if k[0] not in "+:"]
 
-        table: pd.DataFrame = load_metadata_table(tablename=tablename, folder=folder, branch=branch, sep=',')
+        if ':url:' in specification:
+            table: pd.DataFrame = pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
+        else:
+            table: pd.DataFrame = smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
 
         for c in table.columns:
             if table.dtypes[c] == np.dtype('bool'):
@@ -181,41 +198,85 @@ def create_metadata_db(database_name: str, branch: str = None, folder: str = Non
             insert into {tablename} ({', '.join(column_names)})
                 values ({', '.join(['?'] * len(column_names))});
             """
-            print(tablename)
             # print(insert_sql, data[0])
             # print(table.columns)
             cursor.executemany(insert_sql, data)
 
     db.commit()
+
     return db
 
 
-METADATA_FILENAMES = [f"{x}.csv" for x in RIKSPROT_METADATA_TABLES.keys()]
+def generate_utterance_index(corpus_folder: str, target_folder: str = None) -> tuple[pd.DataFrame, pd.DataFrame]:
 
+    utterance_data: list[tuple] = []
+    protocol_data: list[tuple[int, str]] = []
+    filenames = glob.glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
 
-def _metadata_url(*, filename: str, tag: str) -> str:
-    return (
-        f'https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/metadata/{filename}'
+    for document_id, filename in tqdm(enumerate(filenames)):
+        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(filename, segment_skip_size=1)
+        protocol_data.append((document_id, protocol.name, protocol.date))
+        for u in protocol.utterances:
+            utterance_data.append(tuple([document_id, u.u_id, u.n, u.who]))
+
+    data: tuple[pd.DataFrame, pd.DataFrame] = (
+        pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date']).set_index("document_id"),
+        pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'hash', 'who']).set_index("u_id"),
     )
 
+    if target_folder:
 
-def download_metadata(target_folder: str, tag: str = "main"):
+        for df, tablename in zip(data, ["protocols", "utterances"]):
+            filename: str = jj(target_folder, f"{tablename}.csv")
+            if os.path.isfile(filename):
+                os.unlink(filename)
+            df.to_csv(filename, sep="\t")
 
-    shutil.rmtree(target_folder, ignore_errors=True)
-    os.makedirs(target_folder, exist_ok=True)
-    logger.info("downloading parliamentary metadata")
-
-    for filename in METADATA_FILENAMES:
-        url: str = _metadata_url(filename=filename, tag=tag)
-        download_url(url=url, target_folder=target_folder, filename=filename)
+    return data
 
 
-def collect_utterance_whos(corpus_folder: str) -> pd.DataFrame:
-    data: list[tuple] = []
-    filenames = glob.glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
-    for filename in tqdm(filenames):
-        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(filename, segment_skip_size=1)
-        for u in protocol.utterances:
-            data.append(tuple([protocol.name, protocol.date, u.n, u.who]))
-    df = pd.DataFrame(data=data, columns=['protocol_name', 'date', 'hash', 'who'])
-    return df
+def load_utterance_index(database_filename: str, source_folder: str = None) -> None:
+
+    folder: str = source_folder or dirname(database_filename)
+    tablenames: list[str] = ["protocols", "utterances"]
+    filenames: list[str] = [jj(folder, f"{x}.csv") for x in tablenames]
+
+    if not all(isfile(x) for x in filenames):
+        raise FileNotFoundError(f"files {' and/or '.join(filenames)} not found")
+
+    if not isfile(database_filename):
+        raise FileNotFoundError(database_filename)
+
+    with closing(sqlite3.connect(database_filename)) as db:
+
+        for tablename in tablenames:
+            with closing(db.cursor()) as cursor:
+                cursor.executescript(f"drop table if exists {tablename};")
+
+        for tablename, filename in zip(tablenames, filenames):
+            logger.info(f"loading table: {tablename}")
+            data: pd.DataFrame = pd.read_csv(filename, sep='\t', index_col=0)
+            data.to_sql(tablename, db, if_exists="replace")
+
+        db.commit()
+
+
+def load_scripts(database_filename: str, script_folder: str = None) -> None:
+
+    script_folder: str = script_folder or jj(dirname(database_filename), "sql")
+
+    if not isdir(script_folder):
+        raise FileNotFoundError(script_folder)
+
+    filenames = sorted(glob.glob(jj(script_folder, "*.sql")))
+
+    with closing(sqlite3.connect(database_filename)) as db:
+
+        for filename in filenames:
+            logger.info(f"loading script: {os.path.split(filename)[1]}")
+            with open(filename, "r", encoding="utf-8") as fp:
+                sql_str: str = fp.read()
+            with closing(db.cursor()) as cursor:
+                cursor.executescript(sql_str)
+
+        db.commit()
