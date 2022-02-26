@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from pyriksprot.metadata import download_metadata
+from pyriksprot import metadata
 from pyriksprot.utility import dedent, download_protocols, temporary_file
 
 from .utility import (
@@ -55,7 +55,7 @@ def test_dedent():
 def test_setup_sample_metadata():
 
     target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
-    download_metadata(target_folder, PARLACLARIN_SOURCE_TAG)
+    metadata.download_to_folder(tag=PARLACLARIN_SOURCE_TAG, folder=target_folder)
 
 
 @pytest.mark.skipif(condition=sample_xml_corpus_exists(), reason="Test data found")
@@ -75,17 +75,3 @@ def test_setup_sample_tagged_frames_corpus():
         source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
         target_folder=TAGGED_SOURCE_FOLDER,
     )
-
-
-def test_apa():
-
-    if not sample_metadata_exists():
-        target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
-        download_metadata("metadata", PARLACLARIN_SOURCE_TAG)
-
-    if not sample_xml_corpus_exists():
-        protocols: list[str] = TEST_DOCUMENTS
-        target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols")
-        download_protocols(
-            protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=PARLACLARIN_SOURCE_TAG
-        )
