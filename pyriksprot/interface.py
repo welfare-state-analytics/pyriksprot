@@ -91,6 +91,7 @@ class Utterance:
         paragraphs: Union[List[str], str] = None,
         annotation: Optional[str] = None,
         page_number: Optional[str] = '',
+        speaker_hash: Optional[str] = '',
         **_,
     ):
         self.u_id: str = u_id
@@ -103,6 +104,7 @@ class Utterance:
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
         self.page_number: Optional[str] = page_number
+        self.speaker_hash: Optional[str] = speaker_hash
 
     @property
     def document_name(self) -> str:
@@ -146,6 +148,7 @@ class UtteranceHelper:
                 'next_id': u.next_id,
                 'annotation': u.tagged_text,
                 'paragraphs': PARAGRAPH_MARKER.join(u.paragraphs),
+                'speaker_hash': u.speaker_hash,
                 'checksum': u.checksum(),
             }
             for u in utterances
@@ -183,6 +186,8 @@ class UtteranceHelper:
                 next_id=d.get('next_id'),
                 paragraphs=d.get('paragraphs', '').split(PARAGRAPH_MARKER),
                 annotation=d.get('annotation'),
+                page_number=d.get('page_number'),
+                speaker_hash=d.get('speaker_hash'),
             )
             for d in df.reset_index().to_dict(orient='records')
         ]
@@ -301,6 +306,11 @@ class Speech(UtteranceMixIn):
     def speech_name(self):
         """Generate a unique name for speech."""
         return f"{strip_extensions(self.document_name)}@{self.speech_index}"
+
+    @property
+    def speaker_hash(self):
+        """Return hash from speaker-note preceeding first utterance"""
+        return None if not self.utterances else self.utterances[0].speaker_hash
 
     def add(self, item: Utterance) -> "Speech":
         self.utterances.append(item)
@@ -470,8 +480,6 @@ class ProtocolSegment:
             f"{self.page_number or ''}\t"
         )
 
-    #            f"{len(self.data)/1024.0:.2f}kB\t"
-
     def data_z64(self) -> bytes:
         """Compress text, return base64 encoded string."""
         return compress(self.data)
@@ -485,6 +493,7 @@ class ProtocolSegment:
             'document_name': self.name,
             'filename': self.filename,
             'n_tokens': self.n_tokens,
+            'page_number': self.page_number,
         }
 
     @property

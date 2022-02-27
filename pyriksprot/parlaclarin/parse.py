@@ -17,6 +17,7 @@ from ..utility import deprecated
 @dataclass
 class IterUtterance:
     page_number: str
+    speaker_hash: str
     u_id: str
     who: str
     prev_id: str
@@ -102,9 +103,9 @@ class XmlProtocol(abc.ABC):
 
             elif segment_level == interface.SegmentLevel.Who:
 
-                data, page_numbers = defaultdict(list), {}
+                texts, page_numbers = defaultdict(list), {}
                 for u in self.utterances:
-                    data[u.who].append(u.text)
+                    texts[u.who].append(u.text)
                     if u.who not in page_numbers:
                         page_numbers[u.who] = u.page_number
 
@@ -115,18 +116,17 @@ class XmlProtocol(abc.ABC):
                         name=f'{self.name}_{i+1:03}',
                         who=who,
                         id=who,
-                        data='\n'.join(data[who]),
+                        data='\n'.join(texts[who]),
                         page_number=str(page_numbers[who]),
                         year=self.get_year(),
                     )
-                    for i, who in enumerate(data)
+                    for i, who in enumerate(texts)
                 ]
 
             elif segment_level == interface.SegmentLevel.Speech:
-
-                data, who, page_numbers = defaultdict(list), {}, {}
+                texts, who, page_numbers = defaultdict(list), {}, {}
                 for u in self.utterances:
-                    data[u.n].append(u.text)
+                    texts[u.n].append(u.text)
                     who[u.n] = u.who
                     if u.n not in page_numbers:
                         page_numbers[u.n] = u.page_number
@@ -138,11 +138,11 @@ class XmlProtocol(abc.ABC):
                         name=f'{self.name}_{i+1:03}',
                         who=who[n],
                         id=n,
-                        data='\n'.join(data[n]),
+                        data='\n'.join(texts[n]),
                         page_number=str(page_numbers[n]),
                         year=self.get_year(),
                     )
-                    for i, n in enumerate(data)
+                    for i, n in enumerate(texts)
                 ]
 
             elif segment_level == interface.SegmentLevel.Utterance:
@@ -217,13 +217,21 @@ class XmlUntangleProtocol(XmlProtocol):
         if parent is None:
             return utterances
 
+        speaker_hash: str = None
+
         for child in parent.children:
             if child.name == 'pb':
                 page_number = child['n']
+            elif child.name == "note" and child['type'] == "speaker":
+                speaker_hash = child["n"]
             elif child.name == 'u':
                 utterances.append(
-                    UtteranceMapper.create(element=child, delimiter=self.delimiter, page_number=page_number)
+                    UtteranceMapper.create(
+                        element=child, page_number=page_number, speaker_hash=speaker_hash, delimiter=self.delimiter
+                    )
                 )
+            else:
+                speaker_hash = None
         return utterances
 
     def get_date(self) -> str:
@@ -253,10 +261,16 @@ class UtteranceMapper:
 
     @staticmethod
     def create(
-        element: untangle.Element, page_number: str, dedent: bool = True, delimiter: str = '\n'
+        *,
+        element: untangle.Element,
+        page_number: str,
+        speaker_hash: str,
+        dedent: bool = True,
+        delimiter: str = '\n',
     ) -> IterUtterance:
         utterance: IterUtterance = IterUtterance(
             page_number=page_number,
+            speaker_hash=speaker_hash,
             u_id=element.get_attribute('xml:id'),
             who=element.get_attribute('who') or "undefined",
             prev_id=element.get_attribute('prev'),
@@ -330,6 +344,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
             context = iter(context)
             current_page: int = 0
             current_utterance: dict = None
+            speaker_hash: str = None
             is_preface: bool = False
 
             for event, elem in context:
@@ -345,6 +360,9 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
                     elif tag == 'docDate' and is_preface:
                         self.doc_date = elem.attrib.get('when')
 
+                    elif tag == "note" and elem.attrib.get('type') == "speaker":
+                        speaker_hash = elem.attrib['n']
+
                     elif tag == "pb":
                         current_page = elem.attrib['n']
 
@@ -352,6 +370,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
                         is_preface = False
                         current_utterance: IterUtterance = IterUtterance(
                             page_number=current_page,
+                            speaker_hash=speaker_hash,
                             u_id=elem.attrib.get('{http://www.w3.org/XML/1998/namespace}id'),
                             who=elem.attrib.get('who'),
                             prev_id=elem.attrib.get('prev'),
@@ -359,6 +378,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
                             n=elem.attrib.get('n'),
                             paragraphs=[],
                         )
+                        speaker_hash = None
                     elif tag == "seg" and value is not None:
                         value = (dedent_text(value) if self.dedent else value).strip()
                         if value:
@@ -366,6 +386,9 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
 
                     elif tag == 'div' and elem.attrib.get('type') == 'preface':
                         is_preface = True
+
+                    else:
+                        speaker_hash = None
 
                 elif event == 'end':
 

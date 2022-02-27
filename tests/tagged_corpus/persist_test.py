@@ -23,6 +23,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 paragraphs=['Hej! Detta är en mening.'],
                 tagged_text="token\tpos\tlemma\nA\ta\tNN",
                 delimiter='\n',
+                speaker_hash='apa',
             )
         ],
     )

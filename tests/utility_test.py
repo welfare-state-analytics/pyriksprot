@@ -4,14 +4,13 @@ from pathlib import Path
 import pytest
 
 from pyriksprot import metadata
-from pyriksprot.utility import dedent, download_protocols, temporary_file
+from pyriksprot.utility import dedent, download_protocols, probe_filename, replace_extension, temporary_file, touch
 
 from .utility import (
     PARLACLARIN_SOURCE_FOLDER,
     PARLACLARIN_SOURCE_TAG,
     TAGGED_SOURCE_FOLDER,
     TEST_DOCUMENTS,
-    sample_metadata_exists,
     sample_tagged_corpus_exists,
     sample_xml_corpus_exists,
     setup_sample_tagged_frames_corpus,
@@ -75,3 +74,15 @@ def test_setup_sample_tagged_frames_corpus():
         source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
         target_folder=TAGGED_SOURCE_FOLDER,
     )
+
+
+def test_probe_filename():
+
+    filename: str = "./tests/output/apa.csv"
+    touch(replace_extension(filename, "txt"))
+
+    with pytest.raises(FileNotFoundError):
+        probe_filename(filename)
+
+    assert probe_filename(filename, exts=["txt"]) is not None
+    assert probe_filename(filename, exts=[".txt"]) is not None

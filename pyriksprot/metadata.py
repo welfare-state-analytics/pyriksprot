@@ -5,19 +5,21 @@ import os
 import shutil
 import sqlite3
 from contextlib import closing
-from os.path import dirname, isfile, isdir
+from os.path import dirname, isdir, isfile
 from typing import Any
-from loguru import logger
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 from tqdm import tqdm
 
 from . import interface
 from .parlaclarin import parse
-from .utility import download_url_to_file
+from .utility import download_url_to_file, probe_filename
 
 jj = os.path.join
+
+# pylint: disable=unsupported-assignment-operation, unsubscriptable-object
 
 
 def input_unknown_url(tag: str = "main"):
@@ -99,7 +101,7 @@ RIKSPROT_METADATA_TABLES: dict = {
     },
 }
 
-METADATA_FILENAMES = [f"{x}.csv" for x in RIKSPROT_METADATA_TABLES.keys()]
+METADATA_FILENAMES = [f"{x}.csv" for x in RIKSPROT_METADATA_TABLES]
 
 
 def table_url(tablename: str, tag: str = "main") -> str:
@@ -144,8 +146,10 @@ def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
 
     download_url_to_file(input_unknown_url(tag=tag), "input_unknown", force)
 
+
 def fx_or_url(url: Any, tag: str) -> str:
     return url(tag) if callable(url) else url
+
 
 def create_database(
     database_filename: str,
@@ -188,7 +192,7 @@ def create_database(
             table: pd.DataFrame = smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
 
         for c in table.columns:
-            if table.dtypes[c] == np.dtype('bool'):
+            if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
                 table[c] = [int(x) for x in table[c]]
 
         data = table[column_names].to_records(index=False)
@@ -217,11 +221,13 @@ def generate_utterance_index(corpus_folder: str, target_folder: str = None) -> t
         protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(filename, segment_skip_size=1)
         protocol_data.append((document_id, protocol.name, protocol.date))
         for u in protocol.utterances:
-            utterance_data.append(tuple([document_id, u.u_id, u.n, u.who]))
+            utterance_data.append(tuple([document_id, u.u_id, u.n, u.who, u.page_number, u.speaker_hash]))
 
     data: tuple[pd.DataFrame, pd.DataFrame] = (
         pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date']).set_index("document_id"),
-        pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'hash', 'who']).set_index("u_id"),
+        pd.DataFrame(
+            data=utterance_data, columns=['document_id', 'u_id', 'hash', 'who', 'page_number', 'speaker_hash']
+        ).set_index("u_id"),
     )
 
     if target_folder:
@@ -239,10 +245,7 @@ def load_utterance_index(database_filename: str, source_folder: str = None) -> N
 
     folder: str = source_folder or dirname(database_filename)
     tablenames: list[str] = ["protocols", "utterances"]
-    filenames: list[str] = [jj(folder, f"{x}.csv") for x in tablenames]
-
-    if not all(isfile(x) for x in filenames):
-        raise FileNotFoundError(f"files {' and/or '.join(filenames)} not found")
+    filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
 
     if not isfile(database_filename):
         raise FileNotFoundError(database_filename)
