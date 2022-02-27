@@ -1,9 +1,9 @@
 import sys
+from os.path import dirname
 
 import click
 
 from pyriksprot import metadata as md
-from os.path import dirname
 
 
 @click.command()
@@ -44,6 +44,7 @@ def main(
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)
+
 
 # type: ignore
 
