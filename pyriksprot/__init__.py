@@ -1,6 +1,6 @@
 # type: ignore
 
-from . import parlaclarin
+from . import metadata, parlaclarin
 from .corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
 from .interface import (
@@ -13,7 +13,6 @@ from .interface import (
     Utterance,
 )
 from .merge import MergedSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
-from .metadata import create_metadata_db, download_metadata
 from .parlaclarin import compute_term_frequencies, pretokenize
 from .tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml
 from .utility import (
