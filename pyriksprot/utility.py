@@ -467,3 +467,11 @@ def download_protocols(*, protocols: List[str], target_folder: str, create_subfo
             target_folder=target_folder if not create_subfolder else jj(target_folder, sub_folder),
             filename=filename,
         )
+
+
+def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
+    """Probes existence of filename with any of given extensions in folder"""
+    for probe_name in set([filename] + ([replace_extension(filename, ext) for ext in exts] if exts else [])):
+        if isfile(probe_name):
+            return probe_name
+    raise FileNotFoundError(filename)
