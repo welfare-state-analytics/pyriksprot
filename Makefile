@@ -43,6 +43,12 @@ doc3:
 	@poetry run mv docs/pyriksprot/* docs
 	@poetry run rmdir docs/pyriksprot
 
+.PHONY: metadata
+ metadata:
+	@rm -f ./metadata/riksprot_metadata.db
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py ./metadata/riksprot_metadata.db \
+		--branch $(CORPUS_REPOSITORY_TAG) --force --load-index --scripts-folder ./metadata/sql
+
 test: output-dir
 	@poetry run pytest $(PYTEST_ARGS)  tests
 	@rm -rf ./tests/output/*
