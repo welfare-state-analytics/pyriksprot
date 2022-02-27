@@ -28,7 +28,7 @@ def member_index() -> member.ParliamentaryMemberIndex:
 
 if not sample_metadata_exists():
     target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
-    metadata.download_to_folder(tag=PARLACLARIN_SOURCE_TAG, folder=target_folder)
+    metadata.download_to_folder(tag=PARLACLARIN_SOURCE_TAG, folder=target_folder, force=True)
 
 if not sample_xml_corpus_exists():
     protocols: list[str] = TEST_DOCUMENTS
