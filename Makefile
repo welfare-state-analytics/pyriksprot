@@ -43,11 +43,34 @@ doc3:
 	@poetry run mv docs/pyriksprot/* docs
 	@poetry run rmdir docs/pyriksprot
 
-.PHONY: metadata
- metadata:
-	@rm -f ./metadata/riksprot_metadata.db
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py ./metadata/riksprot_metadata.db \
-		--branch $(CORPUS_REPOSITORY_TAG) --force --load-index --scripts-folder ./metadata/sql
+DEFAULT_ROOT_FOLDER=/data/westac/riksdagen_corpus_data
+METADATA_DB_NAME=riksprot_metadata.$(CORPUS_REPOSITORY_TAG).db
+METADATA_RELATIVE_DB_PATH=metadata/$(METADATA_DB_NAME)
+METADATA_CSV_PATH=metadata/data
+CORPUS_ROOT=$(DEFAULT_ROOT_FOLDER)/riksdagen-corpus/corpus
+
+
+.PHONY: metadata-download
+ metadata-download:
+	@rm -f $(METADATA_DB_NAME)
+	@mkdir -p ./metadata/data
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download $(CORPUS_REPOSITORY_TAG) $(METADATA_CSV_PATH)
+	@cp -f $(METADATA_RELATIVE_DB_PATH) $(DEFAULT_ROOT_FOLDER)/$(METADATA_RELATIVE_DB_PATH)
+
+.PHONY: metadata-database
+ metadata-database:
+	@rm -f $(METADATA_DB_NAME)
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database $(METADATA_RELATIVE_DB_PATH) \
+		--force --load-index --source-folder $(METADATA_CSV_PATH) --scripts-folder ./metadata/sql # --branch $(CORPUS_REPOSITORY_TAG)
+	@mkdir -p $(DEFAULT_ROOT_FOLDER)/metadata
+	@cp -f $(METADATA_RELATIVE_DB_PATH) $(DEFAULT_ROOT_FOLDER)/$(METADATA_RELATIVE_DB_PATH)
+
+.PHONY: metadata-index
+ metadata-index:
+	@mkdir -p ./metadata/data
+	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index $(CORPUS_ROOT) ./metadata/data
+	@gzip  ./metadata/data/protocols.csv ./metadata/data/utterances.csv
 
 test: output-dir
 	@poetry run pytest $(PYTEST_ARGS)  tests
