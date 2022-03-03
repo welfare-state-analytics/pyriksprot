@@ -6,20 +6,36 @@ import click
 from pyriksprot import metadata as md
 
 
+@click.group(help="CLI tool to manage riksprot metadata")
+def main():
+    pass
+
+@click.command()
+@click.argument('tag', type=click.STRING)
+@click.argument('target_folder', type=click.STRING)
+def download_metadata(tag: str, target_folder: str):
+    md.download_to_folder(tag=tag, folder=target_folder, force=True)
+
+
+@click.command()
+@click.argument('corpus_folder', type=click.STRING)
+@click.argument('target_folder', type=click.STRING)
+def create_utterance_index(corpus_folder: str, target_folder: str):
+    md.generate_utterance_index(corpus_folder=corpus_folder, target_folder=target_folder)
+
+
 @click.command()
 @click.argument('target', type=click.STRING)
 @click.option('--branch', type=click.STRING, help='Text or tags', default=None)
 @click.option('--source-folder', type=click.STRING, default=None)
 @click.option('--force', type=click.BOOL, is_flag=True, help='Force overwrite', default=False)
 @click.option('--load-index', type=click.BOOL, is_flag=True, help='Load utterance index', default=False)
-@click.option('--corpus-folder', type=click.STRING, help='If set, then generate index from this folder', default=None)
 @click.option('--scripts-folder', type=click.STRING, help='If set, apply scripts in folder to DB', default=None)
-def main(
+def create_database(
     target: str,
     branch: str = None,
     source_folder: str = None,
     force: bool = False,
-    corpus_folder: bool = True,
     scripts_folder: str = None,
     load_index: bool = True,
 ) -> None:
@@ -32,11 +48,8 @@ def main(
             force=force,
         )
 
-        if corpus_folder:
-            md.generate_utterance_index(corpus_folder=corpus_folder, target_folder=dirname(target))
-
         if load_index:
-            md.load_utterance_index(database_filename=target, source_folder=dirname(target))
+            md.load_utterance_index(database_filename=target, source_folder=source_folder or dirname(target))
 
         if scripts_folder:
             md.load_scripts(database_filename=target, script_folder=scripts_folder)
@@ -49,4 +62,7 @@ def main(
 # type: ignore
 
 if __name__ == "__main__":
+    main.add_command(create_utterance_index, "index")
+    main.add_command(create_database, "database")
+    main.add_command(download_metadata, "download")
     main()  # pylint: disable=no-value-for-parameter
