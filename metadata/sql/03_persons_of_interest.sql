@@ -12,6 +12,8 @@ create view person_name as
 create table persons_of_interest (
    [person_id] varchar primary key not null,
    [gender_id] integer not null default(0) references gender(gender_id),
+   -- Only set for person having a single party:
+   [party_id] integer null references party(party_id),
    [name] varchar not null default(''),
    [year_of_birth] integer null,
    [year_of_death] integer null
@@ -20,7 +22,7 @@ create table persons_of_interest (
 delete from persons_of_interest;
 
 insert into persons_of_interest (person_id)
-    select distinct who
+    select distinct person_id
     from utterances;
 
 insert into persons_of_interest (person_id, gender_id, year_of_birth, year_of_death)

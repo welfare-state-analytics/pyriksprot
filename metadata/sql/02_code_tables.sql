@@ -53,3 +53,11 @@ insert into government (government, start_date, end_date)
     select government, [start], [end]
     from _government
     order by [start];
+
+/* Party table: records are added in 05_person_party.sql */
+drop table if exists party;
+create table if not exists party (
+    party_id integer primary key,
+    party varchar,
+    party_abbrev varchar
+);

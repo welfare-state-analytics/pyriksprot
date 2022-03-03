@@ -1,3 +1,4 @@
+drop table unknowns;
 
 -- alter table terms_of_office drop column _government_id;
 
@@ -12,8 +13,8 @@ alter table terms_of_office rename to _terms_of_office;
 create table terms_of_office (
    [terms_of_office_id] integer primary key,
    [person_id] varchar not null references persons_of_interest(person_id),
-   [office_id] integer not null default(0) references office_type(office_id),
-   [sub_office_id] integer not null default(0) references sub_office_type(sub_office_id),
+   [office_type_id] integer not null default(0) references office_type(office_type_id),
+   [sub_office_type_id] integer not null default(0) references sub_office_type(sub_office_type_id),
    [district_id] integer null references district(district_id),
    [start_date] date null,
    [end_date] date null,
@@ -24,8 +25,8 @@ create table terms_of_office (
 insert into terms_of_office (
     [terms_of_office_id],
     [person_id],
-    [office_id],
-    [sub_office_id],
+    [office_type_id],
+    [sub_office_type_id],
     [district_id],
     [start_date],
     [end_date],
@@ -34,8 +35,8 @@ insert into terms_of_office (
 )
   select [terms_of_office_id],
         [person_id],
-        [office_id],
-        [sub_office_id],
+        [office_type_id],
+        [sub_office_type_id],
         [district_id],
         [start_date],
         [end_date],
