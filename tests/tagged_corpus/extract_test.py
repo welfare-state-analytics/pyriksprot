@@ -7,7 +7,7 @@ import pytest
 
 from pyriksprot import CorpusSourceIndex, dispatch, interface, tagged_corpus
 
-from ..utility import TAGGED_SOURCE_FOLDER, TAGGED_METADATA_DATABASE_NAME
+from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 
 # pylint: disable=redefined-outer-name
 
