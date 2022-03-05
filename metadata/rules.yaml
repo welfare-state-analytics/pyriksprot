@@ -1,0 +1,76 @@
+
+rule-assign-party:
+  - description: "Assign party to utterance"
+  - name: "Person has only one party"
+    when:
+      - persons.party_id is not NULL
+    action:
+      - utterance := persons.party_id
+  - name: "Person has many parties"
+    when:
+      - persons.party_id is NULL
+      - person_id is not "unknown"
+      - persons.person_id is in person_multiple_party
+    action:
+      - rule:
+        name: "Party specification spans year"
+        when:
+          - start_year <= u.year <= end_year
+        action:
+          - party_id := person_multiple_party[covers-year].party_id
+        conflict-resolution:
+          when:
+            - multiple records spans year having different parties
+          action:
+            - party_id := pick random record (lowest identity)
+      - rule:
+        name: "Party specification has no year"
+        when:
+          - start_year and end_year is un-assigned
+        conflict-resolution:
+          when:
+            - multiple records with un-assigned years
+          action:
+            - party_id := pick random record (lowest identity)
+
+  - name: "Person is unknown"
+    when:
+      - person_id is "unknown"
+    action:
+      - rule:
+        name: "Party specified in unknowns metadata"
+        when:
+          - u_id is in unknowns
+          - unknowns.party_id is not null
+        action:
+          - party_id := unknowns.party_id
+
+rule-assign-gender:
+  - description: "Assign gender to utterance"
+  - name: "Person is known"
+    when:
+      - persons.person_id is not "unknown"
+    action:
+      - gender_id := person.gender_id
+  - name: "Person is unknown"
+    when:
+      - persons.person_id is "unknown"
+      - u_id is in unknowns
+      - unknowns[u_id].gender_id is not null
+    action:
+      - gender_id := person.gender_id
+    otherwise:
+        action:
+          - gender_id := 0 (unknown)
+
+
+rule-assign-terms-of-office:
+  - description: "Assign terms-of-office to utterance"
+  - name: "Person is known"
+    when:
+      - persons.person_id is not "unknown"
+    action:
+      - gender_id := person.gender_id
+    otherwise:
+        action:
+          - terms-of-office := unassigned
