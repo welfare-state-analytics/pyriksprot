@@ -2,10 +2,11 @@ from typing import List
 
 import pytest
 
-from pyriksprot import corpus_index, interface, member, merge
+from pyriksprot import corpus_index, interface, merge
+from pyriksprot import metadata as md
 from pyriksprot.tagged_corpus import iterate, persist
 
-from .utility import TAGGED_SOURCE_FOLDER
+from .utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -18,8 +19,8 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 
 
 @pytest.fixture
-def member_index() -> member.ParliamentaryMemberIndex:
-    return member.ParliamentaryMemberIndex(source=TAGGED_SOURCE_FOLDER)
+def metadata_index() -> md.MetaDataIndex:
+    return md.MetaDataIndex.load(database_filename=TAGGED_METADATA_DATABASE_NAME)
 
 
 @pytest.fixture
@@ -37,7 +38,7 @@ def utterance_segments(source_index) -> List[interface.ProtocolSegment]:
     return segments
 
 
-def test_segment_merger_merge_on_protocol_level_group_by_who(member_index, source_index, utterance_segments):
+def test_segment_merger_merge_on_protocol_level_group_by_who(metadata_index, source_index, utterance_segments):
 
     """Load source protocols to simplify tests"""
     protocols: List[interface.Protocol] = list(persist.load_protocols(source=TAGGED_SOURCE_FOLDER))
@@ -50,7 +51,7 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(member_index, sourc
     group_keys: List[interface.GroupingKey] = [interface.GroupingKey.Who]
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
-        member_index=member_index,
+        metadata_index=metadata_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )

@@ -6,7 +6,9 @@ from typing import List, Mapping, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import corpus_index, dispatch, interface, member, merge, utility
+from pyriksprot import corpus_index, dispatch, interface, merge
+from pyriksprot import metadata as md
+from pyriksprot import utility
 from pyriksprot.tagged_corpus import iterate
 
 from .utility import TAGGED_SOURCE_FOLDER
@@ -24,7 +26,7 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 @pytest.fixture
 def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
-    member_index: member.ParliamentaryMemberIndex,
+    metadata_index: md.MetaDataIndex,
 ) -> Mapping[str, merge.MergedSegmentGroup]:
     segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
@@ -34,7 +36,7 @@ def tagged_speeches(
         segment_skip_size=1,
     )
     groups = merge.SegmentMerger(
-        source_index=source_index, member_index=member_index, temporal_key=None, grouping_keys=None
+        source_index=source_index, metadata_index=metadata_index, temporal_key=None, grouping_keys=None
     ).merge(segments)
     groups = list(groups)
     return groups

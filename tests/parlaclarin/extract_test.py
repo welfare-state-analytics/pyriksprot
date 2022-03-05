@@ -3,10 +3,12 @@ import os
 import uuid
 from typing import Iterable, List, Mapping
 
-import pandas as pd
 import pytest
 
-from pyriksprot import corpus_index, dispatch, interface, member, merge, parlaclarin
+from pyriksprot import corpus_index as csi
+from pyriksprot import dispatch, interface, merge
+from pyriksprot import metadata as md
+from pyriksprot import parlaclarin
 
 from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 
@@ -14,9 +16,9 @@ from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 
 
 @pytest.fixture
-def source_index() -> corpus_index.CorpusSourceIndex:
+def source_index() -> csi.CorpusSourceIndex:
 
-    items: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
+    items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
         source_pattern='**/prot-*.xml',
         skip_empty=False,
@@ -24,9 +26,7 @@ def source_index() -> corpus_index.CorpusSourceIndex:
     return items
 
 
-def test_create_grouping_hashcoder(
-    source_index: corpus_index.CorpusSourceIndex, member_index: member.ParliamentaryMemberIndex
-):
+def test_create_grouping_hashcoder(corpus_index: csi.CorpusSourceIndex, metadata_index: md.MetaDataIndex):
 
     attributes = [interface.SegmentLevel.Who, interface.GroupingKey.Gender]
     hashcoder = merge.create_grouping_hashcoder(attributes)
@@ -43,24 +43,12 @@ def test_create_grouping_hashcoder(
         who="alexis_bjorkman_7f7c23",
         year=1955,
     )
-    hashcode = hashcoder(item, member_index['alexis_bjorkman_7f7c23'], source_index)
+    hashcode = hashcoder(item, metadata_index.persons['alexis_bjorkman_7f7c23'], corpus_index)
 
     assert hashcode is not None
 
 
-def test_parliamentary_index():
-
-    member_index = member.ParliamentaryMemberIndex(source=PARLACLARIN_SOURCE_FOLDER)
-
-    assert isinstance(member_index.members_of_parliament, pd.DataFrame)
-    assert len(member_index.members_of_parliament) > 0
-    assert len(member_index.members_of_parliament_sk) > 0
-    assert len(member_index.ministers) > 0
-    assert len(member_index.speakers) > 0
-    assert len(member_index.persons) > 0
-
-
-def test_segment_merger_merge(source_index, member_index):
+def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, metadata_index: md.MetaDataIndex):
 
     filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
@@ -69,8 +57,8 @@ def test_segment_merger_merge(source_index, member_index):
     )
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
-        source_index=source_index,
-        member_index=member_index,
+        source_index=corpus_index,
+        metadata_index=metadata_index,
         temporal_key=interface.TemporalKey.Year,
         grouping_keys=[interface.GroupingKey.Party],
     )
