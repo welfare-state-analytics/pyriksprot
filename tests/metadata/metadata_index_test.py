@@ -3,7 +3,7 @@ from pyriksprot import metadata as md
 
 def test_load_code_maps():
     database_filename: str = "./metadata/riksprot_metadata.v0.4.0.db"
-    code_maps: md.MetaDataCodeMaps = md.MetaDataCodeMaps.load(database_filename)
+    code_maps: md.MetaDataCodeMaps = md.MetaDataCodeMaps.load(database_filename, person=None)
 
     assert code_maps is not None
 
