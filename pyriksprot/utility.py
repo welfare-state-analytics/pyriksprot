@@ -475,3 +475,7 @@ def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
         if isfile(probe_name):
             return probe_name
     raise FileNotFoundError(filename)
+
+
+def revdict(d: dict) -> dict:
+    return {v: k for k, v in d.items()}
