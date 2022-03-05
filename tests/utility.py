@@ -1,7 +1,7 @@
 import os
 import shutil
+from os.path import isdir, isfile
 from os.path import join as jj
-from os.path import isfile, isdir
 from typing import List
 
 from dotenv import load_dotenv
@@ -63,15 +63,11 @@ def ensure_test_corpora_exist():
 
 
 def sample_xml_corpus_exists():
-    return all(
-        isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
-    )
+    return all(isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS)
 
 
 def sample_metadata_exists():
-    return all(
-        isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES
-    )
+    return all(isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES)
 
 
 def sample_tagged_corpus_exists():
