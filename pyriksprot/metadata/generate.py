@@ -105,8 +105,6 @@ RIKSPROT_METADATA_TABLES: dict = {
     },
 }
 
-METADATA_FILENAMES = [f"{x}.csv" for x in RIKSPROT_METADATA_TABLES]
-
 
 def register_numpy_adapters():
     for dt in [np.int8, np.int16, np.int32, np.int64]:

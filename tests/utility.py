@@ -1,6 +1,7 @@
 import os
 import shutil
 from os.path import join as jj
+from os.path import isfile, isdir
 from typing import List
 
 from dotenv import load_dotenv
@@ -50,7 +51,7 @@ def ensure_test_corpora_exist():
             target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
         )
 
-    if not os.path.isdir(TAGGED_SOURCE_FOLDER):
+    if not isdir(TAGGED_SOURCE_FOLDER):
         try:
             setup_sample_tagged_frames_corpus(
                 protocols=TEST_DOCUMENTS,
@@ -63,18 +64,18 @@ def ensure_test_corpora_exist():
 
 def sample_xml_corpus_exists():
     return all(
-        os.path.isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
+        isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
     )
 
 
 def sample_metadata_exists():
     return all(
-        os.path.isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename)) for filename in md.METADATA_FILENAMES
+        isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES
     )
 
 
 def sample_tagged_corpus_exists():
-    return all(os.path.isfile(jj(TAGGED_SOURCE_FOLDER, "protocols", f"{x}.zip")) for x in TEST_DOCUMENTS)
+    return all(isfile(jj(TAGGED_SOURCE_FOLDER, "protocols", f"{x}.zip")) for x in TEST_DOCUMENTS)
 
 
 def setup_sample_tagged_frames_corpus(
@@ -93,7 +94,7 @@ def setup_sample_tagged_frames_corpus(
         filename: str = replace_extension(name, 'zip')
         subfolder: str = filename.split('-')[1]
         source_filename: str = jj(source_folder, subfolder, filename)
-        if not os.path.isfile(source_filename):
+        if not isfile(source_filename):
             logger.warning(f"test data: test file {name} not found")
             continue
         shutil.copy(src=source_filename, dst=jj(target_folder, filename))
@@ -106,7 +107,7 @@ def setup_sample_tagged_frames_corpus(
         force=True,
     )
     os.makedirs(jj(target_folder, "metadata"), exist_ok=True)
-    # for filename in md.METADATA_FILENAMES:
+    #  for filename in [f"{x}.csv" for x in md.RIKSPROT_METADATA_TABLES]:
     #     shutil.copy(src=jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename), dst=jj(target_folder, filename))
 
 
