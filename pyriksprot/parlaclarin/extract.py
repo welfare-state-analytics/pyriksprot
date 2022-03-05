@@ -6,7 +6,9 @@ from typing import Callable, Sequence
 
 from loguru import logger
 
-from .. import corpus_index, dehyphenation, dispatch, interface, member, merge, utility
+from .. import corpus_index, dehyphenation, dispatch, interface, merge
+from .. import metadata as md
+from .. import utility
 from . import iterate
 
 # pylint: disable=too-many-arguments
@@ -65,7 +67,6 @@ def extract_corpus_text(
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
     )
-    member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(source=source_folder)
 
     preprocessor: Callable[[str], str] = utility.compose(
         ([utility.dedent] if dedent else []) + ([create_dehyphen(data_path)] if dehyphen else [])
@@ -81,9 +82,10 @@ def extract_corpus_text(
         preprocessor=preprocessor,
     )
 
+    corpus_metadata: md.MetaDataIndex = md.MetaDataIndex(source=source_folder)
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
-        member_index=member_index,
+        corpus_metadata=corpus_metadata,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )
@@ -92,6 +94,6 @@ def extract_corpus_text(
         for item in merger.merge(segments):
             dispatcher.dispatch(list(item.values()))
 
-    member_index.store(target_name if isdir(target_name) else dirname(target_name))
+    corpus_metadata.store(target_name if isdir(target_name) else dirname(target_name))
 
     logger.info(f"Corpus stored in {target_name}.")

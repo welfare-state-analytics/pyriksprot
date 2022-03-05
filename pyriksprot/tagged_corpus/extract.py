@@ -7,7 +7,8 @@ from typing import Sequence
 from loguru import logger
 from tqdm import tqdm
 
-from .. import corpus_index, dispatch, interface, member, merge
+from .. import corpus_index, dispatch, interface, merge
+from .. import metadata as md
 from . import iterate
 
 # pylint: disable=too-many-arguments, W0613
@@ -15,6 +16,7 @@ from . import iterate
 
 def extract_corpus_tags(
     source_folder: str = None,
+    metadata_filename: str = None,
     target_name: str = None,
     content_type: interface.ContentType = interface.ContentType.TaggedFrame,
     target_type: dispatch.TargetTypeKey = None,
@@ -92,8 +94,11 @@ def extract_corpus_tags(
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
-    logger.info("loading index over parliamentary persons...")
-    member_index: member.ParliamentaryMemberIndex = member.ParliamentaryMemberIndex(source=source_folder, tag=None)
+    logger.info("loading parliamentary metadata...")
+
+    # FIXME: How to ensure matadata tag is the same as corpus???
+    metadata_index: md.MetaDataIndex = md.MetaDataIndex.load(database_filename=metadata_filename)
+
     texts: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
@@ -108,7 +113,7 @@ def extract_corpus_tags(
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
-        member_index=member_index,
+        metadata_index=metadata_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )
@@ -125,6 +130,6 @@ def extract_corpus_tags(
                 continue
             dispatcher.dispatch(list(item.values()))
 
-    member_index.store(target_name if isdir(target_name) else dirname(target_name))
+    metadata_index.store(target_name=target_name if isdir(target_name) else dirname(target_name))
 
     logger.info(f"Corpus stored in {target_name}.")
