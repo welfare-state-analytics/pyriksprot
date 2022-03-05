@@ -5,8 +5,8 @@ from .generate import (
     create_database,
     download_to_folder,
     generate_utterance_index,
-    load_utterance_index,
     load_scripts,
+    load_utterance_index,
     subset_to_folder,
 )
 from .metadata_index import MetaDataCodeMaps, MetaDataIndex
