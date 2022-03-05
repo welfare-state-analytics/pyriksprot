@@ -95,6 +95,6 @@ def extract_corpus_text(
         for item in merger.merge(segments):
             dispatcher.dispatch(list(item.values()))
 
-    metadata_index.store(target_name if isdir(target_name) else dirname(target_name))
+    # metadata_index.store(target_name if isdir(target_name) else dirname(target_name))
 
     logger.info(f"Corpus stored in {target_name}.")
