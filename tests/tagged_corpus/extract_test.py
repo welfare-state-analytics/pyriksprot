@@ -7,13 +7,14 @@ import pytest
 
 from pyriksprot import CorpusSourceIndex, dispatch, interface, tagged_corpus
 
-from ..utility import TAGGED_SOURCE_FOLDER
+from ..utility import TAGGED_SOURCE_FOLDER, TAGGED_METADATA_DATABASE_NAME
 
 # pylint: disable=redefined-outer-name
 
 
 DEFAULT_OPTS = dict(
     source_folder=TAGGED_SOURCE_FOLDER,
+    metadata_filename=TAGGED_METADATA_DATABASE_NAME,
     target_type='files-in-zip',
     content_type=interface.ContentType.TaggedFrame,
     segment_level=interface.SegmentLevel.Who,
