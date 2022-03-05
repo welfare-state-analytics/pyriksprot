@@ -10,6 +10,7 @@ from pyriksprot import metadata as md
 def main():
     pass
 
+
 @click.command()
 @click.argument('tag', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
