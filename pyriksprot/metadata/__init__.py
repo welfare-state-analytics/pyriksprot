@@ -6,6 +6,7 @@ from .generate import (
     download_to_folder,
     generate_utterance_index,
     load_utterance_index,
+    load_scripts,
     subset_to_folder,
 )
 from .metadata_index import MetaDataCodeMaps, MetaDataIndex
