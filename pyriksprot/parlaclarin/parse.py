@@ -198,10 +198,18 @@ class XmlProtocol(abc.ABC):
 class XmlUntangleProtocol(XmlProtocol):
     """Wraps the XML representation of a single ParlaClarin document (protocol)"""
 
-    def __init__(self, data: Union[str, untangle.Element], segment_skip_size: int = 0, delimiter: str = '\n'):
+    def __init__(
+        self,
+        data: Union[str, untangle.Element],
+        segment_skip_size: int = 0,
+        delimiter: str = '\n',
+        ignore_tags: set[str] | str = "note,teiHeader",
+    ):
+
+        ignore_tags: set[str] = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
 
         data: untangle.Element = (
-            data if isinstance(data, untangle.Element) else untangle.parse(data, ignore_tags={'note', 'teiHeader'})
+            data if isinstance(data, untangle.Element) else untangle.parse(data, ignore_tags=ignore_tags)
         )
 
         super().__init__(data, segment_skip_size, delimiter)
@@ -222,8 +230,9 @@ class XmlUntangleProtocol(XmlProtocol):
         for child in parent.children:
             if child.name == 'pb':
                 page_number = child['n']
-            elif child.name == "note" and child['type'] == "speaker":
-                speaker_hash = child["n"]
+            elif child.name == "note":
+                if child['type'] == "speaker":
+                    speaker_hash = child["n"]
             elif child.name == 'u':
                 utterances.append(
                     UtteranceMapper.create(
@@ -291,10 +300,16 @@ class UtteranceMapper:
 
 class ProtocolMapper:
     @staticmethod
-    def to_protocol(data: Union[str, untangle.Element], segment_skip_size: int = 0) -> interface.Protocol:
+    def to_protocol(
+        data: Union[str, untangle.Element],
+        segment_skip_size: int = 0,
+        ignore_tags: set[str] | str = "note,teiHeader",
+    ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
 
-        xml_protocol: XmlUntangleProtocol = XmlUntangleProtocol(data=data, segment_skip_size=segment_skip_size)
+        xml_protocol: XmlUntangleProtocol = XmlUntangleProtocol(
+            data=data, segment_skip_size=segment_skip_size, ignore_tags=ignore_tags
+        )
 
         protocol: interface.Protocol = interface.Protocol(
             utterances=[interface.Utterance(**asdict(u)) for u in xml_protocol.utterances],
