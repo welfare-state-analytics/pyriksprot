@@ -19,8 +19,8 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 
 
 @pytest.fixture
-def metadata_index() -> md.MetaDataIndex:
-    return md.MetaDataIndex.load(database_filename=TAGGED_METADATA_DATABASE_NAME)
+def metadata_index() -> md.PersonIndex:
+    return md.PersonIndex.load(database_filename=TAGGED_METADATA_DATABASE_NAME)
 
 
 @pytest.fixture

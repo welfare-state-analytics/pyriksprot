@@ -26,7 +26,7 @@ def source_index() -> corpus_index.CorpusSourceIndex:
 @pytest.fixture
 def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
-    metadata_index: md.MetaDataIndex,
+    metadata_index: md.PersonIndex,
 ) -> Mapping[str, merge.MergedSegmentGroup]:
     segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,

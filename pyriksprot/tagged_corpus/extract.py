@@ -97,7 +97,7 @@ def extract_corpus_tags(
     logger.info("loading parliamentary metadata...")
 
     # FIXME: How to ensure matadata tag is the same as corpus???
-    metadata_index: md.MetaDataIndex = md.MetaDataIndex.load(database_filename=metadata_filename)
+    metadata_index: md.PersonIndex = md.PersonIndex.load(database_filename=metadata_filename)
 
     texts: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
@@ -130,6 +130,6 @@ def extract_corpus_tags(
                 continue
             dispatcher.dispatch(list(item.values()))
 
-    metadata_index.store(target_name=target_name if isdir(target_name) else dirname(target_name))
+    # metadata_index.store(target_name=target_name if isdir(target_name) else dirname(target_name))
 
     logger.info(f"Corpus stored in {target_name}.")

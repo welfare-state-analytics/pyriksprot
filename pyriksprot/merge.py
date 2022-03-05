@@ -6,7 +6,9 @@ from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple, Type
 
 from loguru import logger
 
-from . import corpus_index, interface, member, utility
+from . import corpus_index, interface
+from . import metadata as md
+from . import utility
 
 # pylint: disable=too-many-arguments
 
@@ -105,7 +107,7 @@ class SegmentMerger:
     def __init__(
         self,
         source_index: corpus_index.CorpusSourceIndex,
-        member_index: member.ParliamentaryMemberIndex,
+        metadata_index: md.PersonIndex,
         temporal_key: interface.TemporalKey,
         grouping_keys: Sequence[interface.GroupingKey],
     ):
@@ -113,12 +115,12 @@ class SegmentMerger:
 
         Args:
             source_index (corpus_index.CorpusSourceIndex): Source item index.
-            member_index (member.ParliamentaryMemberIndex): Parliamentar member index.
+            metadata_index (metadata_index.PersonIndex): Parliamentary metadata_index.
             temporal_key (interface.TemporalKey): Temporal key Noe, 'Year', 'Decade', 'Lustrum', 'Custom', 'Protocol', None
             grouping_keys (Sequence[interface.GroupingKey]): Grouping within temporal key
         """
         self.source_index: corpus_index.CorpusSourceIndex = source_index
-        self.member_index: member.ParliamentaryMemberIndex = member_index
+        self.metadata_index: md.PersonIndex = metadata_index
         self.temporal_key: interface.TemporalKey = temporal_key
         self.custom_temporal_specification = None
         self.grouping_keys: Sequence[interface.GroupingKey] = grouping_keys or []
@@ -156,7 +158,7 @@ class SegmentMerger:
                     continue
 
                 temporal_category: str = source_item.temporal_category(self.temporal_key, item)
-                who: member.ParliamentaryRole = None if item.who is None else self.member_index[item.who]
+                who: interface.IPerson = None if item.who is None else self.metadata_index.persons[item.who]
 
                 if current_temporal_category != temporal_category:
 
@@ -208,21 +210,21 @@ def props(cls: Type) -> List[str]:
 
 def create_grouping_hashcoder(
     grouping_keys: Sequence[str],
-) -> Callable[[interface.ProtocolSegment, member.ParliamentaryRole, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[interface.ProtocolSegment, md.IPerson, corpus_index.CorpusSourceItem], str]:
 
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: Set[str] = set(grouping_keys)
 
     member_keys: Set[str] = grouping_keys.intersection(
-        {name for name in props(member.ParliamentaryRole(id='a', role_type='unknown', name='a'))}
+        {name for name in props(md.IPerson(id='a', role_type='unknown', name='a'))}
     )
     index_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
     item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(interface.ProtocolSegment)})
 
     def hashcoder(
         item: interface.ProtocolSegment,
-        parla_member: member.ParliamentaryRole,
+        parla_member: md.ParliamentaryRole,
         source_item: corpus_index.CorpusSourceItem,
     ) -> Tuple[dict, str, str]:
 

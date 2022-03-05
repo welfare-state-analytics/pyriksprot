@@ -26,7 +26,7 @@ def source_index() -> csi.CorpusSourceIndex:
     return items
 
 
-def test_create_grouping_hashcoder(corpus_index: csi.CorpusSourceIndex, metadata_index: md.MetaDataIndex):
+def test_create_grouping_hashcoder(corpus_index: csi.CorpusSourceIndex, metadata_index: md.PersonIndex):
 
     attributes = [interface.SegmentLevel.Who, interface.GroupingKey.Gender]
     hashcoder = merge.create_grouping_hashcoder(attributes)
@@ -48,7 +48,7 @@ def test_create_grouping_hashcoder(corpus_index: csi.CorpusSourceIndex, metadata
     assert hashcode is not None
 
 
-def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, metadata_index: md.MetaDataIndex):
+def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, metadata_index: md.PersonIndex):
 
     filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 

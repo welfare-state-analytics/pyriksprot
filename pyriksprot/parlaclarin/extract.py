@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from os.path import dirname, isdir
 from typing import Callable, Sequence
 
 from loguru import logger
@@ -83,7 +82,7 @@ def extract_corpus_text(
         preprocessor=preprocessor,
     )
 
-    metadata_index: md.MetaDataIndex = md.MetaDataIndex.load(database_filename=metadata_filename)
+    metadata_index: md.PersonIndex = md.PersonIndex.load(database_filename=metadata_filename)
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
         metadata_index=metadata_index,
