@@ -15,6 +15,10 @@ def read_sql_table(table_name: str, con: sqlite3.Connection) -> pd.DataFrame:
     return pd.read_sql(f"select * from {table_name}", con)
 
 
+def read_sql_tables(tables: list[str] | dict, db: sqlite3.Connection) -> dict[str, pd.DataFrame]:
+    return tables if isinstance(tables, dict) else {table_name: read_sql_table(table_name, db) for table_name in tables}
+
+
 def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
 
     if os.path.isfile(target_name):
