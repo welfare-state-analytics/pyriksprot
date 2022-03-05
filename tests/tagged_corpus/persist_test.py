@@ -39,9 +39,9 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
     assert os.path.isfile(output_filename)
 
-    metadata: dict = tagged_corpus.load_metadata(output_filename)
+    corpus_metadata: dict = tagged_corpus.load_metadata(output_filename)
 
-    assert metadata is not None
+    assert corpus_metadata is not None
 
     loaded_protocol: interface.Protocol = tagged_corpus.load_protocol(output_filename)
 
