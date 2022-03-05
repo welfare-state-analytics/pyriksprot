@@ -4,16 +4,17 @@ import sqlite3
 from contextlib import nullcontext
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Callable, List, Mapping
+from typing import Callable, List, Literal, Mapping
 
 import numpy as np
 import pandas as pd
 
-from .utility import read_sql_table, revdict
+from .utility import read_sql_table, read_sql_tables, revdict
 
 
 @dataclass
-class Decoder:
+class Codec:
+    type: Literal['encoder', 'decoder']
     from_column: str
     to_column: str
     fx: Callable[[int], str]
@@ -35,6 +36,24 @@ COLUMN_TYPES = {
 
 COLUMN_DEFAULTS = {
     'gender_id': 0,
+    'year_of_birth': 0,
+    'year_of_death': 0,
+    'district_id': 0,
+    'party_id': 0,
+    'chamber_id': 0,
+    'office_type_id': 0,
+    'sub_office_type_id': 0,
+    'start_year': 0,
+    'end_year': 0,
+}
+
+CODE_TABLES: dict[str, str] = {
+    'chamber': 'chamber_id',
+    'gender': 'gender_id',
+    'office_type': 'office_type_id',
+    'sub_office_type': 'sub_office_type_id',
+    'government': 'government_id',
+    'party': 'party_id',
 }
 
 PARTY_COLORS = [
@@ -62,6 +81,32 @@ NAME2IDNAME_MAPPING: Mapping[str, str] = {
     'person_id': 'pid',
 }
 IDNAME2NAME_MAPPING: Mapping[str, str] = revdict(NAME2IDNAME_MAPPING)
+
+
+def slim_table_types(tables: list[pd.DataFrame], set_default: bool = True) -> None:
+    """Slims types and sets default value for NaN entries"""
+    if set_default:
+        for table in tables:
+            for column_name, value in COLUMN_DEFAULTS.items():
+                if column_name in table.columns:
+                    table[column_name].fillna(value, inplace=True)
+
+    for table in tables:
+        for column_name, dt in COLUMN_TYPES.items():
+            if column_name in table.columns:
+                if table[column_name].dtype != dt:
+                    table[column_name] = table[column_name].astype(dt)
+
+
+@dataclass
+class Person:
+    # pid: int
+    person_id: str
+    name: str
+    gender_id: int
+    party_id: int
+    year_of_birth: int
+    year_of_death: int
 
 
 @dataclass
@@ -98,31 +143,14 @@ class MetaDataCodeMaps:
 
         with (sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source)) as db:
 
-            code_tables: dict = (
-                source
-                if isinstance(source, dict)
-                else dict(
-                    chamber=read_sql_table("chamber", db),
-                    gender=read_sql_table("gender", db),
-                    office_type=read_sql_table("office_type", db),
-                    sub_office_type=read_sql_table("sub_office_type", db),
-                    government=read_sql_table("government", db),
-                    party=read_sql_table("party", db),
-                )
-            )
+            code_tables: dict[str, pd.DataFrame] = read_sql_tables(list(CODE_TABLES.keys()), db)
 
-            for _, table in code_tables.items():
-                for column_name, dt in COLUMN_TYPES.items():
-                    if column_name in table.columns:
-                        if table[column_name].dtype != dt:
-                            table[column_name] = table[column_name].astype(dt)
+            slim_table_types(code_tables.values(), set_default=False)
+
+            for table_name, key_name in code_tables:
+                code_tables[table_name].set_index(key_name, drop=True, inplace=True)
 
             code_map: MetaDataCodeMaps = MetaDataCodeMaps(person=person, **code_tables)
-            code_map.party.set_index("party_id", drop=True, inplace=True)
-            code_map.chamber.set_index("chamber_id", drop=True, inplace=True)
-            code_map.gender.set_index("gender_id", drop=True, inplace=True)
-            code_map.office_type.set_index("office_type_id", drop=True, inplace=True)
-            code_map.sub_office_type.set_index("sub_office_type_id", drop=True, inplace=True)
 
             return code_map
 
@@ -171,42 +199,45 @@ class MetaDataCodeMaps:
         return self.person['name'].to_dict()
 
     @cached_property
-    def decoders(self) -> list[Decoder]:
+    def codecs(self) -> list[Codec]:
         return [
-            Decoder('office_type_id', 'office_type', self.office_type2name.get),
-            Decoder('sub_office_type_id', 'sub_office_type', self.sub_office_type2name.get),
-            Decoder('gender_id', 'gender', self.gender2name.get),
-            Decoder('party_id', 'party_abbrev', self.party_abbrev2name.get),
-            Decoder('pid', 'person_id', self.pid2person_id.get),
+            Codec('decode', 'office_type_id', 'office_type', self.office_type2name.get),
+            Codec('decode', 'sub_office_type_id', 'sub_office_type', self.sub_office_type2name.get),
+            Codec('decode', 'gender_id', 'gender', self.gender2name.get),
+            Codec('decode', 'party_id', 'party_abbrev', self.party_abbrev2name.get),
+            Codec('decode', 'pid', 'person_id', self.pid2person_id.get),
+            Codec('encode', 'office_type', 'office_type_id', self.office_type2id.get),
+            Codec('encode', 'sub_office_type', 'sub_office_type_id', self.sub_office_type2id.get),
+            Codec('encode', 'gender', 'gender_id', self.gender2id.get),
+            Codec('encode', 'party', 'party_id', self.party_abbrev2id.get),
+            Codec('encode', 'person_id', 'pid', self.person_id2pid.get),
+            Codec('encode', 'who', 'pid', self.person_id2pid.get),
         ]
 
-    @cached_property
+    @property
+    def decoders(self) -> list[Codec]:
+        return [c for c in self.codecs if c.type == 'decode']
+
+    @property
     def encoders(self) -> list[dict]:
-        return [
-            Decoder('office_type', 'office_type_id', self.office_type2id.get),
-            Decoder('sub_office_type', 'sub_office_type_id', self.sub_office_type2id.get),
-            Decoder('gender', 'gender_id', self.gender2id.get),
-            Decoder('party', 'party_id', self.party_abbrev2id.get),
-            Decoder('person_id', 'pid', self.person_id2pid.get),
-            Decoder('who', 'pid', self.person_id2pid.get),
-        ]
+        return [c for c in self.codecs if c.type == 'encode']
 
-    def xcode(self, df: pd.DataFrame, excoders: list[Decoder], drop: bool = True) -> pd.DataFrame:
+    def apply_codec(self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True) -> pd.DataFrame:
 
-        for xcoder in excoders:
-            if xcoder.from_column in df.columns:
-                df[xcoder.to_column] = df[xcoder.from_column].apply(xcoder.fx)
-                if xcoder.default is not None:
-                    df[xcoder.to_column] = df[xcoder.to_column].fillna(xcoder.default)
+        for codec in codecs:
+            if codec.from_column in df.columns:
+                df[codec.to_column] = df[codec.from_column].apply(codec.fx)
+                if codec.default is not None:
+                    df[codec.to_column] = df[codec.to_column].fillna(codec.default)
             if drop:
-                df.drop(columns=[xcoder.from_column], inplace=True, errors='ignore')
+                df.drop(columns=[codec.from_column], inplace=True, errors='ignore')
         return df
 
     def decode(self, df: pd.DataFrame, drop: bool = True) -> pd.DataFrame:
-        return self.xcode(df, self.decoders, drop=drop)
+        return self.apply_codec(df, self.decoders, drop=drop)
 
     def encode(self, df: pd.DataFrame, drop: bool = True) -> pd.DataFrame:
-        return self.xcode(df, self.encoders, drop=drop)
+        return self.apply_codec(df, self.encoders, drop=drop)
 
 
 # pylint: disable=too-many-public-methods
@@ -236,11 +267,7 @@ class MetaDataIndex:
                 'unknown_utterance_party': read_sql_table("unknown_utterance_party", db),
             }
 
-            """Slim data types"""
-            for table_name, table in data.items():
-                for column_name, dt in COLUMN_TYPES.items():
-                    if column_name in table_name.columns:
-                        table[column_name] = table[column_name].astype(dt)
+            slim_table_types(data.values(), set_default=True)
 
             """Set index"""
             data['terms_of_office'].set_index("terms_of_office_id", drop=True, inplace=True)
@@ -272,9 +299,13 @@ class MetaDataIndex:
     def person_yearly_party(self) -> pd.DataFrame:
         return self.data['person_yearly_party']
 
-    @cached_property
-    def speaker_index(self, person_id: str, u_id: str) -> dict[str, SpeakerInfo]:
+    def get_speaker_info(self, person_id: str, u_id: str) -> dict[str, SpeakerInfo]:
         person = self.get_person(person_id)
+        speaker_info: SpeakerInfo = SpeakerInfo()
+        return speaker_info
+
+    def get_person(self) -> Person:
+        raise NotImplementedError()
 
     @cached_property
     def property_values_specs(self) -> List[Mapping[str, str | Mapping[str, int]]]:
