@@ -150,4 +150,4 @@ html
 data_link
 apa.*
 logs
-./metadata/*.db
+metadata/*.db
