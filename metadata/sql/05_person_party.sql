@@ -61,19 +61,50 @@ with persons_with_single_party as (
           on conflict(person_id) do update set party_id=excluded.[party_id];
 
 
--- drop table if exists person_multiple_party;
--- create table person_multiple_party (
---     person_id varchar primary key,
---     party_id integer not null
--- );
--- with persons_with_many_partys as (
---     select person_id
---     from person_party
---     group by person_id
---     having count(distinct party_id) > 1
--- )
---     select distinct person_party.person_id, party_id
---     from person_party
---     left join persons_with_many_partys using (person_id)
---     where persons_with_many_partys.person_id  is null;
--- --  2959
+drop table if exists person_multiple_party;
+create table person_multiple_party (
+    person_multiple_party_id integer primary key,
+    person_id varchar not null,
+    party_id integer not null,
+    start_year int null,
+    end_year int null
+);
+with persons_with_many_partys as (
+    select person_id
+    from person_party
+    group by person_id
+    having count(distinct party_id) > 1
+)
+    insert into person_multiple_party (person_id, party_id, start_year, end_year)
+        select distinct person_party.person_id, party_id, start_year, end_year
+        from person_party
+        join persons_with_many_partys using (person_id);
+
+drop table if exists person_yearly_party;
+create table person_yearly_party (
+    person_yearly_party_id integer primary key,
+    person_id varchar not null references persons_of_interest(person_id),
+    [year] int null,
+    party_id integer not null
+);
+
+insert into person_yearly_party (person_id, [year], party_id)
+    select distinct person_id, years.[year], party_id
+    from person_multiple_party
+    join years
+    on years.[year] between person_multiple_party.[start_year] and ifnull(person_multiple_party.[end_year], 2030)
+    union
+    select distinct person_id, null, party_id
+    from person_multiple_party
+    where start_year is null
+      and end_year is null
+    union
+    select person_id, null, party_id
+    from persons_of_interest
+    where party_id is not null;
+
+insert into person_yearly_party (person_id, [year], party_id)
+    select person_id, null, 0
+    from persons_of_interest
+    where person_id not in (select person_id from person_yearly_party);
+
