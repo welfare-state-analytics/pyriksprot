@@ -13,9 +13,9 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from . import interface
-from .parlaclarin import parse
-from .utility import download_url_to_file, probe_filename
+from .. import interface
+from ..parlaclarin import parse
+from ..utility import download_url_to_file, probe_filename
 
 jj = os.path.join
 
@@ -26,6 +26,10 @@ def input_unknown_url(tag: str = "main"):
     return (
         f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/input/matching/unknowns.csv"
     )
+
+
+def table_url(tablename: str, tag: str = "main") -> str:
+    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/metadata/{tablename}.csv"
 
 
 RIKSPROT_METADATA_TABLES: dict = {
@@ -91,7 +95,7 @@ RIKSPROT_METADATA_TABLES: dict = {
         'twitter': 'text',  # primary key',
         'person_id': 'text references person (person_id) not null',
     },
-    'input_unknown': {
+    'unknowns': {
         'protocol_id': 'text',  # primary key',
         'hash': 'text',
         'gender': 'text',
@@ -102,10 +106,6 @@ RIKSPROT_METADATA_TABLES: dict = {
 }
 
 METADATA_FILENAMES = [f"{x}.csv" for x in RIKSPROT_METADATA_TABLES]
-
-
-def table_url(tablename: str, tag: str = "main") -> str:
-    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/metadata/{tablename}.csv"
 
 
 def register_numpy_adapters():
@@ -121,30 +121,63 @@ def register_numpy_adapters():
 def smart_load_table(tablename: str, folder: str = None, branch: str = None, **opts) -> pd.DataFrame:
     if bool(folder is None) == bool(branch is None):
         raise ValueError("either folder or branch must be set - not both")
-    if isinstance(branch, str):
+    if isinstance(folder, str):
+        tablename: str = probe_filename(jj(folder, f"{tablename}.csv"), ["zip", "csv.gz"])
+    elif isinstance(branch, str):
         tablename: str = table_url(tablename, branch)
-    elif isinstance(folder, str):
-        tablename: str = jj(folder, f"{tablename}.csv")
     table: pd.DataFrame = pd.read_csv(tablename, **opts)
     return table
 
 
 def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
 
-    if isdir(folder):
-        if not force:
-            raise ValueError("Folder exists, use `force=True` to overwrite")
-        shutil.rmtree(folder, ignore_errors=True)
-
     os.makedirs(folder, exist_ok=True)
 
-    for tablename in RIKSPROT_METADATA_TABLES:
+    for tablename, specification in RIKSPROT_METADATA_TABLES.items():
         target_name: str = jj(folder, f"{tablename}.csv")
-        url: str = table_url(tablename=tablename, tag=tag)
+        if isfile(target_name):
+            if not force:
+                raise ValueError(f"File {target_name} exists, use `force=True` to overwrite")
+            os.remove(target_name)
+        logger.info(f"downloading {tablename} to {target_name}...")
+        url: str = (
+            table_url(tablename=tablename, tag=tag)
+            if ':url:' not in specification
+            else fx_or_url(specification[':url:'], tag)
+        )
         download_url_to_file(url, target_name, force)
         # download_url(url, target_folder, filename)
 
-    download_url_to_file(input_unknown_url(tag=tag), "input_unknown", force)
+
+def subset_to_folder(source_folder: str, source_metadata: str, target_folder: str):
+    """Creates a subset of metadata in source metadata that includes only protocols found in source_folder"""
+    data: tuple = generate_utterance_index(corpus_folder=source_folder, target_folder=target_folder)
+    protocols: pd.DataFrame = data[0]
+    utterances: pd.DataFrame = data[1]
+    person_ids: list[str] = set(utterances.person_id.unique().tolist())
+
+    for tablename in ["government", "party_abbreviation"]:
+        shutil.copy(jj(source_metadata, f"{tablename}.csv"), jj(target_folder, f"{tablename}.csv"))
+
+    person_tables: list[str] = [
+        "location_specifier",
+        "member_of_parliament",
+        "minister",
+        "name",
+        "party_affiliation",
+        "person",
+        "speaker",
+        "twitter",
+    ]
+    for tablename in person_tables:
+        filename: str = f"{tablename}.csv"
+        table: pd.DataFrame = pd.read_csv(jj(source_metadata, filename), sep=',', index_col=None)
+        table = table[table['person_id'].isin(person_ids)]
+        table.to_csv(jj(target_folder, filename), sep=',', index=False)
+
+    unknowns: pd.DataFrame = pd.read_csv(jj(source_metadata, "unknowns.csv"), sep=',', index_col=None)
+    unknowns = unknowns[unknowns['protocol_id'].isin(set(protocols['document_name']))]
+    unknowns.to_csv(jj(target_folder, "unknowns.csv"), sep=',', index=False)
 
 
 def fx_or_url(url: Any, tag: str) -> str:
@@ -177,7 +210,6 @@ def create_database(
                 {(','+lf).join(f"{k.removeprefix('+')} {t}" for k, t in specification.items() if not k.startswith(":"))}
             );
         """
-        # print(sql_ddl)
         with closing(db.cursor()) as cursor:
             cursor.executescript(sql_ddl)
 
@@ -186,7 +218,7 @@ def create_database(
 
         column_names: list[str] = [k for k in specification if k[0] not in "+:"]
 
-        if ':url:' in specification:
+        if ':url:' in specification and folder is None:
             table: pd.DataFrame = pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
         else:
             table: pd.DataFrame = smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
@@ -202,12 +234,9 @@ def create_database(
             insert into {tablename} ({', '.join(column_names)})
                 values ({', '.join(['?'] * len(column_names))});
             """
-            # print(insert_sql, data[0])
-            # print(table.columns)
             cursor.executemany(insert_sql, data)
 
     db.commit()
-
     return db
 
 
@@ -218,16 +247,20 @@ def generate_utterance_index(corpus_folder: str, target_folder: str = None) -> t
     filenames = glob.glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
 
     for document_id, filename in tqdm(enumerate(filenames)):
-        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(filename, segment_skip_size=1)
-        protocol_data.append((document_id, protocol.name, protocol.date))
+        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+            filename, segment_skip_size=0, ignore_tags={"teiHeader"}
+        )
+        protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
         for u in protocol.utterances:
-            utterance_data.append(tuple([document_id, u.u_id, u.n, u.who, u.page_number, u.speaker_hash]))
+            utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_hash]))
 
     data: tuple[pd.DataFrame, pd.DataFrame] = (
-        pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date']).set_index("document_id"),
-        pd.DataFrame(
-            data=utterance_data, columns=['document_id', 'u_id', 'hash', 'who', 'page_number', 'speaker_hash']
-        ).set_index("u_id"),
+        pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date', 'year']).set_index(
+            "document_id"
+        ),
+        pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_hash']).set_index(
+            "u_id"
+        ),
     )
 
     if target_folder:
@@ -247,8 +280,11 @@ def load_utterance_index(database_filename: str, source_folder: str = None) -> N
     tablenames: list[str] = ["protocols", "utterances"]
     filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
 
-    if not isfile(database_filename):
+    if not isfile(database_filename) or len(filenames) != 2:
         raise FileNotFoundError(database_filename)
+
+    if not all(isfile(filename) for filename in filenames):
+        raise FileNotFoundError(','.join(filenames))
 
     with closing(sqlite3.connect(database_filename)) as db:
 
