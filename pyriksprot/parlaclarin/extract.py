@@ -26,6 +26,7 @@ def create_dehyphen(data_path: str) -> dehyphenation.SwedishDehyphenatorService:
 
 def extract_corpus_text(
     source_folder: str = None,
+    metadata_filename: str = None,
     target_name: str = None,
     target_type: str = None,
     segment_level: interface.SegmentLevel = None,
@@ -82,10 +83,10 @@ def extract_corpus_text(
         preprocessor=preprocessor,
     )
 
-    corpus_metadata: md.MetaDataIndex = md.MetaDataIndex(source=source_folder)
+    metadata_index: md.MetaDataIndex = md.MetaDataIndex.load(metadata_filename=metadata_filename)
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
-        corpus_metadata=corpus_metadata,
+        metadata_index=metadata_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )
@@ -94,6 +95,6 @@ def extract_corpus_text(
         for item in merger.merge(segments):
             dispatcher.dispatch(list(item.values()))
 
-    corpus_metadata.store(target_name if isdir(target_name) else dirname(target_name))
+    metadata_index.store(target_name if isdir(target_name) else dirname(target_name))
 
     logger.info(f"Corpus stored in {target_name}.")
