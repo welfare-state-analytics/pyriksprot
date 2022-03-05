@@ -83,7 +83,7 @@ def extract_corpus_text(
         preprocessor=preprocessor,
     )
 
-    metadata_index: md.MetaDataIndex = md.MetaDataIndex.load(metadata_filename=metadata_filename)
+    metadata_index: md.MetaDataIndex = md.MetaDataIndex.load(database_filename=metadata_filename)
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
         metadata_index=metadata_index,
