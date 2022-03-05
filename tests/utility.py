@@ -8,19 +8,20 @@ from loguru import logger
 
 from pyriksprot import interface
 from pyriksprot import metadata as md
-from pyriksprot.utility import replace_extension
+from pyriksprot.utility import download_protocols, replace_extension
 
 load_dotenv()
 
 
 PARLACLARIN_BRANCH = os.environ["CORPUS_REPOSITORY_TAG"]
 PARLACLARIN_SOURCE_TAG = os.environ["CORPUS_REPOSITORY_TAG"]
-PARLACLARIN_SOURCE_FOLDER = f'tests/test_data/source/parlaclarin/{PARLACLARIN_SOURCE_TAG}'
-PARLACLARIN_SOURCE_PATTERN = f'{PARLACLARIN_SOURCE_FOLDER}/**/prot-*.xml'
+PARLACLARIN_SOURCE_FOLDER = jj("tests/test_data/source/parlaclarin", PARLACLARIN_SOURCE_TAG)
+PARLACLARIN_SOURCE_PATTERN = jj(PARLACLARIN_SOURCE_FOLDER, "**/prot-*.xml")
 PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
 
-TAGGED_SOURCE_FOLDER = f'tests/test_data/source/tagged_frames/{PARLACLARIN_SOURCE_TAG}'
-TAGGED_SOURCE_PATTERN = f'{TAGGED_SOURCE_FOLDER}/prot-*.zip'
+TAGGED_SOURCE_FOLDER = jj("tests/test_data/source/tagged_frames", PARLACLARIN_SOURCE_TAG)
+TAGGED_METADATA_DATABASE_NAME = jj(TAGGED_SOURCE_FOLDER, "riksprot_metadata.db")
+TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "prot-*.zip")
 
 TEST_DOCUMENTS = [
     "prot-1933--fk--5",
@@ -30,6 +31,34 @@ TEST_DOCUMENTS = [
     'prot-199192--127',
     'prot-199192--21',
 ]
+
+
+def ensure_test_corpora_exist():
+    if not sample_xml_corpus_exists():
+        download_protocols(
+            protocols=TEST_DOCUMENTS,
+            target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "protocols"),
+            create_subfolder=True,
+            tag=PARLACLARIN_SOURCE_TAG,
+        )
+
+    if not sample_metadata_exists():
+        """Create just a subset of the data"""
+        md.subset_to_folder(
+            source_folder=PARLACLARIN_SOURCE_FOLDER,
+            source_metadata="metadata/data",
+            target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        )
+
+    if not os.path.isdir(TAGGED_SOURCE_FOLDER):
+        try:
+            setup_sample_tagged_frames_corpus(
+                protocols=TEST_DOCUMENTS,
+                source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
+                target_folder=TAGGED_SOURCE_FOLDER,
+            )
+        except Exception as ex:
+            logger.warning(ex)
 
 
 def sample_xml_corpus_exists():
@@ -69,8 +98,16 @@ def setup_sample_tagged_frames_corpus(
             continue
         shutil.copy(src=source_filename, dst=jj(target_folder, filename))
 
-    for filename in md.METADATA_FILENAMES:
-        shutil.copy(src=jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename), dst=jj(target_folder, filename))
+    """Create metadata from test corpus"""
+    md.create_database(
+        TAGGED_METADATA_DATABASE_NAME,
+        branch=None,
+        folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        force=True,
+    )
+    os.makedirs(jj(target_folder, "metadata"), exist_ok=True)
+    # for filename in md.METADATA_FILENAMES:
+    #     shutil.copy(src=jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename), dst=jj(target_folder, filename))
 
 
 TAGGED_CSV_STR = (
