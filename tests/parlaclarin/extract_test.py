@@ -10,7 +10,7 @@ from pyriksprot import dispatch, interface, merge
 from pyriksprot import metadata as md
 from pyriksprot import parlaclarin
 
-from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN
+from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
 
 # pylint: disable=redefined-outer-name
 
@@ -78,6 +78,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
 
     parlaclarin.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
+        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
         compress_type=dispatch.CompressType.Zip,
@@ -98,6 +99,7 @@ def test_extract_corpus_with_no_temporal_key():
 
     parlaclarin.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
+        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -116,6 +118,7 @@ def test_extract_corpus_with_no_matching_protocols():
 
     parlaclarin.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
+        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -135,6 +138,7 @@ def test_aggregator_extract_gender_party_no_temporal_key():
 
     parlaclarin.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
+        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_filename,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
