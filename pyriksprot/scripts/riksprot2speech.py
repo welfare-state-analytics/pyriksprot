@@ -10,6 +10,7 @@ from .utils import option2, update_arguments_from_options_file
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)
+@click.argument('metadata-filename', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
 @option2('--options-filename')
 @option2('--target-type')
@@ -25,6 +26,7 @@ from .utils import option2, update_arguments_from_options_file
 def main(
     options_filename: str = None,
     source_folder: str = None,
+    metadata_filename: str = None,
     target_name: str = None,
     target_type: str = None,
     content_type: str = 'tagged_frame',
