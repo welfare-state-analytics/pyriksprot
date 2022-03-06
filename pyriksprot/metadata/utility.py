@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
-from typing import Any, Mapping
+from typing import Any, Mapping, Type
 
 import numpy as np
 import pandas as pd
@@ -113,6 +113,27 @@ def slim_table_types(
             if column_name in table.columns:
                 if table[column_name].dtype != dt:
                     table[column_name] = table[column_name].astype(dt)
+
+
+def group_to_list_of_records2(df: pd.DataFrame, key: str) -> dict[str | int, list[dict]]:
+    """Groups `df` by `key` and aggregates each group to list of row records (dicts)"""
+    return {q: df.loc[ds].to_dict(orient='records') for q, ds in df.groupby(key).groups.items()}
+
+
+def group_to_list_of_records(
+    df: pd.DataFrame, key: str, properties: list[str] = None, ctor: Type = None
+) -> dict[str | int, list[dict]]:
+    """Groups `df` by `key` and aggregates each group to list of row records (dicts)"""
+    key_rows: pd.DataFrame = pd.DataFrame(
+        data={
+            key: df[key],
+            'data': (df[properties] if properties else df).to_dict("records"),
+        }
+    )
+    if ctor is not None:
+        key_rows['data'] = key_rows['data'].apply(lambda x: ctor(**x))
+
+    return key_rows.groupby(key)['data'].apply(list).to_dict()
 
 
 def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
