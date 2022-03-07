@@ -3,13 +3,14 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass, field, fields
 from functools import cached_property
+
+import numpy as np
+import pandas as pd
 from loguru import logger
 
-import pandas as pd
-
 from . import codecs
-from . import utterance
 from . import utility as mdu
+from . import utterance
 
 DATA_TABLES: dict[str, str] = {
     'persons_of_interest': None,
@@ -43,7 +44,7 @@ class PersonParty:
 
 @dataclass
 class Person:
-    # pid: int
+    pid: int
     person_id: str
     name: str
     gender_id: int
@@ -59,14 +60,16 @@ class Person:
         if self.party_id:
             return self.party_id
         if self.alt_parties and not self.is_unknown:
+            """Prioritise items with closed intervals"""
             for x in [p for p in self.alt_parties if p.start_year > 0 and p.end_year > 0]:
                 if x.start_year <= year <= x.end_year:
-                    return x
-            for x in [p for p in self.alt_parties if p.start_year == 0]:
+                    return x.party_id
+            """Open ended intervals"""
+            for x in [p for p in self.alt_parties if p.start_year > 0 or p.end_year > 0]:
                 if x.start_year <= year <= (x.end_year or 9999):
-                    return x
+                    return x.party_id
             """Questionable rule"""
-            return self.alt_parties[-1]
+            return 0  # self.alt_parties[-1]
         return 0
 
     def term_of_office_at(self, year: int) -> TermOfOffice:
@@ -163,7 +166,7 @@ class PersonIndex:
             data: dict = self.persons.loc[pid].to_dict()
             terms: list[TermOfOffice] = self.terms_of_office_lookup.get(data['person_id'])
             alt_parties: list[PersonParty] = self.person_multiple_party_lookup.get(data['person_id'])
-            return Person(terms_of_office=terms, alt_parties=alt_parties, **data)
+            return Person(pid=pid, terms_of_office=terms, alt_parties=alt_parties, **data)
         except Exception as ex:
             logger.info(f"{type(ex).__name__}: {ex}")
             raise
@@ -210,12 +213,25 @@ class PersonIndex:
         self, df: pd.DataFrame, *, encoded: bool = True, drop: bool = True, columns: list[str] = None
     ) -> pd.DataFrame:
 
-        columns: list = ['person_id', 'gender_id', 'party_id']
+        persons: pd.DataFrame = self.persons
+        fg = self.person_id2pid.get
 
         join_column: str = next((x for x in df.columns if x in ['who', 'person_id']), None)
-        join_criterias: dict = dict(left_on=join_column) if join_column else dict(left_index=True)
+        join_criterias = dict(left_on='pid')
 
-        xi: pd.DataFrame = df.merge(self.persons[columns], right_index=True, how='left', **join_criterias)
+        if 'pid' not in df.columns and join_column:
+            df['pid'] = df[join_column].apply(fg)
+        else:
+            if not np.issubtype(df.index.dtype, np.integer):
+                """assume index is person_id"""
+                df['pid'] = pd.Series(df.index).apply(fg)
+            else:
+                """assume pid is index"""
+                join_criterias = dict(left_index=True)
+
+        columns: list = ['gender_id', 'party_id']
+
+        xi: pd.DataFrame = df.merge(persons[columns], right_index=True, how='left', **join_criterias)
 
         if not encoded and drop:
             xi = self.lookups.decode(xi, drop=True)
@@ -240,6 +256,7 @@ class PersonIndex:
 
     def unknown_person(self) -> Person:
         return Person(
+            pid=0,
             person_id='unknown',
             name='unknown',
             gender_id=0,
@@ -250,27 +267,33 @@ class PersonIndex:
         )
 
 
-class SpeekerInfoService:
-    def __init__(self, database_filename: str):
+class SpeakerInfoService:
+    def __init__(self, database_filename: str, **kwargs):
         self.database_filename: str = database_filename
+        self.kwargs: dict = kwargs
 
     @cached_property
-    def utterance_lookup(self) -> utterance.UtteranceLookup:
-        return utterance.UtteranceLookup().load(source=self.database_filename)
+    def utterance_index(self) -> utterance.UtteranceIndex:
+        return self.kwargs.get('utterance_lookup') or utterance.UtteranceIndex().load(source=self.database_filename)
 
     @cached_property
     def person_index(self) -> PersonIndex:
-        return PersonIndex(self.database_filename).load()
+        return self.kwargs.get('person_index') or PersonIndex(self.database_filename).load()
 
-    def get_speaker_info(self, protocol_id: int, u_id: str, person_id: str) -> dict[str, SpeakerInfo]:
+    def get_speaker_info(self, *, u_id: str, protocol_id: int = None, person_id: str = None) -> dict[str, SpeakerInfo]:
+
+        if person_id is None or protocol_id is None:
+            uttr: pd.Series = self.utterance_index.utterances.loc[u_id]
+            person_id = uttr.person_id
+            protocol_id = uttr.document_id
 
         person = self.person_index[person_id]
         gender_id: int = person.gender_id
         party_id: int = person.party_id
-        year: int = self.utterance_lookup.protocols_lookup(protocol_id)['year']
+        year: int = self.utterance_index.protocol(protocol_id).year
         if person.is_unknown:
-            gender_id = gender_id or self.utterance_lookup.unknown_gender_lookup.get(u_id, 0)
-            party_id = party_id or self.utterance_lookup.unknown_party_lookup.get(u_id, 0)
+            gender_id = gender_id or self.utterance_index.unknown_gender_lookup.get(u_id, 0)
+            party_id = party_id or self.utterance_index.unknown_party_lookup.get(u_id, 0)
         elif not party_id:
             party_id = person.party_at(year)
 
