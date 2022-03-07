@@ -103,8 +103,8 @@ class Utterance:
             [] if not paragraphs else paragraphs if isinstance(paragraphs, list) else paragraphs.split(PARAGRAPH_MARKER)
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
-        self.page_number: Optional[str] = page_number
-        self.speaker_hash: Optional[str] = speaker_hash
+        self.page_number: Optional[str] = page_number if isinstance(page_number, str) else ''
+        self.speaker_hash: Optional[str] = speaker_hash if isinstance(speaker_hash, str) else ''
 
     @property
     def document_name(self) -> str:
@@ -148,7 +148,8 @@ class UtteranceHelper:
                 'next_id': u.next_id,
                 'annotation': u.tagged_text,
                 'paragraphs': PARAGRAPH_MARKER.join(u.paragraphs),
-                'speaker_hash': u.speaker_hash,
+                'page_number': u.page_number or '',
+                'speaker_hash': u.speaker_hash or '',
                 'checksum': u.checksum(),
             }
             for u in utterances
@@ -177,20 +178,7 @@ class UtteranceHelper:
     def from_csv(csv_str: str) -> List[Utterance]:
         """Convert CSV string to list of utterances. Return list."""
         df: pd.DataFrame = UtteranceHelper.to_dataframe(StringIO(csv_str))
-        utterances: List[Utterance] = [
-            Utterance(
-                u_id=d.get('u_id'),
-                n=d.get('n'),
-                who=d.get('who'),
-                prev_id=d.get('prev_id'),
-                next_id=d.get('next_id'),
-                paragraphs=d.get('paragraphs', '').split(PARAGRAPH_MARKER),
-                annotation=d.get('annotation'),
-                page_number=d.get('page_number'),
-                speaker_hash=d.get('speaker_hash'),
-            )
-            for d in df.reset_index().to_dict(orient='records')
-        ]
+        utterances: List[Utterance] = [Utterance(**d) for d in df.reset_index().to_dict(orient='records')]
         return utterances
 
     @staticmethod

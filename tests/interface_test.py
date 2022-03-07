@@ -262,7 +262,7 @@ def test_speech_annotation():
         # ("prot-1955--ak--22.xml", 53, 53, interface.MergeSpeechStrategyType.Who),
         # ("prot-1955--ak--22.xml", 149, 149, interface.MergeSpeechStrategyType.WhoSequence),
         # ('prot-199192--127.xml', 224, 224, interface.MergeSpeechStrategyType.Chain),
-        ('prot-199192--127.xml', 51, 51, interface.MergeSpeechStrategyType.Who),
+        ('prot-199192--127.xml', 49, 49, interface.MergeSpeechStrategyType.Who),
         ('prot-199192--127.xml', 208, 208, interface.MergeSpeechStrategyType.WhoSequence),
     ],
 )
@@ -270,7 +270,7 @@ def test_protocol_to_speeches_with_different_strategies(
     filename: str, speech_count: int, non_empty_speech_count: int, strategy: str
 ):
 
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, filename.split('-')[1], filename)
+    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
     document_name: str = utility.strip_path_and_extension(filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path)
@@ -324,6 +324,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 paragraphs=['Hej! Detta är en mening.'],
                 tagged_text="token\tpos\tlemma\nA\ta\tNN",
                 delimiter='\n',
+                page_number=''
             )
         ],
     )

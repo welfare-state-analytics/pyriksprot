@@ -102,7 +102,6 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
             if not stored_filename in filenames:
                 continue
 
-            # FIXME: #9 No page number key/value in protocol json-data stored in ZIP
             data_str: str = fp.read(stored_filename).decode('utf-8')
             utterances: List[interface.Utterance] = PROTOCOL_LOADERS.get(ext)(data_str)
 
