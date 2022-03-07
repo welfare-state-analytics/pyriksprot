@@ -6,25 +6,13 @@ from pyriksprot import corpus_index, interface, merge
 from pyriksprot import metadata as md
 from pyriksprot.tagged_corpus import iterate, persist
 
-from .utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
+from .utility import TAGGED_SOURCE_FOLDER
 
 # pylint: disable=unused-variable, redefined-outer-name
 
 
 @pytest.fixture
-def source_index() -> corpus_index.CorpusSourceIndex:
-    return corpus_index.CorpusSourceIndex.load(
-        source_folder=TAGGED_SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
-    )
-
-
-@pytest.fixture
-def metadata_index() -> md.PersonIndex:
-    return md.PersonIndex.load(database_filename=TAGGED_METADATA_DATABASE_NAME)
-
-
-@pytest.fixture
-def utterance_segments(source_index) -> List[interface.ProtocolSegment]:
+def utterance_segments(source_index: corpus_index.CorpusSourceIndex) -> List[interface.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
@@ -38,7 +26,11 @@ def utterance_segments(source_index) -> List[interface.ProtocolSegment]:
     return segments
 
 
-def test_segment_merger_merge_on_protocol_level_group_by_who(metadata_index, source_index, utterance_segments):
+def test_segment_merger_merge_on_protocol_level_group_by_who(
+    speaker_service: md.SpeakerInfoService,
+    source_index: corpus_index.CorpusSourceIndex,
+    utterance_segments: List[interface.ProtocolSegment],
+):
 
     """Load source protocols to simplify tests"""
     protocols: List[interface.Protocol] = list(persist.load_protocols(source=TAGGED_SOURCE_FOLDER))
@@ -51,7 +43,7 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(metadata_index, sou
     group_keys: List[interface.GroupingKey] = [interface.GroupingKey.Who]
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
-        metadata_index=metadata_index,
+        speaker_service=speaker_service,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )

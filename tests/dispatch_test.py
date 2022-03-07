@@ -11,22 +11,13 @@ from pyriksprot import metadata as md
 from pyriksprot import utility
 from pyriksprot.tagged_corpus import iterate
 
-from .utility import TAGGED_SOURCE_FOLDER
-
 # pylint: disable=unused-variable, redefined-outer-name
-
-
-@pytest.fixture
-def source_index() -> corpus_index.CorpusSourceIndex:
-    return corpus_index.CorpusSourceIndex.load(
-        source_folder=TAGGED_SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
-    )
 
 
 @pytest.fixture
 def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
-    metadata_index: md.PersonIndex,
+    speaker_service: md.SpeakerInfoService,
 ) -> Mapping[str, merge.MergedSegmentGroup]:
     segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
@@ -36,13 +27,13 @@ def tagged_speeches(
         segment_skip_size=1,
     )
     groups = merge.SegmentMerger(
-        source_index=source_index, metadata_index=metadata_index, temporal_key=None, grouping_keys=None
+        source_index=source_index, speaker_service=speaker_service, temporal_key=None, grouping_keys=None
     ).merge(segments)
     groups = list(groups)
     return groups
 
 
-def test_folder_with_zips_dispatch(tagged_speeches):
+def test_folder_with_zips_dispatch(tagged_speeches: Mapping[str, merge.MergedSegmentGroup]):
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with dispatch.FilesInFolderDispatcher(
         target_name=target_name,
@@ -53,7 +44,7 @@ def test_folder_with_zips_dispatch(tagged_speeches):
     assert isdir(target_name)
 
 
-def test_zip_file_dispatch(tagged_speeches):
+def test_zip_file_dispatch(tagged_speeches: Mapping[str, merge.MergedSegmentGroup]):
     target_name: str = f'./tests/output/{uuid.uuid1()}.zip'
     with dispatch.FilesInZipDispatcher(
         target_name=target_name,
@@ -83,7 +74,9 @@ def test_find_dispatch_class():
     assert expected_keys.intersection(dispatch_keys) == expected_keys
 
 
-def test_checkpoint_dispatch(tagged_speeches, source_index: corpus_index.CorpusSourceIndex):
+def test_checkpoint_dispatch(
+    tagged_speeches: Mapping[str, merge.MergedSegmentGroup], source_index: corpus_index.CorpusSourceIndex
+):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with dispatch.CheckpointPerGroupDispatcher(
@@ -111,7 +104,9 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
 
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch(
-    tagged_speeches, source_index: corpus_index.CorpusSourceIndex, cls: Type[dispatch.IDispatcher]
+    tagged_speeches: Mapping[str, merge.MergedSegmentGroup],
+    source_index: corpus_index.CorpusSourceIndex,
+    cls: Type[dispatch.IDispatcher],
 ):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
@@ -133,7 +128,9 @@ def test_single_feather_per_group_dispatch(
 
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch_with_skips(
-    tagged_speeches, source_index: corpus_index.CorpusSourceIndex, cls: Type[dispatch.IDispatcher]
+    tagged_speeches: Mapping[str, merge.MergedSegmentGroup],
+    source_index: corpus_index.CorpusSourceIndex,
+    cls: Type[dispatch.IDispatcher],
 ):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
