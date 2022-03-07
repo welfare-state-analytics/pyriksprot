@@ -50,7 +50,6 @@ class dotdict(dict):
     __delattr__ = dict.__delitem__
 
 
-# FIXME: sync_delta_names hangs
 def sync_delta_names(
     source_folder: str, source_extension: str, target_folder: str, target_extension: str, delete: bool = False
 ) -> Set(str):
@@ -61,7 +60,6 @@ def sync_delta_names(
 
     delta_names = set(target_names).difference(set(source_names))
 
-    # FIXME: Move files if not delete
     if delete:
         for name in delta_names:
             path = jj(target_folder, f"{name}.{target_extension}")
