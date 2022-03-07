@@ -3,7 +3,6 @@ from __future__ import annotations
 import sqlite3
 from contextlib import nullcontext
 from functools import cached_property
-from typing import List, Mapping
 
 import pandas as pd
 
@@ -18,7 +17,8 @@ DATA_TABLES: dict[str, str] = {
 
 null_frame: pd.DataFrame = pd.DataFrame()
 
-class UtteranceLookup:
+
+class UtteranceIndex:
     def __init__(self):
 
         self.protocols: pd.DataFrame = null_frame
@@ -26,7 +26,7 @@ class UtteranceLookup:
         self.unknown_utterance_gender: pd.DataFrame = null_frame
         self.unknown_utterance_party: pd.DataFrame = null_frame
 
-    def load(self, source: str | sqlite3.Connection | dict) -> UtteranceLookup:
+    def load(self, source: str | sqlite3.Connection | dict) -> UtteranceIndex:
         with (sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source)) as db:
             tables: dict[str, pd.DataFrame] = mdu.load_tables(DATA_TABLES, db=db)
             for table_name, table in tables.items():
@@ -42,3 +42,6 @@ class UtteranceLookup:
     def unknown_gender_lookup(self) -> dict[str, int]:
         """Utterance `u_id` to `gender_id` mapping"""
         return self.unknown_utterance_gender['gender_id'].to_dict()
+
+    def protocol(self, document_id: int) -> pd.Series:
+        return self.protocols.loc[document_id]

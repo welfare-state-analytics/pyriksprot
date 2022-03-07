@@ -10,6 +10,6 @@ from .generate import (
     load_utterance_index,
     subset_to_folder,
 )
-from .person import Person, PersonIndex, PersonParty, SpeakerInfo, SpeekerInfoService, TermOfOffice
+from .person import Person, PersonIndex, PersonParty, SpeakerInfo, SpeakerInfoService, TermOfOffice
 from .utility import IDNAME2NAME_MAPPING, NAME2IDNAME_MAPPING, PARTY_COLOR_BY_ABBREV, PARTY_COLOR_BY_ID, PARTY_COLORS
-from .utterance import UtteranceLookup
+from .utterance import UtteranceIndex
