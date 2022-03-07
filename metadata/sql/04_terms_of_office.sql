@@ -43,9 +43,12 @@ create table sub_office_type (
     [chamber_id] integer null references chamber(chamber_id),
     [identifier] text null
 );
+insert into sub_office_type (sub_office_type_id, office_type_id, [description], chamber_id, identifier)
+    values
+        (0, 0, 'unknown', null, null);
+
 insert into sub_office_type (office_type_id, [description], chamber_id, identifier)
     values
-        (0, 'unknown', null, null),
         (1, 'Ledamot av första kammaren', 1, 'förstakammarledamot'),
         (1, 'Ledamot av andra kammaren', 2, 'andrakammarledamot'),
         (1, 'ledamot av Sveriges riksdag', 3, 'ledamot av Sveriges riksdag'),
