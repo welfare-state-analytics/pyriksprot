@@ -28,13 +28,15 @@ class Codec:
     fx: Callable[[int], str]
     default: str = None
 
+
 null_frame: pd.DataFrame = pd.DataFrame()
+
 
 class Codecs:
     def __init__(self):
         self.chamber: pd.DataFrame = null_frame
         self.gender: pd.DataFrame = null_frame
-        self.government: pd.DataFrame =null_frame
+        self.government: pd.DataFrame = null_frame
         self.office_type: pd.DataFrame = null_frame
         self.party: pd.DataFrame = null_frame
         self.sub_office_type: pd.DataFrame = null_frame
@@ -104,7 +106,8 @@ class Codecs:
 
         for codec in codecs:
             if codec.from_column in df.columns:
-                df[codec.to_column] = df[codec.from_column].apply(codec.fx)
+                if codec.to_column not in df:
+                    df[codec.to_column] = df[codec.from_column].apply(codec.fx)
                 if codec.default is not None:
                     df[codec.to_column] = df[codec.to_column].fillna(codec.default)
             if drop:
