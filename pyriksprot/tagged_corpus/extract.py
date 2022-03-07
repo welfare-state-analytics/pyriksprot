@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import shutil
-from os.path import dirname, isdir
+from os.path import isdir
 from typing import Sequence
 
 from loguru import logger
@@ -96,8 +96,8 @@ def extract_corpus_tags(
     )
     logger.info("loading parliamentary metadata...")
 
-    # FIXME: How to ensure matadata tag is the same as corpus???
-    metadata_index: md.PersonIndex = md.PersonIndex.load(database_filename=metadata_filename)
+    # FIXME: How to ensure metadata tag is the same as corpus??? Add tag to DB?
+    speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     texts: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
@@ -113,7 +113,7 @@ def extract_corpus_tags(
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
-        metadata_index=metadata_index,
+        speaker_service=speaker_service,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )

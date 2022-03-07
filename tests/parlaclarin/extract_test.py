@@ -48,7 +48,7 @@ def test_create_grouping_hashcoder(corpus_index: csi.CorpusSourceIndex, metadata
     assert hashcode is not None
 
 
-def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, metadata_index: md.PersonIndex):
+def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
 
     filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
@@ -58,7 +58,7 @@ def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, metadata_inde
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=corpus_index,
-        metadata_index=metadata_index,
+        speaker_service=speaker_service,
         temporal_key=interface.TemporalKey.Year,
         grouping_keys=[interface.GroupingKey.Party],
     )

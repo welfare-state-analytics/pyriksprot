@@ -107,7 +107,7 @@ class SegmentMerger:
     def __init__(
         self,
         source_index: corpus_index.CorpusSourceIndex,
-        metadata_index: md.PersonIndex,
+        speaker_service: md.SpeakerInfoService,
         temporal_key: interface.TemporalKey,
         grouping_keys: Sequence[interface.GroupingKey],
     ):
@@ -115,12 +115,12 @@ class SegmentMerger:
 
         Args:
             source_index (corpus_index.CorpusSourceIndex): Source item index.
-            metadata_index (metadata_index.PersonIndex): Parliamentary metadata_index.
-            temporal_key (interface.TemporalKey): Temporal key Noe, 'Year', 'Decade', 'Lustrum', 'Custom', 'Protocol', None
+            speaker_service (person.SpeakerInfoService): Parliamentary speaker helper service.
+            temporal_key (interface.TemporalKey): Temporal key None, 'Year', 'Decade', 'Lustrum', 'Custom', 'Protocol', None
             grouping_keys (Sequence[interface.GroupingKey]): Grouping within temporal key
         """
         self.source_index: corpus_index.CorpusSourceIndex = source_index
-        self.metadata_index: md.PersonIndex = metadata_index
+        self.speaker_service: md.SpeakerInfoService = speaker_service
         self.temporal_key: interface.TemporalKey = temporal_key
         self.custom_temporal_specification = None
         self.grouping_keys: Sequence[interface.GroupingKey] = grouping_keys or []
@@ -158,7 +158,7 @@ class SegmentMerger:
                     continue
 
                 temporal_category: str = source_item.temporal_category(self.temporal_key, item)
-                who: interface.IPerson = None if item.who is None else self.metadata_index.persons[item.who]
+                who: md.Person = None if item.who is None else self.person_index[item.who]
 
                 if current_temporal_category != temporal_category:
 
@@ -210,21 +210,19 @@ def props(cls: Type) -> List[str]:
 
 def create_grouping_hashcoder(
     grouping_keys: Sequence[str],
-) -> Callable[[interface.ProtocolSegment, md.IPerson, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[interface.ProtocolSegment, md.SpeakerInfo, corpus_index.CorpusSourceItem], str]:
 
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: Set[str] = set(grouping_keys)
 
-    member_keys: Set[str] = grouping_keys.intersection(
-        {name for name in props(md.IPerson(id='a', role_type='unknown', name='a'))}
-    )
+    speaker_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(md.SpeakerInfo)})
     index_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
     item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(interface.ProtocolSegment)})
 
     def hashcoder(
         item: interface.ProtocolSegment,
-        parla_member: md.ParliamentaryRole,
+        speaker: md.SpeakerInfo,
         source_item: corpus_index.CorpusSourceItem,
     ) -> Tuple[dict, str, str]:
 
@@ -233,8 +231,8 @@ def create_grouping_hashcoder(
         if len(grouping_keys) == 0:
             return (parts, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
 
-        for attr in member_keys:
-            parts[attr] = str(getattr(parla_member, attr, "unknown") or attr)
+        for attr in speaker_keys:
+            parts[attr] = str(getattr(speaker, attr, "unknown") or attr)
 
         for attr in index_keys:
             parts[attr] = str(getattr(source_item, attr, "unknown") or attr)
