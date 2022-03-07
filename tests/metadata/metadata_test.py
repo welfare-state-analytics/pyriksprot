@@ -1,20 +1,21 @@
 import os
 
 import pytest
+from loguru import logger
 
 from pyriksprot import metadata as md
 
-from ..utility import PARLACLARIN_SOURCE_FOLDER, TAGGED_METADATA_DATABASE_NAME, ensure_test_corpora_exist
+from ..utility import create_subset_metadata_to_folder, ensure_test_corpora_exist
 
 jj = os.path.join
 
+FORCE_RUN_SKIPS = os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 
+
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_to_folder():
-
     target_folder: str = './metadata/data/'
-
     md.download_to_folder(tag="v0.4.0", folder=target_folder, force=True)
-
     assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in md.RIKSPROT_METADATA_TABLES)
 
 
@@ -30,16 +31,7 @@ def test_setup_test_corpora():
     ensure_test_corpora_exist()
 
 
-@pytest.mark.skip(reason="Test infrastructure test")
-def test_subset_to_folder():
-    md.subset_to_folder(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
-        source_metadata="metadata/data",
-        target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
-    )
-    md.create_database(
-        TAGGED_METADATA_DATABASE_NAME,
-        branch=None,
-        folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
-        force=True,
-    )
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
+def test_create_subset_metadata_to_folder():
+    logger.info("creating sub-setted test metadata")
+    create_subset_metadata_to_folder()

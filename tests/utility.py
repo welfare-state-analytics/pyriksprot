@@ -34,8 +34,8 @@ TEST_DOCUMENTS = [
 ]
 
 
-def ensure_test_corpora_exist():
-    if not sample_xml_corpus_exists():
+def ensure_test_corpora_exist(force: bool = False):
+    if force or not sample_xml_corpus_exists():
         download_protocols(
             protocols=TEST_DOCUMENTS,
             target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "protocols"),
@@ -43,7 +43,7 @@ def ensure_test_corpora_exist():
             tag=PARLACLARIN_SOURCE_TAG,
         )
 
-    if not sample_metadata_exists():
+    if force or not sample_metadata_exists():
         """Create just a subset of the data"""
         md.subset_to_folder(
             source_folder=PARLACLARIN_SOURCE_FOLDER,
@@ -51,7 +51,7 @@ def ensure_test_corpora_exist():
             target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
         )
 
-    if not isdir(TAGGED_SOURCE_FOLDER):
+    if force or not isdir(TAGGED_SOURCE_FOLDER):
         try:
             setup_sample_tagged_frames_corpus(
                 protocols=TEST_DOCUMENTS,
@@ -102,9 +102,33 @@ def setup_sample_tagged_frames_corpus(
         folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
         force=True,
     )
-    os.makedirs(jj(target_folder, "metadata"), exist_ok=True)
-    #  for filename in [f"{x}.csv" for x in md.RIKSPROT_METADATA_TABLES]:
-    #     shutil.copy(src=jj(PARLACLARIN_SOURCE_FOLDER, "metadata", filename), dst=jj(target_folder, filename))
+    create_subset_metadata_to_folder()
+
+
+def create_subset_metadata_to_folder():
+    md.subset_to_folder(
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_metadata="metadata/data",
+        target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+    )
+    md.create_database(
+        database_filename=TAGGED_METADATA_DATABASE_NAME,
+        branch=None,
+        folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        force=True,
+    )
+    md.generate_utterance_index(
+        corpus_folder=PARLACLARIN_SOURCE_FOLDER,
+        target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+    )
+    md.load_utterance_index(
+        database_filename=TAGGED_METADATA_DATABASE_NAME,
+        source_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+    )
+    md.load_scripts(
+        database_filename=TAGGED_METADATA_DATABASE_NAME,
+        script_folder="./metadata/sql",
+    )
 
 
 TAGGED_CSV_STR = (
