@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from dataclasses import dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields
 from functools import cached_property
 
 import numpy as np
@@ -88,6 +88,7 @@ class Person:
 
 @dataclass
 class SpeakerInfo:
+    speech_id: str
     person_id: str
     name: str
     gender_id: int
@@ -98,11 +99,17 @@ class SpeakerInfo:
     sub_office_type_id: int
     # year_of_birth: int = None
     # year_of_death: int = None
-    # chamber_id: int = None
-    # district: str = None
-    # occupation: str = None
-    # title: str = None
-    property_bag: dict = None
+    # district_id: int = None
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    def to_tuple(self) -> tuple:
+        return [getattr(self, name) for name in self.columns]
+
+    @cached_property
+    def columns(self) -> list[str]:
+        return [f.name for f in fields(self)]
 
 
 def swap_rows(df: pd.DataFrame, i: int, j: int):
@@ -280,17 +287,19 @@ class SpeakerInfoService:
     def person_index(self) -> PersonIndex:
         return self.kwargs.get('person_index') or PersonIndex(self.database_filename).load()
 
-    def get_speaker_info(self, *, u_id: str, protocol_id: int = None, person_id: str = None) -> dict[str, SpeakerInfo]:
+    def get_speaker_info(self, *, u_id: str, person_id: str = None, year: int = None) -> dict[str, SpeakerInfo]:
 
-        if person_id is None or protocol_id is None:
-            uttr: pd.Series = self.utterance_index.utterances.loc[u_id]
-            person_id = uttr.person_id
-            protocol_id = uttr.document_id
+        if person_id is None or year is None:
+            try:
+                uttr: pd.Series = self.utterance_index.utterances.loc[u_id]
+                person_id = uttr.person_id
+                year: int = self.utterance_index.protocol(uttr.document_id).year
+            except Exception as ex:
+                logger.info(f"{ex}: {u_id}")
 
         person = self.person_index[person_id]
         gender_id: int = person.gender_id
         party_id: int = person.party_id
-        year: int = self.utterance_index.protocol(protocol_id).year
         if person.is_unknown:
             gender_id = gender_id or self.utterance_index.unknown_gender_lookup.get(u_id, 0)
             party_id = party_id or self.utterance_index.unknown_party_lookup.get(u_id, 0)
@@ -299,6 +308,7 @@ class SpeakerInfoService:
 
         term_of_office: TermOfOffice = person.term_of_office_at(year)
         speaker_info: SpeakerInfo = SpeakerInfo(
+            speech_id=u_id,
             person_id=person.person_id,
             name=person.name,
             gender_id=gender_id,
@@ -309,3 +319,12 @@ class SpeakerInfoService:
             end_year=term_of_office.end_year,
         )
         return speaker_info
+
+    def store(self, target_filename: str, speakers: list[SpeakerInfo]) -> None:
+        speaker_infos: pd.DataFrame = pd.DataFrame(data=[s.to_dict() for s in speakers])
+        speaker_infos.to_csv(
+            mdu.replace_extension(target_filename, "zip"),
+            sep='\t',
+            compression=dict(method='zip', archive_name="speaker_index.csv"),
+            header=True,
+        )
