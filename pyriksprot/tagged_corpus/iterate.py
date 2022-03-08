@@ -4,31 +4,34 @@ from typing import Iterable, List, Tuple
 
 import pandas as pd
 
-from ..interface import Protocol, ProtocolSegment, ProtocolSegmentIterator
+from .. import segment
 from . import persist
 
 
-def multiprocessing_load(args) -> Iterable[ProtocolSegment]:
+def multiprocessing_load(args) -> Iterable[segment.ProtocolSegment]:
 
-    protocol: Protocol = persist.load_protocol(filename=args[0])
+    protocol: segment.Protocol = persist.load_protocol(filename=args[0])
     return (
         []
         if protocol is None
-        else protocol.to_segments(content_type=args[1], segment_level=args[2], segment_skip_size=args[3])
+        else segment.to_segments(
+            protocol=protocol, content_type=args[1], segment_level=args[2], segment_skip_size=args[3]
+        )
     )
 
 
-class ProtocolIterator(ProtocolSegmentIterator):
+class ProtocolIterator(segment.ProtocolSegmentIterator):
     """Reads xml files using Protocol entity and returns a stream of `ProtocolSegment`"""
 
     def load(self, filename: str) -> List[Tuple[str, str, int]]:
 
-        protocol: Protocol = persist.load_protocol(filename=filename)
+        protocol: segment.Protocol = persist.load_protocol(filename=filename)
 
         return (
             []
             if protocol is None
-            else protocol.to_segments(
+            else segment.to_segments(
+                protocol=protocol,
                 content_type=self.content_type,
                 segment_level=self.segment_level,
                 segment_skip_size=self.segment_skip_size,

@@ -6,16 +6,18 @@ import shutil
 import sqlite3
 from contextlib import closing
 from os.path import dirname, isdir, isfile
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from .. import interface
 from ..parlaclarin import parse
-from ..utility import download_url_to_file, probe_filename
+from .utility import download_url_to_file, probe_filename
+
+if TYPE_CHECKING:
+    from .. import interface
 
 jj = os.path.join
 

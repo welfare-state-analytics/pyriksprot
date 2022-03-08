@@ -72,7 +72,7 @@ def extract_corpus_text(
         ([utility.dedent] if dedent else []) + ([create_dehyphen(data_path)] if dehyphen else [])
     )
 
-    segments: iterate.ProtocolSegmentIterator = iterate.XmlUntangleSegmentIterator(
+    segments: iterate.XmlUntangleSegmentIterator = iterate.XmlUntangleSegmentIterator(
         filenames=source_index.paths,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,

@@ -10,10 +10,9 @@ from zipfile import ZipFile
 
 import pandas as pd
 
-from pyriksprot.interface import TemporalKey
-from pyriksprot.tagged_corpus.persist import load_metadata
-
 from . import utility
+from .interface import TemporalKey
+from .tagged_corpus.persist import load_metadata
 
 if TYPE_CHECKING:
     from . import iterate

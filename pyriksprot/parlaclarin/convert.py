@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, List, Union
 from click import echo
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 
-from pyriksprot.interface import MergeSpeechStrategyType
+from pyriksprot import segment
 
 from ..dehyphenation import SwedishDehyphenatorService
 from ..foss.sparv_tokenize import default_tokenize
@@ -78,7 +78,7 @@ def convert_protocol(
     input_filename: str = None,
     output_filename: str = None,
     template_name: str = None,
-    merge_strategy: MergeSpeechStrategyType = MergeSpeechStrategyType.WhoSequence,
+    merge_strategy: segment.MergeSpeechStrategyType = segment.MergeSpeechStrategyType.WhoSequence,
     **dehyphen_cfg,
 ):
     """Convert protocol in `input_filename' using template `template_name`. Store result in `output_filename`.
@@ -94,7 +94,7 @@ def convert_protocol(
 
     if protocol.has_text:
         converter: ProtocolConverter = ProtocolConverter(template_name)
-        speeches: List[interface.Speech] = protocol.to_speeches(merge_strategy=merge_strategy)
+        speeches: List[interface.Speech] = segment.to_speeches(protocol, merge_strategy=merge_strategy)
         content: str = converter.convert(protocol, speeches, strip_paths(input_filename))
 
     if output_filename is not None:

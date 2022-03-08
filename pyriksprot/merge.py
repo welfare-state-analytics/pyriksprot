@@ -8,7 +8,7 @@ from loguru import logger
 
 from . import corpus_index, interface
 from . import metadata as md
-from . import utility
+from . import segment, utility
 
 # pylint: disable=too-many-arguments
 
@@ -28,7 +28,7 @@ class MergedSegmentGroup:
     year: int
     grouping_keys: Sequence[interface.GroupingKey]
     grouping_values: Mapping[str, str | int]
-    category_items: List[interface.ProtocolSegment] = field(default_factory=list)
+    category_items: List[segment.ProtocolSegment] = field(default_factory=list)
     n_tokens: int = 0
 
     """Groups keys values, as a comma separated string"""
@@ -43,7 +43,7 @@ class MergedSegmentGroup:
             return utility.merge_tagged_csv(self.category_items, sep='\n')
         return '\n'.join(self.category_items)
 
-    def add(self, item: interface.ProtocolSegment):
+    def add(self, item: segment.ProtocolSegment):
         self.category_items.append(item.data)
 
     def __repr__(self) -> str:
@@ -106,6 +106,7 @@ class SegmentMerger:
 
     def __init__(
         self,
+        *,
         source_index: corpus_index.CorpusSourceIndex,
         speaker_service: md.SpeakerInfoService,
         temporal_key: interface.TemporalKey,
@@ -127,7 +128,7 @@ class SegmentMerger:
         self.grouping_hashcoder = create_grouping_hashcoder(self.grouping_keys)
 
     def merge(
-        self, iterator: List[interface.ProtocolSegment] | interface.ProtocolSegmentIterator
+        self, iterator: List[segment.ProtocolSegment] | segment.ProtocolSegmentIterator
     ) -> Iterable[Mapping[str, MergedSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
@@ -158,7 +159,14 @@ class SegmentMerger:
                     continue
 
                 temporal_category: str = source_item.temporal_category(self.temporal_key, item)
-                who: md.Person = None if item.who is None else self.person_index[item.who]
+
+                """ Note:
+                    Value of `item.id` depends on aggregation level.
+                    It is u_id for SpeechLevel and UtteranceLevel
+                """
+                speaker: md.SpeakerInfo = self.speaker_service.get_speaker_info(
+                    u_id=item.u_id, person_id=item.who, year=source_item.year
+                )
 
                 if current_temporal_category != temporal_category:
 
@@ -168,7 +176,8 @@ class SegmentMerger:
 
                     current_group, current_temporal_category = {}, temporal_category
 
-                grouping_values, group_str, group_hashcode = self.grouping_hashcoder(item, who, source_item)
+                grouping_values, group_str, group_hashcode = self.grouping_hashcoder(item, speaker, source_item)
+                # FIXME: #14 This fix cannot work. It prevents groupings that exclude `who` added https://github.com/welfare-state-analytics/pyriksprot/commit/8479a7c03458adcc0a0f0d0750cf48e55eec4bb0
                 grouping_values['who'] = item.who
 
                 if group_hashcode not in current_group:
@@ -210,7 +219,7 @@ def props(cls: Type) -> List[str]:
 
 def create_grouping_hashcoder(
     grouping_keys: Sequence[str],
-) -> Callable[[interface.ProtocolSegment, md.SpeakerInfo, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[segment.ProtocolSegment, md.SpeakerInfo, corpus_index.CorpusSourceItem], str]:
 
     """Create a hashcode function for given grouping keys"""
 
@@ -218,10 +227,10 @@ def create_grouping_hashcoder(
 
     speaker_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(md.SpeakerInfo)})
     index_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
-    item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(interface.ProtocolSegment)})
+    item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(segment.ProtocolSegment)})
 
     def hashcoder(
-        item: interface.ProtocolSegment,
+        item: segment.ProtocolSegment,
         speaker: md.SpeakerInfo,
         source_item: corpus_index.CorpusSourceItem,
     ) -> Tuple[dict, str, str]:

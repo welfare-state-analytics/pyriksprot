@@ -4,22 +4,23 @@ from typing import Iterable, List, Tuple
 
 from pyriksprot.utility import deprecated
 
-from ..interface import ProtocolSegment, ProtocolSegmentIterator
+from .. import segment
 from .parse import ProtocolMapper, XmlIterParseProtocol, XmlUntangleProtocol
 
 
-def multiprocessing_xml_load(args) -> Iterable[ProtocolSegment]:
+def multiprocessing_xml_load(args) -> Iterable[segment.ProtocolSegment]:
     """Load protocol from XML. Aggregate text to `segment_level`. Return (name, who, id, text)."""
-    return XmlUntangleProtocol(data=args[0], segment_skip_size=args[3]).to_text(segment_level=args[2])
+    return segment.to_text(protocol=XmlUntangleProtocol(data=args[0], segment_skip_size=args[3]), segment_level=args[2])
 
 
-class XmlUntangleSegmentIterator(ProtocolSegmentIterator):
+class XmlUntangleSegmentIterator(segment.ProtocolSegmentIterator):
     """Iterate ParlaClarin XML files using `untangle` wrapper."""
 
-    def load(self, filename: str) -> Iterable[ProtocolSegment]:
-        """Load protocol from XML. Aggregate text to `segment_level`. Return sequence of ProtocolSegment."""
-        return XmlUntangleProtocol(data=filename, segment_skip_size=self.segment_skip_size).to_text(
-            segment_level=self.segment_level
+    def load(self, filename: str) -> Iterable[segment.ProtocolSegment]:
+        """Load protocol from XML. Aggregate text to `segment_level`. Return sequence of segment.ProtocolSegment."""
+        return segment.to_text(
+            protocol=XmlUntangleProtocol(data=filename, segment_skip_size=self.segment_skip_size),
+            segment_level=self.segment_level,
         )
 
     def map_futures(self, imap, args: List[Tuple[str, str, int]]):
@@ -28,17 +29,21 @@ class XmlUntangleSegmentIterator(ProtocolSegmentIterator):
 
 @deprecated
 def multiprocessing_load(args):
-    return ProtocolMapper.to_protocol(data=args[0]).to_segments(
-        content_type=args[1], segment_level=args[2], segment_skip_size=args[3]
+    return segment.to_segments(
+        protocol=ProtocolMapper.to_protocol(data=args[0]),
+        content_type=args[1],
+        segment_level=args[2],
+        segment_skip_size=args[3],
     )
 
 
 # @deprecated
-class XmlProtocolSegmentIterator(ProtocolSegmentIterator):
-    """Reads xml files using Protocol entity and returns a stream of `ProtocolSegment`"""
+class XmlProtocolSegmentIterator(segment.ProtocolSegmentIterator):
+    """Reads xml files using Protocol entity and returns a stream of `segment.ProtocolSegment`"""
 
-    def load(self, filename: str) -> List[ProtocolSegment]:
-        return ProtocolMapper.to_protocol(data=filename, segment_skip_size=self.segment_skip_size).to_segments(
+    def load(self, filename: str) -> List[segment.ProtocolSegment]:
+        return segment.to_segments(
+            protocol=ProtocolMapper.to_protocol(data=filename, segment_skip_size=self.segment_skip_size),
             content_type=self.content_type,
             segment_level=self.segment_level,
             segment_skip_size=self.segment_skip_size,
@@ -49,19 +54,22 @@ class XmlProtocolSegmentIterator(ProtocolSegmentIterator):
 
 
 @deprecated
-def multiprocessing_xml_iter_load(args) -> Iterable[ProtocolSegment]:
+def multiprocessing_xml_iter_load(args) -> Iterable[segment.ProtocolSegment]:
     """Load protocol from XML. Aggregate text to `segment_level`. Return (name, who, id, text)."""
-    return XmlIterParseProtocol(data=args[0], segment_skip_size=args[3]).to_text(segment_level=args[2])
+    return segment.to_text(
+        protocol=XmlIterParseProtocol(data=args[0], segment_skip_size=args[3]), segment_level=args[2]
+    )
 
 
 # @deprecated
-class XmlSaxSegmentIterator(ProtocolSegmentIterator):
+class XmlSaxSegmentIterator(segment.ProtocolSegmentIterator):
     """Reads xml files and returns a stream of (name, who, id, text, page_number).
     Uses SAX streaming"""
 
-    def load(self, filename: str) -> List[ProtocolSegment]:
-        return XmlIterParseProtocol(data=filename, segment_skip_size=self.segment_skip_size).to_text(
-            segment_level=self.segment_level
+    def load(self, filename: str) -> List[segment.ProtocolSegment]:
+        return segment.to_text(
+            protocol=XmlIterParseProtocol(data=filename, segment_skip_size=self.segment_skip_size),
+            segment_level=self.segment_level,
         )
 
     def map_futures(self, imap, args):

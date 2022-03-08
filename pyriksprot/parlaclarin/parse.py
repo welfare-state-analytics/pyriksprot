@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import abc
 import xml.etree.cElementTree as ET
-from collections import defaultdict
-from typing import Callable, Iterable, List, Union
+from typing import Iterable, List, Union
 
 from loguru import logger
 
-from .. import interface, segment
+from .. import interface
 from ..foss import untangle
 from ..utility import dedent as dedent_text
 from ..utility import deprecated
@@ -57,6 +56,7 @@ class XmlProtocol(abc.ABC):
     def has_text(self) -> bool:
         """Return sequence of XML_Utterances."""
         return any(x.text != '' for x in self.utterances)
+
 
 class XmlUntangleProtocol(XmlProtocol):
     """Wraps the XML representation of a single ParlaClarin document (protocol)"""
