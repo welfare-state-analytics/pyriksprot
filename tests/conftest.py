@@ -6,19 +6,35 @@ import pytest
 from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import
 from loguru import logger
 
-from pyriksprot import corpus_index
+from pyriksprot import corpus_index as csi
 from pyriksprot import metadata as md
 
-from .utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER, ensure_test_corpora_exist
+from .utility import (
+    PARLACLARIN_SOURCE_FOLDER,
+    TAGGED_METADATA_DATABASE_NAME,
+    TAGGED_SOURCE_FOLDER,
+    ensure_test_corpora_exist,
+)
 
 ensure_test_corpora_exist()
 
 
 @pytest.fixture
-def source_index() -> corpus_index.CorpusSourceIndex:
-    return corpus_index.CorpusSourceIndex.load(
+def source_index() -> csi.CorpusSourceIndex:
+    return csi.CorpusSourceIndex.load(
         source_folder=TAGGED_SOURCE_FOLDER, source_pattern='**/prot-*.zip', years=None, skip_empty=True
     )
+
+
+@pytest.fixture
+def xml_source_index() -> csi.CorpusSourceIndex:
+
+    items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
+        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_pattern='**/prot-*.xml',
+        skip_empty=False,
+    )
+    return items
 
 
 @pytest.fixture
