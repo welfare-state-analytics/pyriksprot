@@ -1,6 +1,6 @@
 import click
 
-from pyriksprot import dispatch, interface
+from pyriksprot import dispatch, interface, segment
 from pyriksprot.tagged_corpus import extract
 
 from .utils import option2, update_arguments_from_options_file
@@ -16,6 +16,7 @@ from .utils import option2, update_arguments_from_options_file
 @option2('--target-type')
 @option2('--compress-type')
 @option2('--content-type')
+@option2('--merge-strategy')
 @option2('--multiproc-processes')
 @option2('--skip-lemma')
 @option2('--skip-text')
@@ -30,6 +31,7 @@ def main(
     target_name: str = None,
     target_type: str = None,
     content_type: str = 'tagged_frame',
+    merge_strategy: str = 'chain',
     compress_type: str = 'feather',
     multiproc_processes: int = 1,
     skip_lemma: bool = False,
@@ -41,6 +43,7 @@ def main(
 ):
     arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
     arguments['content_type'] = interface.ContentType(arguments['content_type'])
+    arguments['merge_strategy'] = segment.MergeSpeechStrategyType(arguments['merge_strategy'])
     arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 
     extract.extract_corpus_tags(
@@ -54,33 +57,27 @@ def main(
                 group_keys=None,
                 multiproc_keep_order=False,
                 multiproc_chunksize=10,
-                speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
             ),
         }
     )
 
 
 if __name__ == "__main__":
+    main()
 
-    if True:  # pylint: disable=using-constant-test
-
-        main()
-
-    else:
-        from click.testing import CliRunner
-
-        runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                '/data/westac/riksdagen_corpus_data/tagged_frames',
-                '/data/westac/riksdagen_corpus_data/tagged-speech-corpus.feather',
-                '--target-type',
-                'feather',
-                # '--compression-type',
-                # 'LZMA',
-                '--processes',
-                1,
-            ],
-        )
-        print(result.output)
+    # from click.testing import CliRunner
+    # runner = CliRunner()
+    # result = runner.invoke(
+    #     main,
+    #     [
+    #         '/data/westac/riksdagen_corpus_data/tagged_frames',
+    #         '/data/westac/riksdagen_corpus_data/tagged-speech-corpus.feather',
+    #         '--target-type',
+    #         'feather',
+    #         # '--compression-type',
+    #         # 'LZMA',
+    #         '--processes',
+    #         1,
+    #     ],
+    # )
+    # print(result.output)

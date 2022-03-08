@@ -9,15 +9,17 @@ from tqdm import tqdm
 
 from .. import corpus_index, dispatch, interface, merge
 from .. import metadata as md
+from .. import segment
 from . import iterate
 
 # pylint: disable=too-many-arguments, W0613
 
 
 def extract_corpus_tags(
-    source_folder: str = None,
-    metadata_filename: str = None,
-    target_name: str = None,
+    *,
+    source_folder: str,
+    metadata_filename: str,
+    target_name: str,
     content_type: interface.ContentType = interface.ContentType.TaggedFrame,
     target_type: dispatch.TargetTypeKey = None,
     compress_type: dispatch.CompressType = dispatch.CompressType.Lzma,
@@ -29,7 +31,7 @@ def extract_corpus_tags(
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
-    speech_merge_strategy: interface.MergeSpeechStrategyType = 'who_sequence',
+    speech_merge_strategy: segment.MergeSpeechStrategyType = 'chain',
     force: bool = False,
     skip_lemma: bool = False,
     skip_text: bool = False,
@@ -99,7 +101,7 @@ def extract_corpus_tags(
     # FIXME: How to ensure metadata tag is the same as corpus??? Add tag to DB?
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
-    texts: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    texts: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
         segment_level=segment_level,
