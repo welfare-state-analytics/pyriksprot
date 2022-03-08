@@ -88,6 +88,7 @@ def test_extract_speeches(target_type: str):
 
     tagged_corpus.extract_corpus_tags(
         source_folder=TAGGED_SOURCE_FOLDER,
+        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         content_type=interface.ContentType.TaggedFrame,
         target_type=target_type,
@@ -100,7 +101,7 @@ def test_extract_speeches(target_type: str):
         multiproc_keep_order=None,
         multiproc_processes=1,
         multiproc_chunksize=100,
-        speech_merge_strategy='who_sequence',
+        speech_merge_strategy='chain',
         force=False,
         skip_lemma=False,
         skip_text=True,

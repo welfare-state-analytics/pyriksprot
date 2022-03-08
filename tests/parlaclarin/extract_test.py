@@ -3,61 +3,51 @@ import os
 import uuid
 from typing import Iterable, List, Mapping
 
-import pytest
-
 from pyriksprot import corpus_index as csi
 from pyriksprot import dispatch, interface, merge
 from pyriksprot import metadata as md
-from pyriksprot import parlaclarin
+from pyriksprot import parlaclarin, segment
 
 from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
 
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture
-def source_index() -> csi.CorpusSourceIndex:
-
-    items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
-        source_pattern='**/prot-*.xml',
-        skip_empty=False,
-    )
-    return items
-
-
-def test_create_grouping_hashcoder(corpus_index: csi.CorpusSourceIndex, metadata_index: md.PersonIndex):
+def test_create_grouping_hashcoder(source_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
 
     attributes = [interface.SegmentLevel.Who, interface.GroupingKey.Gender]
     hashcoder = merge.create_grouping_hashcoder(attributes)
 
     assert callable(hashcoder)
 
-    item: interface.ProtocolSegment = interface.ProtocolSegment(
+    item: segment.ProtocolSegment = segment.ProtocolSegment(
         protocol_name="apa",
         content_type=interface.ContentType.TaggedFrame,
+        segment_level=interface.SegmentLevel.Speech,
         id="a",
+        u_id="a",
         name="apa",
         page_number="0",
         data="hej",
-        who="alexis_bjorkman_7f7c23",
+        who="Q5715273",
         year=1955,
     )
-    hashcode = hashcoder(item, metadata_index.persons['alexis_bjorkman_7f7c23'], corpus_index)
+    speaker: md.SpeakerInfo = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
+    hashcode = hashcoder(item, speaker, source_index)
 
     assert hashcode is not None
 
 
-def test_segment_merger_merge(corpus_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
+def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
 
     filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
-    texts: Iterable[interface.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
+    texts: Iterable[segment.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=0, multiproc_processes=None
     )
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
-        source_index=corpus_index,
+        source_index=xml_source_index,
         speaker_service=speaker_service,
         temporal_key=interface.TemporalKey.Year,
         grouping_keys=[interface.GroupingKey.Party],

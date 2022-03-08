@@ -8,7 +8,7 @@ import pytest
 
 from pyriksprot import corpus_index, dispatch, interface, merge
 from pyriksprot import metadata as md
-from pyriksprot import utility
+from pyriksprot import segment, utility
 from pyriksprot.tagged_corpus import iterate
 
 # pylint: disable=unused-variable, redefined-outer-name
@@ -19,11 +19,11 @@ def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
     speaker_service: md.SpeakerInfoService,
 ) -> Mapping[str, merge.MergedSegmentGroup]:
-    segments: interface.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
-        speech_merge_strategy=interface.MergeSpeechStrategyType.WhoSequence,
+        speech_merge_strategy=segment.MergeSpeechStrategyType.Chain,
         segment_skip_size=1,
     )
     groups = merge.SegmentMerger(

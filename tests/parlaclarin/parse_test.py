@@ -34,7 +34,7 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 )
 def test_parlaclarin_xml_with_no_utterances(filename):
 
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, filename.split('-')[1], filename)
+    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
 
     protocol = parlaclarin.ProtocolMapper.to_protocol(path, segment_skip_size=0)
 

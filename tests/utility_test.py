@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 
-from pyriksprot import metadata
 from pyriksprot.utility import dedent, download_protocols, probe_filename, replace_extension, temporary_file, touch
 
 from .utility import (
@@ -48,13 +47,6 @@ def test_dedent():
     assert dedent("apa\n\napa\n") == "apa\n\napa\n"
     assert dedent("apa\n\n  apa\n") == "apa\n\napa\n"
     assert dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
-
-
-# @pytest.mark.skipif(condition=sample_metadata_exists(), reason="Test data found")
-def test_setup_sample_metadata():
-
-    target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "metadata")
-    metadata.download_to_folder(tag=PARLACLARIN_SOURCE_TAG, folder=target_folder)
 
 
 @pytest.mark.skipif(condition=sample_xml_corpus_exists(), reason="Test data found")

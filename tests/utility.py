@@ -18,7 +18,7 @@ PARLACLARIN_BRANCH = os.environ["CORPUS_REPOSITORY_TAG"]
 PARLACLARIN_SOURCE_TAG = os.environ["CORPUS_REPOSITORY_TAG"]
 PARLACLARIN_SOURCE_FOLDER = jj("tests/test_data/source/parlaclarin", PARLACLARIN_SOURCE_TAG)
 PARLACLARIN_SOURCE_PATTERN = jj(PARLACLARIN_SOURCE_FOLDER, "**/prot-*.xml")
-PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
+PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/parlaclarin/fake'
 
 TAGGED_SOURCE_FOLDER = jj("tests/test_data/source/tagged_frames", PARLACLARIN_SOURCE_TAG)
 TAGGED_METADATA_DATABASE_NAME = jj(TAGGED_SOURCE_FOLDER, "riksprot_metadata.db")
@@ -153,6 +153,8 @@ UTTERANCES_DICTS = [
         'next_id': 'i-2',
         'paragraphs': 'Hej! Detta är en mening.',
         'annotation': TAGGED_CSV_STR,
+        'page_number': '',
+        'speaker_hash': '',
         'checksum': '107d28f2f90d3ccc',
     },
     {
@@ -163,6 +165,8 @@ UTTERANCES_DICTS = [
         'next_id': None,
         'paragraphs': 'Jag heter Ove.@#@Vad heter du?',
         'annotation': TAGGED_CSV_STR,
+        'page_number': '',
+        'speaker_hash': '',
         'checksum': '9c3ee2212f9db2eb',
     },
     {
@@ -173,6 +177,8 @@ UTTERANCES_DICTS = [
         'next_id': None,
         'paragraphs': 'Jag heter Adam.',
         'annotation': TAGGED_CSV_STR,
+        'page_number': '',
+        'speaker_hash': '',
         'checksum': '8a2880190e158a8a',
     },
     {
@@ -183,6 +189,8 @@ UTTERANCES_DICTS = [
         'next_id': None,
         'paragraphs': 'Ove är dum.',
         'annotation': TAGGED_CSV_STR,
+        'page_number': '',
+        'speaker_hash': '',
         'checksum': '13ed9d8bf4098390',
     },
     {
@@ -193,6 +201,8 @@ UTTERANCES_DICTS = [
         'next_id': None,
         'annotation': 'token\tlemma\tpos\txpos\nHej\thej\tIN\tIN\n!\t!\tMID\tMID\nDetta\tdetta\tPN\tPN.NEU.SIN.DEF.SUB+OBJ\när\tvara\tVB\tVB.PRS.AKT\nett\ten\tDT\tDT.NEU.SIN.IND\ntest\ttest\tNN\tNN.NEU.SIN.IND.NOM\n!\t!\tMAD\tMAD\n\'\t\tMAD\tMAD\n"\t\tMAD\tMAD',
         'paragraphs': 'Adam är dum.',
+        'page_number': '',
+        'speaker_hash': '',
         'checksum': 'a2f0635f8991d206',
     },
 ]
