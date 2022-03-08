@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 
 import click
 
-from pyriksprot import dispatch, interface
+from pyriksprot import dispatch, interface, segment
 
 from .. import utility
 
@@ -14,6 +14,7 @@ CLI_LOG_PATH = './logs'
 TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
 COMPRESS_TYPES = dispatch.CompressType.values()
 CONTENT_TYPES = [e.value for e in interface.ContentType]
+MERGE_STRATEGIES = [e.value for e in segment.MergeSpeechStrategyType]
 SEGMENT_LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
 
 
@@ -24,6 +25,7 @@ CLI_OPTIONS = {
     '--dehyphen': dict(default=False, is_flag=True, help='Dehyphen text'),
     '--group-key': dict(help='Partition key(s)', multiple=True, type=click.STRING),
     '--lowercase': dict(default=True, type=click.BOOL, is_flag=True, help='Lowercase tokem/text'),
+    '--merge-strategy': dict(default='chain', type=click.Choice(MERGE_STRATEGIES), help='Merge strategy'),
     '--multiproc-keep-order': dict(default=False, is_flag=True, help='Process is sort order (slower, multiproc)'),
     '--multiproc-processes': dict(default=None, type=click.IntRange(1, 40), help='Number of processes to use'),
     '--segment-level': dict(default='who', type=click.Choice(SEGMENT_LEVELS), help='Protocol iterate level'),
