@@ -3,32 +3,14 @@ from __future__ import annotations
 import abc
 import xml.etree.cElementTree as ET
 from collections import defaultdict
-from dataclasses import asdict, dataclass
 from typing import Callable, Iterable, List, Union
 
 from loguru import logger
 
-from .. import interface
+from .. import interface, segment
 from ..foss import untangle
 from ..utility import dedent as dedent_text
 from ..utility import deprecated
-
-
-@dataclass
-class IterUtterance:
-    page_number: str
-    speaker_hash: str
-    u_id: str
-    who: str
-    prev_id: str
-    next_id: str
-    n: str
-    paragraphs: str
-    delimiter: str = '\n'
-
-    @property
-    def text(self) -> str:
-        return self.delimiter.join(self.paragraphs).strip()
 
 
 class XmlProtocol(abc.ABC):
@@ -38,18 +20,18 @@ class XmlProtocol(abc.ABC):
         self.segment_skip_size: bool = segment_skip_size
         self.delimiter: str = delimiter
 
-        self.iterator: Iterable[IterUtterance] = self.create_iterator()
-        self.utterances: List[IterUtterance] = self.create_utterances()
+        self.iterator: Iterable[interface.Utterance] = self.create_iterator()
+        self.utterances: List[interface.Utterance] = self.create_utterances()
 
         self.date = self.get_date()
         self.name = self.get_name()
 
     @abc.abstractmethod
-    def create_iterator(self) -> Iterable[IterUtterance]:
+    def create_iterator(self) -> Iterable[interface.Utterance]:
         return []
 
     @abc.abstractmethod
-    def create_utterances(self) -> List[IterUtterance]:
+    def create_utterances(self) -> List[interface.Utterance]:
         ...
 
     @abc.abstractmethod
@@ -76,125 +58,6 @@ class XmlProtocol(abc.ABC):
         """Return sequence of XML_Utterances."""
         return any(x.text != '' for x in self.utterances)
 
-    def to_text(
-        self,
-        *,
-        segment_level: interface.SegmentLevel,
-        segment_skip_size: int = 0,
-        preprocess: Callable[[str], str] = None,
-    ) -> Iterable[interface.ProtocolSegment]:
-        """Generate text blocks from `protocol`. Yield each block as a tuple (name, who, id, text, page_number)."""
-        try:
-
-            if segment_level in [interface.SegmentLevel.Protocol, None]:
-
-                items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(
-                        protocol_name=self.name,
-                        content_type=interface.ContentType.Text,
-                        name=self.name,
-                        who=None,
-                        id=self.name,
-                        data=self.text,
-                        page_number='0',
-                        year=self.get_year(),
-                    )
-                ]
-
-            elif segment_level == interface.SegmentLevel.Who:
-
-                texts, page_numbers = defaultdict(list), {}
-                for u in self.utterances:
-                    texts[u.who].append(u.text)
-                    if u.who not in page_numbers:
-                        page_numbers[u.who] = u.page_number
-
-                items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(
-                        protocol_name=self.name,
-                        content_type=interface.ContentType.Text,
-                        name=f'{self.name}_{i+1:03}',
-                        who=who,
-                        id=who,
-                        data='\n'.join(texts[who]),
-                        page_number=str(page_numbers[who]),
-                        year=self.get_year(),
-                    )
-                    for i, who in enumerate(texts)
-                ]
-
-            elif segment_level == interface.SegmentLevel.Speech:
-                texts, who, page_numbers = defaultdict(list), {}, {}
-                for u in self.utterances:
-                    texts[u.n].append(u.text)
-                    who[u.n] = u.who
-                    if u.n not in page_numbers:
-                        page_numbers[u.n] = u.page_number
-
-                items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(
-                        protocol_name=self.name,
-                        content_type=interface.ContentType.Text,
-                        name=f'{self.name}_{i+1:03}',
-                        who=who[n],
-                        id=n,
-                        data='\n'.join(texts[n]),
-                        page_number=str(page_numbers[n]),
-                        year=self.get_year(),
-                    )
-                    for i, n in enumerate(texts)
-                ]
-
-            elif segment_level == interface.SegmentLevel.Utterance:
-
-                items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(
-                        protocol_name=self.name,
-                        content_type=interface.ContentType.Text,
-                        name=f'{self.name}_{i+1:03}',
-                        who=u.who,
-                        id=u.u_id,
-                        data=u.text,
-                        page_number=str(u.page_number),
-                        year=self.get_year(),
-                    )
-                    for i, u in enumerate(self.utterances)
-                ]
-
-            elif segment_level == interface.SegmentLevel.Paragraph:
-
-                items: Iterable[interface.ProtocolSegment] = [
-                    interface.ProtocolSegment(
-                        protocol_name=self.name,
-                        content_type=interface.ContentType.Text,
-                        name=f'{self.name}_{j+1:03}_{i+1:03}',
-                        who=u.who,
-                        id=f"{u.u_id}@{i}",
-                        data=p,
-                        page_number=str(u.page_number),
-                        year=self.get_year(),
-                    )
-                    for j, u in enumerate(self.utterances)
-                    for i, p in enumerate(u.paragraphs)
-                ]
-
-            else:
-                raise ValueError(f"undefined segment level {segment_level}")
-
-            if preprocess is not None:
-                for item in items:
-                    item.text = preprocess(item.text)
-
-            if segment_skip_size > 0:
-
-                items = [item for item in items if len(item.text) > segment_skip_size]
-
-            return items
-
-        except Exception as ex:
-            raise ex
-
-
 class XmlUntangleProtocol(XmlProtocol):
     """Wraps the XML representation of a single ParlaClarin document (protocol)"""
 
@@ -214,11 +77,11 @@ class XmlUntangleProtocol(XmlProtocol):
 
         super().__init__(data, segment_skip_size, delimiter)
 
-    def create_iterator(self) -> Iterable[IterUtterance]:
+    def create_iterator(self) -> Iterable[interface.Utterance]:
         return []
 
-    def create_utterances(self) -> List[IterUtterance]:
-        utterances: List[IterUtterance] = []
+    def create_utterances(self) -> List[interface.Utterance]:
+        utterances: List[interface.Utterance] = []
         page_number: str = None
 
         parent: untangle.Element = self.get_content_root()
@@ -235,9 +98,7 @@ class XmlUntangleProtocol(XmlProtocol):
                     speaker_hash = child["n"]
             elif child.name == 'u':
                 utterances.append(
-                    UtteranceMapper.create(
-                        element=child, page_number=page_number, speaker_hash=speaker_hash, delimiter=self.delimiter
-                    )
+                    UtteranceMapper.create(element=child, page_number=page_number, speaker_hash=speaker_hash)
                 )
             else:
                 speaker_hash = None
@@ -275,18 +136,16 @@ class UtteranceMapper:
         page_number: str,
         speaker_hash: str,
         dedent: bool = True,
-        delimiter: str = '\n',
-    ) -> IterUtterance:
-        utterance: IterUtterance = IterUtterance(
-            page_number=page_number,
-            speaker_hash=speaker_hash,
+    ) -> interface.Utterance:
+        utterance: interface.Utterance = interface.Utterance(
             u_id=element.get_attribute('xml:id'),
             who=element.get_attribute('who') or "undefined",
+            page_number=page_number,
             prev_id=element.get_attribute('prev'),
             next_id=element.get_attribute('next'),
-            n=element.get_attribute('n'),
             paragraphs=UtteranceMapper.to_paragraphs(element, dedent),
-            delimiter=delimiter,
+            speaker_hash=speaker_hash,
+            n=element.get_attribute('n'),
         )
         return utterance
 
@@ -312,7 +171,7 @@ class ProtocolMapper:
         )
 
         protocol: interface.Protocol = interface.Protocol(
-            utterances=[interface.Utterance(**asdict(u)) for u in xml_protocol.utterances],
+            utterances=xml_protocol.utterances,
             date=xml_protocol.date,
             name=xml_protocol.name,
         )
@@ -324,10 +183,10 @@ class ProtocolMapper:
 class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
     """Load ParlaClarin XML file using SAX parsing."""
 
-    def create_iterator(self) -> Iterable[IterUtterance]:
+    def create_iterator(self) -> Iterable[interface.Utterance]:
         return XmlIterParseProtocol.XmlIterParser(self.data)
 
-    def create_utterances(self) -> List[IterUtterance]:
+    def create_utterances(self) -> List[interface.Utterance]:
         return list(self.iterator)
 
     def get_date(self) -> str:
@@ -352,7 +211,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
         def __next__(self):
             return next(self.iterator)
 
-        def create_iterator(self) -> Iterable[IterUtterance]:
+        def create_iterator(self) -> Iterable[interface.Utterance]:
 
             context = ET.iterparse(self.filename, events=("start", "end"))
 
@@ -383,7 +242,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
 
                     elif tag == "u":
                         is_preface = False
-                        current_utterance: IterUtterance = IterUtterance(
+                        current_utterance: interface.Utterance = interface.Utterance(
                             page_number=current_page,
                             speaker_hash=speaker_hash,
                             u_id=elem.attrib.get('{http://www.w3.org/XML/1998/namespace}id'),
