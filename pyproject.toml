@@ -135,6 +135,8 @@ exclude = [
     "tmp",
     "tests/test_data",
     "tests/output",
+    "metadata",
+    "profile-reports",
 ]
 reportMissingImports = true
 reportMissingTypeStubs = false
@@ -143,4 +145,4 @@ reportUntypedClassDecorator = true
 reportOptionalSubscript = false
 reportOptionalMemberAccess = false
 reportOptionalCall = false
-pythonVersion = "3.8"
+pythonVersion = "3.9"
