@@ -9,6 +9,13 @@ with minister_years as (
    on years.year between start_year and start_year
 ;
 
+select speaker_hash
+from utterances
+group by speaker_hash
+having count(distinct person_id) > 1;
+select *
+from unknown_utterance_party
+join unknown_utterance_party using u_id;
 /* Check for gaps in governments */
 select g1.*, case when g2.start < g1.[end] then 'overlap' when g2.start > g1.[end] then 'gap' else 'ok' end as ok
 from _government g1
@@ -16,72 +23,29 @@ join _government g2
   on g2.government_id = g1.government_id + 1
 ;
 
-with persons_with_many_partys as (
-    select person_id
-    from person_party
-    -- join utterances using (hash)
-    group by person_id
-    having count(distinct party_id) > 1
-)
-    select distinct person_party.person_id, party_id, null, null
-    from person_party
-    left join persons_with_many_partys using (person_id)
-    where persons_with_many_partys.person_id  is null
---  2959
+select person_id, party_id, min(ifnull(start_year,0)), max(ifnull(end_year,9999))
+from person_multiple_party
+group by person_id, party_id
 ;
-select count(*) from persons_of_interest
--- 3170
-;
-with persons_with_many_partys as (
-    select person_id, group_concat(distinct party.party_abbrev) as partys
-    from person_party
-    join party using (party_id)
-    group by person_id
-    having count(distinct party_id) > 1
-)
-    select persons_of_interest.person_id,
-        party.party_abbrev,
-        min(persons_of_interest.name) as name,
-        min(person_party.start_year) as start_year,
-        max(person_party.end_year) as end_year
-    from person_party
-    join party using (party_id)
-    join persons_of_interest using (person_id)
-    join persons_with_many_partys using (person_id)
---    where not (start_year is null or end_year is null)
-    group by person_id, party_abbrev;
-    -- UNION
-    select persons_of_interest.person_id,
-        party.party_abbrev,
-        persons_of_interest.name,
-        person_party.start_year,
-        person_party.end_year
-    from person_party
-    join party using (party_id)
-    join persons_of_interest using (person_id)
-    join persons_with_many_partys using (person_id)
-    --where (start_year is null or end_year is null)
-    ;
+select *
+from person_multiple_party
+where (start_year is null) != (end_year is null);
 --  2959
 select *
 from _member_of_parliament
 where [start] = [end];
 
-
 select *
 from person_party
-join persons_with_many_partys using (person_id)
+join person_multiple_party using (person_id)
 join years
     on years.year between person_party.start_year and person_party.end_year;
-
-
 
 select *
 from person_party
 join years
   on years.year between person_party.start_year and person_party.end_year;
 
-create index idx_utterances_speaker_hash on utterances(speaker_hash);
 select
     utterances.*,
     cast(strftime('%Y',date) as integer) as year
@@ -92,3 +56,24 @@ where person_id = 'Q4953847'
 limit 10
 ;
 
+select *
+from persons_of_interest
+where person_id = 'unknown'
+limit 10
+;
+
+select person_id, year, party_id, count(*), min(year), max(year)
+from person_yearly_party
+group by  person_id, year, party_id;
+
+    select person_id, min([year]), max([year])
+    from utterances
+    join protocols using (document_id)
+    join persons_of_interest using (person_id)
+    group by person_id;
+
+
+    select distinct person_id, [year]
+    from utterances
+    join protocols using (document_id)
+    join persons_of_interest using (person_id)
