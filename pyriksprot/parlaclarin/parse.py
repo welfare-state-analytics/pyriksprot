@@ -88,7 +88,7 @@ class XmlUntangleProtocol(XmlProtocol):
         if parent is None:
             return utterances
 
-        speaker_hash: str = None
+        speaker_hash: str = ''
 
         for child in parent.children:
             if child.name == 'pb':
@@ -100,8 +100,8 @@ class XmlUntangleProtocol(XmlProtocol):
                 utterances.append(
                     UtteranceMapper.create(element=child, page_number=page_number, speaker_hash=speaker_hash)
                 )
-            else:
-                speaker_hash = None
+            # else:
+            #     speaker_hash = None
         return utterances
 
     def get_date(self) -> str:
@@ -218,7 +218,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
             context = iter(context)
             current_page: int = 0
             current_utterance: dict = None
-            speaker_hash: str = None
+            speaker_hash: str = ''
             is_preface: bool = False
 
             for event, elem in context:
@@ -252,7 +252,7 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
                             n=elem.attrib.get('n'),
                             paragraphs=[],
                         )
-                        speaker_hash = None
+                        # speaker_hash = None
                     elif tag == "seg" and value is not None:
                         value = (dedent_text(value) if self.dedent else value).strip()
                         if value:
@@ -261,8 +261,8 @@ class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
                     elif tag == 'div' and elem.attrib.get('type') == 'preface':
                         is_preface = True
 
-                    else:
-                        speaker_hash = None
+                    # else:
+                    #     speaker_hash = None
 
                 elif event == 'end':
 
