@@ -140,7 +140,7 @@ def test_protocol_preprocess():
         ),
         (
             segment.MergeSpeechByChain,
-            segment.MergeSpeechStrategyType.Chain,
+            segment.MergeSpeechStrategyType.chain,
             4,
             [{'A'}, {'B'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-4', 'i-5'],
@@ -153,7 +153,7 @@ def test_protocol_preprocess():
         ),
         (
             segment.MergeSpeechByWhoSequence,
-            segment.MergeSpeechStrategyType.WhoSequence,
+            segment.MergeSpeechStrategyType.who_sequence,
             3,
             [{'A'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-5'],
@@ -172,7 +172,7 @@ def test_merge_speech_by_strategy(
     protocol: interface.Protocol = interface.Protocol(date="1950", name="prot-1958-fake", utterances=utterances)
     for speeches in [
         cls().speeches(protocol=protocol, segment_skip_size=0),
-        segment.to_speeches(protocol, merge_strategy=strategy, segment_skip_size=0),
+        segment.to_speeches(protocol=protocol, merge_strategy=strategy, segment_skip_size=0),
     ]:
 
         assert len(speeches) == expected_count
@@ -254,15 +254,17 @@ def test_speech_annotation():
 @pytest.mark.parametrize(
     'filename, speech_count, non_empty_speech_count, strategy',
     [
-        ("prot-1933--fk--5.xml", 2, 2, segment.MergeSpeechStrategyType.Chain),
+        ("prot-1933--fk--5.xml", 1, 1, segment.MergeSpeechStrategyType.chain),
         # ("prot-1933--fk--5.xml", 1, 1, segment.MergeSpeechStrategyType.Who),
         # ("prot-1933--fk--5.xml", 1, 1, segment.MergeSpeechStrategyType.WhoSequence),
-        ("prot-1955--ak--22.xml", 196, 196, segment.MergeSpeechStrategyType.Chain),
+        ("prot-1955--ak--22.xml", 147, 147, segment.MergeSpeechStrategyType.chain),
         # ("prot-1955--ak--22.xml", 53, 53, segment.MergeSpeechStrategyType.Who),
         # ("prot-1955--ak--22.xml", 149, 149, segment.MergeSpeechStrategyType.WhoSequence),
-        ('prot-199192--127.xml', 224, 224, segment.MergeSpeechStrategyType.Chain),
-        ('prot-199192--127.xml', 49, 49, segment.MergeSpeechStrategyType.Who),
-        ('prot-199192--127.xml', 208, 208, segment.MergeSpeechStrategyType.WhoSequence),
+        ('prot-199192--127.xml', 222, 222, segment.MergeSpeechStrategyType.chain),
+        ('prot-199192--127.xml', 49, 49, segment.MergeSpeechStrategyType.who),
+        ('prot-199192--127.xml', 208, 208, segment.MergeSpeechStrategyType.who_sequence),
+        ('prot-199192--127.xml', 208, 208, segment.MergeSpeechStrategyType.who_speaker_hash_sequence),
+        # ('prot-199192--127.xml', 208, 208, segment.MergeSpeechStrategyType.speaker_hash_sequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(
@@ -274,10 +276,10 @@ def test_protocol_to_speeches_with_different_strategies(
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path)
 
-    speeches = segment.to_speeches(protocol, merge_strategy=strategy, segment_skip_size=0)
+    speeches = segment.to_speeches(protocol=protocol, merge_strategy=strategy, segment_skip_size=0)
     assert len(speeches) == speech_count, "speech count"
 
-    speeches = segment.to_speeches(protocol, merge_strategy=strategy, segment_skip_size=1)
+    speeches = segment.to_speeches(protocol=protocol, merge_strategy=strategy, segment_skip_size=1)
     assert len(speeches) == non_empty_speech_count
 
     assert all(x.text != "" for x in speeches)
@@ -285,10 +287,10 @@ def test_protocol_to_speeches_with_different_strategies(
     assert protocol.date is not None
     assert protocol.has_text == any(x.text != "" for x in speeches)
 
-    speeches = segment.to_speeches(protocol, merge_strategy=strategy, segment_skip_size=3)
+    speeches = segment.to_speeches(protocol=protocol, merge_strategy=strategy, segment_skip_size=3)
     assert all(len(x.text) >= 3 for x in speeches)
 
-    speeches = segment.to_speeches(protocol, merge_strategy=strategy, segment_skip_size=100)
+    speeches = segment.to_speeches(protocol=protocol, merge_strategy=strategy, segment_skip_size=100)
     assert all(len(x.text) >= 100 for x in speeches)
 
 
@@ -304,7 +306,7 @@ def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
     data = untangle.parse(path)
 
     protocol = parlaclarin.ProtocolMapper.to_protocol(data, segment_skip_size=0)
-    speeches = segment.to_speeches(protocol, merge_strategy=segment.MergeSpeechStrategyType.Chain)
+    speeches = segment.to_speeches(protocol=protocol, merge_strategy=segment.MergeSpeechStrategyType.chain)
     assert len(speeches) != expected_speech_count, "speech length"
 
 
@@ -377,19 +379,39 @@ def test_load_protocols_from_folder():
     assert len(protocols) == 5
 
 
-def test_protocol_to_items():
+@pytest.mark.parametrize(
+    'protocol_name,merge_strategy,expected_utterance_count,expected_speech_count',
+    [
+        ('prot-199192--127', 'who', 0, 0),
+        ('prot-199192--127', 'who_sequence', 0, 0),
+        ('prot-199192--127', 'who_speaker_hash_sequence', 0, 0),
+        ('prot-199192--127', 'chain', 0, 0),
+    ],
+)
+def test_protocol_to_items(
+    protocol_name: str, merge_strategy: str, expected_utterance_count: int, expected_speech_count: int
+):
 
-    filename: str = jj(TAGGED_SOURCE_FOLDER, 'prot-199192--127.zip')
+    filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
 
     assert protocol is not None
-    assert len(protocol.utterances) == 274
+    assert len(protocol.utterances) == expected_utterance_count
+
+    utterances: pd.DataFrame = pd.DataFrame(
+        data=[(x.u_id, x.who, x.next_id, x.prev_id, x.speaker_hash) for x in protocol.utterances],
+        columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_hash'],
+    )
 
     items = segment.to_segments(
-        protocol=protocol, content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who
+        protocol=protocol,
+        content_type=interface.ContentType.Text,
+        segment_level=interface.SegmentLevel.Who,
+        merge_strategy=merge_strategy,
     )
     assert len(items) == len(set(d.who for d in protocol.utterances))
+    assert len(protocol.utterances) == expected_speech_count
 
 
 def test_protocols_to_items():

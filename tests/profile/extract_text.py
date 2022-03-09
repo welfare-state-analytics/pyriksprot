@@ -8,7 +8,7 @@ def main():
         'target_name': '.',
         'segment_level': interface.SegmentLevel.Who,
         'temporal_key': interface.TemporalKey.Year,
-        'group_keys': (interface.GroupingKey.Party, interface.GroupingKey.Gender, interface.GroupingKey.Who),
+        'group_keys': (interface.GroupingKey.party_id, interface.GroupingKey.gender_id, interface.GroupingKey.who),
         'years': '1920',
         'segment_skip_size': 1,
         'multiproc_keep_order': False,

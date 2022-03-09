@@ -1,7 +1,9 @@
 import glob
 import os
 import uuid
-from typing import Iterable, List, Mapping
+from typing import Iterable
+
+import pytest
 
 from pyriksprot import corpus_index as csi
 from pyriksprot import dispatch, interface, merge
@@ -10,37 +12,75 @@ from pyriksprot import parlaclarin, segment
 
 from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
 
-# pylint: disable=redefined-outer-name
 
-
-def test_create_grouping_hashcoder(source_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
-
-    attributes = [interface.SegmentLevel.Who, interface.GroupingKey.Gender]
-    hashcoder = merge.create_grouping_hashcoder(attributes)
-
-    assert callable(hashcoder)
-
+def test_create_grouping_hashcoder():
+    protocol_name: str = "prot-1955--ak--22"
+    person_id: str = "Q5715273"
+    u_id: str = "d68df3cd45d2eec6-0"
     item: segment.ProtocolSegment = segment.ProtocolSegment(
-        protocol_name="apa",
+        protocol_name=protocol_name,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
-        id="a",
-        u_id="a",
-        name="apa",
+        id=u_id,
+        u_id=u_id,
+        name=u_id,
         page_number="0",
         data="hej",
-        who="Q5715273",
+        who=person_id,
         year=1955,
     )
-    speaker: md.SpeakerInfo = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
-    hashcode = hashcoder(item, speaker, source_index)
+    # source_item = source_index.lookup.get("prot-1955--ak--22")
+    source_item: csi.CorpusSourceItem = csi.CorpusSourceItem(
+        path='tests/test_data/source/tagged_frames/v0.4.0/prot-1955--ak--22.zip',
+        filename='prot-1955--ak--22.zip',
+        name='prot-1955--ak--22',
+        subfolder='v0.4.0',
+        year=1955,
+        metadata={
+            'name': 'prot-1955--ak--22',
+            'date': '1955-05-20',
+            'checksum': '560f443658031647fbe1d3f88cdd60b515b1dbba',
+        },
+        is_empty=False,
+    )
+    # speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
+    speaker: md.SpeakerInfo = md.SpeakerInfo(
+        speech_id='d68df3cd45d2eec6-0',
+        person_id='Q5715273',
+        name='Ericsson',
+        gender_id=1,
+        party_id=8,
+        start_year=1937,
+        end_year=1959,
+        office_type_id=1,
+        sub_office_type_id=2,
+    )
+    index_item = None
+    with pytest.raises(TypeError):
+        _ = merge.create_grouping_hashcoder(["dummy_id"])
 
-    assert hashcode is not None
+    hashcoder = merge.create_grouping_hashcoder([])
+    parts, hash_str, hashcode = hashcoder(item, speaker, index_item)
+    assert not parts
+    assert hash_str == item.name
+
+    attributes: list[str] = ["who", "gender_id", "party_id", "office_type_id"]
+    hashcoder = merge.create_grouping_hashcoder(attributes)
+    parts, hash_str, hashcode = hashcoder(item, speaker, source_item)
+
+    assert parts == {
+        'gender_id': str(speaker.gender_id),
+        'office_type_id': str(speaker.office_type_id),
+        'party_id': str(speaker.party_id),
+        'who': item.who,
+    }
+    assert hash_str == '1_1_8_q5715273'
+    assert hashcode == "2bceb45df2c99ce2620a1d7897846618"
 
 
 def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
 
-    filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
+    filenames: list[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
     texts: Iterable[segment.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=0, multiproc_processes=None
@@ -50,16 +90,21 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_s
         source_index=xml_source_index,
         speaker_service=speaker_service,
         temporal_key=interface.TemporalKey.Year,
-        grouping_keys=[interface.GroupingKey.Party],
+        grouping_keys=["gender_id", "party_id"],
     )
 
     assert merger is not None
+    assert merger.grouping_keys == ["gender_id", "party_id"]
 
-    groups: Mapping[str, merge.MergedSegmentGroup] = []
-    for item in merger.merge(texts):
-        groups.append(item)
+    groups: list[dict[str, merge.MergedSegmentGroup]] = [item for item in merger.merge(texts)]
 
     assert len(groups) > 0
+    g: dict[str, merge.MergedSegmentGroup] = groups[0]
+    key = list(g.keys())[0]  # '72e6f6e0f08ca88f02b1480464afd55b'
+    data = g[key]
+    # FIXME: 'who' is added to values (bugfix)
+    assert set(data.grouping_keys) == {'gender_id', 'party_id'}
+    assert set(data.grouping_values.keys()) == {'gender_id', 'party_id', 'who'}
 
 
 def test_extract_corpus_text_yearly_grouped_by_party():
@@ -75,7 +120,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
         segment_level=interface.SegmentLevel.Who,
         years=None,
         temporal_key=interface.TemporalKey.Year,
-        group_keys=[interface.GroupingKey.Party],
+        group_keys=[interface.GroupingKey.party_id],
     )
 
     assert os.path.isfile(target_name)
@@ -95,7 +140,7 @@ def test_extract_corpus_with_no_temporal_key():
         segment_level=interface.SegmentLevel.Who,
         years=None,
         temporal_key=None,
-        group_keys=[interface.GroupingKey.Party],
+        group_keys=[interface.GroupingKey.party_id],
     )
 
     assert os.path.isfile(target_name)
@@ -114,7 +159,7 @@ def test_extract_corpus_with_no_matching_protocols():
         segment_level=interface.SegmentLevel.Who,
         years='1900',
         temporal_key=interface.TemporalKey.Year,
-        group_keys=[interface.GroupingKey.Party],
+        group_keys=[interface.GroupingKey.party_id],
     )
 
     assert os.path.isfile(target_name)
@@ -133,7 +178,7 @@ def test_aggregator_extract_gender_party_no_temporal_key():
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
         temporal_key=None,
-        group_keys=(interface.GroupingKey.Party, interface.GroupingKey.Gender),
+        group_keys=(interface.GroupingKey.party_id, interface.GroupingKey.gender_id),
         years='1955-1965',
         segment_skip_size=1,
         multiproc_keep_order=False,
