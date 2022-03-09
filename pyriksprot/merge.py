@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field, fields
-from typing import Callable, Iterable, List, Mapping, Sequence, Set, Tuple, Type, Union
+from typing import Callable, Iterable, Mapping, Sequence, Tuple, Type, Union
 
 from loguru import logger
 
@@ -28,7 +28,7 @@ class MergedSegmentGroup:
     year: int
     grouping_keys: Sequence[interface.GroupingKey]
     grouping_values: Mapping[str, str | int]
-    category_items: List[segment.ProtocolSegment] = field(default_factory=list)
+    category_items: list[segment.ProtocolSegment] = field(default_factory=list)
     n_tokens: int = 0
 
     """Groups keys values, as a comma separated string"""
@@ -128,14 +128,14 @@ class SegmentMerger:
         self.grouping_hashcoder = create_grouping_hashcoder(self.grouping_keys)
 
     def merge(
-        self, iterator: List[segment.ProtocolSegment] | segment.ProtocolSegmentIterator
+        self, iterator: list[segment.ProtocolSegment] | segment.ProtocolSegmentIterator
     ) -> Iterable[Mapping[str, MergedSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
         try:
             current_temporal_category: str = None
             current_group: Mapping[str, MergedSegmentGroup] = {}
-            grouping_keys: Set[str] = set(self.grouping_keys)
+            grouping_keys: set[str] = set(self.grouping_keys)
 
             # if len(grouping_keys or []) == 0:
             #     raise ValueError("no grouping key specified")
@@ -213,7 +213,7 @@ class SegmentMerger:
         return source_item.year
 
 
-def props(cls: Type) -> List[str]:
+def props(cls: Type) -> list[str]:
     return [i for i in cls.__dict__.keys() if i[:1] != '_']
 
 
@@ -223,32 +223,32 @@ def create_grouping_hashcoder(
 
     """Create a hashcode function for given grouping keys"""
 
-    grouping_keys: Set[str] = set(grouping_keys)
+    grouping_keys: set[str] = set(grouping_keys)
 
-    speaker_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(md.SpeakerInfo)})
-    index_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
-    item_keys: Set[str] = grouping_keys.intersection({f.name for f in fields(segment.ProtocolSegment)})
+    speaker_keys: set[str] = grouping_keys.intersection({f.name for f in fields(md.SpeakerInfo)})
+    item_keys: set[str] = grouping_keys.intersection({f.name for f in fields(segment.ProtocolSegment)})
+    corpus_index_keys: set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
+    item_keys -= speaker_keys
+    corpus_index_keys -= speaker_keys | item_keys
+
+    missing_keys: set[str] = grouping_keys - (speaker_keys | corpus_index_keys | item_keys)
+    if missing_keys:
+        raise TypeError(f"grouping_hashcoder: key(s) {', '.join(missing_keys)} not found (ignored)")
 
     def hashcoder(
         item: segment.ProtocolSegment,
         speaker: md.SpeakerInfo,
         source_item: corpus_index.CorpusSourceItem,
     ) -> Tuple[dict, str, str]:
-
-        parts: Mapping[str, str | int] = {}
-
-        if len(grouping_keys) == 0:
-            return (parts, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
-
-        for attr in speaker_keys:
-            parts[attr] = str(getattr(speaker, attr, "unknown") or attr)
-
-        for attr in index_keys:
-            parts[attr] = str(getattr(source_item, attr, "unknown") or attr)
-
-        for attr in item_keys:
-            parts[attr] = str(getattr(item, attr, "unknown") or attr)
-
+        """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
+        if not grouping_keys:
+            return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
+        assert isinstance(source_item, corpus_index.CorpusSourceItem)
+        parts: dict[str, str | int] = {
+            **{attr: str(getattr(speaker, attr)) for attr in speaker_keys},
+            **{attr: str(getattr(source_item, attr)) for attr in corpus_index_keys},
+            **{attr: str(getattr(item, attr)) for attr in item_keys},
+        }
         hashcode_str = utility.slugify('_'.join(x.lower().replace(' ', '_') for x in parts.values()))
 
         return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
