@@ -34,10 +34,18 @@ class TemporalKey(str, Enum):
 
 class GroupingKey(str, Enum):
     NONE = None
-    Who = 'who'
-    Speech = 'speech'
-    Party = 'party'
-    Gender = 'gender'
+    who = 'who'
+    person_id = 'person_id'
+    pid = 'pid'
+    speech_id = 'speech_id'
+    party_id = 'party_id'
+    gender_id = 'gender_id'
+    office_type_id = 'office_type_id'
+    sub_office_type_id = 'sub_office_type_id'
+
+    # speech = 'speech'
+    # party = 'party'
+    # gender = 'gender'
 
 
 class SegmentLevel(str, Enum):
@@ -95,6 +103,10 @@ class Utterance:
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
         self.page_number: Optional[str] = page_number if isinstance(page_number, str) else ''
         self.speaker_hash: Optional[str] = speaker_hash if isinstance(speaker_hash, str) else ''
+
+    @property
+    def is_unknown(self) -> bool:
+        return self.who == "unknown"
 
     @property
     def document_name(self) -> str:
