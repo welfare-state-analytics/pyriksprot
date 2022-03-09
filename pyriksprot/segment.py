@@ -6,22 +6,35 @@ from dataclasses import dataclass
 from enum import Enum
 from itertools import groupby
 from multiprocessing import get_context
-from typing import Callable, Iterable, Mapping
+from typing import TYPE_CHECKING, Callable, Iterable, Literal, Mapping
 
 from loguru import logger
 
 from .interface import ContentType, Protocol, SegmentLevel, Speech, Utterance
-from .metadata import SpeakerInfo
 from .utility import compress
+
+if TYPE_CHECKING:
+    from .metadata import SpeakerInfo
 
 # pylint: disable=too-many-arguments, no-member
 
 
 class MergeSpeechStrategyType(str, Enum):
-    Who = 'who'
-    WhoSequence = 'who_sequence'
-    Chain = 'chain'
+    who = 'who'
+    who_sequence = 'who_sequence'
+    chain = 'chain'
+    who_speaker_hash_sequence = 'who_speaker_hash_sequence'
+    speaker_hash_sequence = 'speaker_hash_sequence'
+    undefined = 'undefined'
 
+# MergeSpeechStrategyType=Literal[
+#     'who',
+#     'who_sequence',
+#     'who_speaker_hash_sequence',
+#     'speaker_hash_sequence',
+#     'chain',
+#     'undefined',
+# ]
 
 @dataclass
 class ProtocolSegment:
@@ -93,8 +106,109 @@ class ProtocolSegment:
         return self.name
 
 
+def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
+    return [
+        ProtocolSegment(
+            protocol_name=protocol.name,
+            content_type=content_type,
+            segment_level=SegmentLevel.Protocol,
+            year=protocol.get_year(),
+            name=protocol.name,
+            who=None,
+            id=protocol.name,
+            u_id=None,
+            data=protocol.text,
+            page_number='0',
+        )
+    ]
+
+
+def to_speech_segments(
+    *,
+    protocol: Protocol,
+    content_type: ContentType,
+    segment_skip_size: int,
+    merge_strategy: MergeSpeechStrategyType,
+    **_,
+) -> list[ProtocolSegment]:
+    return [
+        ProtocolSegment(
+            protocol_name=protocol.name,
+            content_type=content_type,
+            segment_level=SegmentLevel.Speech,
+            year=protocol.get_year(),
+            name=s.document_name,
+            who=s.who,
+            id=s.speech_id,
+            u_id=s.speech_id,
+            data=s.to_content_str(content_type),
+            page_number=s.page_number,
+        )
+        for s in to_speeches(protocol=protocol, merge_strategy=merge_strategy, segment_skip_size=segment_skip_size)
+    ]
+
+
+def to_who_segments(
+    *, protocol: Protocol, content_type: ContentType, segment_skip_size: int, **_
+) -> list[ProtocolSegment]:
+    return [
+        ProtocolSegment(
+            protocol_name=protocol.name,
+            content_type=content_type,
+            segment_level=SegmentLevel.Who,
+            year=protocol.get_year(),
+            name=s.document_name,
+            who=s.who,
+            id=s.speech_id,
+            u_id=s.speech_id,
+            data=s.to_content_str(content_type),
+            page_number=s.page_number,
+        )
+        for s in to_speeches(
+            protocol=protocol, merge_strategy=MergeSpeechStrategyType.who, segment_skip_size=segment_skip_size
+        )
+    ]
+
+
+def to_utterance_segments(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
+    return [
+        ProtocolSegment(
+            protocol_name=protocol.name,
+            content_type=content_type,
+            segment_level=SegmentLevel.Utterance,
+            year=protocol.get_year(),
+            name=f'{protocol.name}_{i+1:03}',
+            who=u.who,
+            id=u.u_id,
+            u_id=u.u_id,
+            data=u.to_str(content_type),
+            page_number=u.page_number,
+        )
+        for i, u in enumerate(protocol.utterances)
+    ]
+
+
+def to_paragraph_segments(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
+    return [
+        ProtocolSegment(
+            protocol_name=protocol.name,
+            content_type=content_type,
+            segment_level=SegmentLevel.Paragraph,
+            year=protocol.get_year(),
+            name=f'{protocol.name}_{j+1:03}_{i+1:03}',
+            who=u.who,
+            id=f"{u.u_id}@{i}",
+            u_id=u.u_id,
+            data=p,
+            page_number=u.page_number,
+        )
+        for j, u in enumerate(protocol.utterances)
+        for i, p in enumerate(u.paragraphs)
+    ]
+
+
 def to_speeches(
-    protocol: Protocol, merge_strategy: MergeSpeechStrategyType = 'chain', segment_skip_size: int = 1
+    *, protocol: Protocol, merge_strategy: MergeSpeechStrategyType, segment_skip_size: int = 1, **_
 ) -> list[Speech]:
     """Convert utterances into speeches using specified strategy. Return list."""
     speeches: list[Speech] = SpeechMergerFactory.get(merge_strategy).speeches(
@@ -108,6 +222,7 @@ def to_segments(
     protocol: Protocol,
     content_type: ContentType,
     segment_level: SegmentLevel,
+    merge_strategy: MergeSpeechStrategyType,
     segment_skip_size: int = 1,
     preprocess: Callable[[str], str] = None,
 ) -> Iterable[ProtocolSegment]:
@@ -123,16 +238,12 @@ def to_segments(
         Iterable[ProtocolSegment]: [description]
     """
 
-    segments: list[ProtocolSegment] = [
-        ProtocolSegment(
-            protocol_name=protocol.name,
-            content_type=content_type,
-            segment_level=segment_level,
-            year=protocol.get_year(),
-            **d,
-        )
-        for d in _to_segments(protocol, content_type, segment_level, segment_skip_size)
-    ]
+    segments: list[ProtocolSegment] = SEGMENT_FUNCTIONS.get(segment_level)(
+        protocol=protocol,
+        content_type=content_type,
+        segment_skip_size=segment_skip_size,
+        merge_strategy=merge_strategy,
+    )
 
     if preprocess is not None:
         for x in segments:
@@ -144,206 +255,14 @@ def to_segments(
     return segments
 
 
-def _to_segments(
-    protocol: Protocol,
-    content_type: ContentType,
-    segment_level: SegmentLevel,
-    segment_skip_size: int,
-    merge_strategy: MergeSpeechStrategyType = MergeSpeechStrategyType.WhoSequence,
-) -> Iterable[dict]:
-
-    if segment_level in [SegmentLevel.Protocol, None]:
-        return [
-            dict(
-                name=protocol.name,
-                who=None,
-                id=protocol.name,
-                u_id=None,
-                data=protocol.to_content_str(content_type),
-                page_number='0',
-            )
-        ]
-
-    if segment_level == SegmentLevel.Speech:
-        return [
-            dict(
-                name=s.document_name,
-                who=s.who,
-                id=s.speech_id,
-                u_id=s.speech_id,
-                data=s.to_content_str(content_type),
-                page_number=s.page_number,
-            )
-            for s in to_speeches(protocol, merge_strategy=merge_strategy, segment_skip_size=segment_skip_size)
-        ]
-
-    if segment_level == SegmentLevel.Who:
-        return [
-            dict(
-                name=s.document_name,
-                who=s.who,
-                id=s.speech_id,
-                u_id=s.speech_id,
-                data=s.to_content_str(content_type),
-                page_number=s.page_number,
-            )
-            for s in to_speeches(
-                protocol, merge_strategy=MergeSpeechStrategyType.Who, segment_skip_size=segment_skip_size
-            )
-        ]
-
-    if segment_level == SegmentLevel.Utterance:
-        return [
-            dict(
-                name=f'{protocol.name}_{i+1:03}',
-                who=u.who,
-                id=u.u_id,
-                u_id=u.u_id,
-                data=u.to_str(content_type),
-                page_number=u.page_number,
-            )
-            for i, u in enumerate(protocol.utterances)
-        ]
-
-    if segment_level == SegmentLevel.Paragraph:
-        """Only text can be returned for paragraphs"""
-
-        return [
-            dict(
-                name=f'{protocol.name}_{j+1:03}_{i+1:03}',
-                who=u.who,
-                id=f"{u.u_id}@{i}",
-                u_id=u.u_id,
-                data=p,
-                page_number=u.page_number,
-            )
-            for j, u in enumerate(protocol.utterances)
-            for i, p in enumerate(u.paragraphs)
-        ]
-
-    return None
-
-
-# FIXME: merge to_segment/to_text
-def to_text(
-    *,
-    protocol: Protocol,
-    segment_level: SegmentLevel,
-    segment_skip_size: int = 0,
-    preprocess: Callable[[str], str] = None,
-) -> Iterable[ProtocolSegment]:
-    """Generate text blocks from `protocol`. Yield each block as a tuple (name, who, id, text, page_number)."""
-    try:
-
-        if segment_level in [SegmentLevel.Protocol, None]:
-
-            items: Iterable[ProtocolSegment] = [
-                ProtocolSegment(
-                    protocol_name=protocol.name,
-                    content_type=ContentType.Text,
-                    segment_level=SegmentLevel.Protocol,
-                    name=protocol.name,
-                    who=None,
-                    id=protocol.name,
-                    u_id=None,
-                    data=protocol.text,
-                    page_number='0',
-                    year=protocol.get_year(),
-                )
-            ]
-
-        elif segment_level == SegmentLevel.Who:
-
-            who_utterances: dict[str, list[Utterance]] = defaultdict(list)
-            for u in protocol.utterances:
-                who_utterances[u.who].append(u)
-
-            items: Iterable[ProtocolSegment] = [
-                ProtocolSegment(
-                    protocol_name=protocol.name,
-                    content_type=ContentType.Text,
-                    segment_level=SegmentLevel.Who,
-                    name=f'{protocol.name}_{i+1:03}',
-                    who=who_us[0].who,
-                    id=who_us[0].who,
-                    u_id=who_us[0].u_id,
-                    data='\n'.join(u.text for u in who_us),
-                    page_number=str(who_us[0].page_number),
-                    year=protocol.get_year(),
-                )
-                for i, who_us in enumerate(who_utterances.values())
-            ]
-
-        elif segment_level == SegmentLevel.Speech:
-            speech_utterances: list[list[Utterance]] = merge_speech_by_chain(protocol.utterances)
-            items: Iterable[ProtocolSegment] = [
-                ProtocolSegment(
-                    protocol_name=protocol.name,
-                    content_type=ContentType.Text,
-                    segment_level=SegmentLevel.Speech,
-                    name=f'{protocol.name}_{i+1:03}',
-                    who=speech[0].who,
-                    id=speech[0].u_id,
-                    u_id=speech[0].u_id,
-                    data='\n'.join(u.text for u in speech),
-                    page_number=str(speech[0].page_number),
-                    year=protocol.get_year(),
-                )
-                for i, speech in enumerate(speech_utterances)
-            ]
-
-        elif segment_level == SegmentLevel.Utterance:
-
-            items: Iterable[ProtocolSegment] = [
-                ProtocolSegment(
-                    protocol_name=protocol.name,
-                    content_type=ContentType.Text,
-                    segment_level=SegmentLevel.Utterance,
-                    name=f'{protocol.name}_{i+1:03}',
-                    who=u.who,
-                    id=u.u_id,
-                    u_id=u.u_id,
-                    data=u.text,
-                    page_number=str(u.page_number),
-                    year=protocol.get_year(),
-                )
-                for i, u in enumerate(protocol.utterances)
-            ]
-
-        elif segment_level == SegmentLevel.Paragraph:
-
-            items: Iterable[ProtocolSegment] = [
-                ProtocolSegment(
-                    protocol_name=protocol.name,
-                    content_type=ContentType.Text,
-                    segment_level=SegmentLevel.Paragraph,
-                    name=f'{protocol.name}_{j+1:03}_{i+1:03}',
-                    who=u.who,
-                    id=f"{u.u_id}@{i}",
-                    u_id=u.u_id,
-                    data=p,
-                    page_number=str(u.page_number),
-                    year=protocol.get_year(),
-                )
-                for j, u in enumerate(protocol.utterances)
-                for i, p in enumerate(u.paragraphs)
-            ]
-
-        else:
-            raise ValueError(f"undefined segment level {segment_level}")
-
-        if preprocess is not None:
-            for item in items:
-                item.data = preprocess(item.data)
-
-        if segment_skip_size > 0:
-
-            items = [item for item in items if len(item.text) > segment_skip_size]
-
-        return items
-
-    except Exception as ex:
-        raise ex
+SEGMENT_FUNCTIONS: dict = {
+    None: to_protocol_segment,
+    SegmentLevel.Protocol: to_protocol_segment,
+    SegmentLevel.Speech: to_speech_segments,
+    SegmentLevel.Who: to_who_segments,
+    SegmentLevel.Utterance: to_utterance_segments,
+    SegmentLevel.Paragraph: to_paragraph_segments,
+}
 
 
 class ProtocolSegmentIterator(abc.ABC):
@@ -359,7 +278,7 @@ class ProtocolSegmentIterator(abc.ABC):
         multiproc_processes: int = None,
         multiproc_chunksize: int = 100,
         multiproc_keep_order: bool = False,
-        speech_merge_strategy: str = 'chain',
+        merge_strategy: str = 'chain',
         preprocessor: Callable[[str], str] = None,
     ):
         """Split document (protocol) into segments.
@@ -372,7 +291,7 @@ class ProtocolSegmentIterator(abc.ABC):
             multiproc_processes (int, optional): Number of read processes. Defaults to None.
             multiproc_chunksize (int, optional): Multiprocessing multiproc_chunksize. Defaults to 100.
             multiproc_keep_order (bool, optional): Keep doc order. Defaults to False.
-            speech_merge_strategy (str, optional): Speech merge strategy. Defaults to 'chain'.
+            merge_strategy (str, optional): Speech merge strategy. Defaults to 'chain'.
             preprocessor (Callable[[str], str], optional): Preprocess funcion, only used for text. Defaults to None.
         """
         self.filenames: list[str] = sorted(filenames)
@@ -380,7 +299,7 @@ class ProtocolSegmentIterator(abc.ABC):
         self.content_type: ContentType = content_type
         self.segment_level: SegmentLevel = segment_level
         self.segment_skip_size: int = segment_skip_size
-        self.speech_merge_strategy: str = speech_merge_strategy  # FIXME: used??
+        self.merge_strategy: str = merge_strategy  # FIXME: used??
         self.multiproc_processes: int = multiproc_processes or 1
         self.multiproc_chunksize: int = multiproc_chunksize
         self.multiproc_keep_order: bool = multiproc_keep_order
@@ -398,7 +317,7 @@ class ProtocolSegmentIterator(abc.ABC):
         fx = self.preprocessor
         if self.multiproc_processes > 1:
             args: list[tuple[str, str, str, int]] = [
-                (name, self.content_type, self.segment_level, self.segment_skip_size) for name in self.filenames
+                (name, self.content_type, self.segment_level, self.segment_skip_size, self.merge_strategy) for name in self.filenames
             ]
             with get_context("spawn").Pool(processes=self.multiproc_processes) as executor:
                 imap = executor.imap if self.multiproc_keep_order else executor.imap_unordered
@@ -424,10 +343,11 @@ class ProtocolSegmentIterator(abc.ABC):
         ...
 
 
-def merge_speech_by_chain(utterances: list[Utterance]) -> list[list[Utterance]]:
+def group_utterances_by_chain(utterances: list[Utterance]) -> list[list[Utterance]]:
     """Split utterances based on prev/next pointers. Return list of lists."""
     speeches: list[list[Utterance]] = []
-    speech: list[Utterance] = None
+    speech: list[Utterance] = []
+    start_of_speech: bool = None
 
     for _, u in enumerate(utterances or []):
         """Rules:
@@ -436,27 +356,49 @@ def merge_speech_by_chain(utterances: list[Utterance]) -> list[list[Utterance]]:
         - if neither `prev` or `next` are set, then utterance is the entire speech
         - attribs `prev` and `next` are never both set
         """
+
         if bool(u.prev_id) and bool(u.next_id):
             raise ValueError(f"logic error: {u.u_id} has both prev/next attrbutes set")
 
-        part_of_chain: bool = bool(u.prev_id) or bool(u.next_id)
+        is_part_of_chain: bool = bool(u.prev_id) or bool(u.next_id)
+        is_unknown_continuation: bool = (
+            bool(speech) and u.who == "unknown" == speech[-1].who and u.speaker_hash == speech[-1].speaker_hash
+        )
 
-        if bool(u.next_id) or not part_of_chain:
+        start_of_speech: bool = (
+            True
+            if bool(u.next_id)
+            else not is_unknown_continuation
+            if not is_part_of_chain
+            else not bool(speech) and bool(u.prev_id)
+        )
+
+        if start_of_speech:
+
+            if bool(u.prev_id) and not bool(speech):
+                logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
+
             speech = [u]
             speeches.append(speech)
-            continue
 
-        if not bool(speech):
-            logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
-            speech = [u]
-            speeches.append(speech)
-            continue
+        else:
 
-        if speech[-1].u_id != u.prev_id:
-            logger.warning(f"u[{u.u_id}]: current u.prev_id differs from previous u.u_id '{speech[-1].u_id}'")
+            if bool(speech):
 
-        speeches[-1].append(u)
+                if speech[-1].u_id != u.prev_id:
+                    logger.warning(f"u[{u.u_id}]: current u.prev_id differs from previous u.u_id '{speech[-1].u_id}'")
 
+                if speech[-1].who != u.who:
+                    raise ValueError(f"u[{u.u_id}]: current u.who differs from previous u.who '{speech[-1].who}'")
+
+            speech.append(u)
+
+    return speeches
+
+
+def merge_utterances_by_speaker_hash(utterances: list[Utterance]) -> list[list[Utterance]]:
+    """Split utterances based on prev/next pointers. Return list of lists."""
+    speeches: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_hash)]
     return speeches
 
 
@@ -514,14 +456,32 @@ class MergeSpeechByWhoSequence(IMergeSpeechStrategy):
     """Merge sequences with same `who` into a speech """
 
     def split(self, utterances: list[Utterance]) -> list[list[Utterance]]:
-        who_sequences: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.who)]
-        return who_sequences
+        groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.who)]
+        return groups
+
+
+class MergeSpeechBySpeakerHashSequence(IMergeSpeechStrategy):
+    """Merge sequences with same `who` into a speech """
+
+    def split(self, utterances: list[Utterance]) -> list[list[Utterance]]:
+        groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_hash)]
+        return groups
+
+
+class MergeSpeechByWhoSpeakerHashSequence(IMergeSpeechStrategy):
+    """Merge sequences with same `who` into a speech """
+
+    def split(self, utterances: list[Utterance]) -> list[list[Utterance]]:
+        groups: list[list[Utterance]] = [
+            list(g) for _, g in groupby(utterances or [], key=lambda x: f"{x.who}_{x.speaker_hash}")
+        ]
+        return groups
 
 
 class MergeSpeechByChain(IMergeSpeechStrategy):
     def merge(self, protocol: Protocol) -> list[Speech]:
         """Create speeches based on prev/next pointers. Return list."""
-        speech_utterances: list[list[Utterance]] = merge_speech_by_chain(protocol.utterances)
+        speech_utterances: list[list[Utterance]] = group_utterances_by_chain(protocol.utterances)
         speeches: list[Speech] = [
             self.create(protocol, utterances=utterances, speech_index=i + 1)
             for i, utterances in enumerate(speech_utterances)
@@ -539,6 +499,8 @@ class SpeechMergerFactory:
     strategies: Mapping[MergeSpeechStrategyType, IMergeSpeechStrategy] = {
         'who': MergeSpeechByWho(),
         'who_sequence': MergeSpeechByWhoSequence(),
+        'who_speaker_hash_sequence': MergeSpeechByWhoSpeakerHashSequence(),
+        'speaker_hash_sequence': MergeSpeechBySpeakerHashSequence(),
         'chain': MergeSpeechByChain(),
         'undefined': UndefinedMergeSpeech(),
     }
