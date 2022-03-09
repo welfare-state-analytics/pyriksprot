@@ -23,7 +23,7 @@ def tagged_speeches(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
-        speech_merge_strategy=segment.MergeSpeechStrategyType.Chain,
+        merge_strategy=segment.MergeSpeechStrategyType.who_speaker_hash_sequence,
         segment_skip_size=1,
     )
     groups = merge.SegmentMerger(

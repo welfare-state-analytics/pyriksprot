@@ -15,7 +15,11 @@ def multiprocessing_load(args) -> Iterable[segment.ProtocolSegment]:
         []
         if protocol is None
         else segment.to_segments(
-            protocol=protocol, content_type=args[1], segment_level=args[2], segment_skip_size=args[3]
+            protocol=protocol,
+            content_type=args[1],
+            segment_level=args[2],
+            segment_skip_size=args[3],
+            merge_strategy=args[4],
         )
     )
 
@@ -35,6 +39,7 @@ class ProtocolIterator(segment.ProtocolSegmentIterator):
                 content_type=self.content_type,
                 segment_level=self.segment_level,
                 segment_skip_size=self.segment_skip_size,
+                merge_strategy=self.merge_strategy
             )
         )
 

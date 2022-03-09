@@ -15,7 +15,7 @@ def main(target_type: dispatch.TargetTypeKey, source_folder: str):
         content_type=interface.ContentType.TaggedFrame,
         compress_type=dispatch.CompressType.Feather,
         segment_level=interface.SegmentLevel.Speech,
-        speech_merge_strategy=segment.MergeSpeechStrategyType.Chain,
+        merge_strategy=segment.MergeSpeechStrategyType.chain,
         temporal_key=None,
         group_keys=None,
         years=None,

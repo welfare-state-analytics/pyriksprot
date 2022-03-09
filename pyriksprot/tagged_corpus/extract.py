@@ -31,7 +31,7 @@ def extract_corpus_tags(
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
-    speech_merge_strategy: segment.MergeSpeechStrategyType = 'chain',
+    merge_strategy: segment.MergeSpeechStrategyType = 'chain',
     force: bool = False,
     skip_lemma: bool = False,
     skip_text: bool = False,
@@ -64,7 +64,7 @@ def extract_corpus_tags(
         skip_text (bool, optional): Defaults to False
         lowercase (bool, optional): Defaults to False
     """
-    logger.info("creating index over corpus source item...")
+    logger.info("extracting tagged corpus...")
 
     if isdir(target_name):
         if force:
@@ -109,7 +109,7 @@ def extract_corpus_tags(
         multiproc_keep_order=multiproc_keep_order,
         multiproc_processes=multiproc_processes,
         multiproc_chunksize=multiproc_chunksize,
-        speech_merge_strategy=speech_merge_strategy,
+        merge_strategy=merge_strategy,
         preprocessor=None,
     )
 

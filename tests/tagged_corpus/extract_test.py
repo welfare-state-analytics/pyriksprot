@@ -57,7 +57,7 @@ def test_load_protocols():
 @pytest.mark.parametrize(
     'temporal_key, group_keys',
     [
-        (interface.TemporalKey.Year, [interface.GroupingKey.Party]),
+        (interface.TemporalKey.Year, [interface.GroupingKey.party_id]),
         (interface.TemporalKey.Year, []),
         (interface.TemporalKey.Protocol, []),
         (None, []),
@@ -101,7 +101,7 @@ def test_extract_speeches(target_type: str):
         multiproc_keep_order=None,
         multiproc_processes=1,
         multiproc_chunksize=100,
-        speech_merge_strategy='chain',
+        merge_strategy='chain',
         force=False,
         skip_lemma=False,
         skip_text=True,

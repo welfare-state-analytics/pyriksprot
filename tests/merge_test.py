@@ -21,7 +21,7 @@ def utterance_segments(source_index: corpus_index.CorpusSourceIndex) -> List[seg
         filenames=source_index.paths,
         content_type=content_type,
         segment_level=segment_level,
-        speech_merge_strategy=None,
+        merge_strategy=None,
     )
     segments = list(segments)
     return segments
@@ -41,7 +41,7 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
 
     """Iterate at protocol level with no temporal key gives one group per docoment"""
     temporal_key: interface.TemporalKey = None
-    group_keys: List[interface.GroupingKey] = [interface.GroupingKey.Who]
+    group_keys: List[interface.GroupingKey] = [interface.GroupingKey.who]
     merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
         speaker_service=speaker_service,
