@@ -39,7 +39,7 @@ class ProtocolIterator(segment.ProtocolSegmentIterator):
                 content_type=self.content_type,
                 segment_level=self.segment_level,
                 segment_skip_size=self.segment_skip_size,
-                merge_strategy=self.merge_strategy
+                merge_strategy=self.merge_strategy,
             )
         )
 

@@ -56,7 +56,7 @@ class XmlProtocolSegmentIterator(segment.ProtocolSegmentIterator):
             content_type=self.content_type,
             segment_level=self.segment_level,
             segment_skip_size=self.segment_skip_size,
-            merge_strategy=self.merge_strategy
+            merge_strategy=self.merge_strategy,
         )
 
     def map_futures(self, imap, args):
@@ -84,7 +84,7 @@ class XmlSaxSegmentIterator(segment.ProtocolSegmentIterator):
             content_type=ContentType.Text,
             protocol=XmlIterParseProtocol(data=filename, segment_skip_size=self.segment_skip_size),
             segment_level=self.segment_level,
-            merge_strategy=self.merge_strategy
+            merge_strategy=self.merge_strategy,
         )
 
     def map_futures(self, imap, args):

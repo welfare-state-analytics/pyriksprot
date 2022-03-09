@@ -27,6 +27,7 @@ class MergeSpeechStrategyType(str, Enum):
     speaker_hash_sequence = 'speaker_hash_sequence'
     undefined = 'undefined'
 
+
 # MergeSpeechStrategyType=Literal[
 #     'who',
 #     'who_sequence',
@@ -35,6 +36,7 @@ class MergeSpeechStrategyType(str, Enum):
 #     'chain',
 #     'undefined',
 # ]
+
 
 @dataclass
 class ProtocolSegment:
@@ -317,7 +319,8 @@ class ProtocolSegmentIterator(abc.ABC):
         fx = self.preprocessor
         if self.multiproc_processes > 1:
             args: list[tuple[str, str, str, int]] = [
-                (name, self.content_type, self.segment_level, self.segment_skip_size, self.merge_strategy) for name in self.filenames
+                (name, self.content_type, self.segment_level, self.segment_skip_size, self.merge_strategy)
+                for name in self.filenames
             ]
             with get_context("spawn").Pool(processes=self.multiproc_processes) as executor:
                 imap = executor.imap if self.multiproc_keep_order else executor.imap_unordered
