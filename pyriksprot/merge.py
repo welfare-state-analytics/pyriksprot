@@ -18,17 +18,22 @@ class SegmentCategoryClosed(Exception):
 
 
 @dataclass
-class MergedSegmentGroup:
+class ProtocolSegmentGroup:
 
     content_type: interface.ContentType
+
     temporal_value: Union[int, str]
-    name: str
-    id: str
-    page_number: str
-    year: int
     grouping_keys: Sequence[interface.GroupingKey]
     grouping_values: Mapping[str, str | int]
-    category_items: list[segment.ProtocolSegment] = field(default_factory=list)
+
+    name: str
+    year: int
+
+    """id/hashcode within group (not used?)"""
+    id: str
+
+    protocol_segments: list[segment.ProtocolSegment] = field(default_factory=list)
+
     n_tokens: int = 0
 
     """Groups keys values, as a comma separated string"""
@@ -40,18 +45,17 @@ class MergedSegmentGroup:
     @property
     def data(self):
         if self.content_type == interface.ContentType.TaggedFrame:
-            return utility.merge_tagged_csv(self.category_items, sep='\n')
-        return '\n'.join(self.category_items)
+            return utility.merge_tagged_csv(self.protocol_segments, sep='\n')
+        return '\n'.join(self.protocol_segments)
 
     def add(self, item: segment.ProtocolSegment):
-        self.category_items.append(item.data)
+        self.protocol_segments.append(item.data)
 
     def __repr__(self) -> str:
         return (
             f"{self.year}"
             f"{self.temporal_value}"
             f"\t{self.name}"
-            f"\t{self.page_number or ''}"
             f"\t{self.key_values}"
             f"\t{self.n_chars}"
         )
@@ -129,12 +133,12 @@ class SegmentMerger:
 
     def merge(
         self, iterator: list[segment.ProtocolSegment] | segment.ProtocolSegmentIterator
-    ) -> Iterable[Mapping[str, MergedSegmentGroup]]:
+    ) -> Iterable[Mapping[str, ProtocolSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
         try:
             current_temporal_category: str = None
-            current_group: Mapping[str, MergedSegmentGroup] = {}
+            current_group: Mapping[str, ProtocolSegmentGroup] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
 
             # if len(grouping_keys or []) == 0:
@@ -162,7 +166,7 @@ class SegmentMerger:
 
                 """ Note:
                     Value of `item.id` depends on aggregation level.
-                    It is u_id for SpeechLevel and UtteranceLevel
+                    It is u_id for levels speech and utterance
                 """
                 speaker: md.SpeakerInfo = self.speaker_service.get_speaker_info(
                     u_id=item.u_id, person_id=item.who, year=source_item.year
@@ -182,16 +186,15 @@ class SegmentMerger:
 
                 if group_hashcode not in current_group:
 
-                    current_group[group_hashcode] = MergedSegmentGroup(
+                    current_group[group_hashcode] = ProtocolSegmentGroup(
                         content_type=item.content_type,
                         temporal_value=temporal_category,
                         grouping_keys=self.grouping_keys,
                         grouping_values=grouping_values,
                         id=group_hashcode,
                         name=group_str,
-                        page_number=0,
                         year=self.to_year(source_item, self.temporal_key),
-                        category_items=[],
+                        protocol_segments=[],
                     )
 
                 current_group[group_hashcode].add(item)
