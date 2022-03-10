@@ -382,10 +382,14 @@ def test_load_protocols_from_folder():
 @pytest.mark.parametrize(
     'protocol_name,merge_strategy,expected_utterance_count,expected_speech_count',
     [
-        ('prot-199192--127', 'who', 0, 0),
-        ('prot-199192--127', 'who_sequence', 0, 0),
-        ('prot-199192--127', 'who_speaker_hash_sequence', 0, 0),
-        ('prot-199192--127', 'chain', 0, 0),
+        ('prot-1955--ak--22', 'who_sequence', 414, 146),
+        ('prot-1955--ak--22', 'who_speaker_hash_sequence', 414, 151),
+        ('prot-1955--ak--22', 'speaker_hash_sequence', 414, 151),
+        ('prot-1955--ak--22', 'chain', 414, 151),
+        ('prot-199192--127', 'who_sequence', 274, 208),
+        ('prot-199192--127', 'who_speaker_hash_sequence', 274, 222),
+        ('prot-199192--127', 'speaker_hash_sequence', 274, 222),
+        ('prot-199192--127', 'chain', 274, 222),
     ],
 )
 def test_protocol_to_items(
@@ -399,19 +403,39 @@ def test_protocol_to_items(
     assert protocol is not None
     assert len(protocol.utterances) == expected_utterance_count
 
+    items = segment.to_segments(
+        protocol=protocol,
+        content_type=interface.ContentType.Text,
+        segment_level=interface.SegmentLevel.Speech,
+        merge_strategy=merge_strategy,
+    )
+    assert len(items) == expected_speech_count
+
+
+@pytest.mark.skip(reason="Infrastructure test")
+@pytest.mark.parametrize('protocol_name', ['prot-199192--21', 'prot-199192--127', 'prot-1933--fk--5', 'prot-1955--ak--22', 'prot-199596--35'])
+def test_protocol_to_speeches(protocol_name: str):
+
+    filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
+
+    protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
     utterances: pd.DataFrame = pd.DataFrame(
         data=[(x.u_id, x.who, x.next_id, x.prev_id, x.speaker_hash) for x in protocol.utterances],
         columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_hash'],
     )
+    for merge_strategy in ['who_sequence', 'who_speaker_hash_sequence', 'speaker_hash_sequence', 'chain']:
 
-    items = segment.to_segments(
-        protocol=protocol,
-        content_type=interface.ContentType.Text,
-        segment_level=interface.SegmentLevel.Who,
-        merge_strategy=merge_strategy,
-    )
-    assert len(items) == len(set(d.who for d in protocol.utterances))
-    assert len(protocol.utterances) == expected_speech_count
+        merger: segment.IMergeSpeechStrategy = segment.SpeechMergerFactory.get(merge_strategy)
+
+        items: list[list[interface.Utterance]] = merger.split(protocol.utterances)
+
+        speech_ids = []
+        for i, item in enumerate(items):
+            speech_ids.extend(len(item) * [i])
+
+        utterances[merge_strategy] = speech_ids
+
+    utterances.to_excel(f"utterances_{protocol_name}.xlsx")
 
 
 def test_protocols_to_items():
