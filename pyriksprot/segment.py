@@ -388,11 +388,11 @@ def group_utterances_by_chain(utterances: list[Utterance]) -> list[list[Utteranc
 
             if bool(speech):
 
-                if speech[-1].u_id != u.prev_id:
-                    logger.warning(f"u[{u.u_id}]: current u.prev_id differs from previous u.u_id '{speech[-1].u_id}'")
+                if bool(u.prev_id) and speech[0].u_id != u.prev_id:
+                    logger.warning(f"u[{u.u_id}]: current prev_id differs from first u.u_id '{speech[0].u_id}'")
 
-                if speech[-1].who != u.who:
-                    raise ValueError(f"u[{u.u_id}]: current u.who differs from previous u.who '{speech[-1].who}'")
+                if speech[0].who != u.who:
+                    raise ValueError(f"u[{u.u_id}]: multiple who ids in current speech '{speech[0].who}'")
 
             speech.append(u)
 
@@ -482,17 +482,15 @@ class MergeSpeechByWhoSpeakerHashSequence(IMergeSpeechStrategy):
 
 
 class MergeSpeechByChain(IMergeSpeechStrategy):
-    def merge(self, protocol: Protocol) -> list[Speech]:
-        """Create speeches based on prev/next pointers. Return list."""
-        speech_utterances: list[list[Utterance]] = group_utterances_by_chain(protocol.utterances)
-        speeches: list[Speech] = [
-            self.create(protocol, utterances=utterances, speech_index=i + 1)
-            for i, utterances in enumerate(speech_utterances)
-        ]
-        return speeches
+    def split(self, utterances: list[Utterance]) -> list[list[Utterance]]:
+        groups: list[list[Utterance]] = group_utterances_by_chain(utterances)
+        return groups
 
 
 class UndefinedMergeSpeech(IMergeSpeechStrategy):
+    def split(self, utterances: list[Utterance]) -> list[list[Utterance]]:
+        raise ValueError("undefined merge strategy encountered")
+
     def merge(self, protocol: Protocol) -> list[Speech]:
         raise ValueError("undefined merge strategy encountered")
 
