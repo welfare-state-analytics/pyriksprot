@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from itertools import groupby
 from multiprocessing import get_context
-from typing import TYPE_CHECKING, Callable, Iterable, Literal, Mapping
+from typing import TYPE_CHECKING, Callable, Iterable, Mapping
 
 from loguru import logger
 
