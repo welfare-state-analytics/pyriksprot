@@ -6,12 +6,16 @@ import os
 import zipfile
 from typing import Iterable, List, Optional
 
-from pyriksprot.utility import is_empty, strip_paths
+from tqdm import tqdm
+
+from pyriksprot.utility import ensure_path, is_empty, strip_path_and_extension, strip_paths, touch
 
 from .. import interface
 
-CHECKSUM_FILENAME: str = 'sha1_checksum.txt'
 METADATA_FILENAME: str = 'metadata.json'
+
+jj = os.path.join
+relpath = os.path.relpath
 
 
 def store_protocol(
@@ -135,3 +139,32 @@ def validate_checksum(filename: str, checksum: str) -> bool:
     if metadata is None:
         return False
     return checksum == metadata.get('checksum', 'oo')
+
+
+def update_speaker_hash(speaker_hash_lookup: dict[str, str], source_folder: str, target_folder: str):
+    """Updates `speaker_hash` in an existing PoS-tagged corpus
+    speaker_hash_lookup = SpeakerInfoService(database_filename).utterance_index.utterances['speaker_hash'].to_dict()
+    """
+
+    os.makedirs(target_folder, exist_ok=True)
+
+    for filename in tqdm(glob.glob(jj(source_folder, "**/*.zip"), recursive=True)):
+        target_filename: str = jj(target_folder, relpath(filename, source_folder))
+        ensure_path(target_filename)
+        json_name = f"{strip_path_and_extension(filename)}.json"
+        try:
+            with zipfile.ZipFile(filename, "r") as fp:
+                protocol_str = fp.read(json_name).decode('utf-8')
+                metadata_str = fp.read("metadata.json").decode('utf-8')
+        except zipfile.BadZipFile:
+            touch(target_filename)
+            continue
+        protocol: list[dict] = json.loads(protocol_str)
+        for u in protocol:
+            speaker_hash: str = speaker_hash_lookup.get(u['u_id'])
+            if speaker_hash:
+                u['speaker_hash'] = speaker_hash
+        utterances_csv_str: str = json.dumps(protocol)
+        with zipfile.ZipFile(target_filename, "w", compression=zipfile.ZIP_DEFLATED) as fp:
+            fp.writestr(json_name, utterances_csv_str or "")
+            fp.writestr("metadata.json", metadata_str or "")
