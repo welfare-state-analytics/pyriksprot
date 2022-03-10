@@ -10,7 +10,6 @@ from .parlaclarin import parse
 from .tagged_corpus import persist
 from .utility import ensure_path, strip_path_and_extension, touch, unlink
 
-CHECKSUM_FILENAME: str = 'sha1_checksum.txt'
 METADATA_FILENAME: str = 'metadata.json'
 
 TaggedDocument = Mapping[str, List[str]]
