@@ -100,7 +100,6 @@ def tag_protocol_xml(
     """
 
     try:
-
         ensure_path(output_filename)
 
         protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
@@ -108,14 +107,11 @@ def tag_protocol_xml(
         )
 
         if not protocol.has_text:
-
             unlink(output_filename)
             touch(output_filename)
-
             return
 
         protocol.preprocess(tagger.preprocess)
-
         checksum: str = protocol.checksum()
 
         # print(f"checksum: {checksum}")
@@ -123,17 +119,11 @@ def tag_protocol_xml(
         # print(f"filename: {os.path.abspath(output_filename)}  {os.path.isfile(os.path.abspath(output_filename))}")
 
         if not force and persist.validate_checksum(output_filename, checksum):
-
             logger.info(f"SKIPPING {strip_path_and_extension(input_filename)} (checksum validates OK)")
-
             touch(output_filename)
-
         else:
-
             unlink(output_filename)
-
             protocol = tag_protocol(tagger, protocol=protocol)
-
             persist.store_protocol(output_filename, protocol=protocol, checksum=checksum, storage_format=storage_format)
 
     except Exception:
