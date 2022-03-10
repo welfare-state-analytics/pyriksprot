@@ -37,7 +37,7 @@ def test_protocol_texts_iterator_metadata(iterator_class):
 
 def test_xml_protocol_texts_iterator_texts():
 
-    filenames: List[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
+    filenames: List[str] = sorted(glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True))
     expected_document_names: List[str] = sorted(utility.strip_path_and_extension(filenames))
 
     texts: Iterable[segment.ProtocolSegment] = list(
@@ -58,18 +58,18 @@ def test_xml_protocol_texts_iterator_texts():
             filenames=filenames,
             segment_level='protocol',
             segment_skip_size=0,
-            multiproc_processes=2,
+            multiproc_processes=None,
             multiproc_keep_order=True,
         )
     )
-    assert [x.name for x in texts] == expected_document_names
+    assert set([x.name for x in texts]) == set(expected_document_names)
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level=None, segment_skip_size=1, multiproc_processes=None
         )
     )
-    assert len(texts) == 6
+    assert len(texts) == 5
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
@@ -79,7 +79,7 @@ def test_xml_protocol_texts_iterator_texts():
             multiproc_processes=None,
         )
     )
-    assert len(texts) == 493
+    assert len(texts) == 395
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
