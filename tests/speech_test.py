@@ -7,7 +7,7 @@ import uuid
 import pandas as pd
 import pytest
 
-from pyriksprot import interface,  tagged_corpus, utility
+from pyriksprot import interface, tagged_corpus, utility
 from pyriksprot.foss import untangle
 
 from .utility import (
@@ -342,4 +342,3 @@ def test_protocol_to_speeches(protocol_name: str):
         utterances[merge_strategy] = speech_ids
 
     utterances.to_excel(f"utterances_{protocol_name}.xlsx")
-

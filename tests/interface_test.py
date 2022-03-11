@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from black import itertools
 
-from pyriksprot import interface,  segment, tagged_corpus, utility
+from pyriksprot import interface, segment, tagged_corpus, utility
 from pyriksprot.foss import untangle
 
 from .utility import (

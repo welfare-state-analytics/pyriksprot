@@ -27,7 +27,9 @@ def tagged_speeches(
         merge_strategy=segment.MergeSpeechStrategyType.who_speaker_hash_sequence,
         segment_skip_size=1,
     )
-    groups = merge_segments.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
+    groups = merge_segments.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(
+        segments
+    )
     groups = list(groups)
     return groups
 

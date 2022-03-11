@@ -6,8 +6,8 @@ from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
 from .interface import ContentType, Protocol, SegmentLevel, TemporalKey
-from .metadata.person import SpeakerInfoService
 from .merge_speech import MergeSpeechStrategyType, to_speeches
+from .metadata.person import SpeakerInfoService
 from .utility import compress
 
 if TYPE_CHECKING:

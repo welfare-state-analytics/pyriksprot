@@ -5,8 +5,8 @@ from typing import Iterable
 
 import pytest
 
-from pyriksprot import corpus_index as csi, merge_segments
-from pyriksprot import dispatch, interface
+from pyriksprot import corpus_index as csi
+from pyriksprot import dispatch, interface, merge_segments
 from pyriksprot import metadata as md
 from pyriksprot import parlaclarin, segment
 
