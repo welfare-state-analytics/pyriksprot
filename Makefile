@@ -78,7 +78,7 @@ CORPUS_ROOT=$(DEFAULT_ROOT_FOLDER)/riksdagen-corpus/corpus
 
 .PHONY: metadata-test-database
  sample-tagged-corpus:
-	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/metadata/test_setup_sample_tagged_frames_corpus.py -k "test_setup_sample_tagged_frames_corpus"
+	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/utility_test.py -k "test_setup_sample_tagged_frames_corpus"
 
 
 test: output-dir
