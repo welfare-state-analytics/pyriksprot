@@ -102,7 +102,7 @@ def extract_corpus_tags(
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     def get_speaker(item: segment.ProtocolSegment) -> None:
-        item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, who=item.who, year=item.year)
+        item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
     texts: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
@@ -113,7 +113,7 @@ def extract_corpus_tags(
         multiproc_processes=multiproc_processes,
         multiproc_chunksize=multiproc_chunksize,
         merge_strategy=merge_strategy,
-        preprocessor=get_speaker if segment_level == interface.SegmentLevel.Speech else None,
+        preprocess=get_speaker if segment_level == interface.SegmentLevel.Speech else None,
     )
 
     merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
