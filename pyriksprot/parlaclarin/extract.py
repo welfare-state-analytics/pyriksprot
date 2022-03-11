@@ -5,7 +5,7 @@ from typing import Callable, Sequence
 
 from loguru import logger
 
-from .. import corpus_index, dehyphenation, dispatch, interface, merge
+from .. import corpus_index, dehyphenation, dispatch, interface, merge_segments
 from .. import metadata as md
 from .. import utility
 from . import iterate
@@ -83,7 +83,7 @@ def extract_corpus_text(
     )
 
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
-    merger: merge.SegmentMerger = merge.SegmentMerger(
+    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
         source_index=source_index,
         speaker_service=speaker_service,
         temporal_key=temporal_key,
