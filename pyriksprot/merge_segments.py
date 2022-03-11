@@ -156,7 +156,7 @@ class SegmentMerger:
 
                     current_group, current_temporal_value = {}, temporal_category
 
-                grouping_values, hashcode_str, hashcode = hashcoder(item, item.speaker_info, source_item)
+                grouping_values, hashcode_str, hashcode = hashcoder(item, source_item)
 
                 # FIXME: #14 This fix cannot work. It prevents groupings that exclude `who` added https://github.com/welfare-state-analytics/pyriksprot/commit/8479a7c03458adcc0a0f0d0750cf48e55eec4bb0
                 grouping_values['who'] = item.who
@@ -203,7 +203,7 @@ def hashcoder_with_no_grouping_keys(item: segment.ProtocolSegment, **_) -> Tuple
 
 def create_grouping_hashcoder(
     grouping_keys: Sequence[str],
-) -> Callable[[segment.ProtocolSegment, md.SpeakerInfo, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[segment.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: set[str] = set(grouping_keys)
@@ -222,15 +222,15 @@ def create_grouping_hashcoder(
     if missing_keys:
         raise TypeError(f"grouping_hashcoder: key(s) {', '.join(missing_keys)} not found (ignored)")
 
-    def hashcoder(
-        item: segment.ProtocolSegment,
-        speaker: md.SpeakerInfo,
-        source_item: corpus_index.CorpusSourceItem,
-    ) -> Tuple[dict, str, str]:
+    def hashcoder(item: segment.ProtocolSegment, source_item: corpus_index.CorpusSourceItem) -> Tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
         assert isinstance(source_item, corpus_index.CorpusSourceItem)
         parts: dict[str, str | int] = {
-            **{attr: str(getattr(speaker, attr)) for attr in speaker_keys},
+            **(
+                {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys}
+                if item.speaker_info is not None
+                else {}
+            ),
             **{attr: str(getattr(source_item, attr)) for attr in corpus_index_keys},
             **{attr: str(getattr(item, attr)) for attr in item_keys},
         }
