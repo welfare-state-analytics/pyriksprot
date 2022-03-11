@@ -1,9 +1,7 @@
 import click
 from tqdm import tqdm
 
-from pyriksprot import corpus_index, dispatch, interface
-from pyriksprot import metadata as md
-from pyriksprot import segment
+from pyriksprot import corpus_index, dispatch, interface, segment
 from pyriksprot.tagged_corpus import iterate
 
 from .utils import option2
@@ -18,7 +16,7 @@ from .utils import option2
 @option2('--compress-type')
 @option2('--merge-strategy')
 def main(
-    metadata_filename: str = None,
+    # metadata_filename: str = None,
     source_folder: str = None,
     target_name: str = None,
     content_type: str = 'tagged_frame',

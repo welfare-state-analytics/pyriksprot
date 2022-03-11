@@ -7,7 +7,7 @@ import uuid
 import pandas as pd
 import pytest
 
-from pyriksprot import interface, segment, merge_speech, parlaclarin, tagged_corpus, utility
+from pyriksprot import interface, merge_speech, parlaclarin, segment, tagged_corpus, utility
 from pyriksprot.foss import untangle
 
 from .utility import PARLACLARIN_SOURCE_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances

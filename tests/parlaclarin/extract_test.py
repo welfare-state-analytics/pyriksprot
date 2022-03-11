@@ -55,18 +55,17 @@ def test_create_grouping_hashcoder():
         office_type_id=1,
         sub_office_type_id=2,
     )
-    index_item = None
     with pytest.raises(TypeError):
         _ = merge_segments.create_grouping_hashcoder(["dummy_id"])
 
     hashcoder = merge_segments.create_grouping_hashcoder([])
-    parts, hash_str, hashcode = hashcoder(item, index_item)
+    parts, hash_str, hashcode = hashcoder(item=item, source_item=None)
     assert not parts
     assert hash_str == item.name
 
     attributes: list[str] = ["who", "gender_id", "party_id", "office_type_id"]
     hashcoder = merge_segments.create_grouping_hashcoder(attributes)
-    parts, hash_str, hashcode = hashcoder(item, source_item)
+    parts, hash_str, hashcode = hashcoder(item=item, source_item=source_item)
 
     assert parts == {
         'gender_id': str(speaker.gender_id),
@@ -78,7 +77,7 @@ def test_create_grouping_hashcoder():
     assert hashcode == "2bceb45df2c99ce2620a1d7897846618"
 
 
-def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_service: md.SpeakerInfoService):
+def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
 
     filenames: list[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 

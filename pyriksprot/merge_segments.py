@@ -156,7 +156,7 @@ class SegmentMerger:
 
                     current_group, current_temporal_value = {}, temporal_category
 
-                grouping_values, hashcode_str, hashcode = hashcoder(item, source_item)
+                grouping_values, hashcode_str, hashcode = hashcoder(item=item, source_item=source_item)
 
                 # FIXME: #14 This fix cannot work. It prevents groupings that exclude `who` added https://github.com/welfare-state-analytics/pyriksprot/commit/8479a7c03458adcc0a0f0d0750cf48e55eec4bb0
                 grouping_values['who'] = item.who
@@ -202,7 +202,7 @@ def hashcoder_with_no_grouping_keys(item: segment.ProtocolSegment, **_) -> Tuple
 
 
 def create_grouping_hashcoder(
-    grouping_keys: Sequence[str]
+    grouping_keys: Sequence[str],
 ) -> Callable[[segment.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
     """Create a hashcode function for given grouping keys"""
 

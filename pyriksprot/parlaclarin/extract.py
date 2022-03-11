@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Callable, Sequence
+from typing import Sequence
 
 from loguru import logger
 
@@ -83,7 +83,7 @@ def extract_corpus_text(
             item.data = utility.dedent(item.data)
 
         if dehypenator:
-            item.data = dehypenator(item.data)
+            item.data = dehypenator(item.data)  # pylint: disable=not-callable
 
         if get_speaker:
             item.speaker_info = get_speaker(item.u_id, item.who, item.year)
@@ -95,7 +95,7 @@ def extract_corpus_text(
         multiproc_processes=multiproc_processes,
         multiproc_keep_order=multiproc_keep_order,
         multiproc_chunksize=multiproc_chunksize,
-        preprocessor=preprocess,
+        preprocess=preprocess,
     )
 
     merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
