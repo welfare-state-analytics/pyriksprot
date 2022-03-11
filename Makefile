@@ -72,9 +72,14 @@ CORPUS_ROOT=$(DEFAULT_ROOT_FOLDER)/riksdagen-corpus/corpus
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index $(CORPUS_ROOT) ./metadata/data
 	@gzip  ./metadata/data/protocols.csv ./metadata/data/utterances.csv
 
-.PHONY: metadata-test-datavase
+.PHONY: metadata-test-database
  metadata-test-database:
 	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/metadata/metadata_test.py -k "create_subset_metadata_to_folder"
+
+.PHONY: metadata-test-database
+ sample-tagged-corpus:
+	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/metadata/test_setup_sample_tagged_frames_corpus.py -k "test_setup_sample_tagged_frames_corpus"
+
 
 test: output-dir
 	@poetry run pytest $(PYTEST_ARGS)  tests

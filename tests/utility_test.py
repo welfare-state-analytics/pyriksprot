@@ -17,6 +17,8 @@ from .utility import (
 
 jj = os.path.join
 
+FORCE_RUN_SKIPS = os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
+
 
 def test_temporary_file():
 
@@ -59,7 +61,7 @@ def test_setup_sample_xml_corpus():
     )
 
 
-@pytest.mark.skipif(condition=sample_tagged_corpus_exists(), reason="Test data found")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus():
     setup_sample_tagged_frames_corpus(
         protocols=TEST_DOCUMENTS,
