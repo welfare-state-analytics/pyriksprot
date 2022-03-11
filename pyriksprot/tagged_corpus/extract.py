@@ -101,6 +101,9 @@ def extract_corpus_tags(
     # FIXME: How to ensure metadata tag is the same as corpus??? Add tag to DB?
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
+    def get_speaker(item: segment.ProtocolSegment) -> None:
+        item.speaker_info = speaker_service.get_speaker_info(item.u_id, item.who, item.year)
+
     texts: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
@@ -110,7 +113,7 @@ def extract_corpus_tags(
         multiproc_processes=multiproc_processes,
         multiproc_chunksize=multiproc_chunksize,
         merge_strategy=merge_strategy,
-        preprocessor=None,
+        preprocessor=get_speaker if segment_level == interface.SegmentLevel.Speech else None,
     )
 
     merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(

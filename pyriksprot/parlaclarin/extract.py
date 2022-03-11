@@ -5,6 +5,8 @@ from typing import Callable, Sequence
 
 from loguru import logger
 
+from pyriksprot.segment import ProtocolSegment
+
 from .. import corpus_index, dehyphenation, dispatch, interface, merge_segments
 from .. import metadata as md
 from .. import utility
@@ -68,20 +70,32 @@ def extract_corpus_text(
         source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
     )
 
-    preprocessor: Callable[[str], str] = utility.compose(
-        ([utility.dedent] if dedent else []) + ([create_dehyphen(data_path)] if dehyphen else [])
-    )
+    dehypenator = create_dehyphen(data_path) if dehyphen else None
 
-    speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
+    get_speaker = None
+    if segment_level == interface.SegmentLevel.Speech:
+        speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
+        get_speaker = speaker_service.get_speaker_info
+
+    def preprocess(item: ProtocolSegment) -> None:
+
+        if dedent:
+            item.data = utility.dedent(item.data)
+
+        if dehypenator:
+            item.data = dehypenator(item.data)
+
+        if get_speaker:
+            item.speaker_info = get_speaker(item.u_id, item.who, item.year)
+
     segments: iterate.XmlUntangleSegmentIterator = iterate.XmlUntangleSegmentIterator(
         filenames=source_index.paths,
-        speaker_service=speaker_service,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,
         multiproc_processes=multiproc_processes,
         multiproc_keep_order=multiproc_keep_order,
         multiproc_chunksize=multiproc_chunksize,
-        preprocessor=preprocessor,
+        preprocessor=preprocess,
     )
 
     merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
