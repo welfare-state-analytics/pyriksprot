@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Callable, Iterable
 
 from .interface import ContentType, Protocol, SegmentLevel, TemporalKey
 from .merge_speech import MergeSpeechStrategyType, to_speeches
-from .metadata.person import SpeakerInfoService
 from .utility import compress
 
 if TYPE_CHECKING:
@@ -268,7 +267,6 @@ class ProtocolSegmentIterator(abc.ABC):
         self,
         *,
         filenames: list[str],
-        speaker_service: SpeakerInfoService,
         content_type: ContentType = ContentType.Text,
         segment_level: SegmentLevel = SegmentLevel.Protocol,
         segment_skip_size: int = 1,
@@ -276,7 +274,7 @@ class ProtocolSegmentIterator(abc.ABC):
         multiproc_chunksize: int = 100,
         multiproc_keep_order: bool = False,
         merge_strategy: str = 'chain',
-        preprocessor: Callable[[str], str] = None,
+        preprocess: Callable[[str], str] = None,
     ):
         """Split document (protocol) into segments.
 
@@ -300,8 +298,7 @@ class ProtocolSegmentIterator(abc.ABC):
         self.multiproc_processes: int = multiproc_processes or 1
         self.multiproc_chunksize: int = multiproc_chunksize
         self.multiproc_keep_order: bool = multiproc_keep_order
-        self.preprocessor: Callable[[str], str] = preprocessor
-        self.speaker_service: SpeakerInfoService = speaker_service
+        self.preprocess: Callable[[ProtocolSegment], str] = preprocess
 
     def __iter__(self):
         self.iterator = self.create_iterator()
@@ -312,7 +309,10 @@ class ProtocolSegmentIterator(abc.ABC):
 
     def create_iterator(self) -> Iterable[ProtocolSegment]:
 
+        item: ProtocolSegment
         fx = self.preprocessor
+        # speaker_service: SpeakerInfoService = self.speaker_service
+
         if self.multiproc_processes > 1:
             args: list[tuple[str, str, str, int]] = [
                 (name, self.content_type, self.segment_level, self.segment_skip_size, self.merge_strategy)
@@ -324,13 +324,13 @@ class ProtocolSegmentIterator(abc.ABC):
                 for payload in futures:
                     for item in payload:
                         if fx:
-                            item.data = fx(item.data)
+                            fx(item)
                         yield item
         else:
             for filename in self.filenames:
                 for item in self.load(filename=filename):
                     if fx:
-                        item.data = fx(item.data)
+                        fx(item)
                     yield item
 
     @abc.abstractmethod
