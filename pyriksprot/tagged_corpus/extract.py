@@ -31,7 +31,7 @@ def extract_corpus_tags(
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
-    merge_strategy: segment.MergeSpeechStrategyType = 'chain',
+    merge_strategy: segment.MergeUtteranceStrategyType = 'chain',
     force: bool = False,
     skip_lemma: bool = False,
     skip_text: bool = False,

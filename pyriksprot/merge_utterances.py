@@ -12,7 +12,7 @@ from .interface import Protocol, Speech, Utterance
 # pylint: disable=too-many-arguments, no-member
 
 
-class MergeSpeechStrategyType(str, Enum):
+class MergeUtteranceStrategyType(str, Enum):
     who = 'who'
     who_sequence = 'who_sequence'
     chain = 'chain'
@@ -22,7 +22,7 @@ class MergeSpeechStrategyType(str, Enum):
 
 
 def to_speeches(
-    *, protocol: Protocol, merge_strategy: MergeSpeechStrategyType, segment_skip_size: int = 1, **_
+    *, protocol: Protocol, merge_strategy: MergeUtteranceStrategyType, segment_skip_size: int = 1, **_
 ) -> list[Speech]:
     """Convert utterances into speeches using specified strategy. Return list."""
     speeches: list[Speech] = SpeechMergerFactory.get(merge_strategy).speeches(
@@ -182,7 +182,7 @@ class UndefinedMergeSpeech(IMergeSpeechStrategy):
 
 class SpeechMergerFactory:
 
-    strategies: dict[MergeSpeechStrategyType, IMergeSpeechStrategy] = {
+    strategies: dict[MergeUtteranceStrategyType, IMergeSpeechStrategy] = {
         'who': MergeSpeechByWho(),
         'who_sequence': MergeSpeechByWhoSequence(),
         'who_speaker_hash_sequence': MergeSpeechByWhoSpeakerHashSequence(),

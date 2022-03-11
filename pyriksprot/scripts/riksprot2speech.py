@@ -43,7 +43,7 @@ def main(
 ):
     arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
     arguments['content_type'] = interface.ContentType(arguments['content_type'])
-    arguments['merge_strategy'] = segment.MergeSpeechStrategyType(arguments['merge_strategy'])
+    arguments['merge_strategy'] = segment.MergeUtteranceStrategyType(arguments['merge_strategy'])
     arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 
     extract.extract_corpus_tags(

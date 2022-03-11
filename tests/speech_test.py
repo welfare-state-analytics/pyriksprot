@@ -38,7 +38,7 @@ def utterances() -> list[interface.Utterance]:
         ),
         (
             merge_utterances.MergeSpeechByChain,
-            merge_utterances.MergeSpeechStrategyType.chain,
+            merge_utterances.MergeUtteranceStrategyType.chain,
             4,
             [{'A'}, {'B'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-4', 'i-5'],
@@ -51,7 +51,7 @@ def utterances() -> list[interface.Utterance]:
         ),
         (
             merge_utterances.MergeSpeechByWhoSequence,
-            merge_utterances.MergeSpeechStrategyType.who_sequence,
+            merge_utterances.MergeUtteranceStrategyType.who_sequence,
             3,
             [{'A'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-5'],
@@ -152,16 +152,16 @@ def test_speech_annotation():
 @pytest.mark.parametrize(
     'filename, speech_count, non_empty_speech_count, strategy',
     [
-        ("prot-1933--fk--5.xml", 1, 1, merge_utterances.MergeSpeechStrategyType.chain),
+        ("prot-1933--fk--5.xml", 1, 1, merge_utterances.MergeUtteranceStrategyType.chain),
         # ("prot-1933--fk--5.xml", 1, 1, merge_speech.MergeSpeechStrategyType.Who),
         # ("prot-1933--fk--5.xml", 1, 1, merge_speech.MergeSpeechStrategyType.WhoSequence),
-        ("prot-1955--ak--22.xml", 147, 147, merge_utterances.MergeSpeechStrategyType.chain),
+        ("prot-1955--ak--22.xml", 147, 147, merge_utterances.MergeUtteranceStrategyType.chain),
         # ("prot-1955--ak--22.xml", 53, 53, merge_speech.MergeSpeechStrategyType.Who),
         # ("prot-1955--ak--22.xml", 149, 149, merge_speech.MergeSpeechStrategyType.WhoSequence),
-        ('prot-199192--127.xml', 222, 222, merge_utterances.MergeSpeechStrategyType.chain),
-        ('prot-199192--127.xml', 49, 49, merge_utterances.MergeSpeechStrategyType.who),
-        ('prot-199192--127.xml', 208, 208, merge_utterances.MergeSpeechStrategyType.who_sequence),
-        ('prot-199192--127.xml', 208, 208, merge_utterances.MergeSpeechStrategyType.who_speaker_hash_sequence),
+        ('prot-199192--127.xml', 222, 222, merge_utterances.MergeUtteranceStrategyType.chain),
+        ('prot-199192--127.xml', 49, 49, merge_utterances.MergeUtteranceStrategyType.who),
+        ('prot-199192--127.xml', 208, 208, merge_utterances.MergeUtteranceStrategyType.who_sequence),
+        ('prot-199192--127.xml', 208, 208, merge_utterances.MergeUtteranceStrategyType.who_speaker_hash_sequence),
         # ('prot-199192--127.xml', 208, 208, merge_speech.MergeSpeechStrategyType.speaker_hash_sequence),
     ],
 )
@@ -204,7 +204,7 @@ def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
     data = untangle.parse(path)
 
     protocol = parlaclarin.ProtocolMapper.to_protocol(data, segment_skip_size=0)
-    speeches = merge_utterances.to_speeches(protocol=protocol, merge_strategy=merge_utterances.MergeSpeechStrategyType.chain)
+    speeches = merge_utterances.to_speeches(protocol=protocol, merge_strategy=merge_utterances.MergeUtteranceStrategyType.chain)
     assert len(speeches) != expected_speech_count, "speech length"
 
 

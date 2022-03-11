@@ -6,7 +6,7 @@ from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
 from .interface import ContentType, Protocol, SegmentLevel, TemporalKey
-from .merge_utterances import MergeSpeechStrategyType, to_speeches
+from .merge_utterances import MergeUtteranceStrategyType, to_speeches
 from .utility import compress
 
 if TYPE_CHECKING:
@@ -133,7 +133,7 @@ def to_speech_segments(
     protocol: Protocol,
     content_type: ContentType,
     segment_skip_size: int,
-    merge_strategy: MergeSpeechStrategyType,
+    merge_strategy: MergeUtteranceStrategyType,
     **_,
 ) -> list[ProtocolSegment]:
     return [
@@ -170,7 +170,7 @@ def to_who_segments(
             page_number=s.page_number,
         )
         for s in to_speeches(
-            protocol=protocol, merge_strategy=MergeSpeechStrategyType.who, segment_skip_size=segment_skip_size
+            protocol=protocol, merge_strategy=MergeUtteranceStrategyType.who, segment_skip_size=segment_skip_size
         )
     ]
 
@@ -217,7 +217,7 @@ def to_segments(
     protocol: Protocol,
     content_type: ContentType,
     segment_level: SegmentLevel,
-    merge_strategy: MergeSpeechStrategyType,
+    merge_strategy: MergeUtteranceStrategyType,
     segment_skip_size: int = 1,
     preprocess: Callable[[str], str] = None,
 ) -> Iterable[ProtocolSegment]:
