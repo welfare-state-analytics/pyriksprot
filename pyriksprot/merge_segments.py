@@ -21,26 +21,18 @@ class SegmentCategoryClosed(Exception):
 class ProtocolSegmentGroup:
 
     content_type: interface.ContentType
+    year: int
 
+    """Group attributes"""
     temporal_value: Union[int, str]
     grouping_keys: Sequence[interface.GroupingKey]
     grouping_values: Mapping[str, str | int]
+    group_name: str  # string from which hashcode was computed
+    hashcode: str
 
-    name: str
-    year: int
-
-    """id/hashcode within group (not used?)"""
-    id: str
-
+    """Protocol segments that belong to group"""
     protocol_segments: list[segment.ProtocolSegment] = field(default_factory=list)
-
     n_tokens: int = 0
-
-    """Groups keys values, as a comma separated string"""
-    key_values: str = field(init=False, default='')
-
-    def __post_init__(self):
-        self.key_values: str = '\t'.join(self.grouping_values[k] for k in self.grouping_keys)
 
     @property
     def data(self):
@@ -52,13 +44,8 @@ class ProtocolSegmentGroup:
         self.protocol_segments.append(item.data)
 
     def __repr__(self) -> str:
-        return (
-            f"{self.year}"
-            f"{self.temporal_value}"
-            f"\t{self.name}"
-            f"\t{self.key_values}"
-            f"\t{self.n_chars}"
-        )
+        key_values: str = '\t'.join(self.grouping_values[k] for k in self.grouping_keys)
+        return f"{self.year}" f"{self.temporal_value}" f"\t{self.group_name}" f"\t{key_values}" f"\t{self.n_chars}"
 
     @property
     def n_chars(self):
@@ -74,9 +61,9 @@ class ProtocolSegmentGroup:
 
     @property
     def document_name(self) -> str:
-        if self.temporal_value is None or self.name.startswith(self.temporal_value):
-            return self.name
-        return f'{self.temporal_value}_{self.name}'
+        if self.temporal_value is None or self.group_name.startswith(self.temporal_value):
+            return self.group_name
+        return f'{self.temporal_value}_{self.group_name}'
 
     def to_dict(self):
         return {
@@ -112,7 +99,6 @@ class SegmentMerger:
         self,
         *,
         source_index: corpus_index.CorpusSourceIndex,
-        speaker_service: md.SpeakerInfoService,
         temporal_key: interface.TemporalKey,
         grouping_keys: Sequence[interface.GroupingKey],
     ):
@@ -124,10 +110,10 @@ class SegmentMerger:
             temporal_key (interface.TemporalKey): Temporal key None, 'Year', 'Decade', 'Lustrum', 'Custom', 'Protocol', None
             grouping_keys (Sequence[interface.GroupingKey]): Grouping within temporal key
         """
+
         self.source_index: corpus_index.CorpusSourceIndex = source_index
-        self.speaker_service: md.SpeakerInfoService = speaker_service
+
         self.temporal_key: interface.TemporalKey = temporal_key
-        self.custom_temporal_specification = None
         self.grouping_keys: Sequence[interface.GroupingKey] = grouping_keys or []
         self.grouping_hashcoder = create_grouping_hashcoder(self.grouping_keys)
 
@@ -136,68 +122,59 @@ class SegmentMerger:
     ) -> Iterable[Mapping[str, ProtocolSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
+        """ Note: value of `item.id` depends on aggregation level, it is u_id for levels speech and utterance """
+
+        hashcoder = self.grouping_hashcoder
+
         try:
-            current_temporal_category: str = None
+
+            current_temporal_value: str = None
             current_group: Mapping[str, ProtocolSegmentGroup] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
+            source_item: corpus_index.CorpusSourceItem
 
             # if len(grouping_keys or []) == 0:
             #     raise ValueError("no grouping key specified")
 
-            if hasattr(iterator, 'segment_level'):
-
-                if iterator.segment_level == interface.SegmentLevel.Protocol:
-
-                    if len(grouping_keys) > 0:
-                        raise ValueError(
-                            "cannot group by key (within protocol) when segement level is entire protocol."
-                        )
+            if grouping_keys and getattr(iterator, 'segment_level', None) == interface.SegmentLevel.Protocol:
+                raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
 
             for item in iterator:
 
-                source_item: corpus_index.CorpusSourceItem = self.source_index[item.protocol_name]
+                source_item = self.source_index[item.protocol_name]
 
-                if source_item is None:
+                if not bool(source_item):
                     logger.error(f"source item not found: {item.name}")
-                    # raise ValueError(f"source item not found: {item.name}")
                     continue
 
                 temporal_category: str = source_item.temporal_category(self.temporal_key, item)
 
-                """ Note:
-                    Value of `item.id` depends on aggregation level.
-                    It is u_id for levels speech and utterance
-                """
-                speaker: md.SpeakerInfo = self.speaker_service.get_speaker_info(
-                    u_id=item.u_id, person_id=item.who, year=source_item.year
-                )
-
-                if current_temporal_category != temporal_category:
-
+                if current_temporal_value != temporal_category:
                     """Yield previous group"""
                     if current_group:
                         yield current_group
 
-                    current_group, current_temporal_category = {}, temporal_category
+                    current_group, current_temporal_value = {}, temporal_category
 
-                grouping_values, group_str, group_hashcode = self.grouping_hashcoder(item, speaker, source_item)
+                grouping_values, hashcode_str, hashcode = hashcoder(item, item.speaker_info, source_item)
+
                 # FIXME: #14 This fix cannot work. It prevents groupings that exclude `who` added https://github.com/welfare-state-analytics/pyriksprot/commit/8479a7c03458adcc0a0f0d0750cf48e55eec4bb0
                 grouping_values['who'] = item.who
 
-                if group_hashcode not in current_group:
+                if hashcode not in current_group:
 
-                    current_group[group_hashcode] = ProtocolSegmentGroup(
+                    current_group[hashcode] = ProtocolSegmentGroup(
                         content_type=item.content_type,
+                        group_name=hashcode_str,
+                        hashcode=hashcode,
                         temporal_value=temporal_category,
                         grouping_keys=self.grouping_keys,
                         grouping_values=grouping_values,
-                        id=group_hashcode,
-                        name=group_str,
-                        year=self.to_year(source_item, self.temporal_key),
+                        year=source_item.year,
                         protocol_segments=[],
                     )
 
-                current_group[group_hashcode].add(item)
+                current_group[hashcode].add(item)
 
             """Yield last group"""
             if current_group:
@@ -220,13 +197,20 @@ def props(cls: Type) -> list[str]:
     return [i for i in cls.__dict__.keys() if i[:1] != '_']
 
 
+def hashcoder_with_no_grouping_keys(item: segment.ProtocolSegment, **_) -> Tuple[dict, str, str]:
+    return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
+
+
 def create_grouping_hashcoder(
     grouping_keys: Sequence[str],
 ) -> Callable[[segment.ProtocolSegment, md.SpeakerInfo, corpus_index.CorpusSourceItem], str]:
-
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: set[str] = set(grouping_keys)
+
+    if not grouping_keys:
+        """No grouping apart from temporal key """
+        return hashcoder_with_no_grouping_keys
 
     speaker_keys: set[str] = grouping_keys.intersection({f.name for f in fields(md.SpeakerInfo)})
     item_keys: set[str] = grouping_keys.intersection({f.name for f in fields(segment.ProtocolSegment)})
@@ -244,8 +228,6 @@ def create_grouping_hashcoder(
         source_item: corpus_index.CorpusSourceItem,
     ) -> Tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
-        if not grouping_keys:
-            return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
         assert isinstance(source_item, corpus_index.CorpusSourceItem)
         parts: dict[str, str | int] = {
             **{attr: str(getattr(speaker, attr)) for attr in speaker_keys},
@@ -256,4 +238,4 @@ def create_grouping_hashcoder(
 
         return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
 
-    return hashcoder
+    return hashcoder if grouping_keys else hashcoder_with_no_grouping_keys
