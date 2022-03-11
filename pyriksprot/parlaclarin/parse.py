@@ -24,6 +24,7 @@ class XmlProtocol(abc.ABC):
 
         self.date = self.get_date()
         self.name = self.get_name()
+        self.year = int(self.date[:4])
 
     @abc.abstractmethod
     def create_iterator(self) -> Iterable[interface.Utterance]:
@@ -43,9 +44,6 @@ class XmlProtocol(abc.ABC):
 
     def __len__(self):
         return len(self.utterances)
-
-    def get_year(self):
-        return int(self.get_date()[:4])
 
     @property
     def text(self) -> str:

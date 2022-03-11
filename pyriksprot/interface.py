@@ -314,6 +314,7 @@ class Protocol(UtteranceMixIn):
         self.date: str = date
         self.name: str = name
         self.utterances: list[Utterance] = utterances
+        self.year: int = int(self.date[:4])
 
     def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
         """Apply text transforms. Return self."""
@@ -325,9 +326,6 @@ class Protocol(UtteranceMixIn):
             utterance.paragraphs = [preprocess(p.strip()) for p in utterance.paragraphs]
 
         return self
-
-    def get_year(self) -> int:
-        return int(self.date[:4])
 
     def checksum(self) -> Optional[str]:
         """Compute checksum for entire text."""
