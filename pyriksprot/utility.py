@@ -19,6 +19,7 @@ import unicodedata
 import warnings
 import zlib
 from collections import defaultdict
+from dataclasses import fields, is_dataclass
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
@@ -477,3 +478,30 @@ def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
 
 def revdict(d: dict) -> dict:
     return {v: k for k, v in d.items()}
+
+
+def split_properties_by_dataclass(properties: set[str], *cls_list: tuple[Type, ...]) -> tuple[set[str], ...]:
+
+    properties = set(properties)
+
+    key_sets: list[set[str]] = []
+
+    for cls in cls_list:
+
+        if not is_dataclass(cls):
+            raise ValueError(f"{cls.__name__} is not a dataclass")
+
+        key_set: set[str] = properties.intersection({f.name for f in fields(cls)})
+
+        properties -= key_set
+
+        key_sets.append(key_set)
+
+    if properties:
+        raise ValueError(f"split_properties_by_dataclass: {','.join(properties)} not found.")
+
+    return tuple(key_sets)
+
+
+def props(cls: Type) -> list[str]:
+    return [i for i in cls.__dict__.keys() if i[:1] != '_']
