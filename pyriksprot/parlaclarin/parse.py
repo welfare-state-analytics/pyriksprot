@@ -178,7 +178,7 @@ class ProtocolMapper:
 
 
 @deprecated
-class XmlIterParseProtocol(XmlProtocol):  # (ProtocolSegmentIterator):
+class XmlIterParseProtocol(XmlProtocol):
     """Load ParlaClarin XML file using SAX parsing."""
 
     def create_iterator(self) -> Iterable[interface.Utterance]:
