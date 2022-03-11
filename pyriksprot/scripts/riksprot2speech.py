@@ -1,7 +1,7 @@
 import click
 
 from pyriksprot import cluster, dispatch, interface
-from pyriksprot.tagged_corpus import extract
+from pyriksprot.workflows import extract_tags
 
 from .utils import option2, update_arguments_from_options_file
 
@@ -46,7 +46,7 @@ def main(
     arguments['merge_strategy'] = cluster.MergeStrategyType(arguments['merge_strategy'])
     arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 
-    extract.extract_corpus_tags(
+    extract_tags.extract_corpus_tags(
         **{
             **arguments,
             **dict(

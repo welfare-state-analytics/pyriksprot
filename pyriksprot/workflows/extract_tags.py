@@ -10,7 +10,7 @@ from tqdm import tqdm
 from .. import cluster, corpus_index, dispatch, interface, merge
 from .. import metadata as md
 from .. import segment
-from . import iterate
+from ..tagged_corpus import iterate
 
 # pylint: disable=too-many-arguments, W0613
 

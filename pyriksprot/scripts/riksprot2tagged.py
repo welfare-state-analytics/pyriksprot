@@ -6,7 +6,7 @@ import click
 
 from pyriksprot import dispatch, interface
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
-from pyriksprot.tagged_corpus import extract
+from pyriksprot.workflows import extract_tags
 
 sys.path.insert(0, '.')
 
@@ -76,7 +76,7 @@ def main(
         arguments['group_keys'] = arguments['group_key']
         del arguments['group_key']
 
-        extract.extract_corpus_tags(**arguments)
+        extract_tags.extract_corpus_tags(**arguments)
 
     except Exception as ex:
         click.echo(ex)

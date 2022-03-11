@@ -2,7 +2,7 @@ import sys
 
 import click
 
-from pyriksprot.parlaclarin.tf import compute_term_frequencies
+from pyriksprot.workflows.tf import compute_term_frequencies
 
 
 @click.command()

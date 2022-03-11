@@ -6,7 +6,7 @@ import click
 
 from pyriksprot import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
-from pyriksprot.parlaclarin import extract
+from pyriksprot.workflows import extract_text
 
 from .utils import option2, update_arguments_from_options_file
 
@@ -63,7 +63,7 @@ def main(
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
         arguments['group_keys'] = arguments['group_key']
         del arguments['group_key']
-        extract.extract_corpus_text(**arguments)
+        extract_text.extract_corpus_text(**arguments)
 
     except Exception as ex:
         click.echo(ex)

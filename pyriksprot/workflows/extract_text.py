@@ -10,7 +10,7 @@ from pyriksprot.segment import ProtocolSegment
 from .. import corpus_index, dehyphenation, dispatch, interface, merge
 from .. import metadata as md
 from .. import utility
-from . import iterate
+from ..parlaclarin import iterate
 
 # pylint: disable=too-many-arguments
 

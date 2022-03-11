@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 from tqdm.auto import tqdm
 
 from ..foss.sparv_tokenize import default_tokenize
-from .iterate import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
+from ..parlaclarin.iterate import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
 
 
 class TermFrequencyCounter:
