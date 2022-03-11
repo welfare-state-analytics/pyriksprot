@@ -4,9 +4,9 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 
 from tqdm.auto import tqdm
 
-from .iterate import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
-
 from pyriksprot.foss.sparv_tokenize import default_tokenize
+
+from .iterate import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
 
 
 class TermFrequencyCounter:
@@ -59,4 +59,3 @@ class TermFrequencyCounter:
         """Load term frequency counts from pickled file `filename`."""
         with open(filename, 'rb') as fp:
             return pickle.load(fp)
-

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import abc
+import inspect
 from collections import defaultdict
 from enum import Enum
-import inspect
 from itertools import groupby
 from typing import Type
 
