@@ -30,7 +30,7 @@ class XmlUntangleSegmentIterator(segment.ProtocolSegmentIterator):
             protocol=XmlUntangleProtocol(data=filename, segment_skip_size=self.segment_skip_size),
             segment_level=self.segment_level,
             merge_strategy=self.merge_strategy,
-            segment_skip_size=self.segment_skip_size
+            segment_skip_size=self.segment_skip_size,
         )
 
     def map_futures(self, imap, args: List[Tuple[str, str, int]]):
@@ -73,7 +73,7 @@ def multiprocessing_xml_iter_load(args) -> Iterable[segment.ProtocolSegment]:
         protocol=XmlIterParseProtocol(data=args[0], segment_skip_size=args[3]),
         segment_level=args[2],
         merge_strategy=args[4],
-        segment_skip_size=args[3]
+        segment_skip_size=args[3],
     )
 
 
