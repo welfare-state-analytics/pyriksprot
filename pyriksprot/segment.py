@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
+from . import merge_utterances as mu
 from .interface import ContentType, Protocol, SegmentLevel, TemporalKey
-from .merge_utterances import MergeStrategyType, to_speeches
 from .utility import compress
 
 if TYPE_CHECKING:
@@ -133,7 +133,7 @@ def to_speech_segments(
     protocol: Protocol,
     content_type: ContentType,
     segment_skip_size: int,
-    merge_strategy: MergeStrategyType,
+    merge_strategy: mu.MergeStrategyType,
     **_,
 ) -> list[ProtocolSegment]:
     return [
@@ -149,7 +149,7 @@ def to_speech_segments(
             data=s.to_content_str(content_type),
             page_number=s.page_number,
         )
-        for s in to_speeches(protocol=protocol, merge_strategy=merge_strategy, skip_size=segment_skip_size)
+        for s in mu.to_speeches(protocol=protocol, merge_strategy=merge_strategy, skip_size=segment_skip_size)
     ]
 
 
@@ -169,7 +169,7 @@ def to_who_segments(
             data=s.to_content_str(content_type),
             page_number=s.page_number,
         )
-        for s in to_speeches(protocol=protocol, merge_strategy=MergeStrategyType.who, skip_size=segment_skip_size)
+        for s in mu.to_speeches(protocol=protocol, merge_strategy=mu.MergeStrategyType.who, skip_size=segment_skip_size)
     ]
 
 
@@ -215,7 +215,7 @@ def to_segments(
     protocol: Protocol,
     content_type: ContentType,
     segment_level: SegmentLevel,
-    merge_strategy: MergeStrategyType,
+    merge_strategy: mu.MergeStrategyType,
     segment_skip_size: int = 1,
     preprocess: Callable[[str], str] = None,
 ) -> Iterable[ProtocolSegment]:
