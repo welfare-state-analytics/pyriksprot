@@ -113,7 +113,6 @@ class SegmentMerger:
         """
 
         self.source_index: corpus_index.CorpusSourceIndex = source_index
-
         self.temporal_key: TemporalKey = temporal_key
         self.grouping_keys: list[GroupingKey] = grouping_keys or []
         self.grouping_hashcoder = create_grouping_hashcoder(self.grouping_keys)
@@ -219,7 +218,7 @@ class SegmentMerger:
                 if v[0] <= year <= v[1]:
                     return k
 
-        raise ValueError(f"temporal period failed for {self.name}")
+        raise ValueError(f"temporal period failed for {item.protocol_name}")
 
 
 def props(cls: Type) -> list[str]:

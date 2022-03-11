@@ -6,7 +6,7 @@ from typing import List, Mapping, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import corpus_index, dispatch, interface, merge
+from pyriksprot import cluster, corpus_index, dispatch, interface, merge
 from pyriksprot import metadata as md
 from pyriksprot import segment, utility
 from pyriksprot.tagged_corpus import iterate
@@ -26,13 +26,11 @@ def tagged_speeches(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
-        merge_strategy=segment.MergeStrategyType.who_speaker_hash_sequence,
+        merge_strategy=cluster.MergeStrategyType.who_speaker_hash_sequence,
         segment_skip_size=1,
         preprocess=assign_speaker_info,
     )
-    groups = merge.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(
-        segments
-    )
+    groups = merge.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
     groups = list(groups)
     return groups
 

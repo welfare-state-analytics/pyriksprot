@@ -1,6 +1,6 @@
 from os.path import basename
 
-from pyriksprot import dispatch, interface, segment, tagged_corpus
+from pyriksprot import cluster, dispatch, interface, tagged_corpus
 
 # pylint: disable=redefined-outer-name
 
@@ -15,7 +15,7 @@ def main(target_type: dispatch.TargetTypeKey, source_folder: str):
         content_type=interface.ContentType.TaggedFrame,
         compress_type=dispatch.CompressType.Feather,
         segment_level=interface.SegmentLevel.Speech,
-        merge_strategy=segment.MergeStrategyType.chain,
+        merge_strategy=cluster.MergeStrategyType.chain,
         temporal_key=None,
         group_keys=None,
         years=None,

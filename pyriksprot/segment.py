@@ -6,7 +6,7 @@ from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
 from . import cluster as mu
-from .interface import ContentType, Protocol, SegmentLevel, TemporalKey
+from .interface import ContentType, Protocol, SegmentLevel
 from .utility import compress
 
 if TYPE_CHECKING:
@@ -245,7 +245,7 @@ class ProtocolSegmentIterator(abc.ABC):
         merge_strategy: str = 'chain',
         preprocess: Callable[[str], str] = None,
     ):
-        """Split document (protocol) into segments.
+        """Merge utterances within protocols to segments.
 
         Args:
             filenames (list[str]): files to read

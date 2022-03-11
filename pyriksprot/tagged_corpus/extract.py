@@ -7,7 +7,7 @@ from typing import Sequence
 from loguru import logger
 from tqdm import tqdm
 
-from .. import corpus_index, dispatch, interface, merge
+from .. import cluster, corpus_index, dispatch, interface, merge
 from .. import metadata as md
 from .. import segment
 from . import iterate
@@ -31,7 +31,7 @@ def extract_corpus_tags(
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
-    merge_strategy: segment.MergeStrategyType = 'chain',
+    merge_strategy: cluster.MergeStrategyType = 'chain',
     force: bool = False,
     skip_lemma: bool = False,
     skip_text: bool = False,
