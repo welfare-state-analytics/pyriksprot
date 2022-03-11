@@ -6,7 +6,7 @@ from .corpus.parlaclarin import pretokenize
 from .corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
-from .merge import ProtocolSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
+from .merge import ProtocolSegmentGroup, SegmentMerger, create_grouping_hashcoder
 from .segment import ProtocolSegment, ProtocolSegmentIterator
 from .utility import (
     compose,
@@ -31,6 +31,7 @@ from .utility import (
     path_add_timestamp,
     sanitize,
     slugify,
+    split_properties_by_dataclass,
     store_dict,
     store_token_set,
     strip_extensions,
