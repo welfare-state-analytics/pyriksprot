@@ -5,10 +5,11 @@ from typing import Any, Callable, List, Mapping, Union
 
 from loguru import logger
 
-from . import interface
-from .parlaclarin import parse
-from .tagged_corpus import persist
-from .utility import ensure_path, strip_path_and_extension, touch, unlink
+from pyriksprot.corpus.parlaclarin import parse
+from pyriksprot.corpus.tagged import persist
+
+from .. import interface
+from ..utility import ensure_path, strip_path_and_extension, touch, unlink
 
 METADATA_FILENAME: str = 'metadata.json'
 

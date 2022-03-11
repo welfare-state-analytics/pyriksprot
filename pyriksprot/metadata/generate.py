@@ -13,7 +13,8 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from ..parlaclarin import parse
+from pyriksprot.corpus.parlaclarin import parse
+
 from .utility import download_url_to_file, probe_filename
 
 if TYPE_CHECKING:

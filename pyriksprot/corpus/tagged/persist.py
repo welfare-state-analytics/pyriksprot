@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from pyriksprot.utility import ensure_path, is_empty, strip_path_and_extension, strip_paths, touch
 
-from .. import interface
+from ... import interface
 
 METADATA_FILENAME: str = 'metadata.json'
 

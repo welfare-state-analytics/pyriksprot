@@ -8,7 +8,8 @@ import pytest
 from pyriksprot import corpus_index as csi
 from pyriksprot import dispatch, interface, merge
 from pyriksprot import metadata as md
-from pyriksprot import parlaclarin, segment
+from pyriksprot import segment, workflows
+from pyriksprot.corpus import parlaclarin
 
 from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
 
@@ -112,7 +113,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
 
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
-    parlaclarin.extract_corpus_text(
+    workflows.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
@@ -133,7 +134,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
 def test_extract_corpus_with_no_temporal_key():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
-    parlaclarin.extract_corpus_text(
+    workflows.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
@@ -152,7 +153,7 @@ def test_extract_corpus_with_no_temporal_key():
 def test_extract_corpus_with_no_matching_protocols():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
-    parlaclarin.extract_corpus_text(
+    workflows.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
@@ -172,7 +173,7 @@ def test_aggregator_extract_gender_party_no_temporal_key():
 
     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
 
-    parlaclarin.extract_corpus_text(
+    workflows.extract_corpus_text(
         source_folder=PARLACLARIN_SOURCE_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_filename,

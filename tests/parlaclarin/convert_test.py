@@ -4,7 +4,7 @@ from typing import List
 import pytest
 
 from pyriksprot import cluster, interface
-from pyriksprot.parlaclarin import convert, parse
+from pyriksprot.corpus.parlaclarin import convert, parse
 
 from ..utility import PARLACLARIN_FAKE_FOLDER
 

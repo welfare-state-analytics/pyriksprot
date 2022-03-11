@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Iterable, List, Tuple
 
+from pyriksprot import segment
 from pyriksprot.interface import ContentType
 from pyriksprot.utility import deprecated
 
-from .. import segment
 from .parse import ProtocolMapper, XmlIterParseProtocol, XmlUntangleProtocol
 
 

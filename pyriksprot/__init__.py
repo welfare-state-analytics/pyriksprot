@@ -1,15 +1,13 @@
 # type: ignore
 
-from . import metadata, parlaclarin
+from . import metadata
 from .cluster import MergerFactory, MergeStrategyType, to_speeches
+from .corpus.parlaclarin import pretokenize
 from .corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
 from .merge import ProtocolSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
-from .parlaclarin import pretokenize
-from .workflows import compute_term_frequencies, extract_corpus_tags, extract_corpus_text
 from .segment import ProtocolSegment, ProtocolSegmentIterator
-from .tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml
 from .utility import (
     compose,
     data_path_ts,
@@ -45,3 +43,5 @@ from .utility import (
     ts_data_path,
     unlink,
 )
+from .workflows import compute_term_frequencies, extract_corpus_tags, extract_corpus_text
+from .workflows.tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml

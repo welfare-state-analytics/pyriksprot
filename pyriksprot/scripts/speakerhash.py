@@ -4,7 +4,7 @@ import sys
 import click
 
 from pyriksprot import metadata as md
-from pyriksprot.tagged_corpus.persist import update_speaker_hash
+from pyriksprot.corpus.tagged.persist import update_speaker_hash
 
 jj = os.path.join
 relpath = os.path.relpath

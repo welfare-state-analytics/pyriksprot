@@ -4,7 +4,9 @@ from uuid import uuid4
 
 import pytest
 
-from pyriksprot import interface, tag, tagged_corpus
+from pyriksprot import interface
+from pyriksprot.corpus import tagged as tagged_corpus
+from pyriksprot.workflows import tag
 
 
 @pytest.mark.parametrize('storage_format', [interface.StorageFormat.JSON, interface.StorageFormat.CSV])

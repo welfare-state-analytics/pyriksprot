@@ -256,7 +256,7 @@ class ProtocolSegmentIterator(abc.ABC):
             multiproc_chunksize (int, optional): Multiprocessing multiproc_chunksize. Defaults to 100.
             multiproc_keep_order (bool, optional): Keep doc order. Defaults to False.
             merge_strategy (str, optional): Speech merge strategy. Defaults to 'chain'.
-            preprocessor (Callable[[str], str], optional): Preprocess funcion, only used for text. Defaults to None.
+            preprocess (Callable[[str], str], optional): Preprocess funcion, only used for text. Defaults to None.
         """
         self.filenames: list[str] = sorted(filenames)
         self.iterator = None
@@ -279,7 +279,7 @@ class ProtocolSegmentIterator(abc.ABC):
     def create_iterator(self) -> Iterable[ProtocolSegment]:
 
         item: ProtocolSegment
-        fx = self.preprocessor
+        fx = self.preprocess
         # speaker_service: SpeakerInfoService = self.speaker_service
 
         if self.multiproc_processes > 1:

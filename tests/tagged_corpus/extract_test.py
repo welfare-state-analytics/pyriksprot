@@ -5,7 +5,8 @@ from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import CorpusSourceIndex, dispatch, interface, tagged_corpus
+from pyriksprot import CorpusSourceIndex, dispatch, interface, workflows
+from pyriksprot.corpus import tagged as tagged_corpus
 
 from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 
@@ -75,7 +76,7 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
         ),
     }
 
-    tagged_corpus.extract_corpus_tags(**opts, progress=False)
+    workflows.extract_corpus_tags(**opts, progress=False)
     assert isfile(opts['target_name'])
     os.unlink(opts['target_name'])
 
@@ -86,7 +87,7 @@ def test_extract_speeches(target_type: str):
     compress_type: dispatch.CompressType = dispatch.CompressType.Feather
     target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{compress_type}'
 
-    tagged_corpus.extract_corpus_tags(
+    workflows.extract_corpus_tags(
         source_folder=TAGGED_SOURCE_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,

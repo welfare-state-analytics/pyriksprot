@@ -9,7 +9,8 @@ import pandas as pd
 import pytest
 from black import itertools
 
-from pyriksprot import cluster, interface, tagged_corpus
+from pyriksprot import cluster, interface
+from pyriksprot.corpus import tagged as tagged_corpus
 
 from .utility import TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_utterances
 

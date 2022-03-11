@@ -9,7 +9,7 @@ import pytest
 from pyriksprot import cluster, corpus_index, dispatch, interface, merge
 from pyriksprot import metadata as md
 from pyriksprot import segment, utility
-from pyriksprot.tagged_corpus import iterate
+from pyriksprot.corpus.tagged import iterate
 
 # pylint: disable=unused-variable, redefined-outer-name
 

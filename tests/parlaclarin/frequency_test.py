@@ -4,7 +4,8 @@ from typing import List
 
 import pytest
 
-from pyriksprot import interface, parlaclarin, utility
+from pyriksprot import interface, utility, workflows
+from pyriksprot.corpus import parlaclarin
 
 from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 
@@ -21,7 +22,7 @@ TEST_PARLACLARIN_XML_FILES = [
 @pytest.mark.parametrize('texts', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
 def test_word_frequency_counter(texts):
 
-    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
+    counter: workflows.TermFrequencyCounter = workflows.TermFrequencyCounter(progress=False)
 
     counter.ingest(texts)
 
@@ -37,7 +38,7 @@ def test_word_frequency_counter(texts):
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
-    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
+    counter: workflows.TermFrequencyCounter = workflows.TermFrequencyCounter(progress=False)
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(filename)
 
     counter.ingest(texts)
@@ -49,7 +50,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 def test_persist_word_frequencies(filename: List[str]):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
-    counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
+    counter: workflows.TermFrequencyCounter = workflows.TermFrequencyCounter(progress=False)
 
     counter.ingest(texts)
 
@@ -58,7 +59,7 @@ def test_persist_word_frequencies(filename: List[str]):
 
     assert os.path.isfile(store_name)
 
-    wf = parlaclarin.TermFrequencyCounter.load(store_name)
+    wf = workflows.TermFrequencyCounter.load(store_name)
     assert counter.frequencies == wf
 
     # os.unlink(store_name)
@@ -93,7 +94,7 @@ def test_compute_word_frequencies(document_name: str, expected_frequencies: dict
     filename: str = jj(PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
 
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
-        counts: parlaclarin.TermFrequencyCounter = parlaclarin.compute_term_frequencies(
+        counts: workflows.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],
             filename=store_name,
             progress=False,
@@ -103,7 +104,7 @@ def test_compute_word_frequencies(document_name: str, expected_frequencies: dict
     assert dict(counts.frequencies) == expected_frequencies
 
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
-        counts: parlaclarin.TermFrequencyCounter = parlaclarin.compute_term_frequencies(
+        counts: workflows.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],
             filename=store_name,
             multiproc_processes=2,

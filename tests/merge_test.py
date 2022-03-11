@@ -3,7 +3,7 @@ from typing import List
 import pytest
 
 from pyriksprot import corpus_index, interface, merge, segment
-from pyriksprot.tagged_corpus import iterate, persist
+from pyriksprot.corpus.tagged import iterate, persist
 
 from .utility import TAGGED_SOURCE_FOLDER
 

@@ -8,10 +8,10 @@ from click import echo
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 
 from pyriksprot import cluster
+from pyriksprot.dehyphenation import SwedishDehyphenatorService
+from pyriksprot.foss.sparv_tokenize import default_tokenize
+from pyriksprot.utility import dedent, strip_paths
 
-from ..dehyphenation import SwedishDehyphenatorService
-from ..foss.sparv_tokenize import default_tokenize
-from ..utility import dedent, strip_paths
 from . import parse
 
 if TYPE_CHECKING:
@@ -41,7 +41,7 @@ def pretokenize(text: str) -> str:
 
 
 JINJA_ENV = Environment(
-    loader=PackageLoader('pyriksprot.parlaclarin.resources', 'templates'),
+    loader=PackageLoader('pyriksprot.corpus.parlaclarin.resources', 'templates'),
     autoescape=select_autoescape(['html', 'xml']),
     trim_blocks=True,
     lstrip_blocks=True,

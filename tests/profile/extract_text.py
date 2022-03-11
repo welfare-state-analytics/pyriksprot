@@ -1,4 +1,4 @@
-from pyriksprot import interface, parlaclarin
+from pyriksprot import interface, workflows
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
         '_': {},
     }
 
-    parlaclarin.extract_corpus_text(**opts)
+    workflows.extract_corpus_text(**opts)
 
 
 if __name__ == '__main__':

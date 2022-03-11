@@ -2,7 +2,8 @@ import os
 
 import pytest
 
-from pyriksprot import interface, parlaclarin
+from pyriksprot import interface
+from pyriksprot.corpus import parlaclarin
 
 from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_FOLDER
 

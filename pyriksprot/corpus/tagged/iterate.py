@@ -4,7 +4,7 @@ from typing import Iterable, List, Tuple
 
 import pandas as pd
 
-from .. import segment
+from ... import segment
 from . import persist
 
 

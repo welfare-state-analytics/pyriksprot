@@ -1,13 +1,13 @@
 from os.path import basename
 
-from pyriksprot import cluster, dispatch, interface, tagged_corpus
+from pyriksprot import cluster, dispatch, interface, workflows
 
 # pylint: disable=redefined-outer-name
 
 
 def main(target_type: dispatch.TargetTypeKey, source_folder: str):
 
-    tagged_corpus.extract_corpus_tags(
+    workflows.extract_corpus_tags(
         source_folder=source_folder,
         metadata_filename="/data/westac/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.0.db",
         target_name=f'/data/westac/riksdagen_corpus_data/{target_type}_{basename(source_folder)}/',

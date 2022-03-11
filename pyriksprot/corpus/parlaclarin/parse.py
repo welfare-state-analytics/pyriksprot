@@ -6,10 +6,10 @@ from typing import Iterable, List, Union
 
 from loguru import logger
 
-from .. import interface
-from ..foss import untangle
-from ..utility import dedent as dedent_text
-from ..utility import deprecated
+from pyriksprot import interface
+from pyriksprot.foss import untangle
+from pyriksprot.utility import dedent as dedent_text
+from pyriksprot.utility import deprecated
 
 
 class XmlProtocol(abc.ABC):

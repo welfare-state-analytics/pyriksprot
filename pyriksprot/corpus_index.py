@@ -9,7 +9,7 @@ from typing import List, Optional, Set
 import pandas as pd
 
 from . import utility
-from .tagged_corpus.persist import load_metadata
+from .corpus.tagged.persist import load_metadata
 
 METADATA_FILENAME: str = 'metadata.json'
 

@@ -5,12 +5,12 @@ from typing import Sequence
 
 from loguru import logger
 
+from pyriksprot.corpus.parlaclarin import iterate
 from pyriksprot.segment import ProtocolSegment
 
 from .. import corpus_index, dehyphenation, dispatch, interface, merge
 from .. import metadata as md
 from .. import utility
-from ..parlaclarin import iterate
 
 # pylint: disable=too-many-arguments
 

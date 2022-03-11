@@ -2,7 +2,7 @@ import click
 from tqdm import tqdm
 
 from pyriksprot import cluster, corpus_index, dispatch, interface, segment
-from pyriksprot.tagged_corpus import iterate
+from pyriksprot.corpus.tagged import iterate
 
 from .utils import option2
 
