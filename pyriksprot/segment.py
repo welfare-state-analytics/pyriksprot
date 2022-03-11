@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ProtocolSegment:
+    """Container for a subset of utterances within a single protocol"""
 
     protocol_name: str
     content_type: ContentType
@@ -79,36 +80,6 @@ class ProtocolSegment:
     @property
     def filename(self) -> str:
         return f'{self.name}.{self.extension}'
-
-    def temporal_value(self, temporal_key: TemporalKey | dict[str, tuple[int, int]]) -> str:
-
-        if not self.year:
-            raise ValueError(f"{self.protocol_name} segment has undefined year")
-
-        if isinstance(temporal_key, (TemporalKey, str, type(None))):
-
-            if temporal_key in [None, '', 'document', 'protocol', TemporalKey.NONE]:
-                """No temporal key gives a group per document/protocol"""
-                return self.protocol_name
-
-            if temporal_key == TemporalKey.Year:
-                return str(self.year)
-
-            if temporal_key == TemporalKey.Lustrum:
-                low_year: int = self.year - (self.year % 5)
-                return f"{low_year}-{low_year+4}"
-
-            if temporal_key == TemporalKey.Decade:
-                low_year: int = self.year - (self.year % 10)
-                return f"{low_year}-{low_year+9}"
-
-        elif isinstance(temporal_key, dict):
-            """custom periods as a dict {'category-name': (from_year,to_year), ...}"""
-            for k, v in temporal_key:
-                if v[0] <= self.year <= v[1]:
-                    return k
-
-        raise ValueError(f"temporal period failed for {self.name}")
 
 
 def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
