@@ -6,6 +6,7 @@ import os
 import zipfile
 from typing import Iterable, List, Optional
 
+from loguru import logger
 from tqdm import tqdm
 
 from pyriksprot.utility import ensure_path, is_empty, strip_path_and_extension, strip_paths, touch
@@ -56,20 +57,19 @@ def store_protocol(
 
 def load_metadata(filename: str) -> Optional[dict]:
     """Read metadata attributes stored in `metadata.json` """
-    if is_empty(filename) or not zipfile.is_zipfile(filename):
-        # logger.warning(f'Skipping {os.path.basename(filename)} (corrupt or empty zip)')
+
+    try:
+        with zipfile.ZipFile(filename, 'r') as fp:
+            filenames: List[str] = [f.filename for f in fp.filelist]
+            if METADATA_FILENAME not in filenames:
+                return None
+            json_str = fp.read(METADATA_FILENAME).decode('utf-8')
+            return json.loads(json_str)
+    except (zipfile.BadZipFile, FileNotFoundError):
         return None
-
-    with zipfile.ZipFile(filename, 'r') as fp:
-
-        filenames: List[str] = [f.filename for f in fp.filelist]
-
-        if METADATA_FILENAME not in filenames:
-            return None
-
-        json_str = fp.read(METADATA_FILENAME).decode('utf-8')
-
-        return json.loads(json_str)
+    except Exception as ex:
+        logger.info(f"caught {type(ex).__name__}")
+        return None
 
 
 PROTOCOL_LOADERS: dict = dict(
