@@ -60,13 +60,13 @@ def test_create_grouping_hashcoder():
         _ = merge_segments.create_grouping_hashcoder(["dummy_id"])
 
     hashcoder = merge_segments.create_grouping_hashcoder([])
-    parts, hash_str, hashcode = hashcoder(item, speaker, index_item)
+    parts, hash_str, hashcode = hashcoder(item, index_item)
     assert not parts
     assert hash_str == item.name
 
     attributes: list[str] = ["who", "gender_id", "party_id", "office_type_id"]
     hashcoder = merge_segments.create_grouping_hashcoder(attributes)
-    parts, hash_str, hashcode = hashcoder(item, speaker, source_item)
+    parts, hash_str, hashcode = hashcoder(item, source_item)
 
     assert parts == {
         'gender_id': str(speaker.gender_id),
@@ -84,7 +84,6 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_s
 
     texts: Iterable[segment.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames,
-        speaker_service=speaker_service,
         segment_level=interface.SegmentLevel.Who,
         segment_skip_size=0,
         multiproc_processes=None,

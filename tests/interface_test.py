@@ -9,13 +9,9 @@ import pandas as pd
 import pytest
 from black import itertools
 
-from pyriksprot import interface, segment, tagged_corpus, merge_speech
+from pyriksprot import interface, merge_speech, tagged_corpus
 
-from .utility import (
-    TAGGED_SOURCE_PATTERN,
-    UTTERANCES_DICTS,
-    create_utterances,
-)
+from .utility import TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_utterances
 
 # pylint: disable=redefined-outer-name
 

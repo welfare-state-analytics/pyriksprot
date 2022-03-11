@@ -202,7 +202,7 @@ def hashcoder_with_no_grouping_keys(item: segment.ProtocolSegment, **_) -> Tuple
 
 
 def create_grouping_hashcoder(
-    grouping_keys: Sequence[str],
+    grouping_keys: Sequence[str]
 ) -> Callable[[segment.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
     """Create a hashcode function for given grouping keys"""
 

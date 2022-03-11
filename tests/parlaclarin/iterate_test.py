@@ -5,7 +5,6 @@ from typing import Iterable, List
 import pytest
 
 from pyriksprot import interface
-from pyriksprot import metadata as md
 from pyriksprot import parlaclarin, segment, utility
 
 from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
@@ -64,7 +63,7 @@ def test_xml_protocol_texts_iterator_texts():
             multiproc_keep_order=True,
         )
     )
-    assert set([x.name for x in texts]) == set(expected_document_names)
+    assert {x.name for x in texts} == set(expected_document_names)
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(

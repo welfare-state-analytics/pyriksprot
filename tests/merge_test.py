@@ -14,14 +14,13 @@ from .utility import TAGGED_SOURCE_FOLDER
 
 @pytest.fixture
 def protocol_segments(
-    speaker_service: md.SpeakerInfoService, source_index: corpus_index.CorpusSourceIndex
+    source_index: corpus_index.CorpusSourceIndex
 ) -> List[segment.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
     segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
-        speaker_service=speaker_service,
         content_type=content_type,
         segment_level=segment_level,
         merge_strategy=None,

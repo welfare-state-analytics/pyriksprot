@@ -10,7 +10,7 @@ from .utils import option2
 
 
 @click.command()
-#@click.argument('metadata-filename', type=click.STRING)
+# @click.argument('metadata-filename', type=click.STRING)
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
 @option2('--content-type')
@@ -26,7 +26,7 @@ def main(
     compress_type: str = "zip",
     merge_strategy: str = "chain",
 ):
- #   speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
+    #   speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True

@@ -19,7 +19,6 @@ def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
     speaker_service: md.SpeakerInfoService,
 ) -> Mapping[str, merge_segments.ProtocolSegmentGroup]:
-
     def assign_speaker_info(item: segment.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(item.u_id)
 
@@ -29,7 +28,7 @@ def tagged_speeches(
         segment_level=interface.SegmentLevel.Speech,
         merge_strategy=segment.MergeSpeechStrategyType.who_speaker_hash_sequence,
         segment_skip_size=1,
-        preprocess=assign_speaker_info
+        preprocess=assign_speaker_info,
     )
     groups = merge_segments.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(
         segments
