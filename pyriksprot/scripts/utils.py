@@ -14,7 +14,7 @@ CLI_LOG_PATH = './logs'
 TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
 COMPRESS_TYPES = dispatch.CompressType.values()
 CONTENT_TYPES = [e.value for e in interface.ContentType]
-MERGE_STRATEGIES = [e.value for e in segment.MergeUtteranceStrategyType]
+MERGE_STRATEGIES = [e.value for e in segment.MergeStrategyType]
 SEGMENT_LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
 
 

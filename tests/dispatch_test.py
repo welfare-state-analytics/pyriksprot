@@ -26,7 +26,7 @@ def tagged_speeches(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
-        merge_strategy=segment.MergeUtteranceStrategyType.who_speaker_hash_sequence,
+        merge_strategy=segment.MergeStrategyType.who_speaker_hash_sequence,
         segment_skip_size=1,
         preprocess=assign_speaker_info,
     )

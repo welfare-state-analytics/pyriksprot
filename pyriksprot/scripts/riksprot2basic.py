@@ -33,7 +33,7 @@ def main(
         filenames=source_index.paths,
         content_type=interface.ContentType(content_type),
         segment_level=interface.SegmentLevel.Protocol,
-        merge_strategy=segment.MergeUtteranceStrategyType(merge_strategy),
+        merge_strategy=segment.MergeStrategyType(merge_strategy),
     )
 
     with dispatch.IDispatcher.dispatcher(target_type)(

@@ -3,7 +3,7 @@ from __future__ import annotations
 import glob
 import os
 import uuid
-from typing import Callable, List
+from typing import Callable
 
 import pandas as pd
 import pytest
@@ -19,7 +19,7 @@ jj = os.path.join
 
 
 @pytest.fixture(scope='module')
-def utterances() -> List[interface.Utterance]:
+def utterances() -> list[interface.Utterance]:
     return create_utterances()
 
 
@@ -35,13 +35,13 @@ def test_utterance_checksumtext():
 
 def test_utterances_to_dict():
 
-    who_sequences: List[List[interface.Utterance]] = merge_utterances.MergeSpeechByWhoSequence().split(None)
+    who_sequences: list[list[interface.Utterance]] = merge_utterances.MergeByWhoSequence().cluster(None)
     assert who_sequences == []
 
-    who_sequences: List[List[interface.Utterance]] = merge_utterances.MergeSpeechByWhoSequence().split([])
+    who_sequences: list[list[interface.Utterance]] = merge_utterances.MergeByWhoSequence().cluster([])
     assert who_sequences == []
 
-    utterances: List[interface.Utterance] = [
+    utterances: list[interface.Utterance] = [
         interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
         interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
         interface.Utterance(u_id=f'{uuid.uuid4()}', who='B'),
@@ -49,7 +49,7 @@ def test_utterances_to_dict():
         interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
     ]
 
-    who_sequences: List[List[interface.Utterance]] = merge_utterances.MergeSpeechByWhoSequence().split(utterances)
+    who_sequences: list[list[interface.Utterance]] = merge_utterances.MergeByWhoSequence().cluster(utterances)
 
     assert len(who_sequences) == 3
     assert len(who_sequences[0]) == 2
@@ -60,33 +60,33 @@ def test_utterances_to_dict():
     assert set(x.who for x in who_sequences[2]) == {'A'}
 
 
-def test_utterances_who_sequences(utterances: List[interface.Utterance]):
+def test_utterances_who_sequences(utterances: list[interface.Utterance]):
 
     data = interface.UtteranceHelper.to_dict(utterances)
     assert data == UTTERANCES_DICTS
 
 
-def test_utterances_to_csv(utterances: List[interface.Utterance]):
+def test_utterances_to_csv(utterances: list[interface.Utterance]):
 
     data: str = interface.UtteranceHelper.to_csv(utterances)
     loaded_utterances = interface.UtteranceHelper.from_csv(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
-def test_utterances_to_json(utterances: List[interface.Utterance]):
+def test_utterances_to_json(utterances: list[interface.Utterance]):
 
     data: str = interface.UtteranceHelper.to_json(utterances)
     loaded_utterances = interface.UtteranceHelper.from_json(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
-def test_utterances_to_pandas(utterances: List[interface.Utterance]):
+def test_utterances_to_pandas(utterances: list[interface.Utterance]):
 
     data: pd.DataFrame = interface.UtteranceHelper.to_dataframe(utterances)
     assert data.reset_index().to_dict(orient='records') == UTTERANCES_DICTS
 
 
-def test_protocol_create(utterances: List[interface.Utterance]):
+def test_protocol_create(utterances: list[interface.Utterance]):
 
     protocol: interface.Protocol = interface.Protocol(date="1958", name="prot-1958-fake", utterances=utterances)
 
@@ -106,7 +106,7 @@ def test_protocol_create(utterances: List[interface.Utterance]):
 
 def test_protocol_preprocess():
     """Modifies utterances:"""
-    utterances: List[interface.Utterance] = create_utterances()
+    utterances: list[interface.Utterance] = create_utterances()
 
     protocol: interface.Protocol = interface.Protocol(date="1950", name="prot-1958-fake", utterances=utterances)
 
@@ -118,8 +118,8 @@ def test_protocol_preprocess():
 
 
 def test_protocols_to_items():
-    filenames: List[str] = glob.glob(TAGGED_SOURCE_PATTERN, recursive=True)
-    protocols: List[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
+    filenames: list[str] = glob.glob(TAGGED_SOURCE_PATTERN, recursive=True)
+    protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
     _ = itertools.chain(
         p.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
         for p in protocols
