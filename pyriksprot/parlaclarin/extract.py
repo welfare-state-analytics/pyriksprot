@@ -72,8 +72,10 @@ def extract_corpus_text(
         ([utility.dedent] if dedent else []) + ([create_dehyphen(data_path)] if dehyphen else [])
     )
 
+    speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
     segments: iterate.XmlUntangleSegmentIterator = iterate.XmlUntangleSegmentIterator(
         filenames=source_index.paths,
+        speaker_service=speaker_service,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,
         multiproc_processes=multiproc_processes,
@@ -82,10 +84,8 @@ def extract_corpus_text(
         preprocessor=preprocessor,
     )
 
-    speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
     merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
         source_index=source_index,
-        speaker_service=speaker_service,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )

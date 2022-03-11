@@ -16,9 +16,9 @@ from loguru import logger
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
-from . import merge, segment, utility
+from . import merge_segments, segment, utility
 
-DispatchItem = Union[merge.MergedSegmentGroup, segment.ProtocolSegment]
+DispatchItem = Union[merge_segments.ProtocolSegmentGroup, segment.ProtocolSegment]
 
 jj = os.path.join
 # pylint: disable=no-member
@@ -112,7 +112,7 @@ class IDispatcher(abc.ABC):
         self.document_id += 1
 
     @abc.abstractmethod
-    def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
+    def _dispatch_item(self, item: merge_segments.ProtocolSegmentGroup) -> None:
         ...
 
     def document_index(self) -> pd.DataFrame:
@@ -170,8 +170,8 @@ class FilesInFolderDispatcher(IDispatcher):
     def open_target(self, target_name: Any) -> None:
         os.makedirs(target_name, exist_ok=True)
 
-    def _dispatch_item(self, item: merge.MergedSegmentGroup) -> None:
-        filename: str = f'{item.temporal_value}_{item.name}.{item.extension}'
+    def _dispatch_item(self, item: merge_segments.ProtocolSegmentGroup) -> None:
+        filename: str = f'{item.temporal_value}_{item.group_name}.{item.extension}'
         # FIXME: POS is made lowercase!
         self.store(filename, item.data.lower() if self.lowercase else item.data)
 

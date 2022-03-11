@@ -7,7 +7,7 @@ from typing import Sequence
 from loguru import logger
 from tqdm import tqdm
 
-from .. import corpus_index, dispatch, interface, merge
+from .. import corpus_index, dispatch, interface, merge_segments
 from .. import metadata as md
 from .. import segment
 from . import iterate
@@ -103,6 +103,7 @@ def extract_corpus_tags(
 
     texts: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
+        speaker_service=speaker_service,
         content_type=content_type,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,
@@ -113,9 +114,8 @@ def extract_corpus_tags(
         preprocessor=None,
     )
 
-    merger: merge.SegmentMerger = merge.SegmentMerger(
+    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
         source_index=source_index,
-        speaker_service=speaker_service,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )
