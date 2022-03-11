@@ -7,7 +7,7 @@ from typing import Sequence
 from loguru import logger
 from tqdm import tqdm
 
-from .. import corpus_index, dispatch, interface, merge_segments
+from .. import corpus_index, dispatch, interface, merge
 from .. import metadata as md
 from .. import segment
 from . import iterate
@@ -116,7 +116,7 @@ def extract_corpus_tags(
         preprocess=get_speaker if segment_level == interface.SegmentLevel.Speech else None,
     )
 
-    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
+    merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,

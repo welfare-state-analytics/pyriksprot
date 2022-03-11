@@ -4,8 +4,8 @@ from . import metadata, parlaclarin
 from .corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
-from .merge_segments import ProtocolSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
-from .merge_utterances import MergerFactory, MergeStrategyType, to_speeches
+from .merge import ProtocolSegmentGroup, SegmentCategoryClosed, SegmentMerger, create_grouping_hashcoder
+from .cluster import MergerFactory, MergeStrategyType, to_speeches
 from .parlaclarin import compute_term_frequencies, pretokenize
 from .segment import ProtocolSegment, ProtocolSegmentIterator
 from .tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml

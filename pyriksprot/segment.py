@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
-from . import merge_utterances as mu
+from . import cluster as mu
 from .interface import ContentType, Protocol, SegmentLevel, TemporalKey
 from .utility import compress
 
