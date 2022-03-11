@@ -42,7 +42,6 @@ def test_create_grouping_hashcoder():
             'date': '1955-05-20',
             'checksum': '560f443658031647fbe1d3f88cdd60b515b1dbba',
         },
-        is_empty=False,
     )
     # speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
     speaker: md.SpeakerInfo = md.SpeakerInfo(
@@ -60,7 +59,10 @@ def test_create_grouping_hashcoder():
         _ = merge.create_grouping_hashcoder(["dummy_id"])
 
     hashcoder = merge.create_grouping_hashcoder([])
+
+    item.speaker_info = speaker
     parts, hash_str, hashcode = hashcoder(item=item, source_item=None)
+
     assert not parts
     assert hash_str == item.name
 
@@ -74,8 +76,7 @@ def test_create_grouping_hashcoder():
         'party_id': str(speaker.party_id),
         'who': item.who,
     }
-    assert hash_str == '1_1_8_q5715273'
-    assert hashcode == "2bceb45df2c99ce2620a1d7897846618"
+    assert set(hash_str.split("_")) ==  set('1_1_8_q5715273'.split("_"))
 
 
 def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):

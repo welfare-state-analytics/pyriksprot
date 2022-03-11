@@ -27,7 +27,6 @@ class CorpusSourceItem:
     subfolder: str = None
     year: Optional[int] = None
     metadata: dict | None = None
-    is_empty: Optional[int] = None
 
     def __post_init__(self):
 

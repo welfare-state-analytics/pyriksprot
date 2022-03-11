@@ -20,7 +20,7 @@ def tagged_speeches(
     speaker_service: md.SpeakerInfoService,
 ) -> Mapping[str, merge.ProtocolSegmentGroup]:
     def assign_speaker_info(item: segment.ProtocolSegment) -> None:
-        item.speaker_info = speaker_service.get_speaker_info(item.u_id)
+        item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
 
     segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,

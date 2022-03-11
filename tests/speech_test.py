@@ -70,26 +70,23 @@ def test_merge_speech_by_strategy(
 ):
 
     protocol: interface.Protocol = interface.Protocol(date="1950", name="prot-1958-fake", utterances=utterances)
-    for speeches in [
-        cls().speeches(protocol=protocol, segment_skip_size=0),
-        cluster.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0),
-    ]:
+    speeches = cluster.to_speeches(protocol=protocol, merge_strategy=cls, skip_size=0)
 
-        assert len(speeches) == expected_count
+    assert len(speeches) == expected_count
 
-        for i, speech in enumerate(speeches):
-            assert speech.speech_index == i + 1
-            assert speech.speech_date == protocol.date
-            assert speech.document_name == f'{protocol.name}_{speech.speech_index:03}'
-            assert speech.speech_name.startswith(protocol.name)
-            assert speech.delimiter == '\n'
-            for interface.utterance in speech.utterances:
-                assert interface.utterance.who == speech.who
+    for i, speech in enumerate(speeches):
+        assert speech.speech_index == i + 1
+        assert speech.speech_date == protocol.date
+        assert speech.document_name == f'{protocol.name}_{speech.speech_index:03}'
+        assert speech.speech_name.startswith(protocol.name)
+        assert speech.delimiter == '\n'
+        for interface.utterance in speech.utterances:
+            assert interface.utterance.who == speech.who
 
-        assert [s.text for s in speeches] == expected_texts
+    assert [s.text for s in speeches] == expected_texts
 
-        assert [{u.who for u in s.utterances} for s in speeches] == expected_whos
-        assert [s.speech_id for s in speeches] == expected_ids
+    assert [{u.who for u in s.utterances} for s in speeches] == expected_whos
+    assert [s.speech_id for s in speeches] == expected_ids
 
 
 def test_speech_annotation():

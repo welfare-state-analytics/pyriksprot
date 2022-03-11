@@ -3,7 +3,9 @@ from __future__ import annotations
 import abc
 from collections import defaultdict
 from enum import Enum
+import inspect
 from itertools import groupby
+from typing import Type
 
 from loguru import logger
 
@@ -21,7 +23,9 @@ class MergeStrategyType(str, Enum):
     undefined = 'undefined'
 
 
-def to_speeches(*, protocol: Protocol, merge_strategy: MergeStrategyType, skip_size: int = 1) -> list[Speech]:
+def to_speeches(
+    *, protocol: Protocol, merge_strategy: MergeStrategyType | Type[IMergeStrategy], skip_size: int = 1
+) -> list[Speech]:
 
     if not protocol.utterances:
         return []
@@ -39,7 +43,7 @@ def to_speeches(*, protocol: Protocol, merge_strategy: MergeStrategyType, skip_s
             speech_index=i + 1,
             utterances=utterances,
         )
-        for i, utterances in enumerate(merger.cluster(protocol.utterances))
+        for i, utterances in enumerate(merger.cluster(utterances=protocol.utterances))
     ]
 
     if skip_size > 0:
@@ -177,9 +181,11 @@ class MergerFactory:
     }
 
     @staticmethod
-    def get(strategy: str) -> IMergeStrategy:
+    def get(strategy: str | Type[IMergeStrategy]) -> IMergeStrategy:
         return (
-            MergerFactory.strategies.get(strategy)
+            strategy()
+            if inspect.isclass(strategy) and issubclass(strategy, IMergeStrategy)
+            else MergerFactory.strategies.get(strategy)
             if strategy in MergerFactory.strategies
             else MergerFactory.strategies.get('undefined')
         )
