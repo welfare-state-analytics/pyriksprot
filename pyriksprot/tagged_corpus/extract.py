@@ -103,7 +103,6 @@ def extract_corpus_tags(
 
     texts: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
-        speaker_service=speaker_service,
         content_type=content_type,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,
