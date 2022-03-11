@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, is_dataclass
 from typing import Callable, Iterable, Type
 
 from loguru import logger
@@ -12,10 +12,6 @@ from . import segment, utility
 from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 
 # pylint: disable=too-many-arguments
-
-
-class SegmentCategoryClosed(Exception):
-    ...
 
 
 @dataclass
@@ -75,11 +71,6 @@ class ProtocolSegmentGroup:
             'n_tokens': self.n_tokens,
             **self.grouping_values,
         }
-
-    @staticmethod
-    def header(grouping_keys: list[str], sep: str = '\t') -> str:
-        header: str = f"period{sep}name{sep}{sep.join(v for v in grouping_keys)}{sep}n_chars{sep}"
-        return header
 
 
 class SegmentMerger:
@@ -221,10 +212,6 @@ class SegmentMerger:
         raise ValueError(f"temporal period failed for {item.protocol_name}")
 
 
-def props(cls: Type) -> list[str]:
-    return [i for i in cls.__dict__.keys() if i[:1] != '_']
-
-
 def hashcoder_with_no_grouping_keys(item: segment.ProtocolSegment, **_) -> tuple[dict, str, str]:
     return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
 
@@ -240,25 +227,29 @@ def create_grouping_hashcoder(
         """No grouping apart from temporal key """
         return hashcoder_with_no_grouping_keys
 
-    speaker_keys: set[str] = grouping_keys.intersection({f.name for f in fields(md.SpeakerInfo)})
-    item_keys: set[str] = grouping_keys.intersection({f.name for f in fields(segment.ProtocolSegment)})
-    corpus_index_keys: set[str] = grouping_keys.intersection({f.name for f in fields(corpus_index.CorpusSourceItem)})
-    item_keys -= speaker_keys
-    corpus_index_keys -= speaker_keys | item_keys
-
-    missing_keys: set[str] = grouping_keys - (speaker_keys | corpus_index_keys | item_keys)
-    if missing_keys:
-        raise TypeError(f"grouping_hashcoder: key(s) {', '.join(missing_keys)} not found (ignored)")
+    speaker_keys, item_keys, corpus_index_keys = utility.split_properties_by_dataclass(
+        grouping_keys, md.SpeakerInfo, segment.ProtocolSegment, corpus_index.CorpusSourceItem
+    )
 
     def hashcoder(item: segment.ProtocolSegment, source_item: corpus_index.CorpusSourceItem) -> tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
         assert isinstance(source_item, corpus_index.CorpusSourceItem)
+        try:
+            speaker_data: dict = (
+                {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys} if speaker_keys else {}
+            )
+            # (
+            #     {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys}
+            #     if item.speaker_info is not None
+            #     else {}
+            # )
+        except AttributeError as ex:
+            raise ValueError(
+                f"Grouping hashcoder: failed on retrieving key values from item.speaker_info. {ex}"
+            ) from ex
+
         parts: dict[str, str | int] = {
-            **(
-                {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys}
-                if item.speaker_info is not None
-                else {}
-            ),
+            **speaker_data,
             **{attr: str(getattr(source_item, attr)) for attr in corpus_index_keys},
             **{attr: str(getattr(item, attr)) for attr in item_keys},
         }
