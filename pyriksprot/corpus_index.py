@@ -1,21 +1,15 @@
 from __future__ import annotations
 
 import glob
-import json
 from dataclasses import asdict, dataclass
 from os.path import basename, dirname, isdir
 from os.path import join as jj
-from typing import TYPE_CHECKING, List, Mapping, Optional, Set, Tuple
-from zipfile import ZipFile
+from typing import List, Optional, Set
 
 import pandas as pd
 
 from . import utility
-from .interface import TemporalKey
 from .tagged_corpus.persist import load_metadata
-
-if TYPE_CHECKING:
-    from . import iterate
 
 METADATA_FILENAME: str = 'metadata.json'
 
@@ -40,57 +34,20 @@ class CorpusSourceItem:
         self.filename = basename(self.path)
         self.name = utility.strip_path_and_extension(self.path)
         self.subfolder = basename(dirname(self.path))
-        self.year = self.to_year(basename(self.path))
         self.metadata = load_metadata(self.path)
-        self.is_empty = self.metadata is None
 
         if not self.name.startswith("prot-"):
             raise ValueError(f"illegal filename {self.name}")
 
-    def temporal_category(
-        self, temporal_key: TemporalKey | Mapping[str, Tuple[int, int]], item: iterate.ProtocolSegment = None
-    ) -> str:
+        """Year extracted from filename"""
+        self.year = int(self.filename.split("-")[1][:4])
 
-        if isinstance(temporal_key, (TemporalKey, str, type(None))):
+        """Year from data in metadata (the actual year)"""
+        self.actual_year = int(self.metadata['date'][:4]) if self.metadata else self.year
 
-            if temporal_key in [None, '', 'document', 'protocol', TemporalKey.NONE]:
-                """No temporal key gives a group per document/protocol"""
-                return item.protocol_name
-
-            if temporal_key == TemporalKey.Year:
-                return str(self.year)
-
-            if temporal_key == TemporalKey.Lustrum:
-                low_year: int = self.year - (self.year % 5)
-                return f"{low_year}-{low_year+4}"
-
-            if temporal_key == TemporalKey.Decade:
-                low_year: int = self.year - (self.year % 10)
-                return f"{low_year}-{low_year+9}"
-
-        elif isinstance(temporal_key, dict):
-            """custom periods as a dict {'category-name': (from_year,to_year), ...}"""
-            for k, v in temporal_key:
-                if v[0] <= self.year <= v[1]:
-                    return k
-
-        raise ValueError(f"temporal period failed for {self.name}")
-
-    def to_year(self, filename: str) -> Optional[int]:
-        date_split = lambda date, idx: int(date.split("-")[idx][:4])
-
-        try:
-            with ZipFile(self.path, 'r') as zipped_file:
-                with zipped_file.open(METADATA_FILENAME) as meta:
-                    date_str = json.load(meta)['date']
-                    return date_split(date_str, 0)
-        except Exception:
-            ...
-        try:
-            return date_split(filename, 1)
-        except ValueError:
-            ...
-        return None
+    @property
+    def is_empty(self) -> bool:
+        return not bool(self.metadata)
 
     def to_dict(self) -> dict:
 
