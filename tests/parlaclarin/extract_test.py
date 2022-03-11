@@ -5,8 +5,8 @@ from typing import Iterable
 
 import pytest
 
-from pyriksprot import corpus_index as csi
-from pyriksprot import dispatch, interface, merge
+from pyriksprot import corpus_index as csi, merge_segments
+from pyriksprot import dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import parlaclarin, segment
 
@@ -57,15 +57,15 @@ def test_create_grouping_hashcoder():
     )
     index_item = None
     with pytest.raises(TypeError):
-        _ = merge.create_grouping_hashcoder(["dummy_id"])
+        _ = merge_segments.create_grouping_hashcoder(["dummy_id"])
 
-    hashcoder = merge.create_grouping_hashcoder([])
+    hashcoder = merge_segments.create_grouping_hashcoder([])
     parts, hash_str, hashcode = hashcoder(item, speaker, index_item)
     assert not parts
     assert hash_str == item.name
 
     attributes: list[str] = ["who", "gender_id", "party_id", "office_type_id"]
-    hashcoder = merge.create_grouping_hashcoder(attributes)
+    hashcoder = merge_segments.create_grouping_hashcoder(attributes)
     parts, hash_str, hashcode = hashcoder(item, speaker, source_item)
 
     assert parts == {
@@ -83,12 +83,15 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_s
     filenames: list[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
     texts: Iterable[segment.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
-        filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=0, multiproc_processes=None
+        filenames=filenames,
+        speaker_service=speaker_service,
+        segment_level=interface.SegmentLevel.Who,
+        segment_skip_size=0,
+        multiproc_processes=None,
     )
 
-    merger: merge.SegmentMerger = merge.SegmentMerger(
+    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
         source_index=xml_source_index,
-        speaker_service=speaker_service,
         temporal_key=interface.TemporalKey.Year,
         grouping_keys=["gender_id", "party_id"],
     )
@@ -96,10 +99,10 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex, speaker_s
     assert merger is not None
     assert merger.grouping_keys == ["gender_id", "party_id"]
 
-    groups: list[dict[str, merge.MergedSegmentGroup]] = [item for item in merger.merge(texts)]
+    groups: list[dict[str, merge_segments.ProtocolSegmentGroup]] = [item for item in merger.merge(texts)]
 
     assert len(groups) > 0
-    g: dict[str, merge.MergedSegmentGroup] = groups[0]
+    g: dict[str, merge_segments.ProtocolSegmentGroup] = groups[0]
     key = list(g.keys())[0]  # '72e6f6e0f08ca88f02b1480464afd55b'
     data = g[key]
     # FIXME: 'who' is added to values (bugfix)

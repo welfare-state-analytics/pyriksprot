@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from pyriksprot import corpus_index, interface, merge
+from pyriksprot import corpus_index, interface, merge_segments
 from pyriksprot import metadata as md
 from pyriksprot import segment
 from pyriksprot.tagged_corpus import iterate, persist
@@ -13,12 +13,15 @@ from .utility import TAGGED_SOURCE_FOLDER
 
 
 @pytest.fixture
-def utterance_segments(source_index: corpus_index.CorpusSourceIndex) -> List[segment.ProtocolSegment]:
+def protocol_segments(
+    speaker_service: md.SpeakerInfoService, source_index: corpus_index.CorpusSourceIndex
+) -> List[segment.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
     segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
+        speaker_service=speaker_service,
         content_type=content_type,
         segment_level=segment_level,
         merge_strategy=None,
@@ -28,27 +31,25 @@ def utterance_segments(source_index: corpus_index.CorpusSourceIndex) -> List[seg
 
 
 def test_segment_merger_merge_on_protocol_level_group_by_who(
-    speaker_service: md.SpeakerInfoService,
     source_index: corpus_index.CorpusSourceIndex,
-    utterance_segments: List[segment.ProtocolSegment],
+    protocol_segments: List[segment.ProtocolSegment],
 ):
 
     """Load source protocols to simplify tests"""
     protocols: List[interface.Protocol] = list(persist.load_protocols(source=TAGGED_SOURCE_FOLDER))
 
     """Check that iterator yields all utterances"""
-    assert len(utterance_segments) == sum(map(len, protocols))
+    assert len(protocol_segments) == sum(map(len, protocols))
 
     """Iterate at protocol level with no temporal key gives one group per docoment"""
     temporal_key: interface.TemporalKey = None
     group_keys: List[interface.GroupingKey] = [interface.GroupingKey.who]
-    merger: merge.SegmentMerger = merge.SegmentMerger(
+    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
         source_index=source_index,
-        speaker_service=speaker_service,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
     )
 
-    groups = merger.merge(utterance_segments)
+    groups = merger.merge(protocol_segments)
 
     assert sum([len(g.values()) for g in groups]) == sum([len(set(u.who for u in p.utterances)) for p in protocols])

@@ -1,6 +1,5 @@
 import os
 from os.path import join as jj
-from typing import List
 from uuid import uuid4
 
 import pytest
@@ -39,9 +38,9 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
     assert os.path.isfile(output_filename)
 
-    corpus_metadata: dict = tagged_corpus.load_metadata(output_filename)
+    metadata: dict = tagged_corpus.load_metadata(output_filename)
 
-    assert corpus_metadata is not None
+    assert metadata is not None
 
     loaded_protocol: interface.Protocol = tagged_corpus.load_protocol(output_filename)
 
@@ -56,7 +55,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
 def test_to_csv():
 
-    tagged_documents: List[tag.TaggedDocument] = [
+    tagged_documents: list[tag.TaggedDocument] = [
         {
             'lemma': ['hej', '!', 'detta', 'vara', 'en', 'test', '!'],
             'num_tokens': 7,
