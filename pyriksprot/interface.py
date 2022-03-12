@@ -221,7 +221,7 @@ class UtteranceMixIn:
     @property
     def has_text(self) -> bool:
         """Check if any utterance actually has any uttered words."""
-        return any(u.text != "" for u in self.utterances)
+        return any(bool(u.text) for u in self.utterances)
 
     @property
     def tagged_text(self) -> str:
