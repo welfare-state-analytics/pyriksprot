@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field, fields, is_dataclass
-from typing import Callable, Iterable, Type
+from dataclasses import dataclass, field
+from typing import Callable, Iterable
 
 from loguru import logger
 
@@ -12,7 +12,7 @@ from . import utility
 from .corpus import iterate
 from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
 
 
 @dataclass
