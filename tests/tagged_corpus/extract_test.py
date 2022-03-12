@@ -83,8 +83,8 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
 
 @pytest.mark.parametrize('target_type', ['single-id-tagged-frame-per-group', 'single-id-tagged-frame'])
 def test_extract_speeches(target_type: str):
-    ...
-    compress_type: dispatch.CompressType = dispatch.CompressType.Feather
+
+    compress_type: dispatch.CompressType = dispatch.CompressType.Plain
     target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{compress_type}'
 
     workflows.extract_corpus_tags(
@@ -115,4 +115,4 @@ def test_extract_speeches(target_type: str):
     assert isdir(target_name)
     assert isfile(join(target_name, f'document_index.{compress_type}'))
     assert isfile(join(target_name, f'token2id.{compress_type}'))
-    assert isfile(join(target_name, 'person_index.zip'))
+    # assert isfile(join(target_name, 'person_index.zip'))
