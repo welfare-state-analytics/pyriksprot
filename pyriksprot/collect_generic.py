@@ -6,11 +6,10 @@ from typing import Callable, Iterable, Type
 
 from loguru import logger
 
-from .corpus import iterate
-
 from . import corpus_index
 from . import metadata as md
 from . import utility
+from .corpus import iterate
 from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 
 # pylint: disable=too-many-arguments

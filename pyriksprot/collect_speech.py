@@ -5,9 +5,8 @@ from typing import Iterable
 
 from loguru import logger
 
-from .corpus import iterate
-
 from . import corpus_index, utility
+from .corpus import iterate
 from .interface import ContentType, SegmentLevel
 
 # pylint: disable=too-many-arguments

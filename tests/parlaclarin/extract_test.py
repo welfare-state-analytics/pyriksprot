@@ -5,7 +5,8 @@ from typing import Iterable
 
 import pytest
 
-from pyriksprot import collect_generic, corpus_index as csi
+from pyriksprot import collect_generic
+from pyriksprot import corpus_index as csi
 from pyriksprot import dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import workflows
@@ -102,7 +103,7 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
         segment_level=interface.SegmentLevel.Who,
         segment_skip_size=0,
         multiproc_processes=None,
-        preprocess=assign_speaker
+        preprocess=assign_speaker,
     )
 
     merger: collect_generic.SegmentMerger = collect_generic.SegmentMerger(

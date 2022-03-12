@@ -31,7 +31,9 @@ def tagged_speeches(
         segment_skip_size=1,
         preprocess=assign_speaker_info,
     )
-    groups = collect_generic.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
+    groups = collect_generic.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(
+        segments
+    )
     groups = list(groups)
     return groups
 
