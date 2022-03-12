@@ -80,6 +80,20 @@ def test_create_grouping_hashcoder():
 
 
 def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
+    speaker: md.SpeakerInfo = md.SpeakerInfo(
+        speech_id='dummy-0',
+        person_id='Q123456',
+        name='Dummy',
+        gender_id=1,
+        party_id=8,
+        start_year=1937,
+        end_year=1959,
+        office_type_id=1,
+        sub_office_type_id=2,
+    )
+
+    def assign_speaker(item: segment.ProtocolSegment) -> None:
+        item.speaker_info = speaker
 
     filenames: list[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
@@ -88,6 +102,7 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
         segment_level=interface.SegmentLevel.Who,
         segment_skip_size=0,
         multiproc_processes=None,
+        preprocess=assign_speaker
     )
 
     merger: merge.SegmentMerger = merge.SegmentMerger(
