@@ -33,12 +33,13 @@ class ProtocolSegmentGroup:
 
     @property
     def data(self):
+        texts: list[str] = (s.data for s in self.protocol_segments)
         if self.content_type == ContentType.TaggedFrame:
-            return utility.merge_tagged_csv(self.protocol_segments, sep='\n')
-        return '\n'.join(self.protocol_segments)
+            return utility.merge_tagged_csv(texts, sep='\n')
+        return '\n'.join(texts)
 
     def add(self, item: segment.ProtocolSegment):
-        self.protocol_segments.append(item.data)
+        self.protocol_segments.append(item)
 
     def __repr__(self) -> str:
         key_values: str = '\t'.join(self.grouping_values[k] for k in self.grouping_keys)
