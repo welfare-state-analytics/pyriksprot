@@ -6,7 +6,7 @@ from typing import List, Mapping, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import cluster, corpus_index, dispatch, interface, iterate, merge
+from pyriksprot import cluster, collect_generic, corpus_index, dispatch, interface, iterate
 from pyriksprot import metadata as md
 from pyriksprot import utility
 from pyriksprot.corpus.tagged import iterate
@@ -18,7 +18,7 @@ from pyriksprot.corpus.tagged import iterate
 def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
     speaker_service: md.SpeakerInfoService,
-) -> Mapping[str, merge.ProtocolSegmentGroup]:
+) -> Mapping[str, collect_generic.ProtocolSegmentGroup]:
     def assign_speaker_info(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
 
@@ -30,12 +30,12 @@ def tagged_speeches(
         segment_skip_size=1,
         preprocess=assign_speaker_info,
     )
-    groups = merge.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
+    groups = collect_generic.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
     groups = list(groups)
     return groups
 
 
-def test_folder_with_zips_dispatch(tagged_speeches: Mapping[str, merge.ProtocolSegmentGroup]):
+def test_folder_with_zips_dispatch(tagged_speeches: Mapping[str, collect_generic.ProtocolSegmentGroup]):
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with dispatch.FilesInFolderDispatcher(
         target_name=target_name,
@@ -46,7 +46,7 @@ def test_folder_with_zips_dispatch(tagged_speeches: Mapping[str, merge.ProtocolS
     assert isdir(target_name)
 
 
-def test_zip_file_dispatch(tagged_speeches: Mapping[str, merge.ProtocolSegmentGroup]):
+def test_zip_file_dispatch(tagged_speeches: Mapping[str, collect_generic.ProtocolSegmentGroup]):
     target_name: str = f'./tests/output/{uuid.uuid1()}.zip'
     with dispatch.FilesInZipDispatcher(
         target_name=target_name,
@@ -77,7 +77,7 @@ def test_find_dispatch_class():
 
 
 def test_checkpoint_dispatch(
-    tagged_speeches: Mapping[str, merge.ProtocolSegmentGroup], source_index: corpus_index.CorpusSourceIndex
+    tagged_speeches: Mapping[str, collect_generic.ProtocolSegmentGroup], source_index: corpus_index.CorpusSourceIndex
 ):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
@@ -106,7 +106,7 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
 
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch(
-    tagged_speeches: Mapping[str, merge.ProtocolSegmentGroup],
+    tagged_speeches: Mapping[str, collect_generic.ProtocolSegmentGroup],
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
@@ -130,7 +130,7 @@ def test_single_feather_per_group_dispatch(
 
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch_with_skips(
-    tagged_speeches: Mapping[str, merge.ProtocolSegmentGroup],
+    tagged_speeches: Mapping[str, collect_generic.ProtocolSegmentGroup],
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):

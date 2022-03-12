@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from pyriksprot import corpus_index, interface, iterate, merge
+from pyriksprot import collect_generic, corpus_index, interface, iterate
 from pyriksprot.corpus.tagged import iterate, persist
 
 from .utility import TAGGED_SOURCE_FOLDER
@@ -39,7 +39,7 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
     """Iterate at protocol level with no temporal key gives one group per docoment"""
     temporal_key: interface.TemporalKey = None
     group_keys: List[interface.GroupingKey] = [interface.GroupingKey.who]
-    merger: merge.SegmentMerger = merge.SegmentMerger(
+    merger: collect_generic.SegmentMerger = collect_generic.SegmentMerger(
         source_index=source_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,

@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from pyriksprot.corpus.tagged import iterate
 
-from .. import cluster, corpus_index, dispatch, interface, merge
+from .. import cluster, collect_generic, corpus_index, dispatch, interface
 from .. import metadata as md
 from .. import iterate
 
@@ -117,7 +117,7 @@ def extract_corpus_tags(
         preprocess=get_speaker if segment_level == interface.SegmentLevel.Speech else None,
     )
 
-    merger: merge.SegmentMerger = merge.SegmentMerger(
+    merger: collect_generic.SegmentMerger = collect_generic.SegmentMerger(
         source_index=source_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,
