@@ -7,7 +7,7 @@ import zipfile
 from collections import defaultdict
 from enum import Enum
 from io import StringIO
-from typing import Any, List, Literal, Type, Union
+from typing import Any, Literal, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -51,7 +51,7 @@ class CompressType(str, Enum):
         return zipfile.ZIP_DEFLATED
 
     @classmethod
-    def values(cls) -> List[str]:
+    def values(cls) -> list[str]:
         return [e.value for e in cls]
 
 
@@ -67,7 +67,7 @@ class IDispatcher(abc.ABC):
             compress_type ([str]): Target compress format.
         """
         self.target_name: str = target_name
-        self.document_data: List[dict] = []
+        self.document_data: list[dict] = []
         self.document_id: int = 0
         self.compress_type: CompressType = compress_type
         self.kwargs: dict = kwargs
@@ -98,7 +98,7 @@ class IDispatcher(abc.ABC):
         """Dispatch an index of dispatched documents."""
         ...
 
-    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[DispatchItem]) -> None:
         for item in dispatch_items:
             self._dispatch_index_item(item)
             self._dispatch_item(item)
@@ -141,13 +141,13 @@ class IDispatcher(abc.ABC):
             utility.store_str(filename=filename, text=data, compress_type=self.compress_type.value)
 
     @staticmethod
-    def dispatchers() -> List[Type]:
+    def dispatchers() -> list[Type]:
         return utility.find_subclasses(sys.modules[__name__], IDispatcher)
 
     @staticmethod
     def dispatcher(key: str) -> Type[IDispatcher]:
         """Return dispatcher class for `key`."""
-        dispatchers: List[Type[IDispatcher]] = IDispatcher.dispatchers()
+        dispatchers: list[Type[IDispatcher]] = IDispatcher.dispatchers()
         for dispatcher in dispatchers:
             if dispatcher.name == key:
                 return dispatcher
@@ -155,7 +155,7 @@ class IDispatcher(abc.ABC):
         return FilesInFolderDispatcher
 
     @staticmethod
-    def dispatcher_keys() -> List[str]:
+    def dispatcher_keys() -> list[str]:
         return [d.name for d in IDispatcher.dispatchers()]
 
 
@@ -234,7 +234,7 @@ class CheckpointPerGroupDispatcher(IDispatcher):
     def dispatch_index(self) -> None:
         return
 
-    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[DispatchItem]) -> None:
 
         self._reset_index()
 
@@ -279,12 +279,12 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     def _dispatch_item(self, item: DispatchItem) -> None:
         return
 
-    def dispatch(self, dispatch_items: List[DispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[DispatchItem]) -> None:
 
         if len(dispatch_items) == 0:
             return
 
-        tagged_frames: List[pd.DataFrame] = []
+        tagged_frames: list[pd.DataFrame] = []
         for item in dispatch_items:
 
             tagged_frame: pd.DataFrame = self.create_tagged_frame(item)
@@ -299,7 +299,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
             self.flush(total_frame, dispatch_items)
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: List[DispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[DispatchItem]):
         temporal_value: str = dispatch_items[0].temporal_value
         sub_folder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, sub_folder)
@@ -313,7 +313,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t', quoting=3, dtype=str)
         tagged_frame['document_id'] = self.document_id
 
-        drop_columns: List[str] = []
+        drop_columns: list[str] = []
 
         if 'xpos' in tagged_frame.columns:
             drop_columns.append('xpos')
@@ -411,9 +411,9 @@ class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
 
     def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
         super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
-        self.tagged_frames: List[pd.DataFrame] = []
+        self.tagged_frames: list[pd.DataFrame] = []
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: List[DispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[DispatchItem]):
         self.tagged_frames.append(tagged_frame)
 
     def close_target(self) -> None:
