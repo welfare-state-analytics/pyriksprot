@@ -25,7 +25,7 @@ def multiprocessing_load(args) -> Iterable[segment.ProtocolSegment]:
 
 
 class ProtocolIterator(segment.ProtocolSegmentIterator):
-    """Reads xml files using Protocol entity and returns a stream of `ProtocolSegment`"""
+    """Reads xml files and returns a stream of `ProtocolSegment`"""
 
     def load(self, filename: str) -> List[Tuple[str, str, int]]:
 
