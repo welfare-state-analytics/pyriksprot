@@ -5,10 +5,10 @@ from typing import Iterable
 
 import pytest
 
-from pyriksprot import corpus_index as csi
+from pyriksprot import corpus_index as csi, iterate
 from pyriksprot import dispatch, interface, merge
 from pyriksprot import metadata as md
-from pyriksprot import segment, workflows
+from pyriksprot import workflows
 from pyriksprot.corpus import parlaclarin
 
 from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
@@ -18,7 +18,7 @@ def test_create_grouping_hashcoder():
     protocol_name: str = "prot-1955--ak--22"
     person_id: str = "Q5715273"
     u_id: str = "d68df3cd45d2eec6-0"
-    item: segment.ProtocolSegment = segment.ProtocolSegment(
+    item: iterate.ProtocolSegment = iterate.ProtocolSegment(
         protocol_name=protocol_name,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
@@ -92,12 +92,12 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
         sub_office_type_id=2,
     )
 
-    def assign_speaker(item: segment.ProtocolSegment) -> None:
+    def assign_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker
 
     filenames: list[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
 
-    texts: Iterable[segment.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
+    texts: Iterable[iterate.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames,
         segment_level=interface.SegmentLevel.Who,
         segment_skip_size=0,

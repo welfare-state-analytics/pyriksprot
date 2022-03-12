@@ -7,7 +7,7 @@ import uuid
 import pandas as pd
 import pytest
 
-from pyriksprot import cluster, interface, segment, utility
+from pyriksprot import cluster, interface, iterate, utility
 from pyriksprot.corpus import parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
@@ -300,7 +300,7 @@ def test_protocol_to_items(
     assert protocol is not None
     assert len(protocol.utterances) == expected_utterance_count
 
-    items = segment.to_segments(
+    items = iterate.to_segments(
         protocol=protocol,
         content_type=interface.ContentType.Text,
         segment_level=interface.SegmentLevel.Speech,

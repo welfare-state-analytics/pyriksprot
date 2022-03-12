@@ -1,7 +1,7 @@
 import click
 from tqdm import tqdm
 
-from pyriksprot import cluster, corpus_index, dispatch, interface, segment
+from pyriksprot import cluster, corpus_index, dispatch, interface, iterate
 from pyriksprot.corpus.tagged import iterate
 
 from .utils import option2
@@ -29,7 +29,7 @@ def main(
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
     )
-    segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    segments: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=interface.ContentType(content_type),
         segment_level=interface.SegmentLevel.Protocol,

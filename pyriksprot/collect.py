@@ -5,7 +5,7 @@ from typing import Iterable
 
 from loguru import logger
 
-from . import corpus_index, segment, utility
+from . import corpus_index, iterate, utility
 from .interface import ContentType, SegmentLevel
 
 # pylint: disable=too-many-arguments
@@ -17,7 +17,7 @@ class ProtocolSegmentGroup:
     content_type: ContentType
     year: int
     protocol_name: str
-    protocol_segments: list[segment.ProtocolSegment] = field(default_factory=list)
+    protocol_segments: list[iterate.ProtocolSegment] = field(default_factory=list)
     n_tokens: int = 0
 
     @property
@@ -26,7 +26,7 @@ class ProtocolSegmentGroup:
             return utility.merge_tagged_csv(self.protocol_segments, sep='\n')
         return '\n'.join(self.protocol_segments)
 
-    def add(self, item: segment.ProtocolSegment):
+    def add(self, item: iterate.ProtocolSegment):
         self.protocol_segments.append(item.data)
 
     def __repr__(self) -> str:
@@ -64,7 +64,7 @@ class SpeechMerger:
     def __init__(self, source_index: corpus_index.CorpusSourceIndex):
         self.source_index: corpus_index.CorpusSourceIndex = source_index
 
-    def merge(self, iterator: Iterable[segment.ProtocolSegment]) -> Iterable[dict[str, ProtocolSegmentGroup]]:
+    def merge(self, iterator: Iterable[iterate.ProtocolSegment]) -> Iterable[dict[str, ProtocolSegmentGroup]]:
 
         assert iterator.segment_level == SegmentLevel.Speech
 

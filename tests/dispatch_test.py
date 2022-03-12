@@ -6,9 +6,9 @@ from typing import List, Mapping, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import cluster, corpus_index, dispatch, interface, merge
+from pyriksprot import cluster, corpus_index, dispatch, interface, iterate, merge
 from pyriksprot import metadata as md
-from pyriksprot import segment, utility
+from pyriksprot import utility
 from pyriksprot.corpus.tagged import iterate
 
 # pylint: disable=unused-variable, redefined-outer-name
@@ -19,10 +19,10 @@ def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
     speaker_service: md.SpeakerInfoService,
 ) -> Mapping[str, merge.ProtocolSegmentGroup]:
-    def assign_speaker_info(item: segment.ProtocolSegment) -> None:
+    def assign_speaker_info(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
 
-    segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    segments: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,

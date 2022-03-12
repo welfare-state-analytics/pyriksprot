@@ -4,7 +4,7 @@ from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import interface, segment, utility
+from pyriksprot import interface, iterate, utility
 from pyriksprot.corpus import parlaclarin
 
 from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
@@ -25,7 +25,7 @@ def test_protocol_texts_iterator_metadata(iterator_class):
     filenames = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
     expected_document_names = sorted(utility.strip_path_and_extension(filenames))
 
-    texts: Iterable[segment.ProtocolSegment] = list(
+    texts: Iterable[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=None)
     )
 
@@ -41,7 +41,7 @@ def test_xml_protocol_texts_iterator_texts():
     filenames: List[str] = sorted(glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True))
     expected_document_names: List[str] = sorted(utility.strip_path_and_extension(filenames))
 
-    texts: Iterable[segment.ProtocolSegment] = list(
+    texts: Iterable[iterate.ProtocolSegment] = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=None
         )
@@ -123,9 +123,9 @@ def test_xml_protocol_texts_iterator_texts():
     # with open('b.txt', 'w') as fp: fp.write(texts2[1].text)
 
 
-EXPECTED_STREAM: list[segment.ProtocolSegment] = {
+EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
     'protocol': [
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Protocol,
@@ -137,7 +137,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Protocol,
@@ -151,7 +151,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
         ),
     ],
     'speech': [
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Speech,
@@ -163,7 +163,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Speech,
@@ -175,7 +175,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Speech,
@@ -187,7 +187,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Speech,
@@ -199,7 +199,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             segment_level=interface.SegmentLevel.Speech,
             content_type=interface.ContentType.Text,
@@ -211,7 +211,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Speech,
@@ -225,7 +225,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
         ),
     ],
     'who': [
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Who,
@@ -237,7 +237,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Who,
@@ -249,7 +249,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Who,
@@ -261,7 +261,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Who,
@@ -273,7 +273,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Who,
@@ -287,7 +287,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
         ),
     ],
     'utterance': [
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -299,7 +299,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -311,7 +311,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -323,7 +323,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -335,7 +335,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1958,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -347,7 +347,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -359,7 +359,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='0',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -371,7 +371,7 @@ EXPECTED_STREAM: list[segment.ProtocolSegment] = {
             page_number='1',
             year=1960,
         ),
-        segment.ProtocolSegment(
+        iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Utterance,
@@ -400,12 +400,12 @@ def test_protocol_texts_iterator(iterator_class):
     document_names: List[str] = ['prot-1958-fake', 'prot-1960-fake']
     filenames: List[str] = [jj(PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
 
-    segments: List[segment.ProtocolSegment] = list(
+    segments: List[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=None)
     )
     assert segments == EXPECTED_STREAM['protocol']
 
-    segments: List[segment.ProtocolSegment] = list(
+    segments: List[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=2)
     )
     assert set(t.data for t in segments) == set(t.data for t in EXPECTED_STREAM['protocol'])
@@ -461,7 +461,7 @@ def test_protocol_texts_iterator_levels_compare(segment_level):
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):
 
     filenames = [jj(PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
-    texts: list[segment.ProtocolSegment] = list(
+    texts: list[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None)
     )
     assert len(texts) == len(EXPECTED_STREAM[segment_level])

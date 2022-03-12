@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from pyriksprot import corpus_index, interface, merge, segment
+from pyriksprot import corpus_index, interface, iterate, merge
 from pyriksprot.corpus.tagged import iterate, persist
 
 from .utility import TAGGED_SOURCE_FOLDER
@@ -11,11 +11,11 @@ from .utility import TAGGED_SOURCE_FOLDER
 
 
 @pytest.fixture
-def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[segment.ProtocolSegment]:
+def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[iterate.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
-    segments: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    segments: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
         segment_level=segment_level,
@@ -27,7 +27,7 @@ def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[segm
 
 def test_segment_merger_merge_on_protocol_level_group_by_who(
     source_index: corpus_index.CorpusSourceIndex,
-    protocol_segments: List[segment.ProtocolSegment],
+    protocol_segments: List[iterate.ProtocolSegment],
 ):
 
     """Load source protocols to simplify tests"""

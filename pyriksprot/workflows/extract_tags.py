@@ -11,7 +11,7 @@ from pyriksprot.corpus.tagged import iterate
 
 from .. import cluster, corpus_index, dispatch, interface, merge
 from .. import metadata as md
-from .. import segment
+from .. import iterate
 
 # pylint: disable=too-many-arguments, W0613
 
@@ -102,10 +102,10 @@ def extract_corpus_tags(
     # FIXME: How to ensure metadata tag is the same as corpus??? Add tag to DB?
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
-    def get_speaker(item: segment.ProtocolSegment) -> None:
+    def get_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
-    texts: segment.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    texts: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
         segment_level=segment_level,

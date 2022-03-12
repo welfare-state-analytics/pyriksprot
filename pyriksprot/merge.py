@@ -6,9 +6,9 @@ from typing import Callable, Iterable, Type
 
 from loguru import logger
 
-from . import corpus_index
+from . import corpus_index, iterate
 from . import metadata as md
-from . import segment, utility
+from . import utility
 from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 
 # pylint: disable=too-many-arguments
@@ -28,7 +28,7 @@ class ProtocolSegmentGroup:
     hashcode: str
 
     """Protocol segments that belong to group"""
-    protocol_segments: list[segment.ProtocolSegment] = field(default_factory=list)
+    protocol_segments: list[iterate.ProtocolSegment] = field(default_factory=list)
     n_tokens: int = 0
 
     @property
@@ -38,7 +38,7 @@ class ProtocolSegmentGroup:
             return utility.merge_tagged_csv(texts, sep='\n')
         return '\n'.join(texts)
 
-    def add(self, item: segment.ProtocolSegment):
+    def add(self, item: iterate.ProtocolSegment):
         self.protocol_segments.append(item)
 
     def __repr__(self) -> str:
@@ -110,7 +110,7 @@ class SegmentMerger:
         self.grouping_hashcoder = create_grouping_hashcoder(self.grouping_keys)
 
     def merge(
-        self, iterator: list[segment.ProtocolSegment] | segment.ProtocolSegmentIterator
+        self, iterator: list[iterate.ProtocolSegment] | iterate.ProtocolSegmentIterator
     ) -> Iterable[dict[str, ProtocolSegmentGroup]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
 
@@ -184,7 +184,7 @@ class SegmentMerger:
             return source_item.year - source_item.year % 5
         return source_item.year
 
-    def to_temporal_value(self, item: segment.ProtocolSegment) -> str:
+    def to_temporal_value(self, item: iterate.ProtocolSegment) -> str:
 
         year: int = item.year
         if isinstance(self.temporal_key, (TemporalKey, str, type(None))):
@@ -213,13 +213,13 @@ class SegmentMerger:
         raise ValueError(f"temporal period failed for {item.protocol_name}")
 
 
-def hashcoder_with_no_grouping_keys(item: segment.ProtocolSegment, **_) -> tuple[dict, str, str]:
+def hashcoder_with_no_grouping_keys(item: iterate.ProtocolSegment, **_) -> tuple[dict, str, str]:
     return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
 
 
 def create_grouping_hashcoder(
     grouping_keys: list[str],
-) -> Callable[[segment.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[iterate.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: set[str] = set(grouping_keys)
@@ -229,10 +229,10 @@ def create_grouping_hashcoder(
         return hashcoder_with_no_grouping_keys
 
     speaker_keys, item_keys, corpus_index_keys = utility.split_properties_by_dataclass(
-        grouping_keys, md.SpeakerInfo, segment.ProtocolSegment, corpus_index.CorpusSourceItem
+        grouping_keys, md.SpeakerInfo, iterate.ProtocolSegment, corpus_index.CorpusSourceItem
     )
 
-    def hashcoder(item: segment.ProtocolSegment, source_item: corpus_index.CorpusSourceItem) -> tuple[dict, str, str]:
+    def hashcoder(item: iterate.ProtocolSegment, source_item: corpus_index.CorpusSourceItem) -> tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
         assert isinstance(source_item, corpus_index.CorpusSourceItem)
         try:

@@ -16,9 +16,9 @@ from loguru import logger
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
-from . import merge, segment, utility
+from . import iterate, merge, utility
 
-DispatchItem = Union[merge.ProtocolSegmentGroup, segment.ProtocolSegment]
+DispatchItem = Union[merge.ProtocolSegmentGroup, iterate.ProtocolSegment]
 
 jj = os.path.join
 # pylint: disable=no-member

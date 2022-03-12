@@ -4,17 +4,17 @@ from typing import Iterable, List, Tuple
 
 import pandas as pd
 
-from ... import segment
+from ... import iterate
 from . import persist
 
 
-def multiprocessing_load(args) -> Iterable[segment.ProtocolSegment]:
+def multiprocessing_load(args) -> Iterable[iterate.ProtocolSegment]:
 
-    protocol: segment.Protocol = persist.load_protocol(filename=args[0])
+    protocol: iterate.Protocol = persist.load_protocol(filename=args[0])
     return (
         []
         if protocol is None
-        else segment.to_segments(
+        else iterate.to_segments(
             protocol=protocol,
             content_type=args[1],
             segment_level=args[2],
@@ -24,17 +24,17 @@ def multiprocessing_load(args) -> Iterable[segment.ProtocolSegment]:
     )
 
 
-class ProtocolIterator(segment.ProtocolSegmentIterator):
+class ProtocolIterator(iterate.ProtocolSegmentIterator):
     """Reads xml files and returns a stream of `ProtocolSegment`"""
 
     def load(self, filename: str) -> List[Tuple[str, str, int]]:
 
-        protocol: segment.Protocol = persist.load_protocol(filename=filename)
+        protocol: iterate.Protocol = persist.load_protocol(filename=filename)
 
         return (
             []
             if protocol is None
-            else segment.to_segments(
+            else iterate.to_segments(
                 protocol=protocol,
                 content_type=self.content_type,
                 segment_level=self.segment_level,
