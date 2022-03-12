@@ -25,11 +25,10 @@ def utterances() -> list[interface.Utterance]:
 
 
 @pytest.mark.parametrize(
-    'cls, strategy, expected_count, expected_whos, expected_ids, expected_texts',
+    'strategy, expected_count, expected_whos, expected_ids, expected_texts',
     [
         (
             cluster.MergeByWho,
-            'who',
             2,
             [{'A'}, {'B'}],
             ['i-1', 'i-3'],
@@ -39,7 +38,6 @@ def utterances() -> list[interface.Utterance]:
             ],
         ),
         (
-            cluster.MergeByChain,
             cluster.MergeStrategyType.chain,
             4,
             [{'A'}, {'B'}, {'B'}, {'A'}],
@@ -53,7 +51,6 @@ def utterances() -> list[interface.Utterance]:
         ),
         (
             cluster.MergeByWhoSequence,
-            cluster.MergeStrategyType.who_sequence,
             3,
             [{'A'}, {'B'}, {'A'}],
             ['i-1', 'i-3', 'i-5'],
@@ -66,11 +63,11 @@ def utterances() -> list[interface.Utterance]:
     ],
 )
 def test_merge_speech_by_strategy(
-    utterances: list[interface.Utterance], cls, strategy, expected_count, expected_whos, expected_ids, expected_texts
+    utterances: list[interface.Utterance], strategy, expected_count, expected_whos, expected_ids, expected_texts
 ):
 
     protocol: interface.Protocol = interface.Protocol(date="1950", name="prot-1958-fake", utterances=utterances)
-    speeches = cluster.to_speeches(protocol=protocol, merge_strategy=cls, skip_size=0)
+    speeches = cluster.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
 
     assert len(speeches) == expected_count
 

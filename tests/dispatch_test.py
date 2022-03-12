@@ -10,7 +10,6 @@ from pyriksprot import cluster, collect_generic, corpus_index, dispatch, interfa
 from pyriksprot import metadata as md
 from pyriksprot import utility
 from pyriksprot.corpus import iterate
-from pyriksprot.corpus.tagged import iterate
 
 # pylint: disable=unused-variable, redefined-outer-name
 

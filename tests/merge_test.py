@@ -3,8 +3,7 @@ from typing import List
 import pytest
 
 from pyriksprot import collect_generic, corpus_index, interface
-from pyriksprot.corpus import iterate
-from pyriksprot.corpus.tagged import iterate, persist
+from pyriksprot.corpus import iterate, tagged
 
 from .utility import TAGGED_SOURCE_FOLDER
 
@@ -32,7 +31,7 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
 ):
 
     """Load source protocols to simplify tests"""
-    protocols: List[interface.Protocol] = list(persist.load_protocols(source=TAGGED_SOURCE_FOLDER))
+    protocols: List[interface.Protocol] = list(tagged.load_protocols(source=TAGGED_SOURCE_FOLDER))
 
     """Check that iterator yields all utterances"""
     assert len(protocol_segments) == sum(map(len, protocols))

@@ -7,11 +7,10 @@ from typing import Sequence
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.corpus.tagged import iterate
+from pyriksprot.corpus import iterate
 
 from .. import cluster, collect_generic, corpus_index, dispatch, interface
 from .. import metadata as md
-from ..corpus import iterate
 
 # pylint: disable=too-many-arguments, W0613
 
