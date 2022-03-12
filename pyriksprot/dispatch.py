@@ -12,11 +12,12 @@ from typing import Any, Literal, Type, Union
 import numpy as np
 import pandas as pd
 from loguru import logger
+from .corpus import iterate
 
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
-from . import collect_generic, iterate, utility
+from . import collect_generic, utility
 
 DispatchItem = Union[collect_generic.ProtocolSegmentGroup, iterate.ProtocolSegment]
 

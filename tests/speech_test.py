@@ -7,8 +7,8 @@ import uuid
 import pandas as pd
 import pytest
 
-from pyriksprot import cluster, interface, iterate, utility
-from pyriksprot.corpus import parlaclarin
+from pyriksprot import cluster, interface, utility
+from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
 

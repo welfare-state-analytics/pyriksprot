@@ -6,7 +6,7 @@ from typing import Sequence
 from loguru import logger
 
 from pyriksprot.corpus.parlaclarin import iterate
-from pyriksprot.iterate import ProtocolSegment
+from pyriksprot.corpus.iterate import ProtocolSegment
 
 from .. import collect_generic, corpus_index, dehyphenation, dispatch, interface
 from .. import metadata as md

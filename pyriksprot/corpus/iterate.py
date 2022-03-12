@@ -5,12 +5,12 @@ from dataclasses import dataclass
 from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
-from . import cluster as mu
-from .interface import ContentType, Protocol, SegmentLevel
-from .utility import compress
+from .. import cluster as mu
+from ..interface import ContentType, Protocol, SegmentLevel
+from ..utility import compress
 
 if TYPE_CHECKING:
-    from .metadata import SpeakerInfo
+    from ..metadata import SpeakerInfo
 
 # pylint: disable=too-many-arguments, no-member
 

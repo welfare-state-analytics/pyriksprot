@@ -11,7 +11,7 @@ from pyriksprot.corpus.tagged import iterate
 
 from .. import cluster, collect_generic, corpus_index, dispatch, interface
 from .. import metadata as md
-from .. import iterate
+from ..corpus import iterate
 
 # pylint: disable=too-many-arguments, W0613
 

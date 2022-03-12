@@ -5,11 +5,11 @@ from typing import Iterable
 
 import pytest
 
-from pyriksprot import collect_generic, corpus_index as csi, iterate
+from pyriksprot import collect_generic, corpus_index as csi
 from pyriksprot import dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import workflows
-from pyriksprot.corpus import parlaclarin
+from pyriksprot.corpus import iterate, parlaclarin
 
 from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
 

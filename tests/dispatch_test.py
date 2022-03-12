@@ -6,9 +6,10 @@ from typing import List, Mapping, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import cluster, collect_generic, corpus_index, dispatch, interface, iterate
+from pyriksprot import cluster, collect_generic, corpus_index, dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import utility
+from pyriksprot.corpus import iterate
 from pyriksprot.corpus.tagged import iterate
 
 # pylint: disable=unused-variable, redefined-outer-name

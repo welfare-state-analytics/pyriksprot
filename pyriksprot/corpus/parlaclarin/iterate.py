@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable, List, Tuple
 
-from pyriksprot import iterate
+from pyriksprot.corpus import iterate
 from pyriksprot.interface import ContentType
 from pyriksprot.utility import deprecated
 

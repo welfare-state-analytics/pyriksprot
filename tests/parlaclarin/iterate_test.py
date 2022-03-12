@@ -4,8 +4,8 @@ from typing import Iterable, List
 
 import pytest
 
-from pyriksprot import interface, iterate, utility
-from pyriksprot.corpus import parlaclarin
+from pyriksprot import interface, utility
+from pyriksprot.corpus import iterate, parlaclarin
 
 from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
 

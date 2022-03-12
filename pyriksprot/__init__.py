@@ -7,7 +7,7 @@ from .corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
 from .collect_generic import ProtocolSegmentGroup, SegmentMerger, create_grouping_hashcoder
-from .iterate import ProtocolSegment, ProtocolSegmentIterator
+from .corpus.iterate import ProtocolSegment, ProtocolSegmentIterator
 from .utility import (
     compose,
     data_path_ts,

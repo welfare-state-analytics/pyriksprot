@@ -85,12 +85,6 @@ class MergeBySpeakerHashSequence(IMergeStrategy):
         groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_hash)]
         return groups
 
-    # @staticmethod
-    # def merge_utterances_by_speaker_hash(utterances: list[Utterance]) -> list[list[Utterance]]:
-    #     """Split utterances based on prev/next pointers. Return list of lists."""
-    #     speeches: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_hash)]
-    #     return speeches
-
 
 class MergeByWhoSpeakerHashSequence(IMergeStrategy):
     """Merge sequences with same `who` into a speech """

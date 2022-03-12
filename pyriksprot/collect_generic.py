@@ -6,7 +6,9 @@ from typing import Callable, Iterable, Type
 
 from loguru import logger
 
-from . import corpus_index, iterate
+from .corpus import iterate
+
+from . import corpus_index
 from . import metadata as md
 from . import utility
 from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey

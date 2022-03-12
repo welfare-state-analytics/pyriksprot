@@ -2,7 +2,8 @@ from typing import List
 
 import pytest
 
-from pyriksprot import collect_generic, corpus_index, interface, iterate
+from pyriksprot import collect_generic, corpus_index, interface
+from pyriksprot.corpus import iterate
 from pyriksprot.corpus.tagged import iterate, persist
 
 from .utility import TAGGED_SOURCE_FOLDER
