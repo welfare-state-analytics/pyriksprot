@@ -263,7 +263,7 @@ class UtteranceMixIn:
 
 @dataclass
 class Speech(UtteranceMixIn):
-    """Entity that represents a (processed) speech within a single document."""
+    """Entity that represents a (processed) speech within a Parla-CLARIN protocol."""
 
     protocol_name: str
     document_name: str
@@ -285,7 +285,7 @@ class Speech(UtteranceMixIn):
             raise ParlaClarinError("utterance list cannot be empty")
 
         if any(self.who != u.who for u in self.utterances):
-            raise ParlaClarinError("multiple speakes in same speech not allowed")
+            raise ParlaClarinError("multiple speakers in same speech not allowed")
 
     @property
     def filename(self):
@@ -299,7 +299,7 @@ class Speech(UtteranceMixIn):
 
     @property
     def speaker_hash(self):
-        """Return hash from speaker-note preceeding first utterance"""
+        """Hash for preceeding speaker-note."""
         return None if not self.utterances else self.utterances[0].speaker_hash
 
     def add(self, item: Utterance) -> "Speech":
