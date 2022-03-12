@@ -9,7 +9,7 @@ import pytest
 from pyriksprot import cluster, collect_generic, corpus_index, dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import utility
-from pyriksprot.corpus import iterate
+from pyriksprot.corpus import iterate, tagged
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -22,7 +22,7 @@ def tagged_speeches(
     def assign_speaker_info(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
 
-    segments: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    segments: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,

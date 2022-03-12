@@ -7,7 +7,7 @@ from typing import Sequence
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.corpus import iterate
+from pyriksprot.corpus import iterate, tagged
 
 from .. import cluster, collect_generic, corpus_index, dispatch, interface
 from .. import metadata as md
@@ -104,7 +104,7 @@ def extract_corpus_tags(
     def get_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
-    texts: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    texts: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
         segment_level=segment_level,

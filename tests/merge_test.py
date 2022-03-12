@@ -15,7 +15,7 @@ def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[iter
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
-    segments: iterate.ProtocolSegmentIterator = iterate.ProtocolIterator(
+    segments: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
         segment_level=segment_level,
