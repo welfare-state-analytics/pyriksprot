@@ -34,7 +34,7 @@ TargetTypeKey = Literal[
 
 
 class CompressType(str, Enum):
-    Plain = 'plain'
+    Plain = 'csv'
     Zip = 'zip'
     Gzip = 'gzip'
     Bz2 = 'bz2'
@@ -42,7 +42,7 @@ class CompressType(str, Enum):
     Feather = 'feather'
 
     def to_zipfile_compression(self):
-        if self.value == "plain":
+        if self.value == "csv":
             return zipfile.ZIP_STORED
         if self.value == "bz2":
             return zipfile.ZIP_BZIP2

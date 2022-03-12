@@ -399,7 +399,7 @@ def merge_tagged_csv(csv_strings: List[str], sep: str = '\n') -> str:
     return sep.join(texts)
 
 
-def store_str(filename: str, text: str, compress_type: Literal['plain', 'gzip', 'bz2', 'lzma']) -> None:
+def store_str(filename: str, text: str, compress_type: Literal['csv', 'gzip', 'bz2', 'lzma']) -> None:
     """Stores a textfile on disk - optionally compressed"""
     modules = {'gzip': (gzip, 'gz'), 'bz2': (bz2, 'bz2'), 'lzma': (lzma, 'xz')}
 
@@ -408,7 +408,7 @@ def store_str(filename: str, text: str, compress_type: Literal['plain', 'gzip', 
         with module.open(f"{filename}.{extension}", 'wb') as fp:
             fp.write(text.encode('utf-8'))
 
-    elif compress_type == 'plain':
+    elif compress_type == 'csv':
         with open(filename, 'w', encoding='utf-8') as fp:
             fp.write(text)
     else:
