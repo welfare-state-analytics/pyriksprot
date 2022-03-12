@@ -11,10 +11,6 @@ from .interface import ContentType, SegmentLevel
 # pylint: disable=too-many-arguments
 
 
-class SegmentCategoryClosed(Exception):
-    ...
-
-
 @dataclass
 class ProtocolSegmentGroup:
 
@@ -61,13 +57,8 @@ class ProtocolSegmentGroup:
             'n_tokens': self.n_tokens,
         }
 
-    @staticmethod
-    def header(sep: str = '\t') -> str:
-        header: str = f"period{sep}name{sep}n_chars{sep}"
-        return header
 
-
-class SegmentMerger:
+class SpeechMerger:
     """Dispatches a stream of speeches"""
 
     def __init__(self, source_index: corpus_index.CorpusSourceIndex):
@@ -79,8 +70,7 @@ class SegmentMerger:
 
         try:
 
-            current_protocol_name: str = None
-            current_group: ProtocolSegmentGroup = None
+            protocol_group: ProtocolSegmentGroup = None
             source_item: corpus_index.CorpusSourceItem
 
             for item in iterator:
@@ -91,25 +81,23 @@ class SegmentMerger:
                     logger.error(f"source item not found: {item.name}")
                     continue
 
-                if current_protocol_name != item.protocol_name:
+                if not protocol_group or (protocol_group.protocol_name != item.protocol_name):
+
                     """Yield previous group"""
-                    if bool(current_group):
-                        yield current_group
+                    if protocol_group:
+                        yield protocol_group
 
-                    current_protocol_name = item.protocol_name
-
-                    current_group = ProtocolSegmentGroup(
+                    protocol_group = ProtocolSegmentGroup(
                         content_type=item.content_type,
                         protocol_name=item.protocol_name,
                         year=source_item.year,
-                        protocol_segments=[],
                     )
 
-                current_group.add(item)
+                protocol_group.add(item)
 
             """Yield last group"""
-            if current_group:
-                yield current_group
+            if protocol_group:
+                yield protocol_group
 
         except Exception as ex:
             logger.exception(ex)
