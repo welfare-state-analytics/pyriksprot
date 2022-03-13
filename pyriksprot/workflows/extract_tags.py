@@ -6,12 +6,12 @@ from os.path import isdir
 
 from loguru import logger
 from tqdm import tqdm
-from ..corpus import corpus_index
 
 from pyriksprot.corpus import iterate, tagged
 
 from .. import cluster, collect_generic, dispatch, interface
 from .. import metadata as md
+from ..corpus import corpus_index
 
 # pylint: disable=too-many-arguments, W0613
 

@@ -4,7 +4,6 @@ import os
 from typing import Sequence
 
 from loguru import logger
-from ..corpus import corpus_index
 
 from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.corpus.parlaclarin import iterate
@@ -12,6 +11,7 @@ from pyriksprot.corpus.parlaclarin import iterate
 from .. import collect_generic, dehyphenation, dispatch, interface
 from .. import metadata as md
 from .. import utility
+from ..corpus import corpus_index
 
 # pylint: disable=too-many-arguments
 
