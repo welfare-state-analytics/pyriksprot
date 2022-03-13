@@ -1,7 +1,7 @@
 import glob
 import uuid
 from os.path import basename, isdir, isfile, join
-from typing import List, Mapping, Set, Type
+from typing import List, Set, Type
 
 import pandas as pd
 import pytest
