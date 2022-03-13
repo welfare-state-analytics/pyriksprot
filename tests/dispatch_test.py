@@ -6,11 +6,12 @@ from typing import List, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import dispatch, interface
-from pyriksprot import merge_segments as sg
+from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import to_speech, utility
 from pyriksprot.corpus import corpus_index, iterate, tagged
+from pyriksprot.dispatch import dispatch
+from pyriksprot.dispatch import merge as sg
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -34,6 +35,12 @@ def tagged_speeches(
     groups = sg.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
     groups = list(groups)
     return groups
+
+
+def test_find_dispatchers():
+    target_type: dispatch.TargetTypeKey = 'single-id-tagged-frame'
+    dispatcher: dispatch.IDispatcher = dispatch.IDispatcher.dispatcher(target_type)
+    assert dispatcher is not None
 
 
 def test_folder_with_zips_dispatch(tagged_speeches: list[sg.SegmentGroup]):

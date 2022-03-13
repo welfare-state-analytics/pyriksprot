@@ -6,11 +6,11 @@ from typing import Callable, Iterable
 
 from loguru import logger
 
-from . import metadata as md
-from . import utility
-from .corpus import corpus_index, iterate
+from .. import metadata as md
+from .. import utility
+from ..corpus import corpus_index, iterate
+from ..interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 from .dispatch import IDispatchItem
-from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 
 # pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
 
@@ -23,7 +23,7 @@ class SegmentGroup(IDispatchItem):
 
     """Group attributes"""
     temporal_value: int | str
-    grouping_keys: list[GroupingKey]
+    # grouping_keys: list[GroupingKey]
     grouping_values: dict[str, str | int]
     group_name: str  # string from which hashcode was computed
     hashcode: str
@@ -157,7 +157,7 @@ class SegmentMerger:
                         group_name=hashcode_str,
                         hashcode=hashcode,
                         temporal_value=temporal_value,
-                        grouping_keys=self.grouping_keys,
+                        # grouping_keys=self.grouping_keys,
                         grouping_values=grouping_values,
                         year=source_item.year,
                         protocol_segments=[],

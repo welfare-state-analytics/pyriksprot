@@ -9,10 +9,11 @@ from tqdm import tqdm
 
 from pyriksprot.corpus import iterate, tagged
 
-from .. import dispatch, interface, merge_segments
+from .. import interface
 from .. import metadata as md
 from .. import to_speech
 from ..corpus import corpus_index
+from ..dispatch import dispatch, merge
 
 # pylint: disable=too-many-arguments, W0613
 
@@ -121,7 +122,7 @@ def extract_corpus_tags(
         preprocess=preprocess,
     )
 
-    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
+    merger: merge.SegmentMerger = merge.SegmentMerger(
         source_index=source_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,

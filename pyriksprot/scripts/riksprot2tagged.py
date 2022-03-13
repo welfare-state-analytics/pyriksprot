@@ -4,7 +4,8 @@ from typing import Sequence
 
 import click
 
-from pyriksprot import dispatch, interface
+from pyriksprot import interface
+from pyriksprot.dispatch import dispatch
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 from pyriksprot.workflows import extract_tags
 

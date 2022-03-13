@@ -16,8 +16,8 @@ from loguru import logger
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
-from . import utility
-from .interface import ContentType
+from .. import utility
+from ..interface import ContentType
 
 
 class IDispatchItem(abc.ABC):
@@ -414,6 +414,10 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
         return tagged_frame
 
+    def _dispatch_index_item(self, item: IDispatchItem) -> None:
+        self.document_data.append({**item.to_dict(), **{'document_id': self.document_id}})
+        self.document_id += 1
+
     def dispatch_index(self) -> None:
         super().dispatch_index()
         self.dispatch_vocabulary()
@@ -453,7 +457,3 @@ def trim_series_type(series: pd.Series) -> pd.Series:
         if max_value < np.iinfo(np_type).max:
             return series.astype(np_type)
     return series
-
-
-class S3Dispatcher:
-    name: str = 'S3'

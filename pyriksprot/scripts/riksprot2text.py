@@ -4,7 +4,7 @@ from typing import Sequence
 
 import click
 
-from pyriksprot import dispatch
+from pyriksprot.dispatch import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
 from pyriksprot.workflows import extract_text
 

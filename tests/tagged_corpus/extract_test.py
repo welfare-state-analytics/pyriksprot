@@ -6,8 +6,9 @@ from typing import Iterable, List
 import pandas as pd
 import pytest
 
-from pyriksprot import CorpusSourceIndex, dispatch, interface, to_speech, workflows
+from pyriksprot import CorpusSourceIndex, interface, to_speech, workflows
 from pyriksprot.corpus import tagged as tagged_corpus
+from pyriksprot.dispatch import dispatch
 
 from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 

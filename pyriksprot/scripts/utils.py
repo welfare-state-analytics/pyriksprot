@@ -4,7 +4,8 @@ from typing import Any, Callable, Optional
 
 import click
 
-from pyriksprot import dispatch, interface, to_speech
+from pyriksprot import interface, to_speech
+from pyriksprot.dispatch import dispatch
 
 from .. import utility
 

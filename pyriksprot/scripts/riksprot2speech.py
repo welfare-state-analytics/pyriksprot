@@ -1,6 +1,7 @@
 import click
 
-from pyriksprot import dispatch, interface, to_speech
+from pyriksprot import interface, to_speech
+from pyriksprot.dispatch import dispatch
 from pyriksprot.workflows import extract_tags
 
 from .utils import option2, update_arguments_from_options_file

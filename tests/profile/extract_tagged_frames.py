@@ -1,6 +1,7 @@
 from os.path import basename
 
-from pyriksprot import dispatch, interface, to_speech, workflows
+from pyriksprot import interface, to_speech, workflows
+from pyriksprot.dispatch import dispatch
 
 # pylint: disable=redefined-outer-name
 
