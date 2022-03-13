@@ -57,7 +57,7 @@ class ProtocolSegment:
                 self.speaker_info.party_id,
                 self.speaker_info.office_type_id,
                 self.speaker_info.sub_office_type_id,
-                self.speaker_info.who,
+                self.speaker_info.person_id,
             }
         )
 
