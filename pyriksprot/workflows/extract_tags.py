@@ -131,9 +131,7 @@ def extract_corpus_tags(
     with dispatch.IDispatcher.dispatcher(target_type)(
         target_name=target_name, compress_type=compress_type, **dispatch_opts
     ) as dispatcher:
-
         n_total: int = len(source_index.source_items)
-
         for item in tqdm(merger.merge(texts), total=n_total, miniters=10, disable=not progress):
             if not item:
                 logger.error("merge returned empty data")
