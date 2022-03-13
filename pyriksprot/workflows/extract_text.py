@@ -4,11 +4,12 @@ import os
 from typing import Sequence
 
 from loguru import logger
+from ..corpus import corpus_index
 
 from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.corpus.parlaclarin import iterate
 
-from .. import collect_generic, corpus_index, dehyphenation, dispatch, interface
+from .. import collect_generic, dehyphenation, dispatch, interface
 from .. import metadata as md
 from .. import utility
 

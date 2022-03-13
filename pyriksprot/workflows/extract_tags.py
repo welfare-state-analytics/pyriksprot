@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import shutil
+import typing as t
 from os.path import isdir
-from typing import Sequence
 
 from loguru import logger
 from tqdm import tqdm
+from ..corpus import corpus_index
 
 from pyriksprot.corpus import iterate, tagged
 
-from .. import cluster, collect_generic, corpus_index, dispatch, interface
+from .. import cluster, collect_generic, dispatch, interface
 from .. import metadata as md
 
 # pylint: disable=too-many-arguments, W0613
@@ -27,7 +28,7 @@ def extract_corpus_tags(
     segment_skip_size: int = 1,
     years: str = None,
     temporal_key: interface.TemporalKey = None,
-    group_keys: Sequence[interface.GroupingKey] = None,
+    group_keys: t.Sequence[interface.GroupingKey] = None,
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
@@ -104,6 +105,9 @@ def extract_corpus_tags(
     def get_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
+    preprocess: t.Callable[[iterate.ProtocolSegment], None] = (
+        get_speaker if segment_level not in ('protocol', None) else None
+    )
     texts: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
@@ -113,7 +117,7 @@ def extract_corpus_tags(
         multiproc_processes=multiproc_processes,
         multiproc_chunksize=multiproc_chunksize,
         merge_strategy=merge_strategy,
-        preprocess=get_speaker if segment_level == interface.SegmentLevel.Speech else None,
+        preprocess=preprocess,
     )
 
     merger: collect_generic.SegmentMerger = collect_generic.SegmentMerger(

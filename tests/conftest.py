@@ -6,7 +6,7 @@ import pytest
 from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import
 from loguru import logger
 
-from pyriksprot import corpus_index as csi
+from pyriksprot.corpus import corpus_index as csi
 from pyriksprot import metadata as md
 
 from .utility import (

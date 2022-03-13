@@ -6,7 +6,7 @@ from typing import Iterable
 import pytest
 
 from pyriksprot import collect_generic
-from pyriksprot import corpus_index as csi
+from pyriksprot.corpus import corpus_index as csi
 from pyriksprot import dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import workflows
@@ -56,7 +56,7 @@ def test_create_grouping_hashcoder():
         office_type_id=1,
         sub_office_type_id=2,
     )
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         _ = collect_generic.create_grouping_hashcoder(["dummy_id"])
 
     hashcoder = collect_generic.create_grouping_hashcoder([])

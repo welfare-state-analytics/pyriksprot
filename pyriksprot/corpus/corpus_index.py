@@ -8,8 +8,8 @@ from typing import List, Optional, Set
 
 import pandas as pd
 
-from . import utility
-from .corpus.tagged.persist import load_metadata
+from .. import utility
+from .tagged.persist import load_metadata
 
 METADATA_FILENAME: str = 'metadata.json'
 
