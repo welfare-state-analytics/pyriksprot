@@ -8,7 +8,7 @@ from .utility import create_grouping_hashcoder
 
 from ..corpus import corpus_index, iterate
 from ..interface import GroupingKey, SegmentLevel, TemporalKey
-from .item import SegmentGroup
+from .item import DispatchItem
 
 # pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
 
@@ -50,7 +50,7 @@ class SegmentMerger:
 
     def merge(
         self, iterator: list[iterate.ProtocolSegment] | iterate.ProtocolSegmentIterator
-    ) -> Iterable[dict[str, SegmentGroup]]:
+    ) -> Iterable[dict[str, DispatchItem]]:
         """Merges stream of protocol segments based on grouping keys. Yield merged groups continously.
         Note: value of `item.id` depends on aggregation level, it is u_id for levels speech and utterance.
         """
@@ -59,7 +59,7 @@ class SegmentMerger:
 
         try:
             current_temporal_value: str = None
-            current_group: dict[str, SegmentGroup] = {}
+            current_group: dict[str, DispatchItem] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
             source_item: corpus_index.CorpusSourceItem
 
@@ -90,12 +90,12 @@ class SegmentMerger:
 
                 if hashcode not in current_group:
 
-                    current_group[hashcode] = SegmentGroup(
+                    current_group[hashcode] = DispatchItem(
+                        segment_level=item.segment_level,
                         content_type=item.content_type,
                         group_name=hashcode_str,
                         group_hash=hashcode,
                         group_temporal_value=temporal_value,
-                        # grouping_keys=self.grouping_keys,
                         group_values=grouping_values,
                         year=source_item.year,
                         protocol_segments=[],

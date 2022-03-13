@@ -20,7 +20,7 @@ from pyriksprot.dispatch import merge as sg
 def tagged_speeches(
     source_index: corpus_index.CorpusSourceIndex,
     speaker_service: md.SpeakerInfoService,
-) -> list[sg.SegmentGroup]:
+) -> list[sg.DispatchItem]:
     def assign_speaker_info(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
 
@@ -43,7 +43,7 @@ def test_find_dispatchers():
     assert dispatcher is not None
 
 
-def test_folder_with_zips_dispatch(tagged_speeches: list[sg.SegmentGroup]):
+def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with dispatch.FilesInFolderDispatcher(
         target_name=target_name,
@@ -54,7 +54,7 @@ def test_folder_with_zips_dispatch(tagged_speeches: list[sg.SegmentGroup]):
     assert isdir(target_name)
 
 
-def test_zip_file_dispatch(tagged_speeches: list[sg.SegmentGroup]):
+def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
     target_name: str = f'./tests/output/{uuid.uuid1()}.zip'
     with dispatch.FilesInZipDispatcher(
         target_name=target_name,
@@ -84,7 +84,7 @@ def test_find_dispatch_class():
     assert expected_keys.intersection(dispatch_keys) == expected_keys
 
 
-def test_checkpoint_dispatch(tagged_speeches: list[sg.SegmentGroup], source_index: corpus_index.CorpusSourceIndex):
+def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with dispatch.CheckpointPerGroupDispatcher(
@@ -112,7 +112,7 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
 
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch(
-    tagged_speeches: list[sg.SegmentGroup],
+    tagged_speeches: list[sg.DispatchItem],
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
@@ -136,7 +136,7 @@ def test_single_feather_per_group_dispatch(
 
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch_with_skips(
-    tagged_speeches: list[sg.SegmentGroup],
+    tagged_speeches: list[sg.DispatchItem],
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):

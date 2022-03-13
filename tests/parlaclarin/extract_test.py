@@ -115,10 +115,10 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
     assert merger is not None
     assert merger.grouping_keys == ["gender_id", "party_id"]
 
-    groups: list[dict[str, merge.SegmentGroup]] = [item for item in merger.merge(texts)]
+    groups: list[dict[str, merge.DispatchItem]] = [item for item in merger.merge(texts)]
 
     assert len(groups) > 0
-    g: dict[str, merge.SegmentGroup] = groups[0]
+    g: dict[str, merge.DispatchItem] = groups[0]
     key = list(g.keys())[0]  # '72e6f6e0f08ca88f02b1480464afd55b'
     data = g[key]
     # FIXME: 'who' is added to values (bugfix)
