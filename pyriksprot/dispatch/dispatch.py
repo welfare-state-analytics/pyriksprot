@@ -17,7 +17,7 @@ from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
 from .. import utility
-from .item import DispatchItem
+from ..interface import IDispachItem
 
 jj = os.path.join
 
@@ -97,7 +97,7 @@ class IDispatcher(abc.ABC):
         """Dispatch an index of dispatched documents."""
         ...
 
-    def dispatch(self, dispatch_items: list[DispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
         for item in dispatch_items:
             self._dispatch_index_item(item)
             self._dispatch_item(item)
@@ -106,13 +106,13 @@ class IDispatcher(abc.ABC):
         self.document_data = []
         self.document_id: int = 0
 
-    def _dispatch_index_item(self, item: DispatchItem) -> None:
+    def _dispatch_index_item(self, item: IDispachItem) -> None:
         """Default one document per group"""
         self.document_data.append({**item.to_dict(), **{'document_id': self.document_id}})
         self.document_id += 1
 
     @abc.abstractmethod
-    def _dispatch_item(self, item: DispatchItem) -> None:
+    def _dispatch_item(self, item: IDispachItem) -> None:
         ...
 
     def document_index(self) -> pd.DataFrame:
@@ -158,6 +158,10 @@ class IDispatcher(abc.ABC):
     def dispatcher_keys() -> list[str]:
         return [d.name for d in IDispatcher.dispatchers()]
 
+    def to_lower(self, text: str) -> str:
+        # FIXME: PoS tags gets lowercased???
+        return text.lower() if self.lowercase else text
+
 
 class FilesInFolderDispatcher(IDispatcher):
     """Dispatch text to filesystem as single files (optionally compressed)"""
@@ -170,8 +174,8 @@ class FilesInFolderDispatcher(IDispatcher):
     def open_target(self, target_name: Any) -> None:
         os.makedirs(target_name, exist_ok=True)
 
-    def _dispatch_item(self, item: DispatchItem) -> None:
-        self.store(item.filename, item.group_data(self.lowercase))
+    def _dispatch_item(self, item: IDispachItem) -> None:
+        self.store(item.filename, self.to_lower(item.text))
 
     def dispatch_index(self) -> None:
         """Write index of documents to disk."""
@@ -207,8 +211,8 @@ class FilesInZipDispatcher(IDispatcher):
         csv_str: str = self.document_index_str()
         self.zup.writestr('document_index.csv', csv_str)
 
-    def _dispatch_item(self, item: DispatchItem) -> None:
-        self.zup.writestr(item.filename, item.group_data(self.lowercase))
+    def _dispatch_item(self, item: IDispachItem) -> None:
+        self.zup.writestr(item.filename, self.to_lower(item.text))
 
 
 class CheckpointPerGroupDispatcher(IDispatcher):
@@ -225,13 +229,13 @@ class CheckpointPerGroupDispatcher(IDispatcher):
     def close_target(self) -> None:
         return
 
-    def _dispatch_item(self, item: DispatchItem) -> None:
+    def _dispatch_item(self, item: IDispachItem) -> None:
         return
 
     def dispatch_index(self) -> None:
         return
 
-    def dispatch(self, dispatch_items: list[DispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
 
         self._reset_index()
 
@@ -249,7 +253,7 @@ class CheckpointPerGroupDispatcher(IDispatcher):
         ) as fp:
 
             for item in dispatch_items:
-                fp.writestr(item.filename, item.group_data(self.lowercase))
+                fp.writestr(item.filename, self.to_lower(item.text))
                 self._dispatch_index_item(item)
 
             if len(self.document_data) > 0:
@@ -270,10 +274,10 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
     name: str = 'single-tagged-frame-per-group'
 
-    def _dispatch_item(self, item: DispatchItem) -> None:
+    def _dispatch_item(self, item: IDispachItem) -> None:
         return
 
-    def dispatch(self, dispatch_items: list[DispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
 
         if len(dispatch_items) == 0:
             return
@@ -289,7 +293,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
             self.flush(total_frame, dispatch_items)
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[DispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispachItem]):
         temporal_value: str = dispatch_items[0].group_temporal_value
         sub_folder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, sub_folder)
@@ -297,10 +301,11 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         target_name: str = jj(path, f'{temporal_value}.csv')
         self.store(filename=target_name, data=tagged_frame)
 
-    def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:
+    def create_tagged_frame(self, item: IDispachItem) -> pd.DataFrame:
 
         pads: set = {'MID', 'MAD', 'PAD'}
-        tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.group_data()), sep='\t', quoting=3, dtype=str)
+
+        tagged_frame: pd.DataFrame = pd.read_csv(StringIO(self.to_lower(item.text)), sep='\t', quoting=3, dtype=str)
         tagged_frame['document_id'] = self.document_id
 
         drop_columns: list[str] = []
@@ -309,12 +314,14 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             drop_columns.append('xpos')
 
         if self.skip_stopwords and self.skip_puncts:
-            tagged_frame = tagged_frame[~(tagged_frame.token.str.lower().isin(STOPWORDS) | tagged_frame.pos.isin(pads))]
+            tagged_frame = tagged_frame[
+                ~(tagged_frame["token"].str.lower().isin(STOPWORDS) | tagged_frame["pos"].isin(pads))
+            ]
         else:
             if self.skip_stopwords:
-                tagged_frame = tagged_frame[~tagged_frame.token.str.lower().isin(STOPWORDS)]
+                tagged_frame = tagged_frame[~tagged_frame["token"].str.lower().isin(STOPWORDS)]
             if self.skip_puncts:
-                tagged_frame = tagged_frame[~tagged_frame.pos.isin(pads)]
+                tagged_frame = tagged_frame[~tagged_frame["pos"].isin(pads)]
 
         if self.skip_text:
             drop_columns.append('token')
@@ -364,7 +371,7 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         self.token2id.default_factory = self.token2id.__len__
         self.pos_schema: PoS_Tag_Scheme = PoS_TAGS_SCHEMES.SUC
 
-    def create_tagged_frame(self, item: DispatchItem) -> pd.DataFrame:
+    def create_tagged_frame(self, item: IDispachItem) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
         fg = lambda t: self.token2id[t]
         pg = self.pos_schema.pos_to_id.get
@@ -379,8 +386,13 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
         return tagged_frame
 
-    def _dispatch_index_item(self, item: DispatchItem) -> None:
-        self.document_data.append({**item.to_dict(), **{'document_id': self.document_id},})
+    def _dispatch_index_item(self, item: IDispachItem) -> None:
+        self.document_data.append(
+            {
+                **item.to_dict(),
+                **{'document_id': self.document_id},
+            }
+        )
         self.document_id += 1
 
     def dispatch_index(self) -> None:
@@ -407,7 +419,7 @@ class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
         super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
         self.tagged_frames: list[pd.DataFrame] = []
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[DispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispachItem]):
         self.tagged_frames.append(tagged_frame)
 
     def close_target(self) -> None:

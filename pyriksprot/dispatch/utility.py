@@ -7,6 +7,9 @@ from .. import metadata as md
 from .. import utility
 from ..corpus import corpus_index, iterate
 
+# pylint: disable=unbalanced-tuple-unpacking
+
+
 def hashcoder_with_no_grouping_keys(item: iterate.ProtocolSegment, **_) -> tuple[dict, str, str]:
     return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
 

@@ -30,6 +30,7 @@ def test_create_grouping_hashcoder():
         data="hej",
         who=person_id,
         year=1955,
+        n_tokens=0,
     )
     # source_item = source_index.lookup.get("prot-1955--ak--22")
     source_item: csi.CorpusSourceItem = csi.CorpusSourceItem(

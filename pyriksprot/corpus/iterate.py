@@ -6,7 +6,7 @@ from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
 from .. import to_speech as mu
-from ..interface import ContentType, Protocol, SegmentLevel
+from ..interface import ContentType, IDispachItem, Protocol, SegmentLevel
 from ..utility import compress
 
 if TYPE_CHECKING:
@@ -16,12 +16,10 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ProtocolSegment:
+class ProtocolSegment(IDispachItem):
     """Container for a subset of utterances within a single protocol"""
 
     protocol_name: str
-    content_type: ContentType
-    segment_level: SegmentLevel
     name: str
     who: str
     id: str
@@ -29,19 +27,18 @@ class ProtocolSegment:
     page_number: str
     year: int
     u_id: str
-    n_tokens: int = 0
 
     speaker_info: SpeakerInfo = None
 
-    def __repr__(self) -> str:
-        return (
-            f"{self.protocol_name or '*'}\t"
-            f"{self.name or '*'}\t"
-            f"{self.who or '*'}\t"
-            f"{self.id or '?'}\t"
-            f"{self.data or '?'}\t"
-            f"{self.page_number or ''}\t"
-        )
+    # def __repr__(self) -> str:
+    #     return (
+    #         f"{self.protocol_name or '*'}\t"
+    #         f"{self.name or '*'}\t"
+    #         f"{self.who or '*'}\t"
+    #         f"{self.id or '?'}\t"
+    #         f"{self.data or '?'}\t"
+    #         f"{self.page_number or ''}\t"
+    #     )
 
     def data_z64(self) -> bytes:
         """Compress text, return base64 encoded string."""
@@ -81,6 +78,10 @@ class ProtocolSegment:
     def filename(self) -> str:
         return f'{self.name}.{self.extension}'
 
+    @property
+    def text(self) -> str:
+        return self.data
+
 
 def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
     return [
@@ -95,6 +96,8 @@ def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -
             u_id=None,
             data=protocol.text,
             page_number='0',
+            n_tokens=0,
+            speaker_info=None,
         )
     ]
 
@@ -119,6 +122,7 @@ def to_speech_segments(
             u_id=s.speech_id,
             data=s.to_content_str(content_type),
             page_number=s.page_number,
+            n_tokens=0,
         )
         for s in mu.to_speeches(protocol=protocol, merge_strategy=merge_strategy, skip_size=segment_skip_size)
     ]
@@ -139,6 +143,7 @@ def to_who_segments(
             u_id=s.speech_id,
             data=s.to_content_str(content_type),
             page_number=s.page_number,
+            n_tokens=0,
         )
         for s in mu.to_speeches(protocol=protocol, merge_strategy=mu.MergeStrategyType.who, skip_size=segment_skip_size)
     ]
@@ -157,6 +162,7 @@ def to_utterance_segments(*, protocol: Protocol, content_type: ContentType, **_)
             u_id=u.u_id,
             data=u.to_str(content_type),
             page_number=u.page_number,
+            n_tokens=0,
         )
         for i, u in enumerate(protocol.utterances)
     ]
@@ -175,6 +181,7 @@ def to_paragraph_segments(*, protocol: Protocol, content_type: ContentType, **_)
             u_id=u.u_id,
             data=p,
             page_number=u.page_number,
+            n_tokens=0,
         )
         for j, u in enumerate(protocol.utterances)
         for i, p in enumerate(u.paragraphs)

@@ -70,6 +70,24 @@ class StorageFormat(str, Enum):
 PARAGRAPH_MARKER: str = '@#@'
 
 
+@dataclass
+class IDispachItem(abc.ABC):
+    segment_level: SegmentLevel
+    content_type: ContentType
+    n_tokens: int
+
+    @property
+    def filename(self) -> str:
+        ...
+
+    @property
+    def text(self) -> str:
+        ...
+
+    def to_dict(self):
+        ...
+
+
 class IProtocol(abc.ABC):
     ...
 

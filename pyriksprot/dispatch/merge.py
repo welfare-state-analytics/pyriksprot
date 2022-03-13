@@ -4,11 +4,10 @@ from typing import Iterable
 
 from loguru import logger
 
-from .utility import create_grouping_hashcoder
-
 from ..corpus import corpus_index, iterate
 from ..interface import GroupingKey, SegmentLevel, TemporalKey
 from .item import DispatchItem
+from .utility import create_grouping_hashcoder
 
 # pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
 
@@ -99,6 +98,7 @@ class SegmentMerger:
                         group_values=grouping_values,
                         year=source_item.year,
                         protocol_segments=[],
+                        n_tokens=0,
                     )
 
                 current_group[hashcode].add(item)
@@ -146,4 +146,3 @@ class SegmentMerger:
                     return k
 
         raise ValueError(f"temporal period failed for {item.protocol_name}")
-

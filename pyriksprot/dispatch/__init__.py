@@ -6,11 +6,11 @@ from .dispatch import (
     FilesInFolderDispatcher,
     FilesInZipDispatcher,
     IDispatcher,
-    IDispatchItem,
     IdTaggedFramePerGroupDispatcher,
     SingleIdTaggedFrameDispatcher,
     TaggedFramePerGroupDispatcher,
     TargetTypeKey,
 )
-from .merge import SegmentMerger, SegmentGroup
+from .item import DispatchItem
+from .merge import SegmentMerger
 from .utility import create_grouping_hashcoder

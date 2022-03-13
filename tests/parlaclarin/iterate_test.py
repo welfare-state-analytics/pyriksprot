@@ -136,6 +136,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?\nJag heter Adam.\nOve är dum.',
             page_number='0',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -148,6 +149,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?\nJag håller med.\nTalmannen är snäll.\nJag håller också med.',
             page_number='0',
             year=1960,
+            n_tokens=0,
         ),
     ],
     'speech': [
@@ -162,6 +164,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
             page_number='0',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
@@ -174,6 +177,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag heter Adam.',
             page_number='1',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
@@ -186,6 +190,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Ove är dum.',
             page_number='1',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -198,6 +203,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?',
             page_number='0',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -210,6 +216,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag håller med.\nTalmannen är snäll.',
             page_number='1',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -222,6 +229,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag håller också med.',
             page_number='1',
             year=1960,
+            n_tokens=0,
         ),
     ],
     'who': [
@@ -236,6 +244,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
             page_number='0',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
@@ -248,6 +257,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag heter Adam.\nOve är dum.',
             page_number='1',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -260,6 +270,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?',
             page_number='0',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -272,6 +283,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag håller med.\nTalmannen är snäll.',
             page_number='1',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -284,6 +296,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag håller också med.',
             page_number='1',
             year=1960,
+            n_tokens=0,
         ),
     ],
     'utterance': [
@@ -298,6 +311,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Hej! Detta är en mening.',
             page_number='0',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
@@ -310,6 +324,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag heter Ove.\nVad heter du?',
             page_number='0',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
@@ -322,6 +337,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag heter Adam.',
             page_number='1',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1958-fake',
@@ -334,6 +350,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Ove är dum.',
             page_number='1',
             year=1958,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -346,6 +363,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Herr Talman! Jag talar.',
             page_number='0',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -358,6 +376,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Det regnar ute.\nVisste du det?',
             page_number='0',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -370,6 +389,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag håller med.\nTalmannen är snäll.',
             page_number='1',
             year=1960,
+            n_tokens=0,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -382,6 +402,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             data='Jag håller också med.',
             page_number='1',
             year=1960,
+            n_tokens=0,
         ),
     ],
 }
