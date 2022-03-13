@@ -44,14 +44,6 @@ class SegmentGroup(IDispatchItem):
     def add(self, item: iterate.ProtocolSegment):
         self.protocol_segments.append(item)
 
-    # def __repr__(self) -> str:
-    #     key_values: str = '\t'.join(self.grouping_values[k] for k in self.grouping_keys)
-    #     return f"{self.year}" f"{self.temporal_value}" f"\t{self.group_name}" f"\t{key_values}" f"\t{self.n_chars}"
-
-    # @property
-    # def n_chars(self) -> int:
-    #     return sum(map(len, (s.data for s in self.protocol_segments)))
-
     @property
     def filename(self) -> str:
         return f'{self.document_name}.{self.extension}'

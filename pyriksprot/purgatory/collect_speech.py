@@ -33,13 +33,6 @@
 #     def add(self, item: iterate.ProtocolSegment):
 #         self.protocol_segments.append(item)
 
-#     def __repr__(self) -> str:
-#         return f"{self.year}" f"{self.protocol_name}" f"\t{self.n_chars}"
-
-#     @property
-#     def n_chars(self) -> int:
-#         return sum(map(len, (s.data for s in self.protocol_segments)))
-
 #     @property
 #     def filename(self) -> str:
 #         return f'{self.document_name}.{self.extension}'
