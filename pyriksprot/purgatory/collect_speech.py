@@ -5,30 +5,33 @@ from typing import Iterable
 
 from loguru import logger
 
-from . import corpus_index, utility
-from .corpus import iterate
-from .interface import ContentType, SegmentLevel
+from .. import utility
+from ..corpus import corpus_index, iterate
+from ..dispatch import IDispatchItem
+from ..interface import ContentType, SegmentLevel
 
 # pylint: disable=too-many-arguments
 
 
 @dataclass
-class ProtocolSegmentGroup:
+class ProtocolSpeechSet(IDispatchItem):
 
     content_type: ContentType
     year: int
+
     protocol_name: str
     protocol_segments: list[iterate.ProtocolSegment] = field(default_factory=list)
     n_tokens: int = 0
 
     @property
     def data(self):
+        texts: list[str] = [s.data for s in self.protocol_segments]
         if self.content_type == ContentType.TaggedFrame:
-            return utility.merge_tagged_csv(self.protocol_segments, sep='\n')
-        return '\n'.join(self.protocol_segments)
+            return utility.merge_tagged_csv(texts, sep='\n')
+        return '\n'.join(texts)
 
     def add(self, item: iterate.ProtocolSegment):
-        self.protocol_segments.append(item.data)
+        self.protocol_segments.append(item)
 
     def __repr__(self) -> str:
         return f"{self.year}" f"{self.protocol_name}" f"\t{self.n_chars}"
@@ -38,16 +41,16 @@ class ProtocolSegmentGroup:
         return sum(map(len, (s.data for s in self.protocol_segments)))
 
     @property
-    def extension(self) -> str:
-        return 'txt' if self.content_type == ContentType.Text else 'csv'
-
-    @property
     def filename(self) -> str:
         return f'{self.document_name}.{self.extension}'
 
     @property
     def document_name(self) -> str:
-        return f'{self.protocol_name}'
+        return self.protocol_name
+
+    @property
+    def group_name(self) -> str:
+        return self.protocol_name
 
     def to_dict(self):
         return {
@@ -65,13 +68,13 @@ class SpeechMerger:
     def __init__(self, source_index: corpus_index.CorpusSourceIndex):
         self.source_index: corpus_index.CorpusSourceIndex = source_index
 
-    def merge(self, iterator: Iterable[iterate.ProtocolSegment]) -> Iterable[dict[str, ProtocolSegmentGroup]]:
+    def merge(self, iterator: Iterable[iterate.ProtocolSegment]) -> Iterable[dict[str, ProtocolSpeechSet]]:
 
         assert iterator.segment_level == SegmentLevel.Speech
 
         try:
 
-            protocol_group: ProtocolSegmentGroup = None
+            protocol_group: ProtocolSpeechSet = None
             source_item: corpus_index.CorpusSourceItem
 
             for item in iterator:
@@ -88,7 +91,7 @@ class SpeechMerger:
                     if protocol_group:
                         yield protocol_group
 
-                    protocol_group = ProtocolSegmentGroup(
+                    protocol_group = ProtocolSpeechSet(
                         content_type=item.content_type,
                         protocol_name=item.protocol_name,
                         year=source_item.year,

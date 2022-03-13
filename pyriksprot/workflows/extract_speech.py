@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import shutil
-import typing as t
 from os.path import isdir
 
 from loguru import logger
@@ -9,15 +8,16 @@ from tqdm import tqdm
 
 from pyriksprot.corpus import iterate, tagged
 
-from .. import dispatch, group, interface
+from .. import dispatch, interface
 from .. import metadata as md
 from .. import speech
 from ..corpus import corpus_index
+from ..purgatory import collect_speech as cs
 
 # pylint: disable=too-many-arguments, W0613
 
 
-def extract_corpus_tags(
+def extract(
     *,
     source_folder: str,
     metadata_filename: str,
@@ -25,11 +25,8 @@ def extract_corpus_tags(
     content_type: interface.ContentType = interface.ContentType.TaggedFrame,
     target_type: dispatch.TargetTypeKey = None,
     compress_type: dispatch.CompressType = dispatch.CompressType.Lzma,
-    segment_level: interface.SegmentLevel = None,
     segment_skip_size: int = 1,
     years: str = None,
-    temporal_key: interface.TemporalKey = None,
-    group_keys: t.Sequence[interface.GroupingKey] = None,
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
@@ -53,10 +50,7 @@ def extract_corpus_tags(
         target_name (str, optional): Target name. Defaults to None.
         content_type (interface.ContentType): Content type to yield (text or tagged_text)
         target_type (str, optional): Target store type. Defaults to None.
-        segment_level (interface.SegmentLevel, optional): Level of protocol segments yielded by iterator. Defaults to None.
         segment_skip_size (int, optional): Segment skip size. Defaults to 1.
-        group_temporal_key (str, optional): Temporal grouping key used in merge. Defaults to None.
-        group_keys (Sequence[str], optional): Other grouping keys. Defaults to None.
         years (str, optional): Years filter. Defaults to None.
         multiproc_keep_order (str, optional): Force correct iterate yield order when multiprocessing. Defaults to None.
         multiproc_processes (int, optional): Number of processes during iterate. Defaults to 1.
@@ -66,7 +60,7 @@ def extract_corpus_tags(
         skip_text (bool, optional): Defaults to False
         lowercase (bool, optional): Defaults to False
     """
-    logger.info("extracting tagged corpus...")
+    logger.info("extracting tagged speeches...")
 
     if isdir(target_name):
         if force:
@@ -106,26 +100,19 @@ def extract_corpus_tags(
     def get_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
-    preprocess: t.Callable[[iterate.ProtocolSegment], None] = (
-        get_speaker if segment_level not in ('protocol', None) else None
-    )
-    texts: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
+    segments: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
-        segment_level=segment_level,
+        segment_level=interface.SegmentLevel.Speech,
         segment_skip_size=segment_skip_size,
         multiproc_keep_order=multiproc_keep_order,
         multiproc_processes=multiproc_processes,
         multiproc_chunksize=multiproc_chunksize,
         merge_strategy=merge_strategy,
-        preprocess=preprocess,
+        preprocess=get_speaker,
     )
 
-    merger: group.SegmentMerger = group.SegmentMerger(
-        source_index=source_index,
-        temporal_key=temporal_key,
-        grouping_keys=group_keys,
-    )
+    merger: cs.SpeechMerger = cs.SpeechMerger(source_index=source_index)
 
     with dispatch.IDispatcher.dispatcher(target_type)(
         target_name=target_name, compress_type=compress_type, **dispatch_opts
@@ -133,7 +120,7 @@ def extract_corpus_tags(
 
         n_total: int = len(source_index.source_items)
 
-        for item in tqdm(merger.merge(texts), total=n_total, miniters=10, disable=not progress):
+        for item in tqdm(merger.merge(segments), total=n_total, miniters=10, disable=not progress):
             if not item:
                 logger.error("merge returned empty data")
                 continue

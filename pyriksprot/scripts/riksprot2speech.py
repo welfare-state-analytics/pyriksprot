@@ -1,6 +1,6 @@
 import click
 
-from pyriksprot import cluster, dispatch, interface
+from pyriksprot import dispatch, interface, speech
 from pyriksprot.workflows import extract_tags
 
 from .utils import option2, update_arguments_from_options_file
@@ -43,7 +43,7 @@ def main(
 ):
     arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
     arguments['content_type'] = interface.ContentType(arguments['content_type'])
-    arguments['merge_strategy'] = cluster.MergeStrategyType(arguments['merge_strategy'])
+    arguments['merge_strategy'] = speech.MergeStrategyType(arguments['merge_strategy'])
     arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 
     extract_tags.extract_corpus_tags(

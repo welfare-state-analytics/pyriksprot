@@ -8,7 +8,7 @@ from loguru import logger
 from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.corpus.parlaclarin import iterate
 
-from .. import collect_generic, dehyphenation, dispatch, interface
+from .. import dehyphenation, dispatch, group, interface
 from .. import metadata as md
 from .. import utility
 from ..corpus import corpus_index
@@ -99,7 +99,7 @@ def extract_corpus_text(
         preprocess=preprocess,
     )
 
-    merger: collect_generic.SegmentMerger = collect_generic.SegmentMerger(
+    merger: group.SegmentMerger = group.SegmentMerger(
         source_index=source_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,

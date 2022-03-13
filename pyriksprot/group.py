@@ -6,17 +6,17 @@ from typing import Callable, Iterable
 
 from loguru import logger
 
-from . import corpus_index
 from . import metadata as md
 from . import utility
-from .corpus import iterate
+from .corpus import corpus_index, iterate
+from .dispatch import IDispatchItem
 from .interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
 
 # pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
 
 
 @dataclass
-class ProtocolSegmentGroup:
+class SegmentGroup(IDispatchItem):
 
     content_type: ContentType
     year: int
@@ -32,9 +32,11 @@ class ProtocolSegmentGroup:
     protocol_segments: list[iterate.ProtocolSegment] = field(default_factory=list)
     n_tokens: int = 0
 
+    property_bag: dict = field(default_factory=dict)
+
     @property
     def data(self):
-        texts: list[str] = (s.data for s in self.protocol_segments)
+        texts: list[str] = [s.data for s in self.protocol_segments]
         if self.content_type == ContentType.TaggedFrame:
             return utility.merge_tagged_csv(texts, sep='\n')
         return '\n'.join(texts)
@@ -42,17 +44,13 @@ class ProtocolSegmentGroup:
     def add(self, item: iterate.ProtocolSegment):
         self.protocol_segments.append(item)
 
-    def __repr__(self) -> str:
-        key_values: str = '\t'.join(self.grouping_values[k] for k in self.grouping_keys)
-        return f"{self.year}" f"{self.temporal_value}" f"\t{self.group_name}" f"\t{key_values}" f"\t{self.n_chars}"
+    # def __repr__(self) -> str:
+    #     key_values: str = '\t'.join(self.grouping_values[k] for k in self.grouping_keys)
+    #     return f"{self.year}" f"{self.temporal_value}" f"\t{self.group_name}" f"\t{key_values}" f"\t{self.n_chars}"
 
-    @property
-    def n_chars(self):
-        return len(self.data)
-
-    @property
-    def extension(self) -> str:
-        return 'txt' if self.content_type == ContentType.Text else 'csv'
+    # @property
+    # def n_chars(self) -> int:
+    #     return sum(map(len, (s.data for s in self.protocol_segments)))
 
     @property
     def filename(self) -> str:
@@ -65,6 +63,7 @@ class ProtocolSegmentGroup:
         return f'{self.temporal_value}_{self.group_name}'
 
     def to_dict(self):
+        """Temporary fix to include speaker's information"""
         return {
             'year': self.year,
             'period': self.temporal_value,
@@ -72,6 +71,7 @@ class ProtocolSegmentGroup:
             'filename': self.filename,
             'n_tokens': self.n_tokens,
             **self.grouping_values,
+            **self.property_bag,
         }
 
 
@@ -112,22 +112,18 @@ class SegmentMerger:
 
     def merge(
         self, iterator: list[iterate.ProtocolSegment] | iterate.ProtocolSegmentIterator
-    ) -> Iterable[dict[str, ProtocolSegmentGroup]]:
-        """Merges stream of protocol segments based on grouping keys. Yield merged groups continously."""
-
-        """ Note: value of `item.id` depends on aggregation level, it is u_id for levels speech and utterance """
+    ) -> Iterable[dict[str, SegmentGroup]]:
+        """Merges stream of protocol segments based on grouping keys. Yield merged groups continously.
+        Note: value of `item.id` depends on aggregation level, it is u_id for levels speech and utterance.
+        """
 
         hashcoder = self.grouping_hashcoder
 
         try:
-
             current_temporal_value: str = None
-            current_group: dict[str, ProtocolSegmentGroup] = {}
+            current_group: dict[str, SegmentGroup] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
             source_item: corpus_index.CorpusSourceItem
-
-            # if len(grouping_keys or []) == 0:
-            #     raise ValueError("no grouping key specified")
 
             if grouping_keys and getattr(iterator, 'segment_level', None) == SegmentLevel.Protocol:
                 raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
@@ -156,7 +152,7 @@ class SegmentMerger:
 
                 if hashcode not in current_group:
 
-                    current_group[hashcode] = ProtocolSegmentGroup(
+                    current_group[hashcode] = SegmentGroup(
                         content_type=item.content_type,
                         group_name=hashcode_str,
                         hashcode=hashcode,
@@ -240,11 +236,6 @@ def create_grouping_hashcoder(
             speaker_data: dict = (
                 {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys} if speaker_keys else {}
             )
-            # (
-            #     {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys}
-            #     if item.speaker_info is not None
-            #     else {}
-            # )
         except AttributeError as ex:
             raise ValueError(
                 f"Grouping hashcoder: failed on retrieving key values from item.speaker_info. {ex}"
