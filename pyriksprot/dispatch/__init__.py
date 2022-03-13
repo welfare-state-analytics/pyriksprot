@@ -12,4 +12,5 @@ from .dispatch import (
     TaggedFramePerGroupDispatcher,
     TargetTypeKey,
 )
-from .merge import SegmentGroup, SegmentMerger, create_grouping_hashcoder
+from .merge import SegmentMerger, SegmentGroup
+from .utility import create_grouping_hashcoder

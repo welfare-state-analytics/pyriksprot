@@ -17,32 +17,7 @@ from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
 from .. import utility
-from ..interface import ContentType
-
-
-class IDispatchItem(abc.ABC):
-
-    content_type: ContentType
-
-    data: str
-    n_tokens: int
-
-    """Used for filename in to-folder """
-    temporal_value: str
-    group_name: str
-    extension: str
-
-    """Used if to-zip (should include parts above?)"""
-    filename: str
-
-    @abc.abstractmethod
-    def to_dict(self) -> dict:
-        ...
-
-    @property
-    def extension(self) -> str:
-        return 'txt' if self.content_type == ContentType.Text else 'csv'
-
+from .item import SegmentGroup
 
 jj = os.path.join
 
@@ -123,7 +98,7 @@ class IDispatcher(abc.ABC):
         """Dispatch an index of dispatched documents."""
         ...
 
-    def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[SegmentGroup]) -> None:
         for item in dispatch_items:
             self._dispatch_index_item(item)
             self._dispatch_item(item)
@@ -132,12 +107,12 @@ class IDispatcher(abc.ABC):
         self.document_data = []
         self.document_id: int = 0
 
-    def _dispatch_index_item(self, item: IDispatchItem) -> None:
+    def _dispatch_index_item(self, item: SegmentGroup) -> None:
         self.document_data.append({**item.to_dict(), **{'document_id': self.document_id}})
         self.document_id += 1
 
     @abc.abstractmethod
-    def _dispatch_item(self, item: IDispatchItem) -> None:
+    def _dispatch_item(self, item: SegmentGroup) -> None:
         ...
 
     def document_index(self) -> pd.DataFrame:
@@ -195,9 +170,9 @@ class FilesInFolderDispatcher(IDispatcher):
     def open_target(self, target_name: Any) -> None:
         os.makedirs(target_name, exist_ok=True)
 
-    def _dispatch_item(self, item: IDispatchItem) -> None:
+    def _dispatch_item(self, item: SegmentGroup) -> None:
         # FIXME: Ask item for filename
-        filename: str = f'{item.temporal_value}_{item.group_name}.{item.extension}'
+        filename: str = f'{item.group_temporal_value}_{item.group_name}.{item.extension}'
         # FIXME: POS is made lowercase!
         self.store(filename, item.data.lower() if self.lowercase else item.data)
 
@@ -235,7 +210,7 @@ class FilesInZipDispatcher(IDispatcher):
         csv_str: str = self.document_index_str()
         self.zup.writestr('document_index.csv', csv_str)
 
-    def _dispatch_item(self, item: IDispatchItem) -> None:
+    def _dispatch_item(self, item: SegmentGroup) -> None:
         # FIXME: POS is made lowercase!
         self.zup.writestr(item.filename, item.data.lower() if self.lowercase else item.data)
 
@@ -254,21 +229,21 @@ class CheckpointPerGroupDispatcher(IDispatcher):
     def close_target(self) -> None:
         return
 
-    def _dispatch_item(self, item: IDispatchItem) -> None:
+    def _dispatch_item(self, item: SegmentGroup) -> None:
         return
 
     def dispatch_index(self) -> None:
         return
 
-    def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[SegmentGroup]) -> None:
 
         self._reset_index()
 
         if len(dispatch_items) == 0:
             return
 
-        checkpoint_name: str = f'{dispatch_items[0].temporal_value}.zip'
-        sub_folder: str = dispatch_items[0].temporal_value.split('-')[1]
+        checkpoint_name: str = f'{dispatch_items[0].group_temporal_value}.zip'
+        sub_folder: str = dispatch_items[0].group_temporal_value.split('-')[1]
         path: str = jj(self.target_name, sub_folder)
 
         os.makedirs(path, exist_ok=True)
@@ -302,10 +277,10 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
     name: str = 'single-tagged-frame-per-group'
 
-    def _dispatch_item(self, item: IDispatchItem) -> None:
+    def _dispatch_item(self, item: SegmentGroup) -> None:
         return
 
-    def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
+    def dispatch(self, dispatch_items: list[SegmentGroup]) -> None:
 
         if len(dispatch_items) == 0:
             return
@@ -324,15 +299,15 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
             self.flush(total_frame, dispatch_items)
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
-        temporal_value: str = dispatch_items[0].temporal_value
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[SegmentGroup]):
+        temporal_value: str = dispatch_items[0].group_temporal_value
         sub_folder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, sub_folder)
         os.makedirs(path, exist_ok=True)
         target_name: str = jj(path, f'{temporal_value}.csv')
         self.store(filename=target_name, data=tagged_frame)
 
-    def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
+    def create_tagged_frame(self, item: SegmentGroup) -> pd.DataFrame:
 
         pads: set = {'MID', 'MAD', 'PAD'}
         tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.data), sep='\t', quoting=3, dtype=str)
@@ -399,7 +374,7 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         self.token2id.default_factory = self.token2id.__len__
         self.pos_schema: PoS_Tag_Scheme = PoS_TAGS_SCHEMES.SUC
 
-    def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
+    def create_tagged_frame(self, item: SegmentGroup) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
         fg = lambda t: self.token2id[t]
         pg = self.pos_schema.pos_to_id.get
@@ -414,7 +389,7 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
         return tagged_frame
 
-    def _dispatch_index_item(self, item: IDispatchItem) -> None:
+    def _dispatch_index_item(self, item: SegmentGroup) -> None:
         self.document_data.append({**item.to_dict(), **{'document_id': self.document_id}})
         self.document_id += 1
 
@@ -442,7 +417,7 @@ class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
         super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
         self.tagged_frames: list[pd.DataFrame] = []
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[SegmentGroup]):
         self.tagged_frames.append(tagged_frame)
 
     def close_target(self) -> None:

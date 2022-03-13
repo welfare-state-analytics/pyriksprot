@@ -1,70 +1,16 @@
 from __future__ import annotations
 
-import hashlib
-from dataclasses import dataclass, field
-from typing import Callable, Iterable
+from typing import Iterable
 
 from loguru import logger
 
-from .. import metadata as md
-from .. import utility
+from .utility import create_grouping_hashcoder
+
 from ..corpus import corpus_index, iterate
-from ..interface import ContentType, GroupingKey, SegmentLevel, TemporalKey
-from .dispatch import IDispatchItem
+from ..interface import GroupingKey, SegmentLevel, TemporalKey
+from .item import SegmentGroup
 
 # pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
-
-
-@dataclass
-class SegmentGroup(IDispatchItem):
-
-    content_type: ContentType
-    year: int
-
-    """Group attributes"""
-    temporal_value: int | str
-    # grouping_keys: list[GroupingKey]
-    grouping_values: dict[str, str | int]
-    group_name: str  # string from which hashcode was computed
-    hashcode: str
-
-    """Protocol segments that belong to group"""
-    protocol_segments: list[iterate.ProtocolSegment] = field(default_factory=list)
-    n_tokens: int = 0
-
-    property_bag: dict = field(default_factory=dict)
-
-    @property
-    def data(self):
-        texts: list[str] = [s.data for s in self.protocol_segments]
-        if self.content_type == ContentType.TaggedFrame:
-            return utility.merge_tagged_csv(texts, sep='\n')
-        return '\n'.join(texts)
-
-    def add(self, item: iterate.ProtocolSegment):
-        self.protocol_segments.append(item)
-
-    @property
-    def filename(self) -> str:
-        return f'{self.document_name}.{self.extension}'
-
-    @property
-    def document_name(self) -> str:
-        if self.temporal_value is None or self.group_name.startswith(self.temporal_value):
-            return self.group_name
-        return f'{self.temporal_value}_{self.group_name}'
-
-    def to_dict(self):
-        """Temporary fix to include speaker's information"""
-        return {
-            'year': self.year,
-            'period': self.temporal_value,
-            'document_name': self.document_name,
-            'filename': self.filename,
-            'n_tokens': self.n_tokens,
-            **self.grouping_values,
-            **self.property_bag,
-        }
 
 
 class SegmentMerger:
@@ -147,10 +93,10 @@ class SegmentMerger:
                     current_group[hashcode] = SegmentGroup(
                         content_type=item.content_type,
                         group_name=hashcode_str,
-                        hashcode=hashcode,
-                        temporal_value=temporal_value,
+                        group_hash=hashcode,
+                        group_temporal_value=temporal_value,
                         # grouping_keys=self.grouping_keys,
-                        grouping_values=grouping_values,
+                        group_values=grouping_values,
                         year=source_item.year,
                         protocol_segments=[],
                     )
@@ -201,45 +147,3 @@ class SegmentMerger:
 
         raise ValueError(f"temporal period failed for {item.protocol_name}")
 
-
-def hashcoder_with_no_grouping_keys(item: iterate.ProtocolSegment, **_) -> tuple[dict, str, str]:
-    return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
-
-
-def create_grouping_hashcoder(
-    grouping_keys: list[str],
-) -> Callable[[iterate.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
-    """Create a hashcode function for given grouping keys"""
-
-    grouping_keys: set[str] = set(grouping_keys)
-
-    if not grouping_keys:
-        """No grouping apart from temporal key """
-        return hashcoder_with_no_grouping_keys
-
-    speaker_keys, item_keys, corpus_index_keys = utility.split_properties_by_dataclass(
-        grouping_keys, md.SpeakerInfo, iterate.ProtocolSegment, corpus_index.CorpusSourceItem
-    )
-
-    def hashcoder(item: iterate.ProtocolSegment, source_item: corpus_index.CorpusSourceItem) -> tuple[dict, str, str]:
-        """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
-        assert isinstance(source_item, corpus_index.CorpusSourceItem)
-        try:
-            speaker_data: dict = (
-                {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys} if speaker_keys else {}
-            )
-        except AttributeError as ex:
-            raise ValueError(
-                f"Grouping hashcoder: failed on retrieving key values from item.speaker_info. {ex}"
-            ) from ex
-
-        parts: dict[str, str | int] = {
-            **speaker_data,
-            **{attr: str(getattr(source_item, attr)) for attr in corpus_index_keys},
-            **{attr: str(getattr(item, attr)) for attr in item_keys},
-        }
-        hashcode_str = utility.slugify('_'.join(x.lower().replace(' ', '_') for x in parts.values()))
-
-        return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
-
-    return hashcoder if grouping_keys else hashcoder_with_no_grouping_keys

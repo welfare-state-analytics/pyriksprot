@@ -123,7 +123,7 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
     data = g[key]
     # FIXME: 'who' is added to values (bugfix)
     # assert set(data.grouping_keys) == {'gender_id', 'party_id'}
-    assert set(data.grouping_values.keys()) == {'gender_id', 'party_id', 'who'}
+    assert set(data.group_values.keys()) == {'gender_id', 'party_id', 'who'}
 
 
 def test_extract_corpus_text_yearly_grouped_by_party():
