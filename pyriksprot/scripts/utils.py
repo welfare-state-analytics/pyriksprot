@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 
 import click
 
-from pyriksprot import dispatch, interface, speech
+from pyriksprot import dispatch, interface, to_speech
 
 from .. import utility
 
@@ -14,7 +14,7 @@ CLI_LOG_PATH = './logs'
 TARGET_TYPES = dispatch.IDispatcher.dispatcher_keys()
 COMPRESS_TYPES = dispatch.CompressType.values()
 CONTENT_TYPES = [e.value for e in interface.ContentType]
-MERGE_STRATEGIES = [e.value for e in speech.MergeStrategyType]
+MERGE_STRATEGIES = [e.value for e in to_speech.MergeStrategyType]
 SEGMENT_LEVELS = ['protocol', 'speech', 'utterance', 'paragraph', 'who']
 
 

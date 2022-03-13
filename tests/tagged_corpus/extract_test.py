@@ -6,7 +6,7 @@ from typing import Iterable, List
 import pandas as pd
 import pytest
 
-from pyriksprot import CorpusSourceIndex, dispatch, interface, speech, workflows
+from pyriksprot import CorpusSourceIndex, dispatch, interface, to_speech, workflows
 from pyriksprot.corpus import tagged as tagged_corpus
 
 from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
@@ -83,12 +83,12 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
 @pytest.mark.parametrize(
     'target_type,merge_strategy,compress_type',
     [
-        ('single-id-tagged-frame-per-group', speech.MergeStrategyType.chain, 'csv'),
-        ('single-id-tagged-frame-per-group', speech.MergeStrategyType.speaker_hash_sequence, 'csv'),
-        ('single-id-tagged-frame-per-group', speech.MergeStrategyType.who_speaker_hash_sequence, 'csv'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.speaker_hash_sequence, 'csv'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_hash_sequence, 'csv'),
     ],
 )
-def test_extract_speeches(target_type: str, merge_strategy: speech.MergeStrategyType, compress_type: str):
+def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
 
     target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{merge_strategy}'
 

@@ -9,9 +9,9 @@ from tqdm import tqdm
 
 from pyriksprot.corpus import iterate, tagged
 
-from .. import dispatch, group, interface
+from .. import dispatch, interface, merge_segments
 from .. import metadata as md
-from .. import speech
+from .. import to_speech
 from ..corpus import corpus_index
 
 # pylint: disable=too-many-arguments, W0613
@@ -33,7 +33,7 @@ def extract_corpus_tags(
     multiproc_keep_order: str = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
-    merge_strategy: speech.MergeStrategyType = 'chain',
+    merge_strategy: to_speech.MergeStrategyType = 'chain',
     force: bool = False,
     skip_lemma: bool = False,
     skip_text: bool = False,
@@ -121,7 +121,7 @@ def extract_corpus_tags(
         preprocess=preprocess,
     )
 
-    merger: group.SegmentMerger = group.SegmentMerger(
+    merger: merge_segments.SegmentMerger = merge_segments.SegmentMerger(
         source_index=source_index,
         temporal_key=temporal_key,
         grouping_keys=group_keys,

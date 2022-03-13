@@ -5,9 +5,9 @@ from .corpus.corpus_index import CorpusSourceIndex, CorpusSourceItem
 from .corpus.iterate import ProtocolSegment, ProtocolSegmentIterator
 from .corpus.parlaclarin import pretokenize
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
-from .group import SegmentGroup, SegmentMerger, create_grouping_hashcoder
+from .merge_segments import SegmentGroup, SegmentMerger, create_grouping_hashcoder
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
-from .speech import MergerFactory, MergeStrategyType, to_speeches
+from .to_speech import MergerFactory, MergeStrategyType, to_speeches
 from .utility import (
     compose,
     data_path_ts,

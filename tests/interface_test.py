@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from black import itertools
 
-from pyriksprot import interface, speech
+from pyriksprot import interface, to_speech
 from pyriksprot.corpus import tagged as tagged_corpus
 
 from .utility import TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_utterances
@@ -36,10 +36,10 @@ def test_utterance_checksumtext():
 
 def test_utterances_to_dict():
 
-    who_sequences: list[list[interface.Utterance]] = speech.MergeByWhoSequence().cluster(None)
+    who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster(None)
     assert who_sequences == []
 
-    who_sequences: list[list[interface.Utterance]] = speech.MergeByWhoSequence().cluster([])
+    who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster([])
     assert who_sequences == []
 
     utterances: list[interface.Utterance] = [
@@ -50,7 +50,7 @@ def test_utterances_to_dict():
         interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
     ]
 
-    who_sequences: list[list[interface.Utterance]] = speech.MergeByWhoSequence().cluster(utterances)
+    who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster(utterances)
 
     assert len(who_sequences) == 3
     assert len(who_sequences[0]) == 2
