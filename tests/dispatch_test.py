@@ -6,11 +6,10 @@ from typing import List, Mapping, Set, Type
 import pandas as pd
 import pytest
 
-from pyriksprot import dispatch, to_speech
+from pyriksprot import dispatch, interface
 from pyriksprot import merge_segments as sg
-from pyriksprot import interface
 from pyriksprot import metadata as md
-from pyriksprot import utility
+from pyriksprot import to_speech, utility
 from pyriksprot.corpus import corpus_index, iterate, tagged
 
 # pylint: disable=unused-variable, redefined-outer-name
@@ -78,9 +77,7 @@ def test_find_dispatch_class():
     assert expected_keys.intersection(dispatch_keys) == expected_keys
 
 
-def test_checkpoint_dispatch(
-    tagged_speeches: list[sg.SegmentGroup], source_index: corpus_index.CorpusSourceIndex
-):
+def test_checkpoint_dispatch(tagged_speeches: list[sg.SegmentGroup], source_index: corpus_index.CorpusSourceIndex):
 
     target_name: str = f'./tests/output/{uuid.uuid1()}'
     with dispatch.CheckpointPerGroupDispatcher(
