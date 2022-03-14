@@ -30,6 +30,10 @@ class ProtocolSegment(IDispachItem):
 
     speaker_info: SpeakerInfo = None
 
+    def __len__(self) -> int:
+        """IDispatchItem interface"""
+        return 1
+
     # def __repr__(self) -> str:
     #     return (
     #         f"{self.protocol_name or '*'}\t"

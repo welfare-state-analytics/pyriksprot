@@ -24,6 +24,9 @@ class DispatchItem(IDispachItem):
 
     protocol_segments: list[ProtocolSegment] = field(default_factory=list)
 
+    def __len__(self) -> int:
+        return len(self.protocol_segments)
+
     def add(self, item: ProtocolSegment):
         self.protocol_segments.append(item)
 
