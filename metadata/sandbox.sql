@@ -8,11 +8,20 @@ with minister_years as (
   join years
    on years.year between start_year and start_year
 ;
-
-select speaker_hash
+select *
 from utterances
-group by speaker_hash
+where speaker_hash = 'fd225650';
+select speaker_hash, document_id, count(*)
+from utterances
+--where person_id != 'unknown'
+group by speaker_hash, document_id
 having count(distinct person_id) > 1;
+
+select count(*)
+from utterances
+where speaker_hash is null
+-- 5984
+;
 select *
 from unknown_utterance_party
 join unknown_utterance_party using u_id;
