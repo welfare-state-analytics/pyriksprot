@@ -207,10 +207,14 @@ class PoS_Tag_Scheme:
     def __init__(self, df: pd.DataFrame) -> None:
         self.PD_PoS_tags: pd.DataFrame = df
         self.PD_PoS_groups: pd.DataFrame = df.groupby('tag_group_name')['tag'].agg(list)
-        self.pos_to_id: dict = df['pos_id'].to_dict()
-        self.id_to_pos: dict = {v: k for k, v in self.pos_to_id.items()}
+        self.pos_to_id: dict[str, int] = df['pos_id'].to_dict()
+        self.id_to_pos: dict[int, str] = {v: k.upper() for k, v in self.pos_to_id.items()}
         self.groups: Dict[str, List[str]] = self.PD_PoS_groups.to_dict()
         self.tag_to_group: Dict[str, str] = self.PD_PoS_tags.set_index('tag')['tag_group_name'].to_dict()
+
+        """Add lowercased keys to maps"""
+        self.pos_to_id: dict = self.pos_to_id | {k.lower(): v for k, v in self.pos_to_id.items()}
+        self.tag_to_group: dict = self.tag_to_group | {k.lower(): v for k, v in self.tag_to_group.items()}
 
     @property
     def tags(self) -> List[str]:
