@@ -1,3 +1,5 @@
+/* Various SQL queries */
+
 with minister_years as (
     select *, cast(strftime('%Y',start) as integer) as start_year,
               cast(strftime('%Y',end) as integer) as end_year
