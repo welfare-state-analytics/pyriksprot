@@ -134,10 +134,20 @@ def extract_corpus_tags(
     ) as dispatcher:
         data: t.Iterable[dict[str, DispatchItem]]
         n_total: int = len(source_index.source_items)
+
         for data in tqdm(merger.merge(texts), total=n_total, miniters=10, disable=not progress):
+
             if not data:
                 logger.error("merge returned empty data")
                 continue
+
+            # items: list[DispatchItem] = list(data.values())
+            # print(f"dispatch: group count is {len(items)}")
+            # for item in items:
+            #     print(f"   item: filename={item.filename} temporal={item.group_temporal_value} level={item.segment_level}")
+            #     for segment in item.protocol_segments:
+            #         print(f"         segment: filename={segment.filename} temporal={segment.protocol_name} speaker={segment.speaker_info.person_id if segment.speaker_info else 'missing'}")
+
             dispatcher.dispatch(list(data.values()))
 
     # metadata_index.store(target_name=target_name if isdir(target_name) else dirname(target_name))
