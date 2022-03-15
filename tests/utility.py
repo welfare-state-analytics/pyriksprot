@@ -9,8 +9,8 @@ from loguru import logger
 
 from pyriksprot import interface
 from pyriksprot import metadata as md
-from pyriksprot.utility import download_protocols, replace_extension
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
+from pyriksprot.utility import download_protocols, replace_extension
 
 load_dotenv()
 
@@ -47,6 +47,7 @@ def ensure_test_corpora_exist(force: bool = False):
     if force or not sample_metadata_exists():
         """Create just a subset of the data"""
         md.subset_to_folder(
+            parser=ProtocolMapper,
             source_folder=PARLACLARIN_SOURCE_FOLDER,
             source_metadata="metadata/data",
             target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
