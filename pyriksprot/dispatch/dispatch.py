@@ -13,11 +13,12 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.dispatch.item import DispatchItem
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.stopwords import STOPWORDS
 
 from .. import utility
-from ..interface import IDispachItem
+from ..interface import IDispachItem, SegmentLevel
 
 jj = os.path.join
 
@@ -263,7 +264,7 @@ class CheckpointPerGroupDispatcher(IDispatcher):
 
 class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     """Store merged group items in a single tagged frame.
-    NOTE! This dispatcher is ONLY tested for Speech level segments.
+    NOTE! This dispatcher ONLY workd for Speech level segments.
     """
 
     def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
@@ -277,6 +278,25 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     def _dispatch_item(self, item: IDispachItem) -> None:
         return
 
+    def _dispatch_index_item(self, item: IDispachItem) -> None:
+
+        item: DispatchItem = item
+
+        if item.segment_level != SegmentLevel.Speech:
+            raise ValueError(f"TaggedFramePerGroupDispatcher: expected Speech, found {item.segment_level}")
+
+        if len(item.protocol_segments) != 1:
+            raise ValueError(
+                f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
+            )
+
+        for speech_segment in item.protocol_segments:
+
+            self.document_data.append(
+                {**item.to_dict(), **{'document_id': self.document_id}, **speech_segment.speaker_info.to_dict()}
+            )
+            self.document_id += 1
+
     def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
 
         if len(dispatch_items) == 0:
@@ -284,6 +304,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
         tagged_frames: list[pd.DataFrame] = []
         for item in dispatch_items:
+
             tagged_frame: pd.DataFrame = self.create_tagged_frame(item)
             tagged_frames.append(tagged_frame)
             item.n_tokens = len(tagged_frame)
@@ -305,8 +326,12 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
         pads: set = {'MID', 'MAD', 'PAD'}
 
-        tagged_frame: pd.DataFrame = pd.read_csv(StringIO(self.to_lower(item.text)), sep='\t', quoting=3, dtype=str)
+        tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.text), sep='\t', quoting=3, dtype=str)
         tagged_frame['document_id'] = self.document_id
+
+        if self.lowercase:
+            tagged_frame["token"] = tagged_frame["token"].str.lower()
+            tagged_frame["lemma"] = tagged_frame["lemma"].str.lower()
 
         drop_columns: list[str] = []
 
@@ -385,15 +410,6 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         tagged_frame['pos_id'] = tagged_frame.pos.apply(pg).astype(np.int8)
         tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
         return tagged_frame
-
-    def _dispatch_index_item(self, item: IDispachItem) -> None:
-        self.document_data.append(
-            {
-                **item.to_dict(),
-                **{'document_id': self.document_id},
-            }
-        )
-        self.document_id += 1
 
     def dispatch_index(self) -> None:
         super().dispatch_index()
