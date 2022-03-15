@@ -77,8 +77,10 @@ def test_code_lookups():
 
 
 def test_person_index(person_index: md.PersonIndex):
+    person_id: str = 'Q5556026'
+    pid: int = person_index.person_id2pid.get(person_id)
     expected_data: dict = {
-        'person_id': 'Q5556026',
+        'person_id': person_id,
         'name': 'Sten Andersson',
         'gender_id': 1,
         'party_id': 0,
@@ -86,17 +88,17 @@ def test_person_index(person_index: md.PersonIndex):
         'year_of_death': 2010,
     }
 
-    person: md.Person = person_index.get_person('Q5556026')
+    person: md.Person = person_index.get_person(person_id)
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
-    person: md.Person = person_index.get_person(102)
+    person: md.Person = person_index.get_person(pid)
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
     person_lookup = person_index.person_lookup
-    person: md.Person = person_lookup['Q5556026']
+    person: md.Person = person_lookup[person_id]
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
-    terms: list[md.TermOfOffice] = person_index.terms_of_office_lookup.get('Q5556026')
+    terms: list[md.TermOfOffice] = person_index.terms_of_office_lookup.get(person_id)
 
     assert (
         sorted(terms, key=lambda x: x.start_year)
@@ -121,15 +123,12 @@ def test_overload_by_person(person_index: md.PersonIndex):
     person_index: md.PersonIndex = md.PersonIndex(
         "tests/test_data/source/tagged_frames/v0.4.0/riksprot_metadata.db"
     ).load()
-    df: pd.DataFrame = pd.DataFrame(
-        data=dict(
-            person_id=['Q5715273', 'Q5556026', 'Q5983926', 'unknown'],
-        )
-    )
+    person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
+    df: pd.DataFrame = pd.DataFrame(data=dict(person_id=person_ids))
     df_overloaded: pd.DataFrame = person_index.overload_by_person(df)
     assert df_overloaded is not None
     assert set(df_overloaded.columns) == {'person_id', 'pid', 'gender_id', 'party_id'}
-    assert (df_overloaded.pid == [4, 102, 105, 0]).all()
+    assert (df_overloaded.pid == [person_index.person_id2pid.get(x) for x in person_ids]).all()
     assert (df_overloaded.gender_id == [1, 1, 1, 0]).all()
     assert (df_overloaded.party_id == [8, 0, 6, 0]).all()
 
