@@ -100,7 +100,7 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
         temporal_key=interface.TemporalKey.NONE,
         content_type=interface.ContentType.TaggedFrame,
         multiproc_keep_order=None,
-        multiproc_processes=1,
+        multiproc_processes=None,
         multiproc_chunksize=100,
         segment_skip_size=1,
         years=None,
