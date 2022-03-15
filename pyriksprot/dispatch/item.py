@@ -38,8 +38,6 @@ class DispatchItem(IDispachItem):
 
     @property
     def filename(self) -> str:
-        a: str = "apa"
-        a.removeprefix()
         return f'{self.document_name}.{self._extension}'
 
     @property
