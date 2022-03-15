@@ -44,7 +44,7 @@ def test_find_dispatchers():
 
 
 def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
-    target_name: str = f'./tests/output/{uuid.uuid1()}'
+    target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     with dispatch.FilesInFolderDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Plain,
@@ -55,7 +55,7 @@ def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
 
 
 def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
-    target_name: str = f'./tests/output/{uuid.uuid1()}.zip'
+    target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
     with dispatch.FilesInZipDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Zip,
@@ -86,7 +86,7 @@ def test_find_dispatch_class():
 
 def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
 
-    target_name: str = f'./tests/output/{uuid.uuid1()}'
+    target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     with dispatch.CheckpointPerGroupDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Zip,
@@ -117,7 +117,7 @@ def test_single_feather_per_group_dispatch(
     cls: Type[dispatch.IDispatcher],
 ):
 
-    target_name: str = f'./tests/output/{uuid.uuid1()}'
+    target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     with cls(
         target_name=target_name,
         compress_type=dispatch.CompressType.Feather,
@@ -141,7 +141,7 @@ def test_single_feather_per_group_dispatch_with_skips(
     cls: Type[dispatch.IDispatcher],
 ):
 
-    target_name: str = f'./tests/output/{uuid.uuid1()}'
+    target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     with cls(
         target_name=target_name, compress_type=dispatch.CompressType.Feather, lowercase=True, skip_text=True
     ) as dispatcher:
