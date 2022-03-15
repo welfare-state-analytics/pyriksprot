@@ -4,7 +4,7 @@ from pyriksprot import interface, to_speech
 from pyriksprot.dispatch import dispatch
 from pyriksprot.workflows import extract_tags
 
-from .utils import option2, update_arguments_from_options_file
+from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 
 # pylint: disable=too-many-arguments, unused-argument
 
