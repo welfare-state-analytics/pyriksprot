@@ -50,18 +50,6 @@ class ProtocolSegment(IDispachItem):
 
     def to_dict(self):
         """These properties ends up in resulting document index."""
-        speaker: dict = (
-            {}
-            if not self.speaker_info
-            else {
-                self.speaker_info.gender_id,
-                self.speaker_info.party_id,
-                self.speaker_info.office_type_id,
-                self.speaker_info.sub_office_type_id,
-                self.speaker_info.person_id,
-            }
-        )
-
         return {
             'year': self.year,
             'period': self.year,
@@ -71,7 +59,7 @@ class ProtocolSegment(IDispachItem):
             'filename': self.filename,
             'n_tokens': self.n_tokens,
             'page_number': self.page_number,
-            **speaker,
+            **({} if not self.speaker_info else self.speaker_info.to_dict()),
         }
 
     @property

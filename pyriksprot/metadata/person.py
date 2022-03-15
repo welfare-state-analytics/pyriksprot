@@ -101,7 +101,7 @@ class SpeakerInfo:
     # year_of_death: int = None
     # district_id: int = None
 
-    def to_dict(self) -> dict:
+    def asdict(self) -> dict:
         return asdict(self)
 
     def to_tuple(self) -> tuple:
@@ -110,6 +110,15 @@ class SpeakerInfo:
     @cached_property
     def columns(self) -> list[str]:
         return [f.name for f in fields(self)]
+
+    def to_dict(self) -> dict:
+        return {
+            'gender_id': self.gender_id,
+            'party_id': self.party_id,
+            'office_type_id': self.office_type_id,
+            'sub_office_type_id': self.sub_office_type_id,
+            # 'person_id': self.person_id,
+        }
 
 
 def swap_rows(df: pd.DataFrame, i: int, j: int):
@@ -321,7 +330,7 @@ class SpeakerInfoService:
         return speaker_info
 
     def store(self, target_filename: str, speakers: list[SpeakerInfo]) -> None:
-        speaker_infos: pd.DataFrame = pd.DataFrame(data=[s.to_dict() for s in speakers])
+        speaker_infos: pd.DataFrame = pd.DataFrame(data=[s.asdict() for s in speakers])
         speaker_infos.to_csv(
             mdu.replace_extension(target_filename, "zip"),
             sep='\t',
