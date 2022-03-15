@@ -4,6 +4,7 @@ from os.path import dirname
 import click
 
 from pyriksprot import metadata as md
+from pyriksprot.corpus.parlaclarin import ProtocolMapper
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
@@ -22,7 +23,7 @@ def download_metadata(tag: str, target_folder: str):
 @click.argument('corpus_folder', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
 def create_utterance_index(corpus_folder: str, target_folder: str):
-    md.generate_utterance_index(corpus_folder=corpus_folder, target_folder=target_folder)
+    md.generate_utterance_index(ProtocolMapper, corpus_folder=corpus_folder, target_folder=target_folder)
 
 
 @click.command()

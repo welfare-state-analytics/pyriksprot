@@ -1,26 +1,46 @@
 from __future__ import annotations
 
+import abc
 import glob
 import os
 import shutil
 import sqlite3
 from contextlib import closing
+from dataclasses import dataclass
 from os.path import dirname, isdir, isfile
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.corpus.parlaclarin import parse
-
 from .utility import download_url_to_file, probe_filename
 
-if TYPE_CHECKING:
-    from .. import interface
-
 jj = os.path.join
+
+
+class IParser(abc.ABC):
+
+    """IParser = parse.ProtocolMapper """
+
+    @dataclass
+    class IUtterance:
+        u_id: str
+        who: str
+        speaker_hash: str
+
+    @dataclass
+    class IProtocol:
+        name: str
+        date: str
+        utterances: list[IParser.IUtterance]
+
+    def to_protocol(
+        self, filename: str, segment_skip_size: int, ignore_tags: set[str]  # pylint: disable=unused-argument
+    ) -> IParser.IProtocol:
+        ...
+
 
 # pylint: disable=unsupported-assignment-operation, unsubscriptable-object
 
@@ -150,9 +170,9 @@ def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
         # download_url(url, target_folder, filename)
 
 
-def subset_to_folder(source_folder: str, source_metadata: str, target_folder: str):
+def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, target_folder: str):
     """Creates a subset of metadata in source metadata that includes only protocols found in source_folder"""
-    data: tuple = generate_utterance_index(corpus_folder=source_folder, target_folder=target_folder)
+    data: tuple = generate_utterance_index(parser, corpus_folder=source_folder, target_folder=target_folder)
     protocols: pd.DataFrame = data[0]
     utterances: pd.DataFrame = data[1]
     person_ids: list[str] = set(utterances.person_id.unique().tolist())
@@ -241,16 +261,16 @@ def create_database(
     return db
 
 
-def generate_utterance_index(corpus_folder: str, target_folder: str = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+def generate_utterance_index(
+    parser: IParser, corpus_folder: str, target_folder: str = None
+) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     utterance_data: list[tuple] = []
     protocol_data: list[tuple[int, str]] = []
     filenames = glob.glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
 
     for document_id, filename in tqdm(enumerate(filenames)):
-        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
-            filename, segment_skip_size=0, ignore_tags={"teiHeader"}
-        )
+        protocol: IParser.IProtocol = parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
         protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
         for u in protocol.utterances:
             utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_hash]))

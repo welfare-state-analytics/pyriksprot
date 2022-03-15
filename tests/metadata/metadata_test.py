@@ -4,6 +4,7 @@ import pytest
 from loguru import logger
 
 from pyriksprot import metadata as md
+from pyriksprot.corpus.parlaclarin import ProtocolMapper
 
 from ..utility import create_subset_metadata_to_folder, ensure_test_corpora_exist
 
@@ -21,7 +22,7 @@ def test_to_folder():
 
 def test_collect_utterance_whos():
     corpus_folder: str = "./tests/test_data/source/parlaclarin/v0.4.0"
-    protocols, utterances = md.generate_utterance_index(corpus_folder)
+    protocols, utterances = md.generate_utterance_index(ProtocolMapper, corpus_folder)
     assert protocols is not None
     assert utterances is not None
 

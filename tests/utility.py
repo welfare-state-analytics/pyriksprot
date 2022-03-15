@@ -10,6 +10,7 @@ from loguru import logger
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot.utility import download_protocols, replace_extension
+from pyriksprot.corpus.parlaclarin import ProtocolMapper
 
 load_dotenv()
 
@@ -107,6 +108,7 @@ def setup_sample_tagged_frames_corpus(
 
 def create_subset_metadata_to_folder():
     md.subset_to_folder(
+        ProtocolMapper,
         source_folder=PARLACLARIN_SOURCE_FOLDER,
         source_metadata="metadata/data",
         target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
@@ -118,6 +120,7 @@ def create_subset_metadata_to_folder():
         force=True,
     )
     md.generate_utterance_index(
+        ProtocolMapper,
         corpus_folder=PARLACLARIN_SOURCE_FOLDER,
         target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
     )
