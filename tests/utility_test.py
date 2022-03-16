@@ -6,8 +6,8 @@ import pytest
 from pyriksprot.utility import dedent, download_protocols, probe_filename, replace_extension, temporary_file, touch
 
 from .utility import (
-    PARLACLARIN_SOURCE_FOLDER,
-    PARLACLARIN_SOURCE_TAG,
+    RIKSPROT_PARLACLARIN_FOLDER,
+    RIKSPROT_REPOSITORY_TAG,
     TAGGED_SOURCE_FOLDER,
     TEST_DOCUMENTS,
     sample_tagged_corpus_exists,
@@ -55,9 +55,9 @@ def test_dedent():
 def test_setup_sample_xml_corpus():
 
     protocols: list[str] = TEST_DOCUMENTS
-    target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols")
+    target_folder: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols")
     download_protocols(
-        protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=PARLACLARIN_SOURCE_TAG
+        protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=RIKSPROT_REPOSITORY_TAG
     )
 
 
@@ -65,7 +65,7 @@ def test_setup_sample_xml_corpus():
 def test_setup_sample_tagged_frames_corpus():
     setup_sample_tagged_frames_corpus(
         protocols=TEST_DOCUMENTS,
-        source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
+        source_folder=os.environ["TEST_RIKSPROT_TAGGED_FOLDER"],
         target_folder=TAGGED_SOURCE_FOLDER,
     )
 

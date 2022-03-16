@@ -15,13 +15,13 @@ from pyriksprot.utility import download_protocols, replace_extension
 load_dotenv()
 
 
-PARLACLARIN_BRANCH = os.environ["CORPUS_REPOSITORY_TAG"]
-PARLACLARIN_SOURCE_TAG = os.environ["CORPUS_REPOSITORY_TAG"]
-PARLACLARIN_SOURCE_FOLDER = jj("tests/test_data/source/parlaclarin", PARLACLARIN_SOURCE_TAG)
-PARLACLARIN_SOURCE_PATTERN = jj(PARLACLARIN_SOURCE_FOLDER, "**/prot-*.xml")
-PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/parlaclarin/fake'
+RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
+RIKSPROT_PARLACLARIN_FOLDER = jj("tests/test_data/source/parlaclarin", RIKSPROT_REPOSITORY_TAG)
 
-TAGGED_SOURCE_FOLDER = jj("tests/test_data/source/tagged_frames", PARLACLARIN_SOURCE_TAG)
+RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
+RIKSPROT_PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/parlaclarin/fake'
+
+TAGGED_SOURCE_FOLDER = jj("tests/test_data/source/tagged_frames", RIKSPROT_REPOSITORY_TAG)
 TAGGED_METADATA_DATABASE_NAME = jj(TAGGED_SOURCE_FOLDER, "riksprot_metadata.db")
 TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "prot-*.zip")
 
@@ -39,25 +39,25 @@ def ensure_test_corpora_exist(force: bool = False):
     if force or not sample_xml_corpus_exists():
         download_protocols(
             protocols=TEST_DOCUMENTS,
-            target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "protocols"),
+            target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols"),
             create_subfolder=True,
-            tag=PARLACLARIN_SOURCE_TAG,
+            tag=RIKSPROT_REPOSITORY_TAG,
         )
 
     if force or not sample_metadata_exists():
         """Create just a subset of the data"""
         md.subset_to_folder(
             parser=ProtocolMapper,
-            source_folder=PARLACLARIN_SOURCE_FOLDER,
+            source_folder=RIKSPROT_PARLACLARIN_FOLDER,
             source_metadata="metadata/data",
-            target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+            target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
         )
 
     if force or not isdir(TAGGED_SOURCE_FOLDER):
         try:
             setup_sample_tagged_frames_corpus(
                 protocols=TEST_DOCUMENTS,
-                source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
+                source_folder=os.environ["TEST_RIKSPROT_TAGGED_FOLDER"],
                 target_folder=TAGGED_SOURCE_FOLDER,
             )
         except Exception as ex:
@@ -65,11 +65,11 @@ def ensure_test_corpora_exist(force: bool = False):
 
 
 def sample_xml_corpus_exists():
-    return all(isfile(jj(PARLACLARIN_SOURCE_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS)
+    return all(isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS)
 
 
 def sample_metadata_exists():
-    return all(isfile(jj(PARLACLARIN_SOURCE_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES)
+    return all(isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES)
 
 
 def sample_tagged_corpus_exists():
@@ -101,7 +101,7 @@ def setup_sample_tagged_frames_corpus(
     md.create_database(
         TAGGED_METADATA_DATABASE_NAME,
         branch=None,
-        folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
         force=True,
     )
     create_subset_metadata_to_folder()
@@ -110,24 +110,24 @@ def setup_sample_tagged_frames_corpus(
 def create_subset_metadata_to_folder():
     md.subset_to_folder(
         ProtocolMapper,
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         source_metadata="metadata/data",
-        target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
     )
     md.create_database(
         database_filename=TAGGED_METADATA_DATABASE_NAME,
         branch=None,
-        folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
         force=True,
     )
     md.generate_utterance_index(
         ProtocolMapper,
-        corpus_folder=PARLACLARIN_SOURCE_FOLDER,
-        target_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        corpus_folder=RIKSPROT_PARLACLARIN_FOLDER,
+        target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
     )
     md.load_utterance_index(
         database_filename=TAGGED_METADATA_DATABASE_NAME,
-        source_folder=jj(PARLACLARIN_SOURCE_FOLDER, "metadata"),
+        source_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
     )
     md.load_scripts(
         database_filename=TAGGED_METADATA_DATABASE_NAME,

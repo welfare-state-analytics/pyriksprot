@@ -14,7 +14,7 @@ from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
 
-from .utility import PARLACLARIN_SOURCE_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances
+from .utility import RIKSPROT_PARLACLARIN_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances
 
 # pylint: disable=redefined-outer-name
 
@@ -167,7 +167,7 @@ def test_protocol_to_speeches_with_different_strategies(
     filename: str, speech_count: int, non_empty_speech_count: int, strategy: str
 ):
 
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
+    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
     document_name: str = utility.strip_path_and_extension(filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path)
@@ -197,7 +197,7 @@ def test_protocol_to_speeches_with_different_strategies(
     ],
 )
 def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
+    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
 
     data = untangle.parse(path)
 

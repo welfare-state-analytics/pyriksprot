@@ -12,7 +12,7 @@ from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
 
-from ..utility import PARLACLARIN_SOURCE_FOLDER, PARLACLARIN_SOURCE_PATTERN, TAGGED_METADATA_DATABASE_NAME
+from ..utility import RIKSPROT_PARLACLARIN_FOLDER, RIKSPROT_PARLACLARIN_PATTERN, TAGGED_METADATA_DATABASE_NAME
 
 
 def test_create_grouping_hashcoder():
@@ -97,7 +97,7 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
     def assign_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker
 
-    filenames: list[str] = glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True)
+    filenames: list[str] = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
 
     texts: Iterable[iterate.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames,
@@ -132,7 +132,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     workflows.extract_corpus_text(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
@@ -153,7 +153,7 @@ def test_extract_corpus_with_no_temporal_key():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     workflows.extract_corpus_text(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
@@ -172,7 +172,7 @@ def test_extract_corpus_with_no_matching_protocols():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     workflows.extract_corpus_text(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
@@ -192,7 +192,7 @@ def test_aggregator_extract_gender_party_no_temporal_key():
     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
 
     workflows.extract_corpus_text(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         metadata_filename=TAGGED_METADATA_DATABASE_NAME,
         target_name=target_filename,
         target_type='files-in-zip',

@@ -10,7 +10,7 @@ from pyriksprot import metadata as md
 from pyriksprot.corpus import corpus_index as csi
 
 from .utility import (
-    PARLACLARIN_SOURCE_FOLDER,
+    RIKSPROT_PARLACLARIN_FOLDER,
     TAGGED_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
     ensure_test_corpora_exist,
@@ -30,7 +30,7 @@ def source_index() -> csi.CorpusSourceIndex:
 def xml_source_index() -> csi.CorpusSourceIndex:
 
     items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
-        source_folder=PARLACLARIN_SOURCE_FOLDER,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         source_pattern='**/prot-*.xml',
         skip_empty=False,
     )

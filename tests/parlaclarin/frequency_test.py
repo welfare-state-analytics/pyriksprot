@@ -7,7 +7,7 @@ import pytest
 from pyriksprot import interface, utility, workflows
 from pyriksprot.corpus import parlaclarin
 
-from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_PATTERN
+from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_PATTERN
 
 jj = os.path.join
 
@@ -34,7 +34,7 @@ def test_word_frequency_counter(texts):
     assert counter.frequencies.get('f', None) == 1
 
 
-@pytest.mark.parametrize('filename', glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True))
+@pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
@@ -46,7 +46,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
     assert protocol.has_text == (len(counter.frequencies) > 0)
 
 
-@pytest.mark.parametrize('filename', glob.glob(PARLACLARIN_SOURCE_PATTERN, recursive=True))
+@pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
 def test_persist_word_frequencies(filename: List[str]):
 
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
@@ -91,7 +91,7 @@ def test_persist_word_frequencies(filename: List[str]):
     ],
 )
 def test_compute_word_frequencies(document_name: str, expected_frequencies: dict):
-    filename: str = jj(PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
+    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
 
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
         counts: parlaclarin.TermFrequencyCounter = workflows.compute_term_frequencies(
