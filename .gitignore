@@ -150,5 +150,5 @@ html
 data_link
 apa.*
 logs
-**/riksprot_metadata.v0.4.0.db
+metadata/*.db
 *.jar
