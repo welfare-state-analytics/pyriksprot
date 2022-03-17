@@ -160,7 +160,7 @@ def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
             if not force:
                 raise ValueError(f"File {target_name} exists, use `force=True` to overwrite")
             os.remove(target_name)
-        logger.info(f"downloading {tablename} to {target_name}...")
+        logger.info(f"downloading {tablename} ({tag}) to {target_name}...")
         url: str = (
             table_url(tablename=tablename, tag=tag)
             if ':url:' not in specification
