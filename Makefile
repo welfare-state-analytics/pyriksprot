@@ -14,6 +14,10 @@ endif
 # PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
 METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
 
+.PHONY: metadata
+metadata: metadata-download metadata-utterance-index metadata-database
+	@echo "metadata has been updated!"
+
 .PHONY: metadata-download
 metadata-download:
 	@rm -rf ./metadata/$(METADATA_DB_NAME) ./metadata/data
@@ -43,6 +47,11 @@ metadata-database:
 	@cp -r ./metadata/data $(RIKSPROT_DATA_FOLDER)/metadata
 	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 
+ACTUAL_TAG:=v0.4.1
 .PHONY: default-speeches-feather
-default-speeches-feather:
-	 PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather --target-type single-id-tagged-frame-per-group --skip-stopwords --skip-text --lowercase --skip-puncts --force /data/westac/riksdagen_corpus_data/tagged_frames_v0.4.0 ./metadata/riksprot_metadata.v0.4.0.db ./data/HTX
+extract-speeches-to-feather:
+	 PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather \
+	 	--target-type single-id-tagged-frame-per-group --skip-stopwords --skip-text --lowercase --skip-puncts --force \
+		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG) \
+			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
+				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG).feather
