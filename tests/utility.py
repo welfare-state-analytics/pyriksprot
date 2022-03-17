@@ -65,7 +65,9 @@ def ensure_test_corpora_exist(force: bool = False):
 
 
 def sample_xml_corpus_exists():
-    return all(isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS)
+    return all(
+        isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
+    )
 
 
 def sample_metadata_exists():

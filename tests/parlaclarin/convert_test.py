@@ -13,7 +13,9 @@ from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 def test_convert_to_xml():
 
     template_name: str = "speeches.xml.jinja"
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"))
+    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+        jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
+    )
 
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='chain')
 
@@ -40,7 +42,9 @@ Ove är dum.
 
     assert result == expected
 
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"))
+    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+        jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
+    )
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='chain')
 
     result: str = converter.convert(protocol, speeches, "prot-200203--18.xml")
