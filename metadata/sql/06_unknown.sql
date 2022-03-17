@@ -13,14 +13,19 @@ create index idx_utterances_speaker_hash on utterances(speaker_hash);
 
 drop table if exists unknown_utterance_party;
 create table unknown_utterance_party (
-    u_id varchar primary key,
+    u_id varchar, -- primary key,
     party_id int not null
 );
+/* NOTE: unknowns CSV has (from 0.4.1) dupes `hash` records
+    hence the grouping below.
+    None of the dupes has ambigous party_id.
+*/
 with unknown_speaker_note_party (speaker_hash, party_id) as (
-    select [hash], party_id
+    select [hash], max(party_id) as party_id
     from unknowns
     join _party_abbreviation pa using (party)
     join party on party.party_abbrev = pa.abbreviation
+    group by [hash]
 )
     insert into unknown_utterance_party(u_id, party_id)
         select u_id, party_id
