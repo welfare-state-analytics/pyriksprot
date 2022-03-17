@@ -1,4 +1,34 @@
 /* Various SQL queries */
+select u_id, count(*), min(party_id), max(party_id)
+from unknown_utterance_party
+group by u_id
+having COUNT(*) > 1
+limit 10;
+
+with dupes as (
+select protocol_id, hash
+from unknowns
+group by protocol_id, hash
+having COUNT(*) > 1
+) select *
+from unknowns
+join dupes using (protocol_id, hash);
+select *
+from unknowns
+order by protocol_id, hash
+limit 10;
+
+where hash = 'd053ccd9';
+with unknown_speaker_note_party (speaker_hash, party_id) as (
+    select [hash], party_id
+    from unknowns
+    join _party_abbreviation pa using (party)
+    join party on party.party_abbrev = pa.abbreviation
+)
+    insert into unknown_utterance_party(u_id, party_id)
+        select u_id, party_id
+        from utterances
+        join unknown_speaker_note_party using (speaker_hash);
 
 with minister_years as (
     select *, cast(strftime('%Y',start) as integer) as start_year,
