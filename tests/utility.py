@@ -7,8 +7,9 @@ from typing import List
 from dotenv import load_dotenv
 from loguru import logger
 
-from pyriksprot import interface
+from pyriksprot import dispatch, interface
 from pyriksprot import metadata as md
+from pyriksprot import workflows
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.utility import download_protocols, replace_extension
 
@@ -137,6 +138,46 @@ def create_subset_metadata_to_folder():
     )
 
 
+def setup_sample_speech_corpora():
+
+    # target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
+    target_type: str = 'single-id-tagged-frame-per-group'
+    merge_strategy: str = 'speaker_hash_sequence'
+    compress_types: list[str] = ['csv', 'feather']
+
+    for compress_type in compress_types:
+
+        target_name: str = f'tests/test_data/speech_{merge_strategy}_{compress_type}'
+
+        fixed_opts: dict = dict(
+            source_folder=TAGGED_SOURCE_FOLDER,
+            metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+            segment_level=interface.SegmentLevel.Speech,
+            temporal_key=interface.TemporalKey.NONE,
+            content_type=interface.ContentType.TaggedFrame,
+            multiproc_keep_order=None,
+            multiproc_processes=None,
+            multiproc_chunksize=100,
+            segment_skip_size=1,
+            years=None,
+            group_keys=None,
+            force=True,
+            skip_lemma=False,
+            skip_text=True,
+            skip_puncts=True,
+            skip_stopwords=True,
+            lowercase=True,
+            progress=False,
+        )
+        workflows.extract_corpus_tags(
+            **fixed_opts,
+            target_name=target_name,
+            target_type=target_type,
+            compress_type=dispatch.CompressType(compress_type),
+            merge_strategy=merge_strategy,
+        )
+
+
 TAGGED_CSV_STR = (
     "token\tlemma\tpos\txpos\n"
     "Hej\thej\tIN\tIN\n"
@@ -160,7 +201,7 @@ UTTERANCES_DICTS = [
         'paragraphs': 'Hej! Detta är en mening.',
         'annotation': TAGGED_CSV_STR,
         'page_number': '',
-        'speaker_hash': '',
+        'speaker_hash': 'a1',
         'checksum': '107d28f2f90d3ccc',
     },
     {
@@ -172,7 +213,7 @@ UTTERANCES_DICTS = [
         'paragraphs': 'Jag heter Ove.@#@Vad heter du?',
         'annotation': TAGGED_CSV_STR,
         'page_number': '',
-        'speaker_hash': '',
+        'speaker_hash': 'a1',
         'checksum': '9c3ee2212f9db2eb',
     },
     {
@@ -184,7 +225,7 @@ UTTERANCES_DICTS = [
         'paragraphs': 'Jag heter Adam.',
         'annotation': TAGGED_CSV_STR,
         'page_number': '',
-        'speaker_hash': '',
+        'speaker_hash': 'b1',
         'checksum': '8a2880190e158a8a',
     },
     {
@@ -196,7 +237,7 @@ UTTERANCES_DICTS = [
         'paragraphs': 'Ove är dum.',
         'annotation': TAGGED_CSV_STR,
         'page_number': '',
-        'speaker_hash': '',
+        'speaker_hash': 'b2',
         'checksum': '13ed9d8bf4098390',
     },
     {
@@ -208,7 +249,7 @@ UTTERANCES_DICTS = [
         'annotation': 'token\tlemma\tpos\txpos\nHej\thej\tIN\tIN\n!\t!\tMID\tMID\nDetta\tdetta\tPN\tPN.NEU.SIN.DEF.SUB+OBJ\när\tvara\tVB\tVB.PRS.AKT\nett\ten\tDT\tDT.NEU.SIN.IND\ntest\ttest\tNN\tNN.NEU.SIN.IND.NOM\n!\t!\tMAD\tMAD\n\'\t\tMAD\tMAD\n"\t\tMAD\tMAD',
         'paragraphs': 'Adam är dum.',
         'page_number': '',
-        'speaker_hash': '',
+        'speaker_hash': 'a2',
         'checksum': 'a2f0635f8991d206',
     },
 ]
@@ -220,6 +261,7 @@ def create_utterances() -> List[interface.Utterance]:
             u_id='i-1',
             n='c01',
             who='A',
+            speaker_hash="a1",
             prev_id=None,
             next_id='i-2',
             paragraphs=['Hej! Detta är en mening.'],
@@ -230,6 +272,7 @@ def create_utterances() -> List[interface.Utterance]:
             u_id='i-2',
             n='c02',
             who='A',
+            speaker_hash="a1",
             prev_id='i-1',
             next_id=None,
             paragraphs=['Jag heter Ove.', 'Vad heter du?'],
@@ -240,6 +283,7 @@ def create_utterances() -> List[interface.Utterance]:
             u_id='i-3',
             n='c03',
             who='B',
+            speaker_hash="b1",
             prev_id=None,
             next_id=None,
             paragraphs=['Jag heter Adam.'],
@@ -250,6 +294,7 @@ def create_utterances() -> List[interface.Utterance]:
             u_id='i-4',
             n='c03',
             who='B',
+            speaker_hash="b2",
             prev_id=None,
             next_id=None,
             paragraphs=['Ove är dum.'],
@@ -260,6 +305,7 @@ def create_utterances() -> List[interface.Utterance]:
             u_id='i-5',
             n='c09',
             who='A',
+            speaker_hash="a2",
             prev_id=None,
             next_id=None,
             paragraphs=['Adam är dum.'],
