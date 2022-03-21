@@ -58,6 +58,8 @@ insert into government (government, start_date, end_date)
 drop table if exists party;
 create table if not exists party (
     party_id integer primary key,
-    party varchar,
-    party_abbrev varchar
+    party varchar not null,
+    party_abbrev varchar not null,
+    party_color varchar default('#3f1105')
 );
+-- alter table party add column party_color varchar default('#3f1105');
