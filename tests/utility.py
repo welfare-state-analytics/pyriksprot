@@ -150,9 +150,16 @@ def setup_sample_speech_corpora():
     merge_strategy: str = 'speaker_hash_sequence'
     compress_types: list[str] = ['csv', 'feather']
 
+    logger.info("Creating sample speech tagged ID frame corpus")
+    logger.info(f"    source: {TAGGED_SOURCE_FOLDER}")
+    logger.info(f"  metadata: {TAGGED_METADATA_DATABASE_NAME}")
+
+
     for compress_type in compress_types:
 
         target_name: str = f'tests/test_data/speech_{merge_strategy}_{compress_type}'
+
+        logger.info(f"    target: {target_name}")
 
         fixed_opts: dict = dict(
             source_folder=TAGGED_SOURCE_FOLDER,
