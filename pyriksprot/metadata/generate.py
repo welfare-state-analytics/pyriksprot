@@ -197,7 +197,7 @@ def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, 
         table.to_csv(jj(target_folder, filename), sep=',', index=False)
 
     unknowns: pd.DataFrame = pd.read_csv(jj(source_metadata, "unknowns.csv"), sep=',', index_col=None)
-    unknowns = unknowns[unknowns['protocol_id'].isin({ f"{x}.xml" for x in protocols['document_name']})]
+    unknowns = unknowns[unknowns['protocol_id'].isin({f"{x}.xml" for x in protocols['document_name']})]
     unknowns.to_csv(jj(target_folder, "unknowns.csv"), sep=',', index=False)
 
 

@@ -55,6 +55,7 @@ class XmlProtocol(abc.ABC):
         """Return sequence of XML_Utterances."""
         return any(x.text != '' for x in self.utterances)
 
+
 class XmlUntangleProtocol(XmlProtocol):
     """Wraps the XML representation of a single ParlaClarin document (protocol)"""
 

@@ -5,7 +5,7 @@ import pandas as pd
 from pyriksprot import metadata as md
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
-from ..utility import TAGGED_METADATA_DATABASE_NAME, RIKSPROT_REPOSITORY_TAG
+from ..utility import RIKSPROT_REPOSITORY_TAG, TAGGED_METADATA_DATABASE_NAME
 
 # pylint: disable=redefined-outer-name
 
