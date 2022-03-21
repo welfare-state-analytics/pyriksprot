@@ -17,6 +17,8 @@ from .utility import flatten, merge_tagged_csv, strip_extensions
 
 # pylint: disable=too-many-arguments, no-member
 
+EMPTY_SPEAKER_HASH: str = "unknown"
+
 
 class ParlaClarinError(ValueError):
     ...
@@ -99,17 +101,25 @@ class Utterance:
 
     def __init__(
         self,
+        *,
         u_id: str,
+        speaker_hash: str,
+        who: str,
         n: str = "",
-        who: str = None,
         prev_id: str = None,
         next_id: str = None,
         paragraphs: Union[list[str], str] = None,
         annotation: Optional[str] = None,
         page_number: Optional[str] = '',
-        speaker_hash: Optional[str] = '',
         **_,
     ):
+
+        if not speaker_hash:
+            speaker_hash = EMPTY_SPEAKER_HASH
+            # FIXME #15 Exists utterances in data not preceeded by a SPEAKER_HASH
+            # logger.warning(f"utterance {u_id}: empty speaker_hash")
+            # raise ValueError(f"utterance {u_id}: empty speaker_hash not allowed")
+
         self.u_id: str = u_id
         self.n: str = n
         self.who: str = who
@@ -164,12 +174,12 @@ class UtteranceHelper:
                 'u_id': u.u_id,
                 'n': u.n,
                 'who': u.who,
+                'speaker_hash': u.speaker_hash,
                 'prev_id': u.prev_id,
                 'next_id': u.next_id,
                 'annotation': u.tagged_text,
                 'paragraphs': PARAGRAPH_MARKER.join(u.paragraphs),
                 'page_number': u.page_number or '',
-                'speaker_hash': u.speaker_hash or '',
                 'checksum': u.checksum(),
             }
             for u in utterances
