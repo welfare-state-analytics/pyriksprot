@@ -35,6 +35,7 @@ metadata-utterance-index:
 
 .PHONY: metadata-database
 metadata-database:
+	@echo "creating database: metadata/$(METADATA_DB_NAME)"
 	@rm -f metadata/$(METADATA_DB_NAME)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
 		metadata/$(METADATA_DB_NAME) \
@@ -45,6 +46,7 @@ metadata-database:
 	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata
 	@mkdir $(RIKSPROT_DATA_FOLDER)/metadata
 	@cp -r ./metadata/data $(RIKSPROT_DATA_FOLDER)/metadata
+	@echo "copying $(RIKSPROT_DATA_FOLDER)/metadata to: $(RIKSPROT_DATA_FOLDER)/metadata"
 	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
 
