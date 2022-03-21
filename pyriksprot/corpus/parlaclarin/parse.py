@@ -55,7 +55,6 @@ class XmlProtocol(abc.ABC):
         """Return sequence of XML_Utterances."""
         return any(x.text != '' for x in self.utterances)
 
-
 class XmlUntangleProtocol(XmlProtocol):
     """Wraps the XML representation of a single ParlaClarin document (protocol)"""
 
@@ -64,7 +63,7 @@ class XmlUntangleProtocol(XmlProtocol):
         data: Union[str, untangle.Element],
         segment_skip_size: int = 0,
         delimiter: str = '\n',
-        ignore_tags: set[str] | str = "note,teiHeader",
+        ignore_tags: set[str] | str = "teiHeader",
     ):
 
         ignore_tags: set[str] = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
@@ -137,12 +136,12 @@ class UtteranceMapper:
     ) -> interface.Utterance:
         utterance: interface.Utterance = interface.Utterance(
             u_id=element.get_attribute('xml:id'),
+            speaker_hash=speaker_hash,
             who=element.get_attribute('who') or "undefined",
             page_number=page_number,
             prev_id=element.get_attribute('prev'),
             next_id=element.get_attribute('next'),
             paragraphs=UtteranceMapper.to_paragraphs(element, dedent),
-            speaker_hash=speaker_hash,
             n=element.get_attribute('n'),
         )
         return utterance
@@ -160,7 +159,7 @@ class ProtocolMapper:
     def to_protocol(
         data: Union[str, untangle.Element],
         segment_skip_size: int = 0,
-        ignore_tags: set[str] | str = "note,teiHeader",
+        ignore_tags: set[str] | str = "teiHeader",
     ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
 
