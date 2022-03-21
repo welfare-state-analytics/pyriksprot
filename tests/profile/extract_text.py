@@ -4,7 +4,7 @@ from pyriksprot import interface, workflows
 def main():
     opts = {
         'source_folder': '/data/westac/riksdagen_corpus_data/riksdagen-corpus/corpus',
-        'metadata_filename': '/data/westac/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.0.db',
+        'metadata_filename': '/data/westac/riksdagen_corpus_data/metadata/riksprot_metadata.db',
         'target_name': '.',
         'segment_level': interface.SegmentLevel.Who,
         'temporal_key': interface.TemporalKey.Year,

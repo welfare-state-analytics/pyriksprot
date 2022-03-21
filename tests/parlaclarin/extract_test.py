@@ -12,7 +12,7 @@ from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
 
-from ..utility import RIKSPROT_PARLACLARIN_FOLDER, RIKSPROT_PARLACLARIN_PATTERN, TAGGED_METADATA_DATABASE_NAME
+from ..utility import RIKSPROT_PARLACLARIN_FOLDER, RIKSPROT_PARLACLARIN_PATTERN, RIKSPROT_REPOSITORY_TAG, TAGGED_METADATA_DATABASE_NAME
 
 
 def test_create_grouping_hashcoder():
@@ -34,10 +34,10 @@ def test_create_grouping_hashcoder():
     )
     # source_item = source_index.lookup.get("prot-1955--ak--22")
     source_item: csi.CorpusSourceItem = csi.CorpusSourceItem(
-        path='tests/test_data/source/tagged_frames/v0.4.0/prot-1955--ak--22.zip',
+        path=f'tests/test_data/source/tagged_frames/{RIKSPROT_REPOSITORY_TAG}/prot-1955--ak--22.zip',
         filename='prot-1955--ak--22.zip',
         name='prot-1955--ak--22',
-        subfolder='v0.4.0',
+        subfolder=RIKSPROT_REPOSITORY_TAG,
         year=1955,
         metadata={
             'name': 'prot-1955--ak--22',

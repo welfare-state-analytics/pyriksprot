@@ -5,7 +5,7 @@ import pandas as pd
 from pyriksprot import metadata as md
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
-from ..utility import TAGGED_METADATA_DATABASE_NAME
+from ..utility import TAGGED_METADATA_DATABASE_NAME, RIKSPROT_REPOSITORY_TAG
 
 # pylint: disable=redefined-outer-name
 
@@ -121,7 +121,7 @@ def test_person_index(person_index: md.PersonIndex):
 
 def test_overload_by_person(person_index: md.PersonIndex):
     person_index: md.PersonIndex = md.PersonIndex(
-        "tests/test_data/source/tagged_frames/v0.4.0/riksprot_metadata.db"
+        f"tests/test_data/source/tagged_frames/{RIKSPROT_REPOSITORY_TAG}/riksprot_metadata.db"
     ).load()
     person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
     df: pd.DataFrame = pd.DataFrame(data=dict(person_id=person_ids))
@@ -226,4 +226,4 @@ def test_unknown(person_index: md.PersonIndex):
     assert speaker.gender_id == 1
     assert speaker.party_id == 8
 
-    assert service.get_speaker_info(u_id="i-f0c73dc8f12170da-7").party_id == 2
+    assert service.get_speaker_info(u_id="i-f0c73dc8f12170da-7").party_id == 6
