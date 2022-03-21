@@ -39,7 +39,7 @@ def test_create_grouping_hashcoder():
     )
     # source_item = source_index.lookup.get("prot-1955--ak--22")
     source_item: csi.CorpusSourceItem = csi.CorpusSourceItem(
-        path=f'tests/test_data/source/tagged_frames/{RIKSPROT_REPOSITORY_TAG}/prot-1955--ak--22.zip',
+        path=os.path.join("tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "tagged_frames/prot-1955--ak--22.zip"),
         filename='prot-1955--ak--22.zip',
         name='prot-1955--ak--22',
         subfolder=RIKSPROT_REPOSITORY_TAG,

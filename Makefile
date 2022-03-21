@@ -74,12 +74,16 @@ extract-speeches-to-feather:
 .PHONY: test-create-corpora
 test-create-corpora:
 	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
-	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
+	@echo "Setup completed of:"
+	@echo "Setup completed of:"
+	@echo "  - Sample Parla-CLARIN corpus"
+	@echo "  - Sample tagged frame corpus"
+	@echo "  - Sample (subsetted) metadata database"
 
-.PHONY: test-metadata-database
-test-metadata-database:
-	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
-	@echo "Setup of sample metadata database completed!"
+# .PHONY: test-metadata-database
+# test-metadata-database:
+# 	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
+# 	@echo "Setup of sample metadata database completed!"
 
 .PHONY: test-create-speech-corpora
 test-create-speech-corpora:
@@ -87,5 +91,15 @@ test-create-speech-corpora:
 	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
 
 .PHONY: test-refresh-all-data
-test-refresh-all-data: test-create-corpora test-metadata-database test-create-speech-corpora
+test-refresh-all-data: test-clear-sample-data test-create-corpora test-create-speech-corpora
+	@echo "Done!"
+
+test-clear-sample-data:
+	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
+
+#.ONESHELL: test-bundle-data
+.PHONY: test-bundle-data
+test-bundle-data:
+	@mkdir -p dist && rm -f dist/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz
+	@tar --strip-components=2 -cvz -f tests/test_data/dists/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
 	@echo "Done!"

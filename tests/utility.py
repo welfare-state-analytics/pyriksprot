@@ -17,12 +17,12 @@ load_dotenv()
 
 
 RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
-RIKSPROT_PARLACLARIN_FOLDER = jj("tests/test_data/source/parlaclarin", RIKSPROT_REPOSITORY_TAG)
+RIKSPROT_PARLACLARIN_FOLDER = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, "parlaclarin")
 
 RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
-RIKSPROT_PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/parlaclarin/fake'
+RIKSPROT_PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake/parlaclarin'
 
-TAGGED_SOURCE_FOLDER = jj("tests/test_data/source/tagged_frames", RIKSPROT_REPOSITORY_TAG)
+TAGGED_SOURCE_FOLDER = jj("tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "tagged_frames")
 TAGGED_METADATA_DATABASE_NAME = jj(TAGGED_SOURCE_FOLDER, "riksprot_metadata.db")
 TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "prot-*.zip")
 
@@ -157,7 +157,7 @@ def setup_sample_speech_corpora():
 
     for compress_type in compress_types:
 
-        target_name: str = f'tests/test_data/speech_{merge_strategy}_{compress_type}'
+        target_name: str = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, f"tagged_frames_speeches.{compress_type}")
 
         logger.info(f"    target: {target_name}")
 
