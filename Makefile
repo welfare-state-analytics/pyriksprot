@@ -46,12 +46,44 @@ metadata-database:
 	@mkdir $(RIKSPROT_DATA_FOLDER)/metadata
 	@cp -r ./metadata/data $(RIKSPROT_DATA_FOLDER)/metadata
 	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
+	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
+
+.PHONY: metadata-database-vacuum
+metadata-database-vacuum:
+	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
+
+LIGHT_METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).light.db
+
+.PHONY: metadata-light-database
+metadata-light-database:
+	@cp -f metadata/$(METADATA_DB_NAME) metadata/$(LIGHT_METADATA_DB_NAME)
+	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) < ./metadata/10_make_light.sql
+	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) "VACUUM;"
 
 ACTUAL_TAG:=v0.4.1
-.PHONY: default-speeches-feather
+.PHONY: extract-speeches-to-feather
 extract-speeches-to-feather:
 	 PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather \
 	 	--target-type single-id-tagged-frame-per-group --skip-stopwords --skip-text --lowercase --skip-puncts --force \
-		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG) \
+		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG).beta \
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
-				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG).feather
+				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.beta.feather
+
+.PHONY: test-create-corpora
+test-create-corpora:
+	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
+	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
+
+.PHONY: test-metadata-database
+test-metadata-database:
+	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
+	@echo "Setup of sample metadata database completed!"
+
+.PHONY: test-create-speech-corpora
+test-create-speech-corpora:
+	@poetry run python -c 'import tests.utility; tests.utility.setup_sample_speech_corpora()'
+	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
+
+.PHONY: test-refresh-all-data
+test-refresh-all-data: test-create-corpora test-metadata-database test-create-speech-corpora
+	@echo "Done!"

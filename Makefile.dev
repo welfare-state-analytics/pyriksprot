@@ -61,18 +61,6 @@ test-readme:
 init: tools
 	@poetry install
 
-test-parlaclarin-data:
-	@poetry run python -c 'import tests.utility; tests.utility.create_parlaclarin_corpus()'
-
-.PHONY: metadata-test-database
-sample-tagged-corpus:
-	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/utility_test.py -k "test_setup_sample_tagged_frames_corpus"
-
-
-.PHONY: metadata-test-database
-metadata-test-database:
-	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/metadata/metadata_test.py -k "create_subset_metadata_to_folder"
-
 profile-tagging:
 	@mkdir -p ./profile-reports
 	@poetry run python -m pyinstrument -r html -o ./.profile-reports/$(RUN_TIMESTAMP)_tagging-pyinstrument.html ./tests/profile_tagging.py
