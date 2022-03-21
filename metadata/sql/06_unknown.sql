@@ -37,9 +37,10 @@ create table unknown_utterance_gender (
     gender_id int not null
 );
 with unknown_speaker_note_gender (speaker_hash, gender_id) as (
-    select [hash], gender_id
+    select [hash], max(gender_id) as gender_id
     from unknowns
     join gender using (gender)
+    group by [hash]
 )
     insert into unknown_utterance_gender(u_id, gender_id)
         select u_id, gender_id
