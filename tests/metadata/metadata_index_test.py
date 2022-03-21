@@ -5,7 +5,7 @@ import pandas as pd
 from pyriksprot import metadata as md
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
-from ..utility import RIKSPROT_REPOSITORY_TAG, TAGGED_METADATA_DATABASE_NAME
+from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 
 # pylint: disable=redefined-outer-name
 
@@ -120,9 +120,7 @@ def test_person_index(person_index: md.PersonIndex):
 
 
 def test_overload_by_person(person_index: md.PersonIndex):
-    person_index: md.PersonIndex = md.PersonIndex(
-        f"tests/test_data/source/tagged_frames/{RIKSPROT_REPOSITORY_TAG}/riksprot_metadata.db"
-    ).load()
+    person_index: md.PersonIndex = md.PersonIndex(f"{TAGGED_SOURCE_FOLDER}/riksprot_metadata.db").load()
     person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
     df: pd.DataFrame = pd.DataFrame(data=dict(person_id=person_ids))
     df_overloaded: pd.DataFrame = person_index.overload_by_person(df)
