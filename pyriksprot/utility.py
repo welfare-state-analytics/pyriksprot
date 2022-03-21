@@ -456,7 +456,7 @@ def download_protocols(*, protocols: List[str], target_folder: str, create_subfo
     shutil.rmtree(target_folder, ignore_errors=True)
     os.makedirs(target_folder, exist_ok=True)
 
-    logger.info(f"downloading test protocols: {', '.join(protocols)}")
+    logger.info(f"downloading protocols from branch {tag}.")
 
     for filename in protocols:
         sub_folder: str = filename.split('-')[1]

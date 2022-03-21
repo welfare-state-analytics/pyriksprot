@@ -172,10 +172,19 @@ def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
 
 def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, target_folder: str):
     """Creates a subset of metadata in source metadata that includes only protocols found in source_folder"""
+
+    logger.info("Subsetting metadata database.")
+    logger.info(f"    Source folder: {source_folder}")
+    logger.info(f"  Source metadata: {source_metadata}")
+    logger.info(f"    Target folder: {target_folder}")
+
     data: tuple = generate_utterance_index(parser, corpus_folder=source_folder, target_folder=target_folder)
+
     protocols: pd.DataFrame = data[0]
     utterances: pd.DataFrame = data[1]
+
     person_ids: list[str] = set(utterances.person_id.unique().tolist())
+    logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
 
     for tablename in ["government", "party_abbreviation"]:
         shutil.copy(jj(source_metadata, f"{tablename}.csv"), jj(target_folder, f"{tablename}.csv"))
@@ -190,6 +199,7 @@ def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, 
         "speaker",
         "twitter",
     ]
+
     for tablename in person_tables:
         filename: str = f"{tablename}.csv"
         table: pd.DataFrame = pd.read_csv(jj(source_metadata, filename), sep=',', index_col=None)
@@ -211,6 +221,10 @@ def create_database(
     folder: str = None,
     force: bool = False,
 ):
+    logger.info("Creating database.")
+    logger.info(f"  target: {database_filename}")
+    logger.info(f"     tag: {branch}")
+    logger.info(f"  folder: {folder}")
 
     os.makedirs(dirname(database_filename), exist_ok=True)
 
@@ -264,6 +278,10 @@ def create_database(
 def generate_utterance_index(
     parser: IParser, corpus_folder: str, target_folder: str = None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+
+    logger.info("Generating utterance index.")
+    logger.info(f"  source: {corpus_folder}")
+    logger.info(f"  target: {target_folder}")
 
     utterance_data: list[tuple] = []
     protocol_data: list[tuple[int, str]] = []

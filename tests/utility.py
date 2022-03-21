@@ -86,6 +86,10 @@ def setup_sample_tagged_frames_corpus(
     target_folder: str = TAGGED_SOURCE_FOLDER,
 ) -> None:
 
+    logger.info("Creating sample tagged frames corpus")
+    logger.info(f"  source: {source_folder}")
+    logger.info(f"  target: {target_folder}")
+
     protocols = protocols or TEST_DOCUMENTS
 
     shutil.rmtree(target_folder, ignore_errors=True)
@@ -99,6 +103,7 @@ def setup_sample_tagged_frames_corpus(
             logger.warning(f"test data: test file {name} not found")
             continue
         shutil.copy(src=source_filename, dst=jj(target_folder, filename))
+        logger.info(f"  copied: {source_filename} to {jj(target_folder, filename)}")
 
     """Create metadata from test corpus"""
     md.create_database(
