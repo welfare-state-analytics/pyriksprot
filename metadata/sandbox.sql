@@ -1,15 +1,34 @@
 /* Various SQL queries */
+select *
+
+from _unknowns
+where protocol_id in (
+    'prot-1933--fk--5.xml',
+    'prot-1955--ak--22.xml',
+    'prot-197879--14.xml',
+    'prot-199596--35.xml',
+    'prot-199192--127.xml',
+    'prot-199192--21.xml'
+);
+
+SELECT speaker_hash, count(distinct person_id)
+FROM utterances
+group by speaker_hash
+having count(distinct person_id) > 1;
+select * from party;
 select u_id, count(*), min(party_id), max(party_id)
 from unknown_utterance_party
 group by u_id
 having COUNT(*) > 1
 limit 10;
-
+select count(*)
+from unknown_utterance_gender
+limit 10;
 with dupes as (
-select protocol_id, hash
-from unknowns
-group by protocol_id, hash
-having COUNT(*) > 1
+    select protocol_id, hash
+    from unknowns
+    group by protocol_id, hash
+    having COUNT(*) > 1
 ) select *
 from unknowns
 join dupes using (protocol_id, hash);
@@ -17,8 +36,6 @@ select *
 from unknowns
 order by protocol_id, hash
 limit 10;
-
-where hash = 'd053ccd9';
 with unknown_speaker_note_party (speaker_hash, party_id) as (
     select [hash], party_id
     from unknowns
