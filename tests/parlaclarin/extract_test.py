@@ -12,7 +12,12 @@ from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
 
-from ..utility import RIKSPROT_PARLACLARIN_FOLDER, RIKSPROT_PARLACLARIN_PATTERN, RIKSPROT_REPOSITORY_TAG, TAGGED_METADATA_DATABASE_NAME
+from ..utility import (
+    RIKSPROT_PARLACLARIN_FOLDER,
+    RIKSPROT_PARLACLARIN_PATTERN,
+    RIKSPROT_REPOSITORY_TAG,
+    TAGGED_METADATA_DATABASE_NAME,
+)
 
 
 def test_create_grouping_hashcoder():
