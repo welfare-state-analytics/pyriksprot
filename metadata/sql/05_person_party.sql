@@ -2,17 +2,26 @@
 delete from party;
 
 /* Ansats: endast partier i MOPS blir egna poster, övriga blir "Other" */
-insert into party
-    values (0, 'unknown', '?'), (1, 'Other', 'X');
+insert into party (party_id, party, party_abbrev, party_color)
+    values (0, 'unknown', '?', '#000000'), (1, 'Other', 'X', '#000000');
 
-insert into party (party, party_abbrev)
-    select party, coalesce(abbreviation, party)
+insert into party (party, party_abbrev, party_color)
+    select party, coalesce(abbreviation, party), '#3f1105'
     from _member_of_parliament
     join persons_of_interest using (person_id)
     left join _party_abbreviation using (party)
     where party is not null
     group by party, abbreviation;
 
+update party set party_color = '#E8112d' where party_abbrev = 'S';
+update party set party_color = '#52BDEC' where party_abbrev = 'M';
+update party set party_color = '#009933' where party_abbrev = 'C';
+update party set party_color = '#006AB3' where party_abbrev = 'L';
+update party set party_color = '#DA291C' where party_abbrev = 'V';
+update party set party_color = '#83CF39' where party_abbrev = 'MP';
+update party set party_color = '#000077' where party_abbrev = 'KD';
+update party set party_color = '#007700' where party_abbrev = 'NYD';
+update party set party_color = '#DDDD00' where party_abbrev = 'SD';
 
 drop table if exists person_party;
 create table person_party (

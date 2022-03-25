@@ -3,21 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from pyriksprot.utility import dedent, download_protocols, probe_filename, replace_extension, temporary_file, touch
-
-from .utility import (
-    PARLACLARIN_SOURCE_FOLDER,
-    PARLACLARIN_SOURCE_TAG,
-    TAGGED_SOURCE_FOLDER,
-    TEST_DOCUMENTS,
-    sample_tagged_corpus_exists,
-    sample_xml_corpus_exists,
-    setup_sample_tagged_frames_corpus,
-)
+from pyriksprot.utility import dedent, probe_filename, replace_extension, temporary_file, touch
 
 jj = os.path.join
-
-FORCE_RUN_SKIPS = os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 
 
 def test_temporary_file():
@@ -49,25 +37,6 @@ def test_dedent():
     assert dedent("apa\n\napa\n") == "apa\n\napa\n"
     assert dedent("apa\n\n  apa\n") == "apa\n\napa\n"
     assert dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
-
-
-@pytest.mark.skipif(condition=sample_xml_corpus_exists(), reason="Test data found")
-def test_setup_sample_xml_corpus():
-
-    protocols: list[str] = TEST_DOCUMENTS
-    target_folder: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols")
-    download_protocols(
-        protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=PARLACLARIN_SOURCE_TAG
-    )
-
-
-@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_corpus_exists(), reason="Test infrastructure test")
-def test_setup_sample_tagged_frames_corpus():
-    setup_sample_tagged_frames_corpus(
-        protocols=TEST_DOCUMENTS,
-        source_folder=os.environ["PARLACLARIN_TAGGED_FOLDER"],
-        target_folder=TAGGED_SOURCE_FOLDER,
-    )
 
 
 def test_probe_filename():

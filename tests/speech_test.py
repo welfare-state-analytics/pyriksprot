@@ -14,7 +14,7 @@ from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
 
-from .utility import PARLACLARIN_SOURCE_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances
+from .utility import RIKSPROT_PARLACLARIN_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances
 
 # pylint: disable=redefined-outer-name
 
@@ -91,9 +91,9 @@ def test_merge_speech_by_strategy(
 def test_speech_annotation():
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id='i-1', who="apa", annotation='header\nA\nB'),
-        interface.Utterance(u_id='i-2', who="apa", annotation='header\nC\nD'),
-        interface.Utterance(u_id='i-3', who="apa", annotation='header\nE\nF'),
+        interface.Utterance(u_id='i-1', who="apa", speaker_hash="a1", annotation='header\nA\nB'),
+        interface.Utterance(u_id='i-2', who="apa", speaker_hash="a1", annotation='header\nC\nD'),
+        interface.Utterance(u_id='i-3', who="apa", speaker_hash="a1", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
         protocol_name="prot-01",
@@ -109,9 +109,9 @@ def test_speech_annotation():
     assert speech.tagged_text == 'header\nA\nB\nC\nD\nE\nF'
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id='i-1', who="apa", annotation='header\nA\nB'),
-        interface.Utterance(u_id='i-2', who="apa", annotation='header'),
-        interface.Utterance(u_id='i-3', who="apa", annotation='header\nE\nF'),
+        interface.Utterance(u_id='i-1', who="apa", speaker_hash="a1", annotation='header\nA\nB'),
+        interface.Utterance(u_id='i-2', who="apa", speaker_hash="a1", annotation='header'),
+        interface.Utterance(u_id='i-3', who="apa", speaker_hash="a1", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
         protocol_name="prot-01",
@@ -127,9 +127,9 @@ def test_speech_annotation():
     assert speech.tagged_text == 'header\nA\nB\nE\nF'
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id='i-1', who="apa", annotation='header\nA\nB'),
-        interface.Utterance(u_id='i-2', who="apa", annotation='header\n'),
-        interface.Utterance(u_id='i-3', who="apa", annotation='header\nE\nF'),
+        interface.Utterance(u_id='i-1', who="apa", speaker_hash="a1", annotation='header\nA\nB'),
+        interface.Utterance(u_id='i-2', who="apa", speaker_hash="a1", annotation='header\n'),
+        interface.Utterance(u_id='i-3', who="apa", speaker_hash="a1", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
         protocol_name="prot-01",
@@ -153,13 +153,13 @@ def test_speech_annotation():
         ("prot-1933--fk--5.xml", 1, 1, ts.MergeStrategyType.chain),
         # ("prot-1933--fk--5.xml", 1, 1, ts.MergeSpeechStrategyType.Who),
         # ("prot-1933--fk--5.xml", 1, 1, ts.MergeSpeechStrategyType.WhoSequence),
-        ("prot-1955--ak--22.xml", 147, 147, ts.MergeStrategyType.chain),
+        ("prot-1955--ak--22.xml", 151, 151, ts.MergeStrategyType.chain),
         # ("prot-1955--ak--22.xml", 53, 53, ts.MergeSpeechStrategyType.Who),
         # ("prot-1955--ak--22.xml", 149, 149, ts.MergeSpeechStrategyType.WhoSequence),
         ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.chain),
-        ('prot-199192--127.xml', 49, 49, ts.MergeStrategyType.who),
+        ('prot-199192--127.xml', 51, 51, ts.MergeStrategyType.who),
         ('prot-199192--127.xml', 208, 208, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 208, 208, ts.MergeStrategyType.who_speaker_hash_sequence),
+        ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.who_speaker_hash_sequence),
         # ('prot-199192--127.xml', 208, 208, ts.MergeSpeechStrategyType.speaker_hash_sequence),
     ],
 )
@@ -167,7 +167,7 @@ def test_protocol_to_speeches_with_different_strategies(
     filename: str, speech_count: int, non_empty_speech_count: int, strategy: str
 ):
 
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
+    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
     document_name: str = utility.strip_path_and_extension(filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path)
@@ -197,7 +197,7 @@ def test_protocol_to_speeches_with_different_strategies(
     ],
 )
 def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
+    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
 
     data = untangle.parse(path)
 
@@ -216,6 +216,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 u_id='i-1',
                 n='c01',
                 who='A',
+                speaker_hash='a1',
                 prev_id=None,
                 next_id='i-2',
                 paragraphs=['Hej! Detta är en mening.'],

@@ -1,245 +1,109 @@
 include .env
 
-.DEFAULT_GOAL=lint
+include ./Makefile.dev
 
-SHELL := /bin/bash
-SOURCE_FOLDERS=pyriksprot tests
-PACKAGE_FOLDER=pyriksprot
-PYTEST_ARGS=--durations=0 --cov=$(PACKAGE_FOLDER) --cov-report=xml --cov-report=html tests
+# These need to be defined
+ifndef RIKSPROT_DATA_FOLDER
+$(error RIKSPROT_DATA_FOLDER is undefined)
+endif
 
-RUN_TIMESTAMP := $(shell /bin/date "+%Y-%m-%d-%H%M%S")
+ifndef RIKSPROT_REPOSITORY_TAG
+$(error RIKSPROT_REPOSITORY_TAG is undefined)
+endif
 
-faster-release: bump.patch tag publish
+# PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
+METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
 
-fast-release: clean-dev tidy build guard-clean-working-repository bump.patch tag publish
-
-release: ready guard-clean-working-repository bump.patch tag publish
-
-ready: tools clean-dev tidy test lint requirements.txt build
-
-build: requirements.txt-to-git
-	@poetry build
-
-publish:
-	@poetry publish
-
-lint: tidy pylint
-
-tidy: black isort
-
-tidy-to-git: guard-clean-working-repository tidy
-	@status="$$(git status --porcelain)"
-	@if [[ "$$status" != "" ]]; then
-		@git add .
-		@git commit -m "📌 make tidy"
-		@git push
-	fi
-
-doc:
-	@poetry run pdoc pyriksprot
-
-doc3:
-	@poetry run pdoc --html --force --output-dir docs pyriksprot
-	@poetry run mv docs/pyriksprot/* docs
-	@poetry run rmdir docs/pyriksprot
-
-DEFAULT_ROOT_FOLDER=/data/westac/riksdagen_corpus_data
-METADATA_DB_NAME=riksprot_metadata.$(CORPUS_REPOSITORY_TAG).db
-METADATA_RELATIVE_DB_PATH=metadata/$(METADATA_DB_NAME)
-METADATA_CSV_PATH=metadata/data
-CORPUS_ROOT=$(DEFAULT_ROOT_FOLDER)/riksdagen-corpus/corpus
-
+.PHONY: metadata
+metadata: metadata-download metadata-utterance-index metadata-database
+	@echo "metadata has been updated!"
 
 .PHONY: metadata-download
- metadata-download:
-	@rm -f $(METADATA_DB_NAME)
+metadata-download:
+	@rm -rf ./metadata/$(METADATA_DB_NAME) ./metadata/data
 	@mkdir -p ./metadata/data
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download $(CORPUS_REPOSITORY_TAG) $(METADATA_CSV_PATH)
-	@cp -f $(METADATA_RELATIVE_DB_PATH) $(DEFAULT_ROOT_FOLDER)/$(METADATA_RELATIVE_DB_PATH)
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download \
+		$(RIKSPROT_REPOSITORY_TAG) ./metadata/data
 
-.PHONY: metadata-database
- metadata-database:
-	@rm -f $(METADATA_DB_NAME)
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database $(METADATA_RELATIVE_DB_PATH) \
-		--force --load-index --source-folder $(METADATA_CSV_PATH) --scripts-folder ./metadata/sql # --branch $(CORPUS_REPOSITORY_TAG)
-	@mkdir -p $(DEFAULT_ROOT_FOLDER)/metadata
-	@cp -f $(METADATA_RELATIVE_DB_PATH) $(DEFAULT_ROOT_FOLDER)/$(METADATA_RELATIVE_DB_PATH)
-
-.PHONY: metadata-index
- metadata-index:
+.PHONY: metadata-utterance-index
+metadata-utterance-index:
 	@mkdir -p ./metadata/data
 	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index $(CORPUS_ROOT) ./metadata/data
-	@gzip  ./metadata/data/protocols.csv ./metadata/data/utterances.csv
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index \
+		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus ./metadata/data
+	@gzip ./metadata/data/protocols.csv ./metadata/data/utterances.csv
 
-.PHONY: metadata-test-database
- metadata-test-database:
-	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/metadata/metadata_test.py -k "create_subset_metadata_to_folder"
+.PHONY: metadata-database
+metadata-database:
+	@echo "creating database: metadata/$(METADATA_DB_NAME)"
+	@rm -f metadata/$(METADATA_DB_NAME)
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
+		metadata/$(METADATA_DB_NAME) \
+		--force \
+		--load-index \
+		--source-folder ./metadata/data \
+		--scripts-folder ./metadata/sql # --branch $(RIKSPROT_REPOSITORY_TAG)
+	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata
+	@mkdir $(RIKSPROT_DATA_FOLDER)/metadata
+	@cp -r ./metadata/data $(RIKSPROT_DATA_FOLDER)/metadata
+	@echo "copying $(RIKSPROT_DATA_FOLDER)/metadata to: $(RIKSPROT_DATA_FOLDER)/metadata"
+	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
+	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
 
-.PHONY: metadata-test-database
- sample-tagged-corpus:
-	@PYTHONPATH=. PYTEST_FORCE_RUN_SKIPS=1 poetry run pytest tests/utility_test.py -k "test_setup_sample_tagged_frames_corpus"
+.PHONY: metadata-database-vacuum
+metadata-database-vacuum:
+	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
 
+LIGHT_METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).light.db
 
-test: output-dir
-	@poetry run pytest $(PYTEST_ARGS)  tests
-	@rm -rf ./tests/output/*
+.PHONY: metadata-light-database
+metadata-light-database:
+	@cp -f metadata/$(METADATA_DB_NAME) metadata/$(LIGHT_METADATA_DB_NAME)
+	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) < ./metadata/10_make_light.sql
+	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) "VACUUM;"
 
-output-dir:
-	@mkdir -p ./tests/output
+ACTUAL_TAG:=v0.4.1
+.PHONY: extract-speeches-to-feather
+extract-speeches-to-feather:
+	 PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather \
+	 	--target-type single-id-tagged-frame-per-group --skip-stopwords --skip-text --lowercase --skip-puncts --force \
+		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG).beta \
+			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
+				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.beta.feather
 
-retest:
-	@poetry run pytest $(PYTEST_ARGS) --last-failed tests
+.PHONY: test-create-corpora
+test-create-corpora:
+	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
+	@echo "Setup completed of:"
+	@echo "Setup completed of:"
+	@echo "  - Sample Parla-CLARIN corpus"
+	@echo "  - Sample tagged frame corpus"
+	@echo "  - Sample (subsetted) metadata database"
 
-test-readme:
-	@poetry run pytest --codeblocks
+# .PHONY: test-metadata-database
+# test-metadata-database:
+# 	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
+# 	@echo "Setup of sample metadata database completed!"
 
-init: tools
-	@poetry install
+.PHONY: test-create-speech-corpora
+test-create-speech-corpora:
+	@poetry run python -c 'import tests.utility; tests.utility.setup_sample_speech_corpora()'
+	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
 
-profile-tagging:
-	@mkdir -p ./profile-reports
-	@poetry run python -m pyinstrument -r html -o ./.profile-reports/$(RUN_TIMESTAMP)_tagging-pyinstrument.html ./tests/profile_tagging.py
+.PHONY: test-refresh-all-data
+test-refresh-all-data: test-clear-sample-data test-create-corpora test-create-speech-corpora
+	@echo "Done!"
 
-test-parlaclarin-data:
-	@poetry run python -c 'import tests.utility; tests.utility.create_parlaclarin_corpus()'
+test-clear-sample-data:
+	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
 
-.ONESHELL: profile-extract-text
-profile-extract-text:
-	@mkdir -p ./profile-reports \
-		&& export PYTHONPATH=. \
-		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract_text.py
+#.ONESHELL: test-bundle-data
+.PHONY: test-bundle-data
+test-bundle-data:
+	@mkdir -p dist && rm -f dist/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz
+	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/
+	@tar --strip-components=2 -cvz -f tests/test_data/dists/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
+	@echo "Done!"
 
-.ONESHELL: profile-extract-tags
-profile-extract-tags:
-	@mkdir -p ./profile-reports \
-		&& export PYTHONPATH=. \
-		&& poetry run python -m pyinstrument -r html -o ./profile-reports/$(RUN_TIMESTAMP)_extract-pyinstrument.html ./tests/profile/extract_tagged_frames.py
-
-.ONESHELL: guard-clean-working-repository
-guard-clean-working-repository:
-	@status="$$(git status --porcelain)"
-	@if [[ "$$status" != "" ]]; then
-		echo "error: changes exists, please commit or stash them: "
-		echo "$$status"
-		exit 65
-	fi
-
-version:
-	@echo $(shell grep "^version \= " pyproject.toml | sed "s/version = //" | sed "s/\"//g")
-
-tools:
-	@pip install --upgrade pip --quiet
-	@pip install poetry --upgrade --quiet
-	@poetry run pip install --upgrade pip --quiet
-
-bump.patch: requirements.txt
-	@poetry version patch
-	@git add pyproject.toml requirements.txt
-	@git commit -m "📌 bump version patch"
-	@git push
-
-tag:
-	@poetry build
-	@git push
-	@git tag $(shell grep "^version \= " pyproject.toml | sed "s/version = //" | sed "s/\"//g") -a
-	@git push origin --tags
-
-test-coverage:
-	-poetry run coverage --rcfile=.coveragerc run -m pytest
-	-poetry run coveralls
-
-pytest:
-	@mkdir -p ./tests/output
-	@poetry run pytest --quiet tests
-
-pylint:
-	@poetry run pylint $(SOURCE_FOLDERS)
-
-pylint2:
-	@-find $(SOURCE_FOLDERS) -type f -name "*.py" | \
-		grep -v .ipynb_checkpoints | \
-			poetry run xargs -I @@ bash -c '{ echo "@@" ; pylint "@@" ; }'
-
-mypy:
-	@poetry run mypy --version
-	@poetry run mypy .
-
-flake8:
-	@poetry run flake8 --version
-	-poetry run flake8
-
-isort:
-	@poetry run isort --profile black --float-to-top --line-length 120 --py 38 $(SOURCE_FOLDERS)
-
-black: clean-dev
-	@poetry run black --version
-	@poetry run black --line-length 120 --target-version py38 --skip-string-normalization $(SOURCE_FOLDERS)
-
-clean-dev:
-	@rm -rf .pytest_cache build dist .eggs *.egg-info
-	@rm -rf .coverage coverage.xml htmlcov report.xml .tox
-	@find . -type d -name '__pycache__' -exec rm -rf {} +
-	@find . -type d -name '*pytest_cache*' -exec rm -rf {} +
-	@find . -type d -name '.mypy_cache' -exec rm -rf {} +
-	@rm -rf tests/output
-
-clean-cache:
-	@poetry cache clear pypi --all
-	@poetry install --remove-untracked
-
-update:
-	@poetry update
-
-requirements.txt: poetry.lock
-	@poetry export --without-hashes -f requirements.txt --output requirements.txt
-
-requirements.txt-to-git: requirements.txt
-	@git add requirements.txt
-	@git commit -m "📌 updated requirements.txt"
-	@git push
-
-
-gh:
-	@sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-	@sudo apt-add-repository https://cli.github.com/packages
-	@sudo apt update && sudo apt install gh
-
-check-gh: gh-exists
-gh-exists: ; @which gh > /dev/null
-
-.PHONY: help check init version
-.PHONY: lint flake8 pylint mypy black isort tidy
-.PHONY: test retest test-coverage pytest
-.PHONY: ready build tag bump.patch release fast-release
-.PHONY: clean-dev clean-cache update
-.PHONY: gh check-gh gh-exists tools
-
-help: help-workflow
-	@echo "Higher development level recepies: "
-	@echo " make ready            Makes ready for release (tools tidy test flake8 pylint)"
-	@echo " make build            Updates tools, requirement.txt and build dist/wheel"
-	@echo " make release          Bumps version (patch), pushes to origin and creates a tag on origin"
-	@echo " make fast-release     Same as release but without lint and test"
-	@echo " make test             Runs tests with code coverage"
-	@echo " make retest           Runs failed tests with code coverage"
-	@echo " make lint             Runs pylint and flake8"
-	@echo " make tidy             Runs black and isort"
-	@echo " make clean-dev        Removes temporary files, caches, build files"
-	@echo " make clean-cache      Clean poetry PyPI cache"
-	@echo "  "
-	@echo "Lower level recepies: "
-	@echo " make init             Install development tools and dependencies (dev recepie)"
-	@echo " make tag              bump.patch + creates a tag on origin"
-	@echo " make bump.patch       Bumps version (patch), pushes to origin"
-	@echo " make pytest           Runs teets without code coverage"
-	@echo " make pylint           Runs pylint"
-	@echo " make flake8           Runs flake8 (black, flake8-pytest-style, mccabe, naming, pycodestyle, pyflakes)"
-	@echo " make isort            Runs isort"
-	@echo " make black            Runs black"
-	@echo " make gh               Installs Github CLI"
-	@echo " make update           Updates dependencies"
-
-
-stanza_models:
-	@./scripts/stanza_models.sh
+test-copy-corpus-yml:
+	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/

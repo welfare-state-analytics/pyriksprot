@@ -5,12 +5,14 @@ from pyriksprot.dispatch import dispatch
 
 # pylint: disable=redefined-outer-name
 
+TAG = "vx.y.z"
+
 
 def main(target_type: dispatch.TargetTypeKey, source_folder: str):
 
     workflows.extract_corpus_tags(
         source_folder=source_folder,
-        metadata_filename="/data/westac/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.0.db",
+        metadata_filename=f"/data/westac/riksdagen_corpus_data/metadata/riksprot_metadata.{TAG}.db",
         target_name=f'/data/westac/riksdagen_corpus_data/{target_type}_{basename(source_folder)}/',
         target_type=target_type,
         content_type=interface.ContentType.TaggedFrame,
@@ -30,8 +32,6 @@ def main(target_type: dispatch.TargetTypeKey, source_folder: str):
 
 
 if __name__ == '__main__':
-    # target_type: dispatch.TargetTypeKey = 'single-id-tagged-frame-per-group'
     target_type: dispatch.TargetTypeKey = 'single-id-tagged-frame'
-    source_folder: str = '/data/westac/riksdagen_corpus_data/tagged_frames_v0.3.0_20201218'
-    # source_folder: str = './data/tagged_protocols_1965'
+    source_folder: str = '/data/riksdagen_corpus_data/tagged_frames_{TAG}_profile'
     main(target_type, source_folder=source_folder)

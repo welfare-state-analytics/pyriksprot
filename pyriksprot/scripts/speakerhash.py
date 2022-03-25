@@ -9,12 +9,12 @@ from pyriksprot.corpus.tagged.persist import update_speaker_hash
 jj = os.path.join
 relpath = os.path.relpath
 
+# FIXME #20 Tagging does not assign correct speaker hashes to utterances
+def temporary_update(tag: str, target_tag: str):
 
-def temporary_update():
-
-    source_folder: str = "/data/westac/riksdagen_corpus_data/tagged_frames_v0.4.0"
-    target_folder: str = "/data/westac/riksdagen_corpus_data/tagged_frames_v0.4.0.beta"
-    database_filename: str = "metadata/riksprot_metadata.v0.4.0.db"
+    source_folder: str = f"/data/riksdagen_corpus_data/tagged_frames_{tag}"
+    target_folder: str = f"/data/riksdagen_corpus_data/tagged_frames_{target_tag}"
+    database_filename: str = f"/data/riksdagen_corpus_data/metadata/riksprot_metadata.{tag}.db"
 
     service = md.SpeakerInfoService(database_filename)
     speaker_hash_lookup = service.utterance_index.utterances['speaker_hash'].to_dict()
@@ -37,4 +37,4 @@ def main(source_folder: str = None, target_folder: str = None, database_filename
 
 if __name__ == "__main__":
     # main()
-    temporary_update()
+    temporary_update(tag="v0.4.1", target_tag="v0.4.1.beta")

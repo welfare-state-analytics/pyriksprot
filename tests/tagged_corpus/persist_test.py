@@ -19,12 +19,12 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 u_id='i-1',
                 n='c01',
                 who='A',
+                speaker_hash='a1',
                 prev_id=None,
                 next_id='i-2',
                 paragraphs=['Hej! Detta är en mening.'],
                 tagged_text="token\tpos\tlemma\nA\ta\tNN",
                 delimiter='\n',
-                speaker_hash='apa',
             )
         ],
     )

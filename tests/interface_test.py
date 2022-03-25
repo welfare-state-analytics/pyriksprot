@@ -25,12 +25,12 @@ def utterances() -> list[interface.Utterance]:
 
 
 def test_utterance_text():
-    u: interface.Utterance = interface.Utterance(u_id="A", paragraphs=["X", "Y", "C"])
+    u: interface.Utterance = interface.Utterance(u_id="A", speaker_hash="x", who="x", paragraphs=["X", "Y", "C"])
     assert u.text == '\n'.join(["X", "Y", "C"])
 
 
 def test_utterance_checksumtext():
-    u: interface.Utterance = interface.Utterance(u_id="A", paragraphs=["X", "Y", "C"])
+    u: interface.Utterance = interface.Utterance(u_id="A", speaker_hash="x", who="x", paragraphs=["X", "Y", "C"])
     assert u.checksum() == '6060d006e0494206'
 
 
@@ -43,11 +43,11 @@ def test_utterances_to_dict():
     assert who_sequences == []
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', who='B'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', who='B'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', who='A'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_hash="xa1", who='A'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_hash="xa1", who='A'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_hash="xb1", who='B'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_hash="xb1", who='B'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_hash="xa2", who='A'),
     ]
 
     who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster(utterances)

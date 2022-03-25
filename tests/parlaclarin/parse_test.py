@@ -5,7 +5,7 @@ import pytest
 from pyriksprot import interface
 from pyriksprot.corpus import parlaclarin
 
-from ..utility import PARLACLARIN_FAKE_FOLDER, PARLACLARIN_SOURCE_FOLDER
+from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOLDER
 
 jj = os.path.join
 
@@ -13,7 +13,7 @@ jj = os.path.join
 def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(
-        jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
+        jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
     )
 
     assert protocol is not None
@@ -35,7 +35,7 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 )
 def test_parlaclarin_xml_with_no_utterances(filename):
 
-    path: str = jj(PARLACLARIN_SOURCE_FOLDER, "protocols", filename.split('-')[1], filename)
+    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
 
     protocol = parlaclarin.ProtocolMapper.to_protocol(path, segment_skip_size=0)
 
@@ -45,7 +45,7 @@ def test_parlaclarin_xml_with_no_utterances(filename):
 
 
 def test_to_protocol_by_untangle():
-    filename = jj(PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
+    filename = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
 
     protocol: parlaclarin.XmlUntangleProtocol = parlaclarin.XmlUntangleProtocol(filename)
 
