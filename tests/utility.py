@@ -20,7 +20,7 @@ RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
 RIKSPROT_PARLACLARIN_FOLDER = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, "parlaclarin")
 
 RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
-RIKSPROT_PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake/parlaclarin'
+RIKSPROT_PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
 
 TAGGED_SOURCE_FOLDER = jj("tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "tagged_frames")
 TAGGED_METADATA_DATABASE_NAME = jj(TAGGED_SOURCE_FOLDER, "riksprot_metadata.db")
