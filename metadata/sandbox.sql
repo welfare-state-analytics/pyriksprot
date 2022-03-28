@@ -1,6 +1,9 @@
 /* Various SQL queries */
 select *
-
+from persons_of_interest
+where person_id = 'Q4956353'
+;
+;
 from _unknowns
 where protocol_id in (
     'prot-1933--fk--5.xml',
