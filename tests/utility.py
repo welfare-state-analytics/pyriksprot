@@ -128,12 +128,12 @@ def create_subset_metadata_to_folder():
         folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
         force=True,
     )
-    md.generate_utterance_index(
+    md.generate_corpus_indexes(
         ProtocolMapper,
         corpus_folder=RIKSPROT_PARLACLARIN_FOLDER,
         target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
     )
-    md.load_utterance_index(
+    md.load_corpus_indexes(
         database_filename=TAGGED_METADATA_DATABASE_NAME,
         source_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
     )
@@ -154,10 +154,11 @@ def setup_sample_speech_corpora():
     logger.info(f"    source: {TAGGED_SOURCE_FOLDER}")
     logger.info(f"  metadata: {TAGGED_METADATA_DATABASE_NAME}")
 
-
     for compress_type in compress_types:
 
-        target_name: str = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, f"tagged_frames_speeches.{compress_type}")
+        target_name: str = jj(
+            "tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, f"tagged_frames_speeches.{compress_type}"
+        )
 
         logger.info(f"    target: {target_name}")
 
