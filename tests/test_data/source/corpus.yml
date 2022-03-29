@@ -30,7 +30,7 @@ pipelines:
       file_pattern: '**/prot-*.feather'
 pipeline_payload:
   source: null
-  document_index_source: document_index.feather
+  document_index_source: ./tagged_frames_speeches.feather/document_index.feather
   document_index_sep: "\t"
   filenames: null
   memory_store:
