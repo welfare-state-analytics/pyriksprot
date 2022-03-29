@@ -84,9 +84,12 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
 @pytest.mark.parametrize(
     'target_type,merge_strategy,compress_type',
     [
-        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
         ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.speaker_hash_sequence, 'csv'),
-        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_hash_sequence, 'csv'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.speaker_hash_sequence, 'feather'),
+        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
+        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_hash_sequence, 'csv'),
+        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
+        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_hash_sequence, 'csv'),
     ],
 )
 def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
@@ -126,6 +129,13 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
     assert isfile(join(target_name, f'token2id.{compress_type}'))
     # assert isfile(join(target_name, 'person_index.zip'))
 
-    document_index: pd.DataFrame = pd.read_csv(join(target_name, f'document_index.{compress_type}'), sep='\t')
+    target_filename: str = join(target_name, f'document_index.{compress_type}')
+    document_index: pd.DataFrame = (
+        pd.read_csv(target_filename, sep='\t')
+        if compress_type == 'csv'
+        else pd.read_feather(target_filename)
+        if compress_type == 'feather'
+        else None
+    )
     assert 'party_id' in document_index.columns
     assert 'gender_id' in document_index.columns
