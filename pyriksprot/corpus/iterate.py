@@ -27,22 +27,14 @@ class ProtocolSegment(IDispachItem):
     page_number: str
     year: int
     u_id: str
-
+    n_utterances: int = 0
     speaker_info: SpeakerInfo = None
+    speaker_hash: str = None
+    speech_index: int = None
 
     def __len__(self) -> int:
         """IDispatchItem interface"""
         return 1
-
-    # def __repr__(self) -> str:
-    #     return (
-    #         f"{self.protocol_name or '*'}\t"
-    #         f"{self.name or '*'}\t"
-    #         f"{self.who or '*'}\t"
-    #         f"{self.id or '?'}\t"
-    #         f"{self.data or '?'}\t"
-    #         f"{self.page_number or ''}\t"
-    #     )
 
     def data_z64(self) -> bytes:
         """Compress text, return base64 encoded string."""
@@ -51,6 +43,7 @@ class ProtocolSegment(IDispachItem):
     def to_dict(self):
         """These properties ends up in resulting document index."""
         return {
+            'u_id': self.u_id,
             'year': self.year,
             'period': self.year,
             'who': self.who,
@@ -58,6 +51,9 @@ class ProtocolSegment(IDispachItem):
             'document_name': self.name,
             'filename': self.filename,
             'n_tokens': self.n_tokens,
+            'n_utterances': self.n_utterances,
+            'speaker_hash': self.speaker_hash,
+            'speach_index': self.speech_index,
             'page_number': self.page_number,
             **({} if not self.speaker_info else self.speaker_info.to_dict()),
         }
@@ -89,7 +85,9 @@ def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -
             data=protocol.text,
             page_number='0',
             n_tokens=0,
+            n_utterances=len(protocol.utterances),
             speaker_info=None,
+            speaker_hash=None,
         )
     ]
 
@@ -114,7 +112,10 @@ def to_speech_segments(
             u_id=s.speech_id,
             data=s.to_content_str(content_type),
             page_number=s.page_number,
-            n_tokens=0,
+            n_tokens=s.tagged_text.count("\n"),
+            n_utterances=len(s),
+            speaker_hash=s.speaker_hash,
+            speech_index=s.speech_index,
         )
         for s in mu.to_speeches(protocol=protocol, merge_strategy=merge_strategy, skip_size=segment_skip_size)
     ]
@@ -136,6 +137,7 @@ def to_who_segments(
             data=s.to_content_str(content_type),
             page_number=s.page_number,
             n_tokens=0,
+            n_utterances=len(s),
         )
         for s in mu.to_speeches(protocol=protocol, merge_strategy=mu.MergeStrategyType.who, skip_size=segment_skip_size)
     ]
@@ -155,6 +157,7 @@ def to_utterance_segments(*, protocol: Protocol, content_type: ContentType, **_)
             data=u.to_str(content_type),
             page_number=u.page_number,
             n_tokens=0,
+            n_utterances=1,
         )
         for i, u in enumerate(protocol.utterances)
     ]
@@ -174,6 +177,7 @@ def to_paragraph_segments(*, protocol: Protocol, content_type: ContentType, **_)
             data=p,
             page_number=u.page_number,
             n_tokens=0,
+            n_utterances=1,
         )
         for j, u in enumerate(protocol.utterances)
         for i, p in enumerate(u.paragraphs)
