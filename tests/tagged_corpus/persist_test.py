@@ -27,6 +27,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 delimiter='\n',
             )
         ],
+        speaker_notes={},
     )
 
     output_filename: str = jj("tests", "output", f"{str(uuid4())}.zip")

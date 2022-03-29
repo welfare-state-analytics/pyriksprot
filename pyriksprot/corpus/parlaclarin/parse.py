@@ -42,6 +42,10 @@ class XmlProtocol(abc.ABC):
     def get_date(self) -> str:
         ...
 
+    @abc.abstractmethod
+    def get_speaker_notes(self) -> dict[str, str]:
+        ...
+
     def __len__(self):
         return len(self.utterances)
 
@@ -72,6 +76,7 @@ class XmlUntangleProtocol(XmlProtocol):
         data: untangle.Element = (
             data if isinstance(data, untangle.Element) else untangle.parse(data, ignore_tags=ignore_tags)
         )
+        self.speaker_notes: dict[str, str] = {}
 
         super().__init__(data, segment_skip_size, delimiter)
 
@@ -94,6 +99,8 @@ class XmlUntangleProtocol(XmlProtocol):
             elif child.name == "note":
                 if child['type'] == "speaker":
                     speaker_hash = child["n"]
+                    if speaker_hash:
+                        self.speaker_notes[speaker_hash] = " ".join(child.cdata.split())
             elif child.name == 'u':
                 utterances.append(
                     UtteranceMapper.create(element=child, page_number=page_number, speaker_hash=speaker_hash)
@@ -122,6 +129,9 @@ class XmlUntangleProtocol(XmlProtocol):
         except AttributeError:
             logger.warning(f'no content (text.body) found in {self.get_name()}')
         return None
+
+    def get_speaker_notes(self) -> dict[str, str]:
+        return self.speaker_notes
 
 
 class UtteranceMapper:
@@ -172,6 +182,7 @@ class ProtocolMapper:
             utterances=xml_protocol.utterances,
             date=xml_protocol.date,
             name=xml_protocol.name,
+            speaker_notes=xml_protocol.get_speaker_notes(),
         )
 
         return protocol
@@ -193,6 +204,9 @@ class XmlIterParseProtocol(XmlProtocol):
     def get_name(self) -> str:
         return self.iterator.doc_name
 
+    def get_speaker_notes(self) -> dict[str, str]:
+        return self.iterator.speaker_notes
+
     class XmlIterParser:
         def __init__(self, filename: str):
 
@@ -201,6 +215,7 @@ class XmlIterParseProtocol(XmlProtocol):
             self.filename = filename
             self.iterator = None
             self.dedent: bool = True
+            self.speaker_notes: dict[str, str] = {}
 
         def __iter__(self):
             self.iterator = self.create_iterator()
@@ -234,6 +249,8 @@ class XmlIterParseProtocol(XmlProtocol):
 
                     elif tag == "note" and elem.attrib.get('type') == "speaker":
                         speaker_hash = elem.attrib['n']
+                        if speaker_hash:
+                            self.speaker_notes[speaker_hash] = " ".join(value.split())
 
                     elif tag == "pb":
                         current_page = elem.attrib['n']

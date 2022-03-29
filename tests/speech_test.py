@@ -68,7 +68,9 @@ def test_merge_speech_by_strategy(
     utterances: list[interface.Utterance], strategy, expected_count, expected_whos, expected_ids, expected_texts
 ):
 
-    protocol: interface.Protocol = interface.Protocol(date="1950", name="prot-1958-fake", utterances=utterances)
+    protocol: interface.Protocol = interface.Protocol(
+        date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}
+    )
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
 
     assert len(speeches) == expected_count
@@ -225,6 +227,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 page_number='',
             )
         ],
+        speaker_notes={},
     )
 
     output_filename: str = jj("tests", "output", f"{str(uuid.uuid4())}.zip")

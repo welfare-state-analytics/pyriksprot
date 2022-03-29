@@ -338,11 +338,12 @@ class Speech(UtteranceMixIn):
 class Protocol(UtteranceMixIn):
     """Entity that represents a ParlaCLARIN document."""
 
-    def __init__(self, date: str, name: str, utterances: list[Utterance], **_):
+    def __init__(self, date: str, name: str, utterances: list[Utterance], speaker_notes: dict[str, str], **_):
         self.date: str = date
         self.name: str = name
         self.utterances: list[Utterance] = utterances
         self.year: int = int(self.date[:4])
+        self.speaker_notes: dict[str, str] = speaker_notes or {}
 
     def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
         """Apply text transforms. Return self."""
@@ -363,3 +364,6 @@ class Protocol(UtteranceMixIn):
 
     def get_content(self, content_type: ContentType) -> str:
         return self.text if content_type == ContentType.Text else self.tagged_text
+
+    def get_speaker_notes(self) -> dict[str, str]:
+        return self.speaker_notes

@@ -109,7 +109,7 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
             data_str: str = fp.read(stored_filename).decode('utf-8')
             utterances: List[interface.Utterance] = PROTOCOL_LOADERS.get(ext)(data_str)
 
-            protocol: interface.Protocol = interface.Protocol(utterances=utterances, **metadata)
+            protocol: interface.Protocol = interface.Protocol(utterances=utterances, **metadata, speaker_notes={})
 
             return protocol
 

@@ -2,6 +2,7 @@ import sys
 from os.path import dirname
 
 import click
+from loguru import logger
 
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
@@ -23,7 +24,7 @@ def download_metadata(tag: str, target_folder: str):
 @click.argument('corpus_folder', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
 def create_utterance_index(corpus_folder: str, target_folder: str):
-    md.generate_utterance_index(ProtocolMapper, corpus_folder=corpus_folder, target_folder=target_folder)
+    md.generate_corpus_indexes(ProtocolMapper, corpus_folder=corpus_folder, target_folder=target_folder)
 
 
 @click.command()
@@ -41,6 +42,7 @@ def create_database(
     scripts_folder: str = None,
     load_index: bool = True,
 ) -> None:
+
     try:
 
         md.create_database(
@@ -51,12 +53,15 @@ def create_database(
         )
 
         if load_index:
-            md.load_utterance_index(database_filename=target, source_folder=source_folder or dirname(target))
+            logger.info("loading index...")
+            md.load_corpus_indexes(database_filename=target, source_folder=source_folder or dirname(target))
 
         if scripts_folder:
+            logger.info("loading scripts...")
             md.load_scripts(database_filename=target, script_folder=scripts_folder)
 
     except Exception as ex:
+        logger.error(ex)
         click.echo(ex)
         sys.exit(1)
 

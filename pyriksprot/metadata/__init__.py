@@ -5,9 +5,9 @@ from .generate import (
     RIKSPROT_METADATA_TABLES,
     create_database,
     download_to_folder,
-    generate_utterance_index,
+    generate_corpus_indexes,
+    load_corpus_indexes,
     load_scripts,
-    load_utterance_index,
     subset_to_folder,
 )
 from .person import Person, PersonIndex, PersonParty, SpeakerInfo, SpeakerInfoService, TermOfOffice

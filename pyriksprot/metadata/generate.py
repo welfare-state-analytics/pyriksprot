@@ -36,6 +36,9 @@ class IParser(abc.ABC):
         date: str
         utterances: list[IParser.IUtterance]
 
+        def get_speaker_notes(self) -> dict[str, str]:
+            return {}
+
     def to_protocol(
         self, filename: str, segment_skip_size: int, ignore_tags: set[str]  # pylint: disable=unused-argument
     ) -> IParser.IProtocol:
@@ -178,10 +181,11 @@ def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, 
     logger.info(f"  Source metadata: {source_metadata}")
     logger.info(f"    Target folder: {target_folder}")
 
-    data: tuple = generate_utterance_index(parser, corpus_folder=source_folder, target_folder=target_folder)
+    data: tuple = generate_corpus_indexes(parser, corpus_folder=source_folder, target_folder=target_folder)
 
     protocols: pd.DataFrame = data[0]
     utterances: pd.DataFrame = data[1]
+    # speaker_notes: pd.DataFrame = data[2]
 
     person_ids: list[str] = set(utterances.person_id.unique().tolist())
     logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
@@ -275,23 +279,25 @@ def create_database(
     return db
 
 
-def generate_utterance_index(
+def generate_corpus_indexes(
     parser: IParser, corpus_folder: str, target_folder: str = None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
 
-    logger.info("Generating utterance index.")
+    logger.info("Generating utterance, protocol and speaker notes indices.")
     logger.info(f"  source: {corpus_folder}")
     logger.info(f"  target: {target_folder}")
 
     utterance_data: list[tuple] = []
     protocol_data: list[tuple[int, str]] = []
     filenames = glob.glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
+    speaker_notes: dict[str, str] = {}
 
     for document_id, filename in tqdm(enumerate(filenames)):
         protocol: IParser.IProtocol = parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
         protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
         for u in protocol.utterances:
             utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_hash]))
+        speaker_notes.update(protocol.get_speaker_notes())
 
     data: tuple[pd.DataFrame, pd.DataFrame] = (
         pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date', 'year']).set_index(
@@ -300,13 +306,14 @@ def generate_utterance_index(
         pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_hash']).set_index(
             "u_id"
         ),
+        pd.DataFrame(speaker_notes.items(), columns=['speaker_hash', 'speaker_note']).set_index('speaker_hash'),
     )
 
     if target_folder:
 
         os.makedirs(target_folder, exist_ok=True)
 
-        for df, tablename in zip(data, ["protocols", "utterances"]):
+        for df, tablename in zip(data, ["protocols", "utterances", "speaker_notes"]):
             filename: str = jj(target_folder, f"{tablename}.csv")
             if os.path.isfile(filename):
                 os.unlink(filename)
@@ -315,13 +322,13 @@ def generate_utterance_index(
     return data
 
 
-def load_utterance_index(database_filename: str, source_folder: str = None) -> None:
+def load_corpus_indexes(*, database_filename: str, source_folder: str = None) -> None:
 
     folder: str = source_folder or dirname(database_filename)
-    tablenames: list[str] = ["protocols", "utterances"]
+    tablenames: list[str] = ["protocols", "utterances", "speaker_notes"]
     filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
 
-    if not isfile(database_filename) or len(filenames) != 2:
+    if not isfile(database_filename):
         raise FileNotFoundError(database_filename)
 
     if not all(isfile(filename) for filename in filenames):
