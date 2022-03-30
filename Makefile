@@ -78,6 +78,7 @@ metadata-light-database:
 	@cp -f metadata/$(METADATA_DB_NAME) metadata/$(LIGHT_METADATA_DB_NAME)
 	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) < ./metadata/10_make_light.sql
 	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) "VACUUM;"
+	@cp -f metadata/$(LIGHT_METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 
 ACTUAL_TAG:=v0.4.1
 .PHONY: extract-speeches-to-feather
