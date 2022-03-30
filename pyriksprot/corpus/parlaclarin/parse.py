@@ -250,7 +250,10 @@ class XmlIterParseProtocol(XmlProtocol):
                     elif tag == "note" and elem.attrib.get('type') == "speaker":
                         speaker_hash = elem.attrib['n']
                         if speaker_hash:
-                            self.speaker_notes[speaker_hash] = " ".join(value.split())
+                            if value:
+                                self.speaker_notes[speaker_hash] = " ".join(value.split())
+                            else:
+                                pass
 
                     elif tag == "pb":
                         current_page = elem.attrib['n']
@@ -292,5 +295,9 @@ class XmlIterParseProtocol(XmlProtocol):
 
                     elif tag == 'div' and elem.attrib.get('type') == 'preface':
                         is_preface = False
+
+                    # elif tag == "note" and elem.attrib.get('type') == "speaker":
+                    #     self.speaker_notes[speaker_hash] = " ".join(value.split())
+
 
                 elem.clear()
