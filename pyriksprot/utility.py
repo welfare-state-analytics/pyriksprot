@@ -394,7 +394,7 @@ def merge_tagged_csv(csv_strings: List[str], sep: str = '\n') -> str:
     texts: List[str] = [csv_strings[0]]
     for csv_string in csv_strings[1:]:
         text = strip_csv_header(csv_string, sep=sep)
-        if text != '':
+        if text:
             texts.append(text)
     return sep.join(texts)
 

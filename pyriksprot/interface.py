@@ -256,6 +256,11 @@ class UtteranceMixIn:
         """Merge tagged texts for entire speech into a single CSV string."""
         return UtteranceHelper.merge_tagged_texts(self.utterances, sep='\n')
 
+    @property
+    def has_tagged_text(self) -> bool:
+        """Check if any utterance actually has any uttered words."""
+        return any(bool(u.tagged_text) for u in self.utterances)
+
     def to_dict(self) -> list[Mapping[str, Any]]:
         """Convert utterances to list of dict."""
         return UtteranceHelper.to_dict(self.utterances)

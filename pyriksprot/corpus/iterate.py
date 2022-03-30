@@ -53,7 +53,7 @@ class ProtocolSegment(IDispachItem):
             'n_tokens': self.n_tokens,
             'n_utterances': self.n_utterances,
             'speaker_hash': self.speaker_hash,
-            'speach_index': self.speech_index,
+            'speech_index': self.speech_index,
             'page_number': self.page_number,
             **({} if not self.speaker_info else self.speaker_info.to_dict()),
         }
@@ -112,7 +112,7 @@ def to_speech_segments(
             u_id=s.speech_id,
             data=s.to_content_str(content_type),
             page_number=s.page_number,
-            n_tokens=s.tagged_text.count("\n"),
+            n_tokens=0 if not s.has_tagged_text else s.tagged_text.count("\n"),
             n_utterances=len(s),
             speaker_hash=s.speaker_hash,
             speech_index=s.speech_index,
