@@ -264,7 +264,7 @@ class CheckpointPerGroupDispatcher(IDispatcher):
 
 class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     """Store merged group items in a single tagged frame.
-    NOTE! This dispatcher ONLY workd for Speech level segments.
+    NOTE! This dispatcher is ONLY valid for Speech level segments.
     """
 
     def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
@@ -291,9 +291,8 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             )
 
         for speech_segment in item.protocol_segments:
-
             self.document_data.append(
-                {**item.to_dict(), **{'document_id': self.document_id}, **speech_segment.speaker_info.to_dict()}
+                {**{'document_id': self.document_id}, **item.to_dict(), **speech_segment.to_dict()}
             )
             self.document_id += 1
 
@@ -371,20 +370,25 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
         document_index: pd.DataFrame = self.document_index()
 
-        for column_name in ['Unnamed: 0', 'period']:
+        for column_name in [
+            'Unnamed: 0',
+            'period',
+            'protocol_name',
+        ]:
             if column_name in document_index.columns:
                 document_index.drop(columns=column_name, inplace=True)
 
-        document_index['year'] = trim_series_type(document_index.year)
-        document_index['n_tokens'] = trim_series_type(document_index.n_tokens)
-        document_index['document_id'] = trim_series_type(document_index.document_id)
+        document_index = trim_data_frame_typs(document_index)
+        # document_index['year'] = trim_series_type(document_index.year)
+        # document_index['n_tokens'] = trim_series_type(document_index.n_tokens)
+        # document_index['document_id'] = trim_series_type(document_index.document_id)
 
         self.store(filename=jj(self.target_name, 'document_index.csv'), data=document_index)
 
 
 class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
     """Store merged group items in a single tagged frame.
-    NOTE! This dispatcher is ONLY tested for Speech level segments.
+    NOTE! This dispatcher is ONLY valid for Speech level segments.
     """
 
     name: str = 'single-id-tagged-frame-per-group'
@@ -446,7 +450,18 @@ class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
 
 def trim_series_type(series: pd.Series) -> pd.Series:
     max_value: int = series.max()
-    for np_type in [np.int16, np.int32]:
+    for np_type in [np.int8, np.int16, np.int32]:
         if max_value < np.iinfo(np_type).max:
             return series.astype(np_type)
     return series
+
+
+def trim_data_frame_typs(frame: pd.DataFrame, columns: list[str] = None) -> pd.DataFrame:
+    columns = columns if columns else frame.columns
+    for column in columns:
+        if not column in frame.columns:
+            continue
+        if not np.issubdtype(frame[column].dtype, np.integer):
+            continue
+        frame[column] = trim_series_type(frame[column])
+    return frame
