@@ -10,11 +10,11 @@ from .utility import (
     RIKSPROT_REPOSITORY_TAG,
     TEST_DOCUMENTS,
     create_sample_metadata,
-    ensure_test_corpora_exist,
-    sample_tagged_frames_corpus_exists,
-    sample_parlaclarin_corpus_exists,
     create_sample_speech_corpus,
     create_sample_tagged_frames_corpus,
+    ensure_test_corpora_exist,
+    sample_parlaclarin_corpus_exists,
+    sample_tagged_frames_corpus_exists,
 )
 
 jj = os.path.join

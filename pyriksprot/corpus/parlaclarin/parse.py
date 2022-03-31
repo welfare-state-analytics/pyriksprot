@@ -299,5 +299,4 @@ class XmlIterParseProtocol(XmlProtocol):
                     # elif tag == "note" and elem.attrib.get('type') == "speaker":
                     #     self.speaker_notes[speaker_hash] = " ".join(value.split())
 
-
                 elem.clear()
