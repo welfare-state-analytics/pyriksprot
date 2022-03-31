@@ -120,6 +120,20 @@ class SpeakerInfo:
             # 'person_id': self.person_id,
         }
 
+    @staticmethod
+    def dtypes() -> dict:
+        return {
+            # 'speech_id': str,
+            # 'person_id': str,
+            # 'name': str,
+            'gender_id': np.int8,
+            'party_id': np.int8,
+            'start_year': np.int16,
+            'end_year': np.int16,
+            'office_type_id': np.int8,
+            'sub_office_type_id': np.int8,
+        }
+
 
 def swap_rows(df: pd.DataFrame, i: int, j: int):
     row_i, row_j = df.iloc[i].copy(), df.iloc[j].copy()

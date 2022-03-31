@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable
 
+import numpy as np
+
 from .. import to_speech as mu
 from ..interface import ContentType, IDispachItem, Protocol, SegmentLevel
 from ..utility import compress
@@ -56,6 +58,16 @@ class ProtocolSegment(IDispachItem):
             'speech_index': self.speech_index,
             'page_number': self.page_number,
             **({} if not self.speaker_info else self.speaker_info.to_dict()),
+        }
+
+    @staticmethod
+    def dtypes() -> dict:
+        return {
+            'year': np.int16,
+            'n_tokens': np.int32,
+            'n_utterances': np.int8,
+            'speech_index': np.int16,
+            **SpeakerInfo.dtypes(),
         }
 
     @property
