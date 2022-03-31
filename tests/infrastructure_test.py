@@ -48,6 +48,7 @@ def test_create_subset_metadata_to_folder():
     create_sample_metadata()
 
 
+@pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
     create_sample_speech_corpus()
 
