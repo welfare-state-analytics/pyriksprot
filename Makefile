@@ -89,6 +89,13 @@ extract-speeches-to-feather:
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
 				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.beta.feather
 
+.PHONY: test-refresh-all-data
+test-refresh-all-data: test-clear-sample-data test-create-corpora test-copy-corpus-yml test-bundle-data
+	@echo "Done!"
+
+test-clear-sample-data:
+	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
+
 .PHONY: test-create-corpora
 test-create-corpora:
 	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
@@ -97,24 +104,6 @@ test-create-corpora:
 	@echo "  - Sample tagged frame corpus"
 	@echo "  - Sample (subsetted) metadata database"
 
-# .PHONY: test-metadata-database
-# test-metadata-database:
-# 	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
-# 	@echo "Setup of sample metadata database completed!"
-
-.PHONY: test-create-speech-corpora
-test-create-speech-corpora:
-	@poetry run python -c 'import tests.utility; tests.utility.setup_sample_speech_corpora()'
-	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
-
-.PHONY: test-refresh-all-data
-test-refresh-all-data: test-clear-sample-data test-create-corpora test-create-speech-corpora test-bundle-data
-	@echo "Done!"
-
-test-clear-sample-data:
-	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
-
-#.ONESHELL: test-bundle-data
 .PHONY: test-bundle-data
 test-bundle-data:
 	@mkdir -p dist && rm -f dist/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz
@@ -122,5 +111,15 @@ test-bundle-data:
 	@tar --strip-components=2 -cvz -f tests/test_data/dists/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
 	@echo "Done!"
 
+.PHONY: test-copy-corpus-yml
 test-copy-corpus-yml:
 	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/
+
+# .PHONY: test-metadata-database
+# test-metadata-database:
+# 	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
+# 	@echo "Setup of sample metadata database completed!"
+
+# test-create-speech-corpora:
+# 	@poetry run python -c 'import tests.utility; tests.utility.setup_sample_speech_corpora()'
+# 	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"

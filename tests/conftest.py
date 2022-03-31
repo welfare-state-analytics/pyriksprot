@@ -11,7 +11,7 @@ from pyriksprot.corpus import corpus_index as csi
 
 from .utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
-    TAGGED_METADATA_DATABASE_NAME,
+    SAMPLE_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
     ensure_test_corpora_exist,
 )
@@ -39,12 +39,12 @@ def xml_source_index() -> csi.CorpusSourceIndex:
 
 @pytest.fixture
 def person_index() -> md.PersonIndex:
-    return md.PersonIndex(database_filename=TAGGED_METADATA_DATABASE_NAME).load()
+    return md.PersonIndex(database_filename=SAMPLE_METADATA_DATABASE_NAME).load()
 
 
 @pytest.fixture
 def speaker_service(person_index: md.PersonIndex) -> md.SpeakerInfoService:  # pylint: disable=redefined-outer-name
-    return md.SpeakerInfoService(database_filename=TAGGED_METADATA_DATABASE_NAME, person_index=person_index)
+    return md.SpeakerInfoService(database_filename=SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
 
 
 @pytest.fixture

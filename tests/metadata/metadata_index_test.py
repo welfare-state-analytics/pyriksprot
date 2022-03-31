@@ -5,7 +5,7 @@ import pandas as pd
 from pyriksprot import metadata as md
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
-from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
+from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 
 # pylint: disable=redefined-outer-name
 
@@ -32,7 +32,7 @@ def dummy() -> md.Person:
 
 
 def test_code_lookups():
-    lookups: md.Codecs = md.Codecs().load(TAGGED_METADATA_DATABASE_NAME)
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     assert lookups
 
     assert lookups.gender2id.get("woman") == 2
@@ -185,7 +185,7 @@ def test_person_party_at():
 
 
 def test_speaker_info_service(person_index: md.PersonIndex):
-    service = md.SpeakerInfoService(TAGGED_METADATA_DATABASE_NAME, person_index=person_index)
+    service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
 
     person: md.Person = service.person_index.get_person('Q5556026')
     assert person.alt_parties
@@ -200,7 +200,7 @@ def test_speaker_info_service(person_index: md.PersonIndex):
 
 
 def test_unknown(person_index: md.PersonIndex):
-    service = md.SpeakerInfoService(TAGGED_METADATA_DATABASE_NAME, person_index=person_index)
+    service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
     person: md.Person = service.person_index.get_person('unknown')
 
     assert person

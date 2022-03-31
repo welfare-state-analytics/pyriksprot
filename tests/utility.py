@@ -1,6 +1,6 @@
 import os
 import shutil
-from os.path import isdir, isfile
+from os.path import isfile
 from os.path import join as jj
 from typing import List
 
@@ -17,14 +17,18 @@ load_dotenv()
 
 
 RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
-RIKSPROT_PARLACLARIN_FOLDER = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, "parlaclarin")
+ROOT_FOLDER = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG)
 
+RIKSPROT_PARLACLARIN_FOLDER = jj(ROOT_FOLDER, "parlaclarin")
+RIKSPROT_PARLACLARIN_METADATA_FOLDER = jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata")
 RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
 RIKSPROT_PARLACLARIN_FAKE_FOLDER = 'tests/test_data/source/fake'
 
-TAGGED_SOURCE_FOLDER = jj("tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "tagged_frames")
-TAGGED_METADATA_DATABASE_NAME = jj(TAGGED_SOURCE_FOLDER, "riksprot_metadata.db")
+TAGGED_SOURCE_FOLDER = jj(ROOT_FOLDER, "tagged_frames")
 TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "prot-*.zip")
+TAGGED_SPEECH_FOLDER = jj(ROOT_FOLDER, "tagged_frames_speeches.feather")
+
+SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, "riksprot_metadata.db")
 
 TEST_DOCUMENTS = [
     "prot-1933--fk--5",
@@ -36,36 +40,7 @@ TEST_DOCUMENTS = [
 ]
 
 
-def ensure_test_corpora_exist(force: bool = False):
-    if force or not sample_xml_corpus_exists():
-        download_protocols(
-            protocols=TEST_DOCUMENTS,
-            target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols"),
-            create_subfolder=True,
-            tag=RIKSPROT_REPOSITORY_TAG,
-        )
-
-    if force or not sample_metadata_exists():
-        """Create just a subset of the data"""
-        md.subset_to_folder(
-            parser=ProtocolMapper,
-            source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-            source_metadata="metadata/data",
-            target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
-        )
-
-    if force or not isdir(TAGGED_SOURCE_FOLDER):
-        try:
-            setup_sample_tagged_frames_corpus(
-                protocols=TEST_DOCUMENTS,
-                source_folder=os.environ["TEST_RIKSPROT_TAGGED_FOLDER"],
-                target_folder=TAGGED_SOURCE_FOLDER,
-            )
-        except Exception as ex:
-            logger.warning(ex)
-
-
-def sample_xml_corpus_exists():
+def sample_parlaclarin_corpus_exists():
     return all(
         isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
     )
@@ -75,16 +50,74 @@ def sample_metadata_exists():
     return all(isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES)
 
 
-def sample_tagged_corpus_exists():
-    return all(isfile(jj(TAGGED_SOURCE_FOLDER, "protocols", f"{x}.zip")) for x in TEST_DOCUMENTS)
+def sample_tagged_frames_corpus_exists():
+    return all(isfile(jj(TAGGED_SOURCE_FOLDER, f"{x}.zip")) for x in TEST_DOCUMENTS)
 
 
-def setup_sample_tagged_frames_corpus(
-    *,
-    source_folder: str,
-    protocols: List[str] = None,
-    target_folder: str = TAGGED_SOURCE_FOLDER,
-) -> None:
+def sample_tagged_speech_corpus_exists():
+    return all(isfile(jj(TAGGED_SPEECH_FOLDER, f"{x}.zip")) for x in TEST_DOCUMENTS)
+
+
+def ensure_test_corpora_exist(force: bool = False):
+
+    if force or not sample_parlaclarin_corpus_exists():
+        create_sample_parlaclarin_corpus()
+
+    if force or not sample_metadata_exists():
+        create_sample_metadata()
+
+    if force or not sample_tagged_frames_corpus_exists():
+        create_sample_tagged_frames_corpus()
+
+    if force or not sample_tagged_speech_corpus_exists:
+        create_sample_speech_corpus()
+
+
+def create_sample_parlaclarin_corpus():
+    # FIXME Read from local folder instead or prevent "main" tag
+    download_protocols(
+        protocols=TEST_DOCUMENTS,
+        target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols"),
+        create_subfolder=True,
+        tag=RIKSPROT_REPOSITORY_TAG,
+    )
+
+
+def create_sample_metadata():
+    """Subset metadata to folder"""
+    md.subset_to_folder(
+        ProtocolMapper,
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
+        source_metadata="metadata/data",
+        target_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
+    )
+    """Create metadata database"""
+    md.create_database(
+        database_filename=SAMPLE_METADATA_DATABASE_NAME,
+        branch=None,
+        folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
+        force=True,
+    )
+    md.generate_corpus_indexes(
+        ProtocolMapper,
+        corpus_folder=RIKSPROT_PARLACLARIN_FOLDER,
+        target_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
+    )
+    md.load_corpus_indexes(
+        database_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
+    )
+    md.load_scripts(
+        database_filename=SAMPLE_METADATA_DATABASE_NAME,
+        script_folder="./metadata/sql",
+    )
+
+
+def create_sample_tagged_frames_corpus() -> None:
+
+    protocols: str = TEST_DOCUMENTS
+    source_folder: str = os.environ["TEST_RIKSPROT_TAGGED_FOLDER"]
+    target_folder: str = TAGGED_SOURCE_FOLDER
 
     logger.info("Creating sample tagged frames corpus")
     logger.info(f"  source: {source_folder}")
@@ -96,63 +129,29 @@ def setup_sample_tagged_frames_corpus(
     os.makedirs(target_folder, exist_ok=True)
 
     for name in protocols:
+
         filename: str = replace_extension(name, 'zip')
         subfolder: str = filename.split('-')[1]
         source_filename: str = jj(source_folder, subfolder, filename)
+        target_filename: str = jj(target_folder, filename)
+
         if not isfile(source_filename):
             logger.warning(f"test data: test file {name} not found")
             continue
-        shutil.copy(src=source_filename, dst=jj(target_folder, filename))
+        shutil.copy(src=source_filename, dst=target_filename)
         logger.info(f"  copied: {source_filename} to {jj(target_folder, filename)}")
 
-    """Create metadata from test corpus"""
-    md.create_database(
-        TAGGED_METADATA_DATABASE_NAME,
-        branch=None,
-        folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
-        force=True,
-    )
-    create_subset_metadata_to_folder()
 
-
-def create_subset_metadata_to_folder():
-    md.subset_to_folder(
-        ProtocolMapper,
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        source_metadata="metadata/data",
-        target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
-    )
-    md.create_database(
-        database_filename=TAGGED_METADATA_DATABASE_NAME,
-        branch=None,
-        folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
-        force=True,
-    )
-    md.generate_corpus_indexes(
-        ProtocolMapper,
-        corpus_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
-    )
-    md.load_corpus_indexes(
-        database_filename=TAGGED_METADATA_DATABASE_NAME,
-        source_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"),
-    )
-    md.load_scripts(
-        database_filename=TAGGED_METADATA_DATABASE_NAME,
-        script_folder="./metadata/sql",
-    )
-
-
-def setup_sample_speech_corpora():
+def create_sample_speech_corpus():
 
     # target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
     target_type: str = 'single-id-tagged-frame-per-group'
-    merge_strategy: str = 'speaker_hash_sequence'
+    merge_strategy: str = 'chain'
     compress_types: list[str] = ['csv', 'feather']
 
     logger.info("Creating sample speech tagged ID frame corpus")
     logger.info(f"    source: {TAGGED_SOURCE_FOLDER}")
-    logger.info(f"  metadata: {TAGGED_METADATA_DATABASE_NAME}")
+    logger.info(f"  metadata: {SAMPLE_METADATA_DATABASE_NAME}")
 
     for compress_type in compress_types:
 
@@ -164,7 +163,7 @@ def setup_sample_speech_corpora():
 
         fixed_opts: dict = dict(
             source_folder=TAGGED_SOURCE_FOLDER,
-            metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+            metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
             segment_level=interface.SegmentLevel.Speech,
             temporal_key=interface.TemporalKey.NONE,
             content_type=interface.ContentType.TaggedFrame,

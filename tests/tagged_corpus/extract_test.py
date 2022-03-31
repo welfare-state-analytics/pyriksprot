@@ -10,7 +10,7 @@ from pyriksprot import CorpusSourceIndex, interface, to_speech, workflows
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.dispatch import dispatch
 
-from ..utility import TAGGED_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
+from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
 
 # pylint: disable=redefined-outer-name,no-member
 
@@ -60,7 +60,7 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     opts = {
         **dict(
             source_folder=TAGGED_SOURCE_FOLDER,
-            metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+            metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
             target_type='files-in-zip',
             content_type=interface.ContentType.TaggedFrame,
             segment_level=interface.SegmentLevel.Speech,
@@ -98,7 +98,7 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
 
     fixed_opts: dict = dict(
         source_folder=TAGGED_SOURCE_FOLDER,
-        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
         segment_level=interface.SegmentLevel.Speech,
         temporal_key=interface.TemporalKey.NONE,
         content_type=interface.ContentType.TaggedFrame,

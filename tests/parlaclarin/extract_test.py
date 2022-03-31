@@ -16,7 +16,7 @@ from ..utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
     RIKSPROT_PARLACLARIN_PATTERN,
     RIKSPROT_REPOSITORY_TAG,
-    TAGGED_METADATA_DATABASE_NAME,
+    SAMPLE_METADATA_DATABASE_NAME,
 )
 
 
@@ -138,7 +138,7 @@ def test_extract_corpus_text_yearly_grouped_by_party():
 
     workflows.extract_corpus_text(
         source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
         compress_type=dispatch.CompressType.Zip,
@@ -159,7 +159,7 @@ def test_extract_corpus_with_no_temporal_key():
 
     workflows.extract_corpus_text(
         source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -178,7 +178,7 @@ def test_extract_corpus_with_no_matching_protocols():
 
     workflows.extract_corpus_text(
         source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -198,7 +198,7 @@ def test_aggregator_extract_gender_party_no_temporal_key():
 
     workflows.extract_corpus_text(
         source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=TAGGED_METADATA_DATABASE_NAME,
+        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
         target_name=target_filename,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
