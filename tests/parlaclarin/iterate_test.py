@@ -139,6 +139,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             page_number='0',
             year=1958,
             n_tokens=0,
+            n_utterances=4,
         ),
         iterate.ProtocolSegment(
             protocol_name='prot-1960-fake',
@@ -152,6 +153,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             page_number='0',
             year=1960,
             n_tokens=0,
+            n_utterances=4,
         ),
     ],
     'speech': [
