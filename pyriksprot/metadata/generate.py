@@ -131,6 +131,25 @@ RIKSPROT_METADATA_TABLES: dict = {
     },
 }
 
+EXTRA_TABLES = {
+    'speech_index': {
+        'document_id': 'int primary key',
+        'document_name': 'text',
+        'year': 'int',
+        'who': 'text',
+        'gender_id': 'int',
+        'party_id': 'int',
+        'office_type_id': 'int',
+        'sub_office_type_id': 'int',
+        'n_tokens': 'int',
+        'filename': 'text',
+        'u_id': 'text',
+        'n_utterances': 'int',
+        'speaker_hash': 'text',
+        'speach_index': 'int',
+    },
+}
+
 
 def register_numpy_adapters():
     for dt in [np.int8, np.int16, np.int32, np.int64]:
@@ -219,6 +238,24 @@ def fx_or_url(url: Any, tag: str) -> str:
     return url(tag) if callable(url) else url
 
 
+def sql_ddl_create(*, tablename: str, specification: dict[str, str]) -> str:
+    lf = '\n' + (12 * ' ')
+    sql_ddl: str = f"""
+        create table {tablename} (
+            {(','+lf).join(f"{k.removeprefix('+')} {t}" for k, t in specification.items() if not k.startswith(":"))}
+        );
+    """
+    return sql_ddl
+
+
+def sql_ddl_insert(*, tablename: str, columns: list[str]) -> str:
+    insert_sql = f"""
+    insert into {tablename} ({', '.join(columns)})
+        values ({', '.join(['?'] * len(columns))});
+    """
+    return insert_sql
+
+
 def create_database(
     database_filename: str,
     branch: str = None,
@@ -241,21 +278,12 @@ def create_database(
 
     register_numpy_adapters()
 
-    lf = '\n' + (12 * ' ')
-
     for tablename, specification in RIKSPROT_METADATA_TABLES.items():
-        sql_ddl: str = f"""
-            create table {tablename} (
-                {(','+lf).join(f"{k.removeprefix('+')} {t}" for k, t in specification.items() if not k.startswith(":"))}
-            );
-        """
         with closing(db.cursor()) as cursor:
-            cursor.executescript(sql_ddl)
+            cursor.executescript(sql_ddl_create(tablename=tablename, specification=specification))
 
     for tablename, specification in RIKSPROT_METADATA_TABLES.items():
         logger.info(f"loading table: {tablename}")
-
-        column_names: list[str] = [k for k in specification if k[0] not in "+:"]
 
         if ':url:' in specification and folder is None:
             table: pd.DataFrame = pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
@@ -266,13 +294,10 @@ def create_database(
             if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
                 table[c] = [int(x) for x in table[c]]
 
-        data = table[column_names].to_records(index=False)
-
         with closing(db.cursor()) as cursor:
-            insert_sql = f"""
-            insert into {tablename} ({', '.join(column_names)})
-                values ({', '.join(['?'] * len(column_names))});
-            """
+            columns: list[str] = [k for k in specification if k[0] not in "+:"]
+            data = table[columns].to_records(index=False)
+            insert_sql = sql_ddl_insert(tablename=tablename, columns=columns)
             cursor.executemany(insert_sql, data)
 
     db.commit()
