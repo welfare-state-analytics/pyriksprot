@@ -33,7 +33,7 @@ def test_setup_sample_xml_corpus():
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_to_folder():
-    target_folder: str = './metadata/data/'
+    target_folder: str = jj('./metadata/data/', RIKSPROT_REPOSITORY_TAG)
     md.download_to_folder(tag=RIKSPROT_REPOSITORY_TAG, folder=target_folder, force=True)
     assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in md.RIKSPROT_METADATA_TABLES)
 

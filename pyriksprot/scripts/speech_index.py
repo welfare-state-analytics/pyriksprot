@@ -111,7 +111,7 @@ if __name__ == "__main__":
     main()
 
     # arguments = {
-    #     'source_folder': '/data/riksdagen_corpus_data/tagged_frames_v0.4.1',
+    #     'source_folder': '/data/riksdagen_corpus_data/tagged_frames_vx.x.x',
     #     'target_name': 'speech_index.csv.gz',
     #     'database_filename': '/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db',
     #     'merge_strategy': 'chain',

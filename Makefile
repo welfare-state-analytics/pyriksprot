@@ -13,25 +13,43 @@ endif
 
 # PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
 METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
+CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describe --tags)"
+
+funkis:
+ifeq ($(RIKSPROT_REPOSITORY_TAG),$(CHECKED_OUT_TAG))
+	@echo "check: repository tag matches .env tag"
+else
+	$(error repository tag and .env tag mismatch)
+endif
+
+# @ if [[ "$(RIKSPROT_REPOSITORY_TAG)" == "$(CHECKED_OUT_TAG)" ]] ; then \
+# 	echo "info: repository tag and .env tag are the same." ; \
+#   else \
+#   	echo "No!" ; \
+# 	echo "$(RIKSPROT_REPOSITORY_TAG)" ; \
+# 	echo "$(shell git -C /data/riksdagen_corpus_data/riksdagen-corpus describe --tags)" ; \
+#   fi
 
 .PHONY: metadata
-metadata: metadata-download metadata-corpus-index metadata-database
+metadata: funkis metadata-download metadata-corpus-index metadata-database
 	@echo "metadata has been updated!"
 
 .PHONY: metadata-download
-metadata-download:
-	@rm -rf ./metadata/$(METADATA_DB_NAME) ./metadata/data
-	@mkdir -p ./metadata/data
+metadata-download: funkis
+	@rm -rf ./metadata/$(METADATA_DB_NAME) ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+	@mkdir -p ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download \
-		$(RIKSPROT_REPOSITORY_TAG) ./metadata/data
+		$(RIKSPROT_REPOSITORY_TAG) ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
 
 .PHONY: metadata-corpus-index
 metadata-corpus-index:
 	@mkdir -p ./metadata/data
 	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index \
-		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus ./metadata/data
-	@gzip ./metadata/data/protocols.csv ./metadata/data/utterances.csv ./metadata/data/speaker_notes.csv
+		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+	@gzip ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)/protocols.csv \
+		./metadata/data/$(RIKSPROT_REPOSITORY_TAG)/utterances.csv \
+		./metadata/data/$(RIKSPROT_REPOSITORY_TAG)/speaker_notes.csv
 
 
 # .PHONY: metadata-speaker-notes-index
@@ -48,24 +66,24 @@ metadata-corpus-index:
 metadata-database:
 	@echo "creating database: metadata/$(METADATA_DB_NAME)"
 	@rm -f metadata/$(METADATA_DB_NAME)
-	@echo PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
 		metadata/$(METADATA_DB_NAME) \
 		--force \
 		--load-index \
-		--source-folder ./metadata/data \
+		--source-folder ./metadata/data/$(RIKSPROT_REPOSITORY_TAG) \
 		--scripts-folder ./metadata/sql
 
 # --branch $(RIKSPROT_REPOSITORY_TAG)
 
 .PHONY: metadata-database-deploy
 metadata-database-deploy:
-	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata
-	@mkdir $(RIKSPROT_DATA_FOLDER)/metadata
-	@cp -r ./metadata/data $(RIKSPROT_DATA_FOLDER)/metadata
+	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
+	@mkdir -p $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
+	@cp -r ./metadata/data/$(RIKSPROT_REPOSITORY_TAG) $(RIKSPROT_DATA_FOLDER)/metadata
 	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
-	@echo "copying $(RIKSPROT_DATA_FOLDER)/metadata to: $(RIKSPROT_DATA_FOLDER)/metadata"
 	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
+	@echo "Done!"
 
 .PHONY: metadata-database-vacuum
 metadata-database-vacuum:
@@ -80,10 +98,10 @@ metadata-light-database:
 	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) "VACUUM;"
 	@cp -f metadata/$(LIGHT_METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 
-ACTUAL_TAG:=v0.4.1
+ACTUAL_TAG:=$(RIKSPROT_REPOSITORY_TAG)
 .PHONY: extract-speeches-to-feather
 extract-speeches-to-feather:
-	 PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather \
+	PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather \
 	 	--target-type single-id-tagged-frame-per-group --skip-stopwords --skip-text --lowercase --skip-puncts --force \
 		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG).beta \
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \

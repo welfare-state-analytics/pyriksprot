@@ -88,7 +88,7 @@ def create_sample_metadata():
     md.subset_to_folder(
         ProtocolMapper,
         source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        source_metadata="metadata/data",
+        source_metadata=jj("metadata/data", RIKSPROT_REPOSITORY_TAG),
         target_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
     )
     """Create metadata database"""
