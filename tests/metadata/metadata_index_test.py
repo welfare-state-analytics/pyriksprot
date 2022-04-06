@@ -1,8 +1,12 @@
+import sqlite3
+from contextlib import closing
 from dataclasses import asdict
 
 import pandas as pd
+import pytest
 
 from pyriksprot import metadata as md
+from pyriksprot.metadata.generate import EXTRA_TABLES, register_numpy_adapters, sql_ddl_create, sql_ddl_insert
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
 from ..utility import SAMPLE_METADATA_DATABASE_NAME
@@ -225,3 +229,44 @@ def test_unknown(person_index: md.PersonIndex):
     assert speaker.party_id == 8
 
     assert service.get_speaker_info(u_id="i-f0c73dc8f12170da-7").party_id == 6
+
+
+@pytest.parameterize.skip("infra test")
+def test_load_speaker_index():
+
+    database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
+
+    db = sqlite3.connect(database_filename)
+
+    register_numpy_adapters()
+
+    tablename: str = "speech_index"
+    specification: dict[str, str] = EXTRA_TABLES[tablename]
+
+    with closing(db.cursor()) as cursor:
+        cursor.executescript(f"drop table if exists {tablename};")
+        cursor.executescript(sql_ddl_create(tablename=tablename, specification=specification))
+
+    speech_index: pd.DataFrame = pd.read_feather(
+        "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"
+    )
+
+    columns: list[str] = [k for k in specification if k[0] not in "+:"]
+    data = speech_index[columns].to_records(index=False)
+
+    with closing(db.cursor()) as cursor:
+        insert_sql = sql_ddl_insert(tablename=tablename, columns=columns)
+        cursor.executemany(insert_sql, data)
+
+
+@pytest.parameterize.skip("infra test")
+def test_load_speaker_index2():
+
+    database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
+    speech_index_filename: str = (
+        "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"
+    )
+    speech_index: pd.DataFrame = pd.read_feather(speech_index_filename)
+
+    with sqlite3.connect(database_filename) as db:
+        speech_index.to_sql("speech_index", db, if_exists="replace")
