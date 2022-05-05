@@ -1,0 +1,398 @@
+person_id,end,start,district,party,role
+Q1375199,1977-04-15,1977-03-01,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1978-05-23,1978-04-20,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1978-12-15,1978-11-14,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1982-10-04,1979-10-01,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1985-09-30,1982-10-04,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1988-10-03,1985-09-30,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1991-09-30,1988-10-03,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1991-10-04,1991-09-30,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,1998-10-05,1994-10-08,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,2002-09-30,1998-10-05,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,2006-10-02,2002-09-30,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,2006-10-02,2006-10-02,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,2010-10-04,2010-10-04,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1375199,2014-12-30,2014-09-29,Södermanlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1635136,1985-09-30,1982-10-04,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1635136,1988-10-03,1985-09-30,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1635136,1991-09-30,1988-10-03,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1635136,1994-10-03,1991-09-30,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q179493,1944-01-01,1938-01-01,Stockholms kommuns valkrets,,förstakammarledamot
+Q179493,1970-01-01,1945-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q18243057,1970-01-01,1953-01-01,Kalmar läns valkrets,,andrakammarledamot
+Q18243057,1973-07-21,1971-01-11,Kalmar läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q1830351,1979-10-01,1976-10-04,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,1982-10-04,1979-10-01,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,1983-11-17,1982-10-04,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,1985-09-30,1983-12-21,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,1986-10-07,1985-09-30,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,1998-10-05,1994-10-08,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,2002-09-30,1998-10-05,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q1830351,2002-12-31,2002-09-30,Östergötlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q2021126,1974-01-10,1971-01-11,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1976-10-04,1974-01-10,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1976-10-07,1976-10-04,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1979-10-01,1978-10-18,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1982-10-04,1979-10-01,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1985-09-30,1982-10-04,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1988-10-03,1985-09-30,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1991-09-30,1988-10-03,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1991-10-04,1991-09-30,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1994-10-03,1994-06-16,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q2021126,1998-10-05,1994-10-03,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q273408,1988-10-03,1985-09-30,Stockholms läns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q273408,1991-09-30,1988-10-03,Stockholms läns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q273408,1991-10-04,1991-09-30,Stockholms läns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q273408,1997-12-01,1994-10-08,Stockholms läns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q2744062,1960-01-01,1949-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q297850,1988-10-27,1988-10-03,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,1998-10-05,1994-10-08,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,2002-09-30,1998-10-05,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,2006-10-02,2002-09-30,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,2006-10-05,2006-10-02,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,2010-10-04,2010-10-04,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,2018-09-24,2014-10-04,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q297850,2019-12-31,2018-09-24,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q3162739,1961-01-01,1947-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q316519,1994-10-03,1991-09-30,Stockholms kommuns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q3496488,1994-02-06,1991-09-30,Fyrstadskretsen,Liberalerna,ledamot av Sveriges riksdag
+Q3496488,1994-10-03,1994-05-30,Fyrstadskretsen,Liberalerna,ledamot av Sveriges riksdag
+Q4570928,1919-01-01,1918-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q4570928,1921-01-01,1919-01-01,Stockholms läns valkrets,,förstakammarledamot
+Q4570928,1954-01-01,1922-01-01,Stockholms läns och Uppsala läns valkrets,,förstakammarledamot
+Q4692974,1985-09-30,1982-10-04,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,1987-10-13,1985-09-30,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,1988-10-03,1987-11-17,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,1991-09-30,1988-10-03,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,1994-10-03,1991-09-30,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,1998-10-05,1994-10-03,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,2002-09-30,1998-10-05,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4692974,2006-10-02,2002-09-30,Kalmar läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4916267,1979-10-11,1979-10-01,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1986-11-12,1985-09-30,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1987-11-13,1986-12-13,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1988-10-03,1987-12-15,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1991-09-30,1988-10-03,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1991-10-04,1991-09-30,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1994-10-03,1994-10-03,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4916267,1997-12-31,1994-10-07,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4931118,1995-10-09,1995-01-10,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4931118,1998-10-05,1995-10-10,,Liberalerna,ledamot av Sveriges riksdag
+Q4931118,2002-09-30,1998-10-05,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4931118,2005-12-31,2002-09-30,Stockholms kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4935815,1979-11-20,1979-10-17,,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1980-11-21,1980-10-20,,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1981-12-17,1981-11-16,,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1985-09-30,1982-10-04,Uppsala läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1988-10-03,1985-09-30,Uppsala läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1991-09-30,1988-10-03,Uppsala läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1994-10-03,1991-09-30,Uppsala läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4935815,1998-10-05,1994-10-03,Uppsala läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4939882,1985-09-30,1982-10-04,Gotlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4939882,1988-10-03,1985-09-30,Gotlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4939882,1991-09-30,1988-10-03,Gotlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4939882,1994-10-03,1991-09-30,Gotlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4944305,1991-10-04,1991-09-30,Stockholms läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4944305,1998-10-05,1994-10-08,Stockholms läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4944305,2002-09-30,1998-10-05,Stockholms läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4944305,2006-10-02,2002-09-30,Stockholms läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4944305,2010-10-04,2006-10-02,Stockholms läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4945703,1988-10-03,1985-09-30,Fyrstadskretsen,Liberalerna,ledamot av Sveriges riksdag
+Q4945703,1991-09-30,1989-10-01,Fyrstadskretsen,Liberalerna,ledamot av Sveriges riksdag
+Q4945703,1994-10-03,1991-09-30,Fyrstadskretsen,Liberalerna,ledamot av Sveriges riksdag
+Q4945703,1998-10-05,1994-10-03,Malmöhus läns södra valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q4946072,1994-10-03,1991-10-05,,Moderaterna,ledamot av Sveriges riksdag
+Q4946072,1994-10-07,1994-10-03,Skåne läns norra och östra valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4946072,1998-10-05,1995-10-04,Skåne läns norra och östra valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4946072,2002-09-30,1998-10-05,Skåne läns norra och östra valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4946072,2006-10-02,2004-10-01,Skåne läns norra och östra valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4946541,1966-01-01,1949-01-01,Göteborgs kommuns valkrets,,andrakammarledamot
+Q4946998,1989-11-09,1988-10-03,Uppsala läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4946998,1991-09-30,1989-12-16,Uppsala läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4946998,1994-10-03,1991-09-30,Uppsala läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4949792,1985-09-30,1982-10-04,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q4949792,1988-10-03,1985-09-30,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q4949792,1991-09-30,1988-10-03,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q4949792,1991-10-14,1991-09-30,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q4949792,1994-10-03,1991-11-18,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q4949792,1998-10-05,1994-10-03,Malmö kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4949792,2002-09-30,1998-10-05,Malmö kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4953330,1994-10-03,1991-09-30,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4953330,1998-10-05,1994-10-03,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4953330,2002-09-30,1998-10-05,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4953330,2002-11-06,2002-09-30,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4955378,1970-01-01,1969-01-01,Göteborgs kommuns valkrets,,andrakammarledamot
+Q4955378,1974-01-10,1971-01-11,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1976-10-04,1974-01-10,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1979-10-01,1976-10-04,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1982-10-04,1979-10-01,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1985-09-30,1982-10-04,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1988-10-03,1985-09-30,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1991-09-30,1988-10-03,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4955378,1994-10-03,1991-09-30,Göteborgs kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4956970,1988-10-03,1985-10-01,,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4956970,1991-09-30,1988-10-03,Stockholms läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4956970,1994-10-03,1991-09-30,Stockholms läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4956970,1998-10-05,1994-10-03,Stockholms läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4956970,2002-09-30,1998-10-05,Stockholms läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4962152,1958-01-01,1949-01-01,Gävleborgs läns valkrets,,andrakammarledamot
+Q4962481,1982-10-04,1979-10-01,Värmlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4962481,1985-09-30,1982-10-04,Värmlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4962481,1988-10-03,1985-09-30,Värmlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4962481,1991-09-30,1988-10-03,Värmlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4962481,1994-10-03,1991-09-30,Värmlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4962481,1998-10-05,1994-10-03,Värmlands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4969616,1956-01-01,1951-01-01,Gävleborgs läns valkrets,,andrakammarledamot
+Q4970689,1994-10-03,1991-09-30,Göteborgs kommuns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4970689,1998-10-05,1994-10-03,Göteborgs kommuns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4970689,2000-01-31,1998-10-05,Göteborgs kommuns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q4972780,1988-10-03,1985-09-30,Gotlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4972780,1991-09-30,1988-10-03,Gotlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4972780,1994-10-03,1991-09-30,Gotlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4975999,1998-10-05,1994-10-03,Örebro läns valkrets,Miljöpartiet,ledamot av Sveriges riksdag
+Q4975999,2002-09-30,1998-10-05,Stockholms kommuns valkrets,Miljöpartiet,ledamot av Sveriges riksdag
+Q4975999,2003-01-22,2002-09-30,Stockholms kommuns valkrets,Miljöpartiet,ledamot av Sveriges riksdag
+Q4975999,2006-10-02,2003-07-01,Stockholms kommuns valkrets,Miljöpartiet,ledamot av Sveriges riksdag
+Q4976961,1960-01-01,1945-01-01,Västerbottens läns valkrets,,andrakammarledamot
+Q4981243,1988-10-03,1985-09-30,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4981243,1991-09-30,1988-10-03,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4981243,1994-10-03,1991-09-30,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4981243,1998-10-05,1994-10-03,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4987905,1985-09-30,1982-10-04,Västra Götalands läns västra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4987905,1988-10-03,1985-09-30,Västra Götalands läns västra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4987905,1991-09-30,1988-10-03,Västra Götalands läns västra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4987905,1994-10-03,1991-09-30,Västra Götalands läns västra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4987905,1998-10-05,1994-10-03,Västra Götalands läns västra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4987905,2002-09-30,1998-10-05,Västra Götalands läns västra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q4990210,1998-10-05,1994-10-03,Malmöhus läns södra valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q4990781,1994-10-03,1991-09-30,Hallands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4990781,1998-10-05,1994-10-03,Hallands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4990781,2002-09-30,1998-10-05,Hallands läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q4990909,1987-12-20,1987-11-13,,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4990909,1990-12-31,1990-10-02,,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4990909,1994-10-03,1991-09-30,Stockholms kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4990909,1998-10-05,1994-10-03,Stockholms kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q4990909,2002-09-30,1998-10-05,Stockholms kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5005171,1979-10-01,1976-10-04,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1981-05-09,1979-10-01,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1982-10-04,1981-06-11,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1985-05-05,1982-10-04,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1985-09-30,1985-06-07,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1988-10-03,1985-09-30,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1990-11-11,1988-10-03,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1991-09-30,1990-12-12,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1991-10-04,1991-09-30,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5005171,1996-01-31,1994-10-03,Västerbottens läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q514209,1970-01-01,1942-01-01,Västernorrlands läns valkrets,,andrakammarledamot
+Q514209,1974-01-10,1971-01-11,Västernorrlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q514209,1976-10-04,1974-01-10,Stockholms kommuns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5389786,1988-10-03,1985-09-30,Göteborgs kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q5389786,1991-09-30,1988-10-03,Göteborgs kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q5389786,1994-10-03,1991-09-30,Göteborgs kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q5389786,1998-10-05,1994-10-03,Göteborgs kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q5389786,2006-10-02,2002-09-30,Göteborgs kommuns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q5503582,1952-01-01,1951-01-01,Kronobergs läns och Hallands läns valkrets,,förstakammarledamot
+Q5503582,1964-01-01,1953-01-01,Kronobergs läns valkrets,,andrakammarledamot
+Q5535667,1963-01-01,1953-01-01,Södermanlands läns och Västmanlands läns valkrets,,förstakammarledamot
+Q5551491,1970-01-01,1951-01-01,Fyrstadskretsen,,andrakammarledamot
+Q5551491,1974-01-10,1971-01-11,Fyrstadskretsen,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5551491,1976-10-04,1974-01-10,Fyrstadskretsen,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5551491,1979-10-01,1976-10-04,Fyrstadskretsen,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5554160,1991-09-30,1988-10-03,Västmanlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5554160,1994-10-03,1991-09-30,Västmanlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5555011,1982-10-04,1979-10-01,Västerbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5555011,1985-09-30,1982-10-04,Västerbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5555011,1988-10-03,1985-09-30,Västerbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5555011,1994-10-03,1991-09-30,Västerbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5555679,1956-01-01,1929-01-01,Fyrstadskretsen,,andrakammarledamot
+Q5556026,1985-09-30,1983-05-31,,Moderaterna,ledamot av Sveriges riksdag
+Q5556026,1988-10-03,1985-09-30,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5556026,1991-09-30,1988-10-03,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5556026,1994-10-03,1991-09-30,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5556026,1998-10-05,1994-10-03,Malmö kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5556026,2002-09-30,1998-10-05,Malmö kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5557659,1970-01-01,1947-01-01,Älvsborgs läns norra valkrets,,andrakammarledamot
+Q5557659,1974-01-10,1971-01-11,Älvsborgs läns norra valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q5561242,1968-01-01,1953-01-01,Gävleborgs läns valkrets,,andrakammarledamot
+Q5562029,1994-10-03,1991-09-30,Skåne läns norra och östra valkrets,Ny demokrati,ledamot av Sveriges riksdag
+Q5571477,1994-10-03,1991-09-30,Västra Götalands läns västra valkrets,Ny demokrati,ledamot av Sveriges riksdag
+Q5571910,1956-01-01,1954-01-01,Örebro läns valkrets,,andrakammarledamot
+Q5576113,1982-10-04,1979-10-01,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5576113,1985-09-30,1982-10-04,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5576113,1988-10-03,1985-09-30,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5576113,1991-09-30,1988-10-03,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5576113,1994-10-03,1991-09-30,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5576113,1998-10-05,1994-10-03,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5576113,2002-09-30,1998-10-05,Stockholms läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5577761,1994-10-03,1991-09-30,Dalarnas läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q5577761,1998-10-05,1994-10-03,Dalarnas läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q5577761,2002-09-30,1998-10-05,Dalarnas läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q5587157,1993-10-05,1991-09-30,Göteborgs kommuns valkrets,Ny demokrati,ledamot av Sveriges riksdag
+Q5602918,1994-10-03,1991-09-30,Kalmar läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5602918,1998-10-05,1994-10-03,Kalmar läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5602918,2002-09-30,1998-10-05,Kalmar läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5603051,1958-01-01,1953-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q5603051,1963-01-01,1961-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q5603264,1989-01-29,1989-01-10,,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5603264,1990-06-30,1989-10-03,,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5603264,1993-10-05,1991-09-30,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5604541,1952-01-01,1950-01-01,Värmlands läns valkrets,,förstakammarledamot
+Q5604541,1970-01-01,1953-01-01,Värmlands läns valkrets,,andrakammarledamot
+Q5609574,1970-01-01,1969-01-01,Fyrstadskretsen,,andrakammarledamot
+Q5609574,1974-01-10,1971-01-11,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1976-10-04,1974-01-10,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1979-10-01,1976-10-04,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1982-10-04,1979-10-01,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1985-09-30,1982-10-04,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1988-10-03,1985-09-30,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1991-09-30,1988-10-03,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5609574,1994-10-03,1991-09-30,Fyrstadskretsen,Moderaterna,ledamot av Sveriges riksdag
+Q5627474,1956-01-01,1949-01-01,Göteborgs kommuns valkrets,,andrakammarledamot
+Q5715273,1959-01-01,1937-01-01,Västra Götalands läns södra valkrets,,andrakammarledamot
+Q5715273,1961-01-01,1960-01-01,Skaraborgs läns valkrets,,förstakammarledamot
+Q5715273,1970-01-01,1962-01-01,Älvsborgs läns valkrets,,förstakammarledamot
+Q5715293,1991-09-30,1988-10-03,Värmlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5715293,1994-10-03,1991-09-30,Värmlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5715293,1998-10-05,1994-10-03,Värmlands läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5719585,1994-10-03,1991-09-30,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5719585,1998-10-05,1994-10-03,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5719585,2002-09-30,1998-10-05,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5777699,1979-10-01,1976-10-04,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777699,1982-10-04,1979-10-01,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777699,1982-10-07,1982-10-04,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777699,1985-09-30,1985-09-30,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777699,1988-10-03,1988-10-03,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777699,1991-09-30,1988-10-04,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777699,1994-10-03,1991-09-30,Blekinge läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777951,1982-10-04,1979-10-01,Jämtlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777951,1985-09-30,1982-10-04,Jämtlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777951,1988-10-03,1985-09-30,Jämtlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777951,1991-09-30,1988-10-03,Jämtlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5777951,1994-10-03,1991-09-30,Jämtlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5781896,1955-01-01,1933-01-01,Fyrstadskretsen,,andrakammarledamot
+Q5781896,1963-01-01,1956-01-01,Malmöhus läns valkrets,,förstakammarledamot
+Q5781951,1974-01-10,1971-01-11,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1976-10-04,1974-01-10,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1979-10-01,1976-10-04,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1982-10-04,1979-10-01,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1983-04-04,1982-10-04,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1985-09-30,1983-05-28,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1988-10-03,1985-09-30,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1991-09-30,1988-10-03,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5781951,1992-08-31,1991-09-30,Dalarnas läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5787447,1969-01-01,1953-01-01,Jönköpings läns valkrets,,andrakammarledamot
+Q5789491,1970-01-01,1945-01-01,Malmöhus läns valkrets,,andrakammarledamot
+Q5789491,1974-01-10,1971-01-11,Malmöhus läns valkrets,Centerpartiet,ledamot av Sveriges riksdag
+Q5796375,1994-10-03,1991-09-30,,Moderaterna,ledamot av Sveriges riksdag
+Q5796375,1998-10-05,1994-10-03,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5796375,2002-09-30,1998-10-05,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5796375,2006-10-02,2002-09-30,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5796375,2010-10-04,2006-10-02,Uppsala läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5801470,1957-04-22,1949-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q5804686,1991-09-30,1988-10-03,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5804686,1994-10-03,1991-09-30,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5804686,1998-10-05,1994-10-03,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5804686,2002-09-30,1998-10-05,Göteborgs kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5817672,1991-09-30,1989-10-01,,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5817672,1994-10-03,1991-09-30,Norrbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5817672,1995-01-09,1994-10-03,Norrbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5817672,1998-10-05,1995-10-10,Norrbottens läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5820191,1976-10-04,1974-01-10,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1979-10-01,1976-10-04,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1982-10-04,1979-10-01,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1985-09-30,1982-10-04,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1988-10-03,1985-09-30,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1991-09-30,1988-10-03,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1994-10-03,1991-09-30,Malmöhus läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5820191,1998-10-05,1994-10-03,Malmöhus läns södra valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5826637,1970-01-01,1955-01-01,Västerbottens läns och Norrbottens läns valkrets,,förstakammarledamot
+Q5879846,1958-01-01,1945-01-01,Dalarnas läns valkrets,,andrakammarledamot
+Q5887636,1960-01-01,1951-01-01,Kronobergs läns och Hallands läns valkrets,,förstakammarledamot
+Q5887636,1970-01-01,1961-01-01,Kronobergs läns valkrets,,andrakammarledamot
+Q5887636,1974-01-10,1971-01-11,Kronobergs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5887636,1976-10-04,1974-01-10,Kronobergs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5887636,1979-10-01,1976-10-04,Kronobergs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5908653,1994-10-03,1991-09-30,Dalarnas läns valkrets,Ny demokrati,ledamot av Sveriges riksdag
+Q5917908,1964-01-01,1949-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q5923219,1956-01-01,1945-01-01,Skåne läns norra och östra valkrets,,andrakammarledamot
+Q5956968,1964-01-01,1961-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q5956968,1970-01-01,1966-01-01,Stockholms kommuns valkrets,,andrakammarledamot
+Q5956968,1974-01-10,1971-01-11,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1976-10-04,1974-01-10,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1979-10-01,1976-10-04,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1982-10-04,1979-10-01,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1985-09-30,1982-10-04,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1988-10-03,1985-09-30,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1991-09-30,1988-10-03,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5956968,1994-10-03,1991-09-30,Stockholms kommuns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5958560,1968-01-01,1949-01-01,Jämtlands läns valkrets,,andrakammarledamot
+Q5965908,1970-01-01,1941-01-01,Uppsala läns valkrets,,andrakammarledamot
+Q5965908,1974-01-10,1971-01-11,Uppsala läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q5967484,1948-01-01,1945-01-01,Älvsborgs läns norra valkrets,,andrakammarledamot
+Q5967484,1960-01-01,1953-01-01,Älvsborgs läns valkrets,,andrakammarledamot
+Q5969883,1994-10-03,1991-09-30,Göteborgs kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5969883,1998-10-05,1994-10-03,Göteborgs kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5969883,2002-09-30,1998-10-05,Göteborgs kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5969883,2002-11-14,2002-09-30,Göteborgs kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5969883,2003-02-06,2003-01-01,Göteborgs kommuns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q5983926,1991-09-30,1988-10-04,Jönköpings läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5983926,1994-10-03,1991-10-05,Jönköpings läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5983926,1998-10-05,1994-10-03,Jönköpings läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q5983926,2000-12-01,2000-09-05,Jönköpings läns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q6004883,1970-01-01,1953-01-01,Malmöhus läns valkrets,,andrakammarledamot
+Q6004883,1974-01-10,1971-01-11,Malmöhus läns valkrets,Liberalerna,ledamot av Sveriges riksdag
+Q6008439,1936-01-01,1933-01-01,Älvsborgs läns valkrets,,andrakammarledamot
+Q6008439,1957-01-01,1948-01-01,Älvsborgs läns valkrets,,förstakammarledamot
+Q6011486,1960-01-01,1933-01-01,Göteborgs kommuns valkrets,,andrakammarledamot
+Q6019228,1956-01-01,1949-01-01,Blekinge läns valkrets,,andrakammarledamot
+Q6019228,1968-01-01,1958-01-01,Blekinge läns valkrets,,andrakammarledamot
+Q6026379,1957-10-03,1922-01-01,Gävleborgs läns valkrets,,andrakammarledamot
+Q6042992,1958-01-01,1938-01-01,Malmöhus läns valkrets,,förstakammarledamot
+Q6046613,1960-01-01,1933-01-01,Hallands läns valkrets,,andrakammarledamot
+Q6090670,1985-09-30,1982-10-04,Värmlands läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q6090670,1988-10-03,1985-09-30,Värmlands läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q6090670,1991-09-30,1988-10-03,Värmlands läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q6090670,1992-11-15,1991-09-30,Värmlands läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q6090670,1994-10-03,1992-12-17,Värmlands läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q6090670,1996-06-09,1994-10-03,Värmlands läns valkrets,Vänsterpartiet,ledamot av Sveriges riksdag
+Q6139775,1966-01-01,1955-01-01,Västra Götalands läns västra valkrets,,andrakammarledamot
+Q6151901,1937-01-01,1937-01-01,Skaraborgs läns valkrets,,andrakammarledamot
+Q6151901,1964-01-01,1941-01-01,Skaraborgs läns valkrets,,andrakammarledamot
+Q6157673,1960-01-01,1940-01-01,Skåne läns norra och östra valkrets,,andrakammarledamot
+Q6168430,1957-01-01,1949-01-01,Göteborgs kommuns valkrets,,andrakammarledamot
+Q6168430,1964-01-01,1958-01-01,Göteborgs kommuns valkrets,,förstakammarledamot
+Q6172705,1962-01-01,1937-01-01,Göteborgs kommuns valkrets,,andrakammarledamot
+Q6173314,1964-01-01,1934-01-01,Jönköpings läns valkrets,,andrakammarledamot
+Q6175674,1974-01-10,1971-01-11,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1976-10-04,1974-01-10,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1979-10-01,1976-10-04,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1982-10-04,1979-10-01,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1985-09-30,1982-10-04,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1988-10-03,1985-09-30,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1991-09-30,1988-10-03,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6175674,1994-10-03,1991-09-30,Skaraborgs läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6178806,1958-01-01,1949-01-01,Älvsborgs läns norra valkrets,,andrakammarledamot
+Q6180686,1921-01-01,1918-01-01,Malmöhus läns södra valkrets,,andrakammarledamot
+Q6180686,1964-01-01,1922-01-01,Malmöhus läns valkrets,,andrakammarledamot
+Q6186253,1994-10-03,1991-09-30,Hallands läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q6190697,1994-10-03,1991-09-30,Östergötlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6190697,1998-05-31,1994-10-03,Östergötlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q6196710,1960-01-01,1936-01-01,Skaraborgs läns valkrets,,andrakammarledamot
+Q6199190,1960-01-01,1953-01-01,Kalmar läns valkrets,,andrakammarledamot
+Q6199259,1964-01-01,1941-01-01,Västra Götalands läns västra valkrets,,andrakammarledamot
+Q6224947,1970-01-01,1937-01-01,Västmanlands läns valkrets,,andrakammarledamot
+Q6240050,1958-01-01,1949-01-01,Värmlands läns valkrets,,andrakammarledamot
+Q6241402,1994-10-03,1991-09-30,Gävleborgs läns valkrets,Kristdemokraterna,ledamot av Sveriges riksdag
+Q6254949,1960-01-01,1949-01-01,Stockholms läns valkrets,,andrakammarledamot
+Q719015,1987-06-01,1987-04-27,,Moderaterna,ledamot av Sveriges riksdag
+Q719015,1990-04-19,1990-03-19,,Moderaterna,ledamot av Sveriges riksdag
+Q719015,1994-10-03,1991-09-30,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q719015,1998-10-05,1994-10-03,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q719015,2002-09-30,1998-10-05,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q719015,2006-10-02,2002-09-30,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q719015,2006-10-05,2006-10-02,Stockholms kommuns valkrets,Moderaterna,ledamot av Sveriges riksdag
+Q887398,1985-09-30,1985-09-30,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q887398,1988-10-03,1988-10-03,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q887398,1991-09-30,1988-10-04,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q887398,1994-10-03,1991-09-30,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag
+Q887398,1996-06-29,1994-10-03,Västernorrlands läns valkrets,Socialdemokraterna,ledamot av Sveriges riksdag

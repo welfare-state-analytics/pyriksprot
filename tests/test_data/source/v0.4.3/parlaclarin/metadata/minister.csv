@@ -1,0 +1,124 @@
+person_id,end,start,government,role
+Q1375199,1994-10-07,1991-10-04,Regeringen Carl Bildt,energiminister
+Q1375199,1994-10-07,1991-10-04,Regeringen Carl Bildt,näringsminister
+Q1375199,,,Regeringen Carl Bildt,energiminister
+Q1375199,,,Regeringen Carl Bildt,näringsminister
+Q179493,1945-07-31,1944-09-30,Regeringen Hansson III,handelsminister
+Q179493,,1944-09-30,Regeringen Hansson III,handelsminister
+Q1830351,1994-10-07,1991-10-04,Regeringen Carl Bildt,utbildningsminister
+Q1830351,,,Regeringen Carl Bildt,utbildningsminister
+Q2021126,1978-10-18,1976-10-08,Regeringen Fälldin I,energiminister
+Q2021126,1981-05-22,1981-05-05,Regeringen Fälldin II,kommunikationsminister
+Q2021126,1982-10-08,1979-10-12,Regeringen Fälldin II,konsultativt statsråd
+Q2021126,1982-10-08,1979-10-12,Regeringen Fälldin II,löneminister
+Q2021126,1982-10-08,1979-10-12,Regeringen Fälldin III,konsultativt statsråd
+Q2021126,1982-10-08,1979-10-12,Regeringen Fälldin III,löneminister
+Q2021126,1994-06-16,1991-10-04,Regeringen Carl Bildt,miljöminister
+Q2021126,1994-06-16,1991-10-04,Regeringen Carl Bildt,minister för nordiskt samarbete
+Q2021126,1994-06-16,,Regeringen Carl Bildt,miljöminister
+Q2021126,1994-06-16,,Regeringen Carl Bildt,minister för nordiskt samarbete
+Q2021126,,1981-05-05,Regeringen Fälldin II,infrastrukturminister
+Q2021126,,,Regeringen Fälldin I,energiminister
+Q2021126,,,Regeringen Fälldin II,löneminister
+Q2021126,,,Regeringen Fälldin III,löneminister
+Q273408,1994-10-07,1991-10-04,Regeringen Carl Bildt,finansminister
+Q273408,,,Regeringen Carl Bildt,finansminister
+Q297850,1994-10-07,1991-10-04,Regeringen Carl Bildt,skolminister
+Q297850,2014-10-03,2006-10-06,Regeringen Reinfeldt,justitieminister
+Q297850,,,Regeringen Carl Bildt,skolminister
+Q297850,,,Regeringen Reinfeldt,justitieminister
+Q4570928,1926-06-07,1924-10-18,Regeringen Branting III,socialminister
+Q4570928,1926-06-07,1924-10-18,Regeringen Sandler,socialminister
+Q4570928,1936-06-19,1932-09-24,Regeringen Hansson I,socialminister
+Q4570928,1938-12-16,1936-09-28,Regeringen Hansson II,socialminister
+Q4570928,1938-12-16,,Regeringen Hansson II,socialminister
+Q4570928,1939-12-13,1938-12-16,Regeringen Hansson II,handelsminister
+Q4570928,1951-10-01,1939-12-13,Regeringen Erlander I,socialminister
+Q4570928,1951-10-01,1939-12-13,Regeringen Hansson III,socialminister
+Q4570928,1951-10-01,1939-12-13,Regeringen Hansson IV,socialminister
+Q4570928,,1938-12-16,Regeringen Hansson II,handelsminister
+Q4570928,,,Regeringen Branting III,socialminister
+Q4570928,,,Regeringen Erlander I,socialminister
+Q4570928,,,Regeringen Hansson III,socialminister
+Q4570928,,,Regeringen Hansson IV,socialminister
+Q4916267,1982-10-08,1978-10-18,Regeringen Fälldin I,bostadsminister
+Q4916267,1982-10-08,1978-10-18,Regeringen Ullsten,bostadsminister
+Q4916267,1991-11-30,,Regeringen Carl Bildt,bostadsminister
+Q4916267,1991-12-31,1991-10-04,Regeringen Carl Bildt,bostadsminister
+Q4916267,1993-01-01,1991-12-01,Regeringen Carl Bildt,jämställdhetsminister
+Q4916267,1994-10-07,1991-10-04,Regeringen Carl Bildt,invandrarminister
+Q4916267,1994-10-07,1991-10-04,Regeringen Carl Bildt,kulturminister
+Q4916267,,1991-12-01,Regeringen Carl Bildt,invandrarminister
+Q4916267,,1991-12-01,Regeringen Carl Bildt,kulturminister
+Q4916267,,,Regeringen Fälldin I,Biträdande bostadsminister
+Q4916267,,,Regeringen Fälldin I,konsultativt statsråd
+Q4916267,,,Regeringen Fälldin II,bostadsminister
+Q4916267,,,Regeringen Fälldin III,bostadsminister
+Q4916267,,,Regeringen Ullsten,bostadsminister
+Q4931118,1994-10-07,1991-10-04,Regeringen Carl Bildt,sjukvårdsminister
+Q4931118,1994-10-07,1991-10-04,Regeringen Carl Bildt,socialförsäkringsminister
+Q4931118,,,Regeringen Carl Bildt,sjukvårdsminister
+Q4931118,,,Regeringen Carl Bildt,socialförsäkringsminister
+Q4944305,1994-10-07,1991-10-04,Regeringen Carl Bildt,konsumentminister
+Q4944305,1994-10-07,1991-10-04,Regeringen Carl Bildt,samfundsminister
+Q4944305,1994-10-07,1991-10-04,Regeringen Carl Bildt,ungdomsminister
+Q4944305,1994-10-07,1991-10-21,Regeringen Carl Bildt,civilminister
+Q4944305,,,Regeringen Carl Bildt,civilminister
+Q4944305,,,Regeringen Carl Bildt,samfundsminister
+Q4944305,,,Regeringen Carl Bildt,ungdomsminister
+Q5005171,1994-10-07,1991-10-04,Regeringen Carl Bildt,arbetsmarknadsminister
+Q5005171,1994-10-07,1994-06-16,Regeringen Carl Bildt,minister för nordiskt samarbete
+Q5005171,,,Regeringen Carl Bildt,arbetsmarknadsminister
+Q5005171,,,Regeringen Carl Bildt,minister för nordiskt samarbete
+Q514209,1957-10-31,1951-10-01,Regeringen Erlander II,inrikesminister
+Q5715273,1948-10-28,1945-07-31,Regeringen Erlander I,konsultativt statsråd
+Q5715273,1948-10-28,1945-07-31,Regeringen Hansson IV,konsultativt statsråd
+Q5715273,1948-10-28,,Regeringen Erlander I,konsultativt statsråd
+Q5715273,1950-06-30,1950-01-01,Regeringen Erlander I,folkhushållningsminister
+Q5715273,1955-09-12,1948-10-28,Regeringen Erlander I,handelsminister
+Q5715273,1955-09-12,1948-10-28,Regeringen Erlander II,handelsminister
+Q5715273,1957-03-22,1955-09-12,Regeringen Erlander II,socialminister
+Q5715273,,1948-09-24,Regeringen Erlander I,handelsminister
+Q5715273,,1950-01-01,Regeringen Erlander I,folkhushållningsminister
+Q5715273,,,Regeringen Hansson IV,konsultativt statsråd
+Q5777699,1973-12-31,1973-11-03,Regeringen Erlander III,civilminister
+Q5777699,1976-10-08,1973-11-03,Regeringen Palme I,samfundsminister
+Q5777699,1976-10-08,1974-01-01,Regeringen Palme I,kommunminister
+Q5777699,1988-10-04,1982-10-08,Regeringen Carlsson I,bostadsminister
+Q5777699,1988-10-04,1982-10-08,Regeringen Palme II,bostadsminister
+Q5777699,1988-10-04,,Regeringen Carlsson I,bostadsminister
+Q5777699,,1973-11-03,Regeringen Palme I,civilminister
+Q5777699,,1973-11-03,Regeringen Palme I,samfundsminister
+Q5777699,,1974-01-01,Regeringen Palme I,kommunminister
+Q5777699,,,Regeringen Palme II,bostadsminister
+Q5789491,1957-10-31,1957-07-29,Regeringen Erlander II,jordbruksminister
+Q5801470,1957-04-22,1957-03-22,Regeringen Erlander II,kommunikationsminister
+Q5887636,1969-01-25,1957-10-31,Regeringen Erlander III,inrikesminister
+Q5887636,1976-10-08,1971-06-30,Regeringen Palme I,näringsminister
+Q5887636,,1971-06-30,Regeringen Palme I,näringsminister
+Q6042992,1957-10-31,1951-10-01,Regeringen Erlander II,ecklesiastikminister
+Q6157673,1957-02-01,1951-10-01,Regeringen Erlander II,jordbruksminister
+Q6180686,1936-06-19,1932-09-24,Regeringen Hansson I,jordbruksminister
+Q6180686,1938-12-16,1936-09-28,Regeringen Hansson II,handelsminister
+Q6180686,1938-12-16,,Regeringen Hansson II,handelsminister
+Q6180686,1945-07-31,1938-12-16,Regeringen Hansson II,försvarsminister
+Q6180686,1945-07-31,1938-12-16,Regeringen Hansson III,försvarsminister
+Q6180686,1948-10-29,1945-07-31,Regeringen Erlander I,jordbruksminister
+Q6180686,1948-10-29,1945-07-31,Regeringen Hansson IV,jordbruksminister
+Q6180686,1948-10-29,,Regeringen Erlander I,landsbygdsminister
+Q6180686,1949-10-21,1948-10-28,Regeringen Erlander I,samordningsminister
+Q6180686,1955-09-12,1949-10-21,Regeringen Erlander I,finansminister
+Q6180686,1955-09-12,1949-10-21,Regeringen Erlander II,finansminister
+Q6180686,,1938-12-16,Regeringen Hansson II,försvarsminister
+Q6180686,,1949-10-21,Regeringen Erlander I,finansminister
+Q6180686,,,Regeringen Hansson III,försvarsminister
+Q6180686,,,Regeringen Hansson IV,landsbygdsminister
+Q719015,2007-09-05,,Regeringen Reinfeldt,försvarsminister
+Q887398,1982-12-31,1982-10-08,Regeringen Palme II,kommunminister
+Q887398,1982-12-31,,Regeringen Palme II,kommunminister
+Q887398,1988-10-04,1982-10-08,Regeringen Carlsson I,samfundsminister
+Q887398,1988-10-04,1982-10-08,Regeringen Palme II,samfundsminister
+Q887398,1988-10-04,,Regeringen Carlsson I,civilminister
+Q887398,1988-10-04,,Regeringen Carlsson I,samfundsminister
+Q887398,,1983-01-01,Regeringen Palme II,civilminister
+Q887398,,,Regeringen Palme II,samfundsminister
