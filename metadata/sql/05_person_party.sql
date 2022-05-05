@@ -40,23 +40,23 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
         cast(strftime('%Y', mops.[end]) as integer) as end_year
     from _member_of_parliament mops
     join persons_of_interest using (person_id)
-    left join _party_abbreviation pa using (party)
-    left join party on party.party_abbrev = pa.abbreviation
+    join _party_abbreviation pa using (party)
+    join party on party.party_abbrev = pa.abbreviation
     where mops.party is not null;
 
 insert into person_party (person_id, source_id, party_id, start_year, end_year)
     select
         _party_affiliation.person_id, 2 as source_id,
         coalesce(party.party_id, 1), -- 1 is code for "Other", 84 records
-        null as start_year,
-        null as end_year
+        _party_affiliation.[start] as start_year,
+        _party_affiliation.[end] as end_year
     from _party_affiliation
     join persons_of_interest using (person_id)
     left join _party_abbreviation pa using (party)
     left join party on party.party_abbrev = pa.abbreviation
     ;
 
-/* Update party_id for persons hjaving only one party */
+/* Update party_id for persons having only one party */
 with persons_with_single_party as (
     select person_id, max(party_id) as party_id
     from person_party
