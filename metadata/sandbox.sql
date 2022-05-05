@@ -28,19 +28,19 @@ select count(*)
 from unknown_utterance_gender
 limit 10;
 with dupes as (
-    select protocol_id, hash
+    select protocol_id, uuid
     from unknowns
-    group by protocol_id, hash
+    group by protocol_id, uuid
     having COUNT(*) > 1
 ) select *
 from unknowns
-join dupes using (protocol_id, hash);
+join dupes using (protocol_id, uuid);
 select *
 from unknowns
-order by protocol_id, hash
+order by protocol_id, uuid
 limit 10;
 with unknown_speaker_note_party (speaker_hash, party_id) as (
-    select [hash], party_id
+    select [uuid], party_id
     from unknowns
     join _party_abbreviation pa using (party)
     join party on party.party_abbrev = pa.abbreviation
@@ -138,3 +138,9 @@ group by  person_id, year, party_id;
     from utterances
     join protocols using (document_id)
     join persons_of_interest using (person_id)
+;
+
+select *
+from speech_index
+limit 10;
+

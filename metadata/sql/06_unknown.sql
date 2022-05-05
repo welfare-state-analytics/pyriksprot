@@ -5,7 +5,7 @@
 --     party_id int not null
 -- );
 -- insert into unknown_speaker_note_party (speaker_hash, party_id)
---     select [hash], party_id
+--     select [uuid], party_id
 --     from unknowns
 --     join _party_abbreviation pa using (party)
 --     join party on party.party_abbrev = pa.abbreviation;
@@ -16,16 +16,16 @@ create table unknown_utterance_party (
     u_id varchar, -- primary key,
     party_id int not null
 );
-/* NOTE: unknowns CSV has (from 0.4.1) dupes `hash` records
+/* NOTE: unknowns CSV has (from 0.4.1) dupes `uuid` records
     hence the grouping below.
     None of the dupes has ambigous party_id.
 */
 with unknown_speaker_note_party (speaker_hash, party_id) as (
-    select [hash], max(party_id) as party_id
+    select [uuid], max(party_id) as party_id
     from unknowns
     join _party_abbreviation pa using (party)
     join party on party.party_abbrev = pa.abbreviation
-    group by [hash]
+    group by [uuid]
 )
     insert into unknown_utterance_party(u_id, party_id)
         select u_id, party_id
@@ -37,10 +37,10 @@ create table unknown_utterance_gender (
     gender_id int not null
 );
 with unknown_speaker_note_gender (speaker_hash, gender_id) as (
-    select [hash], max(gender_id) as gender_id
+    select [uuid], max(gender_id) as gender_id
     from unknowns
     join gender using (gender)
-    group by [hash]
+    group by [uuid]
 )
     insert into unknown_utterance_gender(u_id, gender_id)
         select u_id, gender_id
