@@ -112,6 +112,7 @@ RIKSPROT_METADATA_TABLES: dict = {
         'wiki_id': 'text',
         'riksdagen_guid': 'text',
         'riksdagen_id': 'text',
+        ':drop_duplicates:': 'person_id'
     },
     'speaker': {
         'person_id': 'text references person (person_id) not null',
@@ -291,6 +292,9 @@ def create_database(
             table: pd.DataFrame = pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
         else:
             table: pd.DataFrame = smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
+
+        if ':drop_duplicates:' in specification:
+            table = table.drop_duplicates(subset='person_id', keep='first')
 
         for c in table.columns:
             if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
