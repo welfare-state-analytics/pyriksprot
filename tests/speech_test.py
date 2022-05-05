@@ -93,9 +93,9 @@ def test_merge_speech_by_strategy(
 def test_speech_annotation():
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id='i-1', who="apa", speaker_hash="a1", annotation='header\nA\nB'),
-        interface.Utterance(u_id='i-2', who="apa", speaker_hash="a1", annotation='header\nC\nD'),
-        interface.Utterance(u_id='i-3', who="apa", speaker_hash="a1", annotation='header\nE\nF'),
+        interface.Utterance(u_id='i-1', who="apa", speaker_note_id="a1", annotation='header\nA\nB'),
+        interface.Utterance(u_id='i-2', who="apa", speaker_note_id="a1", annotation='header\nC\nD'),
+        interface.Utterance(u_id='i-3', who="apa", speaker_note_id="a1", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
         protocol_name="prot-01",
@@ -111,9 +111,9 @@ def test_speech_annotation():
     assert speech.tagged_text == 'header\nA\nB\nC\nD\nE\nF'
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id='i-1', who="apa", speaker_hash="a1", annotation='header\nA\nB'),
-        interface.Utterance(u_id='i-2', who="apa", speaker_hash="a1", annotation='header'),
-        interface.Utterance(u_id='i-3', who="apa", speaker_hash="a1", annotation='header\nE\nF'),
+        interface.Utterance(u_id='i-1', who="apa", speaker_note_id="a1", annotation='header\nA\nB'),
+        interface.Utterance(u_id='i-2', who="apa", speaker_note_id="a1", annotation='header'),
+        interface.Utterance(u_id='i-3', who="apa", speaker_note_id="a1", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
         protocol_name="prot-01",
@@ -129,9 +129,9 @@ def test_speech_annotation():
     assert speech.tagged_text == 'header\nA\nB\nE\nF'
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id='i-1', who="apa", speaker_hash="a1", annotation='header\nA\nB'),
-        interface.Utterance(u_id='i-2', who="apa", speaker_hash="a1", annotation='header\n'),
-        interface.Utterance(u_id='i-3', who="apa", speaker_hash="a1", annotation='header\nE\nF'),
+        interface.Utterance(u_id='i-1', who="apa", speaker_note_id="a1", annotation='header\nA\nB'),
+        interface.Utterance(u_id='i-2', who="apa", speaker_note_id="a1", annotation='header\n'),
+        interface.Utterance(u_id='i-3', who="apa", speaker_note_id="a1", annotation='header\nE\nF'),
     ]
     speech = interface.Speech(
         protocol_name="prot-01",
@@ -161,8 +161,8 @@ def test_speech_annotation():
         ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.chain),
         ('prot-199192--127.xml', 51, 51, ts.MergeStrategyType.who),
         ('prot-199192--127.xml', 208, 208, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.who_speaker_hash_sequence),
-        # ('prot-199192--127.xml', 208, 208, ts.MergeSpeechStrategyType.speaker_hash_sequence),
+        ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        # ('prot-199192--127.xml', 208, 208, ts.MergeSpeechStrategyType.speaker_note_id_sequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(
@@ -218,7 +218,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 u_id='i-1',
                 n='c01',
                 who='A',
-                speaker_hash='a1',
+                speaker_note_id='a1',
                 prev_id=None,
                 next_id='i-2',
                 paragraphs=['Hej! Detta är en mening.'],
@@ -283,12 +283,12 @@ def test_load_protocols_from_folder():
     'protocol_name,merge_strategy,expected_utterance_count,expected_speech_count',
     [
         ('prot-1955--ak--22', 'who_sequence', 414, 146),
-        ('prot-1955--ak--22', 'who_speaker_hash_sequence', 414, 151),
-        ('prot-1955--ak--22', 'speaker_hash_sequence', 414, 151),
+        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 414, 151),
+        ('prot-1955--ak--22', 'speaker_note_id_sequence', 414, 151),
         ('prot-1955--ak--22', 'chain', 414, 151),
         ('prot-199192--127', 'who_sequence', 274, 208),
-        ('prot-199192--127', 'who_speaker_hash_sequence', 274, 222),
-        ('prot-199192--127', 'speaker_hash_sequence', 274, 222),
+        ('prot-199192--127', 'who_speaker_note_id_sequence', 274, 222),
+        ('prot-199192--127', 'speaker_note_id_sequence', 274, 222),
         ('prot-199192--127', 'chain', 274, 222),
     ],
 )
@@ -322,10 +322,10 @@ def test_protocol_to_speeches(protocol_name: str):
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
     utterances: pd.DataFrame = pd.DataFrame(
-        data=[(x.u_id, x.who, x.next_id, x.prev_id, x.speaker_hash) for x in protocol.utterances],
-        columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_hash'],
+        data=[(x.u_id, x.who, x.next_id, x.prev_id, x.speaker_note_id) for x in protocol.utterances],
+        columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_note_id'],
     )
-    for merge_strategy in ['who_sequence', 'who_speaker_hash_sequence', 'speaker_hash_sequence', 'chain']:
+    for merge_strategy in ['who_sequence', 'who_speaker_note_id_sequence', 'speaker_note_id_sequence', 'chain']:
 
         merger: ts.IMergeStrategy = ts.MergerFactory.get(merge_strategy)
 

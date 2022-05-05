@@ -4,7 +4,7 @@ import sys
 import click
 
 from pyriksprot import metadata as md
-from pyriksprot.corpus.tagged.persist import update_speaker_hash
+from pyriksprot.corpus.tagged.persist import update_speaker_note_id
 
 jj = os.path.join
 relpath = os.path.relpath
@@ -17,8 +17,8 @@ def temporary_update(tag: str, target_tag: str):
     database_filename: str = f"/data/riksdagen_corpus_data/metadata/riksprot_metadata.{tag}.db"
 
     service = md.SpeakerInfoService(database_filename)
-    speaker_hash_lookup = service.utterance_index.utterances['speaker_hash'].to_dict()
-    update_speaker_hash(speaker_hash_lookup, source_folder, target_folder)
+    speaker_note_id_lookup = service.utterance_index.utterances['speaker_note_id'].to_dict()
+    update_speaker_note_id(speaker_note_id_lookup, source_folder, target_folder)
 
 
 @click.command()
@@ -28,8 +28,8 @@ def temporary_update(tag: str, target_tag: str):
 def main(source_folder: str = None, target_folder: str = None, database_filename: str = None):
     try:
         service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename)
-        speaker_hash_lookup: dict[str, str] = service.utterance_index.utterances['speaker_hash'].to_dict()
-        update_speaker_hash(speaker_hash_lookup, source_folder, target_folder)
+        speaker_note_id_lookup: dict[str, str] = service.utterance_index.utterances['speaker_note_id'].to_dict()
+        update_speaker_note_id(speaker_note_id_lookup, source_folder, target_folder)
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)

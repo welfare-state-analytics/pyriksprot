@@ -18,8 +18,8 @@ class MergeStrategyType(str, Enum):
     who = 'who'
     who_sequence = 'who_sequence'
     chain = 'chain'
-    who_speaker_hash_sequence = 'who_speaker_hash_sequence'
-    speaker_hash_sequence = 'speaker_hash_sequence'
+    who_speaker_note_id_sequence = 'who_speaker_note_id_sequence'
+    speaker_note_id_sequence = 'speaker_note_id_sequence'
     undefined = 'undefined'
 
 
@@ -78,20 +78,20 @@ class MergeByWhoSequence(IMergeStrategy):
         return groups
 
 
-class MergeBySpeakerHashSequence(IMergeStrategy):
+class MergeBySpeakerNoteIdSequence(IMergeStrategy):
     """Merge sequences with same `who` into a speech """
 
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
-        groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_hash)]
+        groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_note_id)]
         return groups
 
 
-class MergeByWhoSpeakerHashSequence(IMergeStrategy):
+class MergeByWhoSpeakerNoteIdSequence(IMergeStrategy):
     """Merge sequences with same `who` into a speech """
 
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         groups: list[list[Utterance]] = [
-            list(g) for _, g in groupby(utterances or [], key=lambda x: f"{x.who}_{x.speaker_hash}")
+            list(g) for _, g in groupby(utterances or [], key=lambda x: f"{x.who}_{x.speaker_note_id}")
         ]
         return groups
 
@@ -121,7 +121,7 @@ class MergeByChain(IMergeStrategy):
 
             is_part_of_chain: bool = bool(u.prev_id) or bool(u.next_id)
             is_unknown_continuation: bool = (
-                bool(speech) and u.who == "unknown" == speech[-1].who and u.speaker_hash == speech[-1].speaker_hash
+                bool(speech) and u.who == "unknown" == speech[-1].who and u.speaker_note_id == speech[-1].speaker_note_id
             )
 
             start_of_speech: bool = (
@@ -168,8 +168,8 @@ class MergerFactory:
     strategies: dict[MergeStrategyType, IMergeStrategy] = {
         'who': MergeByWho(),
         'who_sequence': MergeByWhoSequence(),
-        'who_speaker_hash_sequence': MergeByWhoSpeakerHashSequence(),
-        'speaker_hash_sequence': MergeBySpeakerHashSequence(),
+        'who_speaker_note_id_sequence': MergeByWhoSpeakerNoteIdSequence(),
+        'speaker_note_id_sequence': MergeBySpeakerNoteIdSequence(),
         'chain': MergeByChain(),
         'undefined': UndefinedMerge(),
     }

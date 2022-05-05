@@ -28,7 +28,7 @@ class IParser(abc.ABC):
     class IUtterance:
         u_id: str
         who: str
-        speaker_hash: str
+        speaker_note_id: str
 
     @dataclass
     class IProtocol:
@@ -101,6 +101,8 @@ RIKSPROT_METADATA_TABLES: dict = {
     'party_affiliation': {
         'person_id': 'text references person (person_id) not null',
         'party': 'text',
+        'start': 'int',
+        'end': 'int',
     },
     'person': {
         'person_id': 'text primary key',
@@ -123,7 +125,7 @@ RIKSPROT_METADATA_TABLES: dict = {
     },
     'unknowns': {
         'protocol_id': 'text',  # primary key',
-        'hash': 'text',
+        'uuid': 'text',
         'gender': 'text',
         'party': 'text',
         'other': 'text',
@@ -145,7 +147,7 @@ EXTRA_TABLES = {
         'filename': 'text',
         'u_id': 'text',
         'n_utterances': 'int',
-        'speaker_hash': 'text',
+        'speaker_note_id': 'text',
         'speach_index': 'int',
     },
 }
@@ -321,17 +323,17 @@ def generate_corpus_indexes(
         protocol: IParser.IProtocol = parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
         protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
         for u in protocol.utterances:
-            utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_hash]))
+            utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_note_id]))
         speaker_notes.update(protocol.get_speaker_notes())
 
     data: tuple[pd.DataFrame, pd.DataFrame] = (
         pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date', 'year']).set_index(
             "document_id"
         ),
-        pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_hash']).set_index(
+        pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_note_id']).set_index(
             "u_id"
         ),
-        pd.DataFrame(speaker_notes.items(), columns=['speaker_hash', 'speaker_note']).set_index('speaker_hash'),
+        pd.DataFrame(speaker_notes.items(), columns=['speaker_note_id', 'speaker_note']).set_index('speaker_note_id'),
     )
 
     if target_folder:

@@ -11,6 +11,7 @@ from pyriksprot.foss import untangle
 from pyriksprot.utility import dedent as dedent_text
 from pyriksprot.utility import deprecated
 
+XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 
 class XmlProtocol(abc.ABC):
     def __init__(self, data: str, segment_skip_size: int = 0, delimiter: str = '\n'):
@@ -91,22 +92,22 @@ class XmlUntangleProtocol(XmlProtocol):
         if parent is None:
             return utterances
 
-        speaker_hash: str = ''
+        speaker_note_id: str = ''
 
         for child in parent.children:
             if child.name == 'pb':
                 page_number = child['n']
             elif child.name == "note":
                 if child['type'] == "speaker":
-                    speaker_hash = child["n"]
-                    if speaker_hash:
-                        self.speaker_notes[speaker_hash] = " ".join(child.cdata.split())
+                    speaker_note_id = child[XML_ID]
+                    if speaker_note_id:
+                        self.speaker_notes[speaker_note_id] = " ".join(child.cdata.split())
             elif child.name == 'u':
                 utterances.append(
-                    UtteranceMapper.create(element=child, page_number=page_number, speaker_hash=speaker_hash)
+                    UtteranceMapper.create(element=child, page_number=page_number, speaker_note_id=speaker_note_id)
                 )
             # else:
-            #     speaker_hash = None
+            #     speaker_note_id = None
         return utterances
 
     def get_date(self) -> str:
@@ -142,12 +143,13 @@ class UtteranceMapper:
         *,
         element: untangle.Element,
         page_number: str,
-        speaker_hash: str,
+        speaker_note_id: str,
         dedent: bool = True,
     ) -> interface.Utterance:
         utterance: interface.Utterance = interface.Utterance(
+            # FIXME: Should be XML_ID???
             u_id=element.get_attribute('xml:id'),
-            speaker_hash=speaker_hash,
+            speaker_note_id=speaker_note_id,
             who=element.get_attribute('who') or "undefined",
             page_number=page_number,
             prev_id=element.get_attribute('prev'),
@@ -231,7 +233,7 @@ class XmlIterParseProtocol(XmlProtocol):
             context = iter(context)
             current_page: int = 0
             current_utterance: dict = None
-            speaker_hash: str = ''
+            speaker_note_id: str = ''
             is_preface: bool = False
 
             for event, elem in context:
@@ -248,10 +250,10 @@ class XmlIterParseProtocol(XmlProtocol):
                         self.doc_date = elem.attrib.get('when')
 
                     elif tag == "note" and elem.attrib.get('type') == "speaker":
-                        speaker_hash = elem.attrib['n']
-                        if speaker_hash:
+                        speaker_note_id = elem.attrib.get(XML_ID)
+                        if speaker_note_id:
                             if value:
-                                self.speaker_notes[speaker_hash] = " ".join(value.split())
+                                self.speaker_notes[speaker_note_id] = " ".join(value.split())
                             else:
                                 pass
 
@@ -262,15 +264,15 @@ class XmlIterParseProtocol(XmlProtocol):
                         is_preface = False
                         current_utterance: interface.Utterance = interface.Utterance(
                             page_number=current_page,
-                            speaker_hash=speaker_hash,
-                            u_id=elem.attrib.get('{http://www.w3.org/XML/1998/namespace}id'),
+                            speaker_note_id=speaker_note_id,
+                            u_id=elem.attrib.get(XML_ID),
                             who=elem.attrib.get('who'),
                             prev_id=elem.attrib.get('prev'),
                             next_id=elem.attrib.get('next'),
                             n=elem.attrib.get('n'),
                             paragraphs=[],
                         )
-                        # speaker_hash = None
+                        # speaker_note_id = None
                     elif tag == "seg" and value is not None:
                         value = (dedent_text(value) if self.dedent else value).strip()
                         if value:
@@ -280,7 +282,7 @@ class XmlIterParseProtocol(XmlProtocol):
                         is_preface = True
 
                     # else:
-                    #     speaker_hash = None
+                    #     speaker_note_id = None
 
                 elif event == 'end':
 
@@ -297,6 +299,6 @@ class XmlIterParseProtocol(XmlProtocol):
                         is_preface = False
 
                     # elif tag == "note" and elem.attrib.get('type') == "speaker":
-                    #     self.speaker_notes[speaker_hash] = " ".join(value.split())
+                    #     self.speaker_notes[speaker_note_id] = " ".join(value.split())
 
                 elem.clear()

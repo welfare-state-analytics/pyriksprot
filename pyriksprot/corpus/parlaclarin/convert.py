@@ -78,7 +78,7 @@ def convert_protocol(
     input_filename: str = None,
     output_filename: str = None,
     template_name: str = None,
-    merge_strategy: to_speech.MergeStrategyType = to_speech.MergeStrategyType.who_speaker_hash_sequence,
+    merge_strategy: to_speech.MergeStrategyType = to_speech.MergeStrategyType.who_speaker_note_id_sequence,
     **dehyphen_cfg,
 ):
     """Convert protocol in `input_filename' using template `template_name`. Store result in `output_filename`.

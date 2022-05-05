@@ -141,9 +141,9 @@ def validate_checksum(filename: str, checksum: str) -> bool:
     return checksum == metadata.get('checksum', 'oo')
 
 
-def update_speaker_hash(speaker_hash_lookup: dict[str, str], source_folder: str, target_folder: str):
-    """Updates `speaker_hash` in an existing PoS-tagged corpus
-    speaker_hash_lookup = SpeakerInfoService(database_filename).utterance_index.utterances['speaker_hash'].to_dict()
+def update_speaker_note_id(speaker_note_id_lookup: dict[str, str], source_folder: str, target_folder: str):
+    """Updates speaker's note's xml:id in an existing PoS-tagged corpus
+    speaker_note_id_lookup = SpeakerInfoService(database_filename).utterance_index.utterances['speaker_note_id'].to_dict()
     """
 
     os.makedirs(target_folder, exist_ok=True)
@@ -161,9 +161,9 @@ def update_speaker_hash(speaker_hash_lookup: dict[str, str], source_folder: str,
             continue
         protocol: list[dict] = json.loads(protocol_str)
         for u in protocol:
-            speaker_hash: str = speaker_hash_lookup.get(u['u_id'])
-            if speaker_hash:
-                u['speaker_hash'] = speaker_hash
+            speaker_note_id: str = speaker_note_id_lookup.get(u['u_id'])
+            if speaker_note_id:
+                u['speaker_note_id'] = speaker_note_id
         utterances_csv_str: str = json.dumps(protocol)
         with zipfile.ZipFile(target_filename, "w", compression=zipfile.ZIP_DEFLATED) as fp:
             fp.writestr(json_name, utterances_csv_str or "")

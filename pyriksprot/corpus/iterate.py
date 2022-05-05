@@ -31,7 +31,7 @@ class ProtocolSegment(IDispachItem):
     u_id: str
     n_utterances: int = 0
     speaker_info: SpeakerInfo = None
-    speaker_hash: str = None
+    speaker_note_id: str = None
     speech_index: int = None
 
     def __len__(self) -> int:
@@ -54,7 +54,7 @@ class ProtocolSegment(IDispachItem):
             'filename': self.filename,
             'n_tokens': self.n_tokens,
             'n_utterances': self.n_utterances,
-            'speaker_hash': self.speaker_hash,
+            'speaker_note_id': self.speaker_note_id,
             'speech_index': self.speech_index,
             'page_number': self.page_number,
             **({} if not self.speaker_info else self.speaker_info.to_dict()),
@@ -99,7 +99,7 @@ def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -
             n_tokens=0,
             n_utterances=len(protocol.utterances),
             speaker_info=None,
-            speaker_hash=None,
+            speaker_note_id=None,
         )
     ]
 
@@ -126,7 +126,7 @@ def to_speech_segments(
             page_number=s.page_number,
             n_tokens=0 if not s.has_tagged_text else s.tagged_text.count("\n"),
             n_utterances=len(s),
-            speaker_hash=s.speaker_hash,
+            speaker_note_id=s.speaker_note_id,
             speech_index=s.speech_index,
         )
         for s in mu.to_speeches(protocol=protocol, merge_strategy=merge_strategy, skip_size=segment_skip_size)

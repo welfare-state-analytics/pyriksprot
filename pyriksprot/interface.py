@@ -17,7 +17,7 @@ from .utility import flatten, merge_tagged_csv, strip_extensions
 
 # pylint: disable=too-many-arguments, no-member
 
-EMPTY_SPEAKER_HASH: str = "unknown"
+EMPTY_SPEAKER_NOTE_ID: str = "unknown"
 
 
 class ParlaClarinError(ValueError):
@@ -103,7 +103,7 @@ class Utterance:
         self,
         *,
         u_id: str,
-        speaker_hash: str,
+        speaker_note_id: str,
         who: str,
         n: str = "",
         prev_id: str = None,
@@ -114,11 +114,11 @@ class Utterance:
         **_,
     ):
 
-        if not speaker_hash:
-            speaker_hash = EMPTY_SPEAKER_HASH
-            # FIXME #15 Exists utterances in data not preceeded by a SPEAKER_HASH
-            # logger.warning(f"utterance {u_id}: empty speaker_hash")
-            # raise ValueError(f"utterance {u_id}: empty speaker_hash not allowed")
+        if not speaker_note_id:
+            speaker_note_id = EMPTY_SPEAKER_NOTE_ID
+            # FIXME #15 Exists utterances in data not preceeded by a speakers's intro note
+            # logger.warning(f"utterance {u_id}: empty speaker_note_id")
+            # raise ValueError(f"utterance {u_id}: empty speaker_note_id not allowed")
 
         self.u_id: str = u_id
         self.n: str = n
@@ -130,7 +130,7 @@ class Utterance:
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
         self.page_number: Optional[str] = page_number if isinstance(page_number, str) else ''
-        self.speaker_hash: Optional[str] = speaker_hash if isinstance(speaker_hash, str) else ''
+        self.speaker_note_id: Optional[str] = speaker_note_id if isinstance(speaker_note_id, str) else ''
 
     @property
     def is_unknown(self) -> bool:
@@ -174,7 +174,7 @@ class UtteranceHelper:
                 'u_id': u.u_id,
                 'n': u.n,
                 'who': u.who,
-                'speaker_hash': u.speaker_hash,
+                'speaker_note_id': u.speaker_note_id,
                 'prev_id': u.prev_id,
                 'next_id': u.next_id,
                 'annotation': u.tagged_text,
@@ -331,9 +331,9 @@ class Speech(UtteranceMixIn):
         return f"{strip_extensions(self.document_name)}@{self.speech_index}"
 
     @property
-    def speaker_hash(self):
+    def speaker_note_id(self):
         """Hash for preceeding speaker-note."""
-        return None if not self.utterances else self.utterances[0].speaker_hash
+        return None if not self.utterances else self.utterances[0].speaker_note_id
 
     def add(self, item: Utterance) -> "Speech":
         self.utterances.append(item)
