@@ -1,19 +1,21 @@
 compress_type: feather
 content_type: tagged_frame
 force: true
-group_key:
-- who
-multiproc_keep_order: false
+lowercase: false
+
 multiproc_processes: null
-segment_level: who
-segment_skip_size: 1
-source_folder: /data/westac/riksdagen_corpus_data/tagged_frames_v0.3.0_20201218/
-target_name: ./data/tagged_frames_v0.3.0_20201218.id.year.1965.who.feather
-target_type: single-id-tagged-frame-per-group
-temporal_key: year
 skip_lemma: false
 skip_text: true
 skip_puncts: true
 skip_stopwords: false
+source_folder: /data/westac/riksdagen_corpus_data/tagged_frames_v0.3.0_20201218/
+target_name: ./data/tagged_frames_v0.3.0_20201218.id.year.1965.who.feather
+target_type: single-id-tagged-frame-per-group
+group_key:
+- who
+multiproc_keep_order: false
+segment_level: who
+segment_skip_size: 1
+temporal_key: year
 years:
 - 1965

@@ -1,0 +1,14 @@
+compress_type: feather
+content_type: tagged_frame
+force: true
+lowercase: false
+merge_strategy: chain
+metadata_filename: /data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.2.db
+multiproc_processes: null
+skip_lemma: false
+skip_puncts: true
+skip_stopwords: true
+skip_text: true
+source_folder: /data/riksdagen_corpus_data/tagged_frames_v0.4.2
+target_name: /data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.beta.feather
+target_type: single-id-tagged-frame-per-group
