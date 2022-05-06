@@ -13,6 +13,7 @@ from pyriksprot.utility import deprecated
 
 XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 
+
 class XmlProtocol(abc.ABC):
     def __init__(self, data: str, segment_skip_size: int = 0, delimiter: str = '\n'):
 

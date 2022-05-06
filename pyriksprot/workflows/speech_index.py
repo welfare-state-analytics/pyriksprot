@@ -15,6 +15,7 @@ from pyriksprot.corpus import corpus_index, iterate, tagged
 jj = os.path.join
 relpath = os.path.relpath
 
+
 def extract_speech_index(
     *,
     source_folder: str,

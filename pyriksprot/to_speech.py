@@ -121,7 +121,9 @@ class MergeByChain(IMergeStrategy):
 
             is_part_of_chain: bool = bool(u.prev_id) or bool(u.next_id)
             is_unknown_continuation: bool = (
-                bool(speech) and u.who == "unknown" == speech[-1].who and u.speaker_note_id == speech[-1].speaker_note_id
+                bool(speech)
+                and u.who == "unknown" == speech[-1].who
+                and u.speaker_note_id == speech[-1].speaker_note_id
             )
 
             start_of_speech: bool = (

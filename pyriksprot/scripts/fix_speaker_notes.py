@@ -26,8 +26,7 @@ def temporary_update(tag: str, target_tag: str):
 @click.argument('target-folder', type=click.STRING)
 @click.argument('database-filename', type=click.STRING)
 def main(source_folder: str = None, target_folder: str = None, database_filename: str = None):
-    """Updates missing or wrong speaker note identities in an exist speech corpus (stored as zipped JSON files)
-    """
+    """Updates missing or wrong speaker note identities in an exist speech corpus (stored as zipped JSON files)"""
     try:
         service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename)
         speaker_note_id_lookup: dict[str, str] = service.utterance_index.utterances['speaker_note_id'].to_dict()

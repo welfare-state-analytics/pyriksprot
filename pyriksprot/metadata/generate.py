@@ -112,7 +112,7 @@ RIKSPROT_METADATA_TABLES: dict = {
         'wiki_id': 'text',
         'riksdagen_guid': 'text',
         'riksdagen_id': 'text',
-        ':drop_duplicates:': 'person_id'
+        ':drop_duplicates:': 'person_id',
     },
     'speaker': {
         'person_id': 'text references person (person_id) not null',
