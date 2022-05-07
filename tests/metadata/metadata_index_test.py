@@ -231,7 +231,7 @@ def test_unknown(person_index: md.PersonIndex):
     assert service.get_speaker_info(u_id="i-f0c73dc8f12170da-7").party_id == 6
 
 
-@pytest.parameterize.skip("infra test")
+@pytest.mark.skip("infra test")
 def test_load_speaker_index():
 
     database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
@@ -259,7 +259,7 @@ def test_load_speaker_index():
         cursor.executemany(insert_sql, data)
 
 
-@pytest.parameterize.skip("infra test")
+@pytest.mark.skip("infra test")
 def test_load_speaker_index2():
 
     database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
