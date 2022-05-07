@@ -24,7 +24,7 @@ else
 	$(error repository tag and .env tag mismatch)
 endif
 
-refresh-tag: metadata test-data
+refresh-tag: metadata test-data metadata-database-deploy
 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) metadata and test-data has been refreshed!"
 
 ########################################################################################################
@@ -64,13 +64,14 @@ metadata-database:
 
 .PHONY: metadata-database-deploy
 metadata-database-deploy:
+	@echo "info: clearing existing deployed $(RIKSPROT_REPOSITORY_TAG) metadata"
 	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
 	@mkdir -p $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
 	@cp -r $(METADATA_FOLDER) $(RIKSPROT_DATA_FOLDER)/metadata
+	@echo "info: $(METADATA_FOLDER) copied to $(RIKSPROT_DATA_FOLDER)/metadata"
 	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
 	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
-	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
-	@echo "Done!"
+	@echo "info: $(METADATA_DB_NAME) copied to $(RIKSPROT_DATA_FOLDER)/metadata"
 
 .PHONY: metadata-database-vacuum
 metadata-database-vacuum:
