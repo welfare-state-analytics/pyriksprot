@@ -103,6 +103,7 @@ RIKSPROT_METADATA_TABLES: dict = {
         'party': 'text',
         'start': 'int',
         'end': 'int',
+        # ':loaded_hook:': _to_year_period
     },
     'person': {
         'person_id': 'text primary key',
@@ -295,6 +296,9 @@ def create_database(
 
         if ':drop_duplicates:' in specification:
             table = table.drop_duplicates(subset='person_id', keep='first')
+
+        # if ':loaded_hook:' in specification:
+        #     table = specification[':loaded_hook:'](table)
 
         for c in table.columns:
             if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
