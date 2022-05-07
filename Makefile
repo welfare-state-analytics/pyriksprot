@@ -13,6 +13,8 @@ endif
 
 # PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
 METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
+METADATA_FOLDER=./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+
 CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describe --tags)"
 
 funkis:
@@ -22,64 +24,49 @@ else
 	$(error repository tag and .env tag mismatch)
 endif
 
-# @ if [[ "$(RIKSPROT_REPOSITORY_TAG)" == "$(CHECKED_OUT_TAG)" ]] ; then \
-# 	echo "info: repository tag and .env tag are the same." ; \
-#   else \
-#   	echo "No!" ; \
-# 	echo "$(RIKSPROT_REPOSITORY_TAG)" ; \
-# 	echo "$(shell git -C /data/riksdagen_corpus_data/riksdagen-corpus describe --tags)" ; \
-#   fi
+refresh-tag: metadata test-data
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) metadata and test-data has been refreshed!"
 
-.PHONY: metadata
-metadata: funkis metadata-download metadata-corpus-index metadata-database
-	@echo "metadata has been updated!"
+########################################################################################################
+# ENTRYPOINT: Main recipe that creates metadata database for current tag
+########################################################################################################
+.PHONY: metadata metadata-download metadata-corpus-index metadata-database metadata-database-deploy
+metadata: funkis metadata-download metadata-corpus-index metadata-database metadata-database-vacuum
+	@echo "info: metadata $(RIKSPROT_REPOSITORY_TAG) has been updated!"
 
-.PHONY: metadata-download
 metadata-download: funkis
-	@rm -rf ./metadata/$(METADATA_DB_NAME) ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
-	@mkdir -p ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+	@echo "info: downloading metadata $(RIKSPROT_REPOSITORY_TAG)"
+	@rm -rf ./metadata/$(METADATA_DB_NAME) $(METADATA_FOLDER)
+	@mkdir -p $(METADATA_FOLDER)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download \
-		$(RIKSPROT_REPOSITORY_TAG) ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+		$(RIKSPROT_REPOSITORY_TAG) $(METADATA_FOLDER)
+	@echo "info: metadata $(RIKSPROT_REPOSITORY_TAG) stored in $(METADATA_FOLDER)"
 
-.PHONY: metadata-corpus-index
 metadata-corpus-index:
+	@echo "info: retrieving index of $(RIKSPROT_REPOSITORY_TAG) protocols, utterances and speakers' notes"
 	@mkdir -p ./metadata/data
 	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index \
-		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
-	@gzip ./metadata/data/$(RIKSPROT_REPOSITORY_TAG)/protocols.csv \
-		./metadata/data/$(RIKSPROT_REPOSITORY_TAG)/utterances.csv \
-		./metadata/data/$(RIKSPROT_REPOSITORY_TAG)/speaker_notes.csv
+		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus $(METADATA_FOLDER)
+	@gzip $(METADATA_FOLDER)/protocols.csv \
+		$(METADATA_FOLDER)/utterances.csv \
+		$(METADATA_FOLDER)/speaker_notes.csv
 
-
-# .PHONY: metadata-speaker-notes-index
-# RIKSPROT_XML_PATTERN=$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/protocols/*/*.xml
-# SPEAKER_NOTE_TARGET=metadata/data/speaker_notes.csv
-# metadata-speaker-notes-index:
-# 	@echo "speaker_hash;speaker_note" > $(SPEAKER_NOTE_TARGET)
-# 	@xmlstarlet sel -N x="http://www.tei-c.org/ns/1.0" -t -m "//x:note[@type='speaker']" \
-# 		-v "concat(@n,';','\"',normalize-space(translate(text(),';','')),'\"')" -nl \
-# 			$(RIKSPROT_XML_PATTERN) | sort | uniq >> $(SPEAKER_NOTE_TARGET)
-# 	@gzip ./metadata/data/$(SPEAKER_NOTE_TARGET)
-
-.PHONY: metadata-database
 metadata-database:
-	@echo "creating database: metadata/$(METADATA_DB_NAME)"
+	@echo "info: generating metadata/$(METADATA_DB_NAME) using source $(METADATA_FOLDER)"
 	@rm -f metadata/$(METADATA_DB_NAME)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
 		metadata/$(METADATA_DB_NAME) \
 		--force \
 		--load-index \
-		--source-folder ./metadata/data/$(RIKSPROT_REPOSITORY_TAG) \
+		--source-folder $(METADATA_FOLDER) \
 		--scripts-folder ./metadata/sql
-
-# --branch $(RIKSPROT_REPOSITORY_TAG)
 
 .PHONY: metadata-database-deploy
 metadata-database-deploy:
 	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
 	@mkdir -p $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
-	@cp -r ./metadata/data/$(RIKSPROT_REPOSITORY_TAG) $(RIKSPROT_DATA_FOLDER)/metadata
+	@cp -r $(METADATA_FOLDER) $(RIKSPROT_DATA_FOLDER)/metadata
 	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
 	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
@@ -98,6 +85,38 @@ metadata-light-database:
 	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) "VACUUM;"
 	@cp -f metadata/$(LIGHT_METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
 
+########################################################################################################
+# ENTRYPOINT: Main recipe that creates sample test data for current tag
+########################################################################################################
+.PHONY: test-data test-data-clear test-data-corpora test-data-corpus-config test-data-bundle
+test-data: test-data-clear test-data-corpora test-data-corpus-config test-data-bundle
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test data refreshed!"
+
+test-data-clear:
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test data cleared."
+	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
+
+test-data-corpora:
+	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test Parla-CLARIN corpus created."
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test tagged frames corpus created (if existed)."
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test subsetted metadata database created."
+
+TEST_BUNDLE_DATA_NAME=tests/test_data/dists/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz
+
+test-data-bundle:
+	@mkdir -p dist && rm -f $(TEST_BUNDLE_DATA_NAME)
+	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/
+	@tar --strip-components=2 -cz -f $(TEST_BUNDLE_DATA_NAME) tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) created test data bundle $(TEST_BUNDLE_DATA_NAME)!"
+
+test-data-corpus-config:
+	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test corpus.yml copied."
+
+########################################################################################################
+# ENTRYPOINT: Recipe that creates default speech coprus for current tag
+########################################################################################################
 ACTUAL_TAG:=$(RIKSPROT_REPOSITORY_TAG)
 .PHONY: extract-speeches-to-feather
 extract-speeches-to-feather:
@@ -107,33 +126,9 @@ extract-speeches-to-feather:
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
 				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.beta.feather
 
-.PHONY: test-refresh-all-data
-test-refresh-all-data: test-clear-sample-data test-create-corpora test-copy-corpus-yml test-bundle-data
-	@echo "Done!"
-
-test-clear-sample-data:
-	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
-
-.PHONY: test-create-corpora
-test-create-corpora:
-	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
-	@echo "Setup completed of:"
-	@echo "  - Sample Parla-CLARIN corpus"
-	@echo "  - Sample tagged frame corpus"
-	@echo "  - Sample (subsetted) metadata database"
-
-TEST_BUNDLE_DATA_NAME=tests/test_data/dists/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz
-
-.PHONY: test-bundle-data
-test-bundle-data:
-	@mkdir -p dist && rm -f $(TEST_BUNDLE_DATA_NAME)
-	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/
-	@tar --strip-components=2 -cvz -f $(TEST_BUNDLE_DATA_NAME) tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
-	@echo "Done!"
-
-.PHONY: test-copy-corpus-yml
-test-copy-corpus-yml:
-	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/
+########################################################################################################
+# PURGATORY
+########################################################################################################
 
 # .PHONY: test-metadata-database
 # test-metadata-database:
@@ -143,3 +138,14 @@ test-copy-corpus-yml:
 # test-create-speech-corpora:
 # 	@poetry run python -c 'import tests.utility; tests.utility.setup_sample_speech_corpora()'
 # 	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
+
+
+# .PHONY: metadata-speaker-notes-index
+# RIKSPROT_XML_PATTERN=$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/protocols/*/*.xml
+# SPEAKER_NOTE_TARGET=metadata/data/speaker_notes.csv
+# metadata-speaker-notes-index:
+# 	@echo "speaker_hash;speaker_note" > $(SPEAKER_NOTE_TARGET)
+# 	@xmlstarlet sel -N x="http://www.tei-c.org/ns/1.0" -t -m "//x:note[@type='speaker']" \
+# 		-v "concat(@n,';','\"',normalize-space(translate(text(),';','')),'\"')" -nl \
+# 			$(RIKSPROT_XML_PATTERN) | sort | uniq >> $(SPEAKER_NOTE_TARGET)
+# 	@gzip ./metadata/data/$(SPEAKER_NOTE_TARGET)
