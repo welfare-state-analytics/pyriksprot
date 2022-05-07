@@ -266,10 +266,7 @@ def create_database(
     folder: str = None,
     force: bool = False,
 ):
-    logger.info("Creating database.")
-    logger.info(f"  target: {database_filename}")
-    logger.info(f"     tag: {branch}")
-    logger.info(f"  folder: {folder}")
+    logger.info(f"Creating database {database_filename}, using source {branch}/{folder} (tag/folder).")
 
     os.makedirs(dirname(database_filename), exist_ok=True)
 
