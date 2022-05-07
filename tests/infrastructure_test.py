@@ -55,4 +55,4 @@ def test_setup_sample_speech_corpora():
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_test_corpora():
-    ensure_test_corpora_exist()
+    ensure_test_corpora_exist(force=True)
