@@ -100,15 +100,14 @@ class XmlUntangleProtocol(XmlProtocol):
                 page_number = child['n']
             elif child.name == "note":
                 if child['type'] == "speaker":
-                    speaker_note_id = child[XML_ID]
-                    if speaker_note_id:
-                        self.speaker_notes[speaker_note_id] = " ".join(child.cdata.split())
+                    speaker_note_id = child["xml:id"]
+                    if not speaker_note_id:
+                        raise ValueError("no xml:id in speaker's note tag")
+                    self.speaker_notes[speaker_note_id] = " ".join(child.cdata.split())
             elif child.name == 'u':
                 utterances.append(
                     UtteranceMapper.create(element=child, page_number=page_number, speaker_note_id=speaker_note_id)
                 )
-            # else:
-            #     speaker_note_id = None
         return utterances
 
     def get_date(self) -> str:
@@ -148,7 +147,6 @@ class UtteranceMapper:
         dedent: bool = True,
     ) -> interface.Utterance:
         utterance: interface.Utterance = interface.Utterance(
-            # FIXME: Should be XML_ID???
             u_id=element.get_attribute('xml:id'),
             speaker_note_id=speaker_note_id,
             who=element.get_attribute('who') or "undefined",
@@ -252,6 +250,8 @@ class XmlIterParseProtocol(XmlProtocol):
 
                     elif tag == "note" and elem.attrib.get('type') == "speaker":
                         speaker_note_id = elem.attrib.get(XML_ID)
+                        if not speaker_note_id:
+                            raise ValueError("no xml:id in speaker's note")
                         if speaker_note_id:
                             if value:
                                 self.speaker_notes[speaker_note_id] = " ".join(value.split())
