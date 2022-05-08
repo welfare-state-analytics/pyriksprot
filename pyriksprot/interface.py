@@ -11,6 +11,7 @@ from io import StringIO
 from typing import Any, Callable, Mapping, Optional, Union
 
 import pandas as pd
+from loguru import logger
 from pandas.io import json
 
 from .utility import flatten, merge_tagged_csv, strip_extensions
@@ -117,7 +118,7 @@ class Utterance:
         if not speaker_note_id:
             speaker_note_id = EMPTY_SPEAKER_NOTE_ID
             # FIXME #15 Exists utterances in data not preceeded by a speakers's intro note
-            # logger.warning(f"utterance {u_id}: empty speaker_note_id")
+            logger.warning(f"utterance {u_id}: empty speaker_note_id")
             # raise ValueError(f"utterance {u_id}: empty speaker_note_id not allowed")
 
         self.u_id: str = u_id
