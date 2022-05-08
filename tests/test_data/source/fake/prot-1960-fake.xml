@@ -57,25 +57,24 @@
       <body>
         <div>
           <pb n="0" facs="https://betalab.kb.se/prot-1960-fake/prot_1960-fake-001.jp2/_view"/>
-          <note type="date" n="a01">
+          <note xml:id="e45018be-78bf-4ad1-ab65-8e7545671069" type="date" n="a01">
             2 Nr 32. Torsdagen den 28 juni 1960 fm.
           </note>
-          <note n="a02">Note</note>
-          <note type="speaker" n="a03">Note</note>
+          <note xml:id="7474e476-1bd7-48fd-b950-9d1471c87f62" n="a02">Note</note>
+          <note xml:id="a95d1bf5-44c1-4727-97db-625eb2c83951" type="speaker" n="a03">Note</note>
           <u who="A" xml:id="i-1" next="i-2" n="c01">
             <seg n="b01">Herr Talman! Jag talar.</seg>
           </u>
-          <note n="a04">Note</note>
+          <note xml:id="0db8d96b-03ff-4c55-b398-99d2d29a7c42" n="a04">Note</note>
           <u who="A" xml:id="i-2" prev="i-1" n="c02">
             <seg n="b02">Det regnar ute.</seg><seg n="b03">Visste du det?</seg>
           </u>
-          <note n="a05">Note</note>
-          <pb n="1" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-001.jp2/_view"/>
-          <note n="a06" type="speaker">B:</note>
+          <note xml:id="5442efbe-030a-436e-9fde-f64ca9cf2ccc" n="a05">Note</note>
+          <note xml:id="f96018c9-e680-4a37-b81d-8a42c11b5879" n="a06" type="speaker">B:</note>
           <u who="B" xml:id="i-3" n="c03">
             <seg n="b04">Jag håller med.</seg><seg n="b05">Talmannen är snäll.</seg>
           </u>
-          <note n="a07" type="speaker">C:</note>
+          <note xml:id="8319fe01-05dc-4467-a62c-89272ff1e506" n="a07" type="speaker">C:</note>
           <u who="C" xml:id="i-4" n="c04">
             <seg n="b05">Jag håller också med.</seg>
           </u>

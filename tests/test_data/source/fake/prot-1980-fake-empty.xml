@@ -57,12 +57,12 @@
       <body>
         <div>
           <pb n="0" facs="https://betalab.kb.se/prot-1980-fake/prot_1980-fake-empty-001.jp2/_view"/>
-          <note type="date" n="a01">
+          <note xmld:id="dfc3d9b0-d0df-4adb-8c0a-b60ff3c25c30" type="date" n="a01">
             2 Nr 32. Torsdagen den 28 juni 1980 fm.
           </note>
-          <note n="a02">Note</note>
-          <note n="a04">Note</note>
-          <note n="a05">Note</note>
+          <note xmld:id="78e06bad-2808-4e60-a2d2-293a12851302" n="a02">Note</note>
+          <note xmld:id="04b5775d-57ed-418a-87cb-5680c249fde9" n="a04">Note</note>
+          <note xmld:id="67c63dc5-2ba5-4a41-9573-f6b13ea79d52" n="a05">Note</note>
         </div>
       </body>
     </text>

@@ -56,22 +56,21 @@
       </front>
       <body>
         <div>
-          <pb n="0" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-000.jp2/_view"/>
-          <note type="date" n="a01">
+          <pb n="0" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-001.jp2/_view"/>
+          <note xml:id="94b1d4e6-7000-4390-9bc9-ad1e1c972d4b" type="date" n="a01">
             2 Nr 32. Torsdagen den 28 juni 1958 fm.
           </note>
-          <note n="a02">Note</note>
-          <note type="speaker" n="a03">Note</note>
+          <note xml:id="3f66dfad-21ee-4f1f-9fe6-678458ff01a3" n="a02">Note</note>
+          <note xml:id="dac95085-435c-4eb4-85b8-cf6606bd9937" type="speaker" n="a03">Note</note>
           <u who="A" xml:id="i-1" next="i-2" n="c01">
             <seg n="b01">Hej! Detta är en mening.</seg>
           </u>
-          <note n="a04">Note</note>
+          <note xml:id="587fe39a-2c9f-409d-946f-01c121cc8712" n="a04">Note</note>
           <u who="A" xml:id="i-2" prev="i-1" n="c02">
             <seg n="b02">Jag heter Ove.</seg><seg n="b03">Vad heter du?</seg>
           </u>
-          <note n="a05">Note</note>
-          <pb n="1" facs="https://betalab.kb.se/prot-1958-fake/prot_1958-fake-001.jp2/_view"/>
-          <note n="a06" type="speaker">B:</note>
+          <note xml:id="c24fe032-d737-44d7-bdbf-5bb3832a97f2" n="a05">Note</note>
+          <note xml:id="8133f094-8209-4448-9093-82477de62015" n="a06" type="speaker">B:</note>
           <u who="B" xml:id="i-3" n="c03">
             <seg n="b04">Jag heter Adam.</seg>
           </u>
