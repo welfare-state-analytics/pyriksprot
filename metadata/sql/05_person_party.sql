@@ -45,16 +45,26 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
     where mops.party is not null;
 
 insert into person_party (person_id, source_id, party_id, start_year, end_year)
-    select
-        _party_affiliation.person_id, 2 as source_id,
-        coalesce(party.party_id, 1), -- 1 is code for "Other", 84 records
-        _party_affiliation.[start] as start_year,
-        _party_affiliation.[end] as end_year
-    from _party_affiliation
-    join persons_of_interest using (person_id)
-    left join _party_abbreviation pa using (party)
-    left join party on party.party_abbrev = pa.abbreviation
-    ;
+    with affiliation as (
+        select
+            person_id,
+            party,
+            case when "start" like '%-%' then substr("start",1,4) else "start" end as "start",
+            case when "end" like '%-%' then substr("end",1,4) else "end" end as "end"
+        from _party_affiliation
+    )
+        select
+            affiliation.person_id, 2 as source_id,
+            coalesce(party.party_id, 1), -- 1 is code for "Other", 84 records
+            cast(affiliation.[start] as integer) as start_year,
+            cast(affiliation.[end] as integer) as end_year
+        from affiliation
+        join persons_of_interest using (person_id)
+        left join _party_abbreviation using (party)
+        left join party on party.party_abbrev = _party_abbreviation.abbreviation
+        ;
+
+
 
 /* Update party_id for persons having only one party */
 with persons_with_single_party as (
