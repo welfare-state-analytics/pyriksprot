@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import abc
 import itertools
 from functools import reduce
+from glob import glob
+from os.path import getmtime, isfile, join
 from typing import Any, Callable, List, Mapping, Union
 
 from loguru import logger
+from tqdm import tqdm
 
 from pyriksprot.corpus.parlaclarin import parse
 from pyriksprot.corpus.tagged import persist
@@ -120,10 +125,11 @@ def tag_protocol_xml(
         # print(f"filename: {os.path.abspath(output_filename)}  {os.path.isfile(os.path.abspath(output_filename))}")
 
         if not force and persist.validate_checksum(output_filename, checksum):
-            logger.info(f"SKIPPING {strip_path_and_extension(input_filename)} (checksum validates OK)")
+            logger.info(f"skipped: {strip_path_and_extension(input_filename)} (checksum validates OK)")
             touch(output_filename)
         else:
             unlink(output_filename)
+            logger.info(f"tagging: {strip_path_and_extension(input_filename)}")
             protocol = tag_protocol(tagger, protocol=protocol)
             persist.store_protocol(output_filename, protocol=protocol, checksum=checksum, storage_format=storage_format)
 
@@ -131,3 +137,25 @@ def tag_protocol_xml(
         logger.error(f"FAILED: {input_filename}")
         unlink(output_filename)
         raise
+
+
+def tag_protocols(tagger: ITagger, source_folder: str, target_folder: str, force: bool):
+    """Tags protocols in `source_folder`. Stores result in `target_folder`.
+    Note: not used by Snakemake workflow (used by tag CLI script)
+    """
+
+    source_files: list[str] = glob(join(source_folder, "prot-*.xml"))
+    for source_file in tqdm(source_files):
+        target_file = join(target_folder, f"{strip_path_and_extension(source_file)}.zip")
+        if force or expired(target_file, source_file):
+            tag_protocol_xml(source_file, target_file, tagger, storage_format="json", force=force)
+        else:
+            touch(target_file)
+
+
+def expired(filename: str, expiry_instance: float | str) -> bool:
+    if isfile(filename):
+        if isinstance(expiry_instance, str):
+            expiry_instance = getmtime(expiry_instance)
+        return expiry_instance > getmtime(filename)
+    return True
