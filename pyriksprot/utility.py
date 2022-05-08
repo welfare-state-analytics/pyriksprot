@@ -269,7 +269,7 @@ def unlink(f: str) -> None:
     if fo.is_dir():
         shutil.rmtree(f)
 
-    if fo.is_file():
+    elif fo.is_file():
         fo.unlink(missing_ok=True)
 
 
