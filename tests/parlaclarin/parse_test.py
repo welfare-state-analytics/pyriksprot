@@ -28,19 +28,26 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 
 
 @pytest.mark.parametrize(
-    'filename',
+    'filename,n_utterances',
     [
-        ("prot-197879--14.xml"),
+        ("prot-1933--fk--5.xml", 2),
+        ("prot-1955--ak--22.xml", 414),
+        ("prot-197879--14.xml", 0),
+        ('prot-199192--127.xml', 2631),
+        ('prot-199192--21.xml', 136),
+        ("prot-199596--35.xml", 386),
     ],
 )
-def test_parlaclarin_xml_with_no_utterances(filename):
+def test_parlaclarin_xml_with_no_utterances(filename: str, n_utterances: int):
 
     path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
 
-    protocol = parlaclarin.ProtocolMapper.to_protocol(path, segment_skip_size=0)
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path, segment_skip_size=0)
 
-    assert len(protocol.utterances) == 0, "utterances empty"
-    assert not protocol.has_text
+    assert len(protocol.utterances) == n_utterances
+    assert not any(not bool(u.speaker_note_id) for u in protocol.utterances) == n_utterances
+
+    # assert not protocol.has_text
     # FIXME: More checks
 
 

@@ -175,7 +175,7 @@ def test_protocol_to_speeches_with_different_strategies(
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path)
 
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
-    assert len(speeches) == speech_count, "speech count"
+    assert len(speeches) == speech_count
 
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=1)
     assert len(speeches) == non_empty_speech_count

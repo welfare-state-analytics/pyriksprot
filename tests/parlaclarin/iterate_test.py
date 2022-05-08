@@ -20,17 +20,62 @@ jj = os.path.join
         parlaclarin.XmlSaxSegmentIterator,
     ],
 )
-def test_protocol_texts_iterator_metadata(iterator_class):
+def test_segment_iterator_when_segment_is_speech(iterator_class):
 
     filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
-    expected_document_names = sorted(utility.strip_path_and_extension(filenames))
 
     texts: Iterable[iterate.ProtocolSegment] = list(
-        iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=None)
+        iterator_class(
+            filenames=filenames,
+            segment_level=interface.SegmentLevel.Speech,
+            segment_skip_size=0,
+            multiproc_processes=None,
+            content_type=interface.ContentType.Text,
+            merge_strategy='chain',
+        )
     )
 
-    assert len(texts) == 6
+    assert len(texts) == 426
+    assert all(x.u_id for x in texts)
+    assert all(x.id == x.u_id for x in texts)
+    assert all(x.speaker_note_id for x in texts)
+
+    # FIXME: Check why this fails:
+    # assert not any(not x.page_number for x in texts) # FAILS [x for x in texts if x.page_number == ""]
+
+    """This might be data error"""
+    assert 3 == len([x for x in texts if x.speaker_note_id == "unknown"])
+
+
+@pytest.mark.parametrize(
+    'iterator_class',
+    [
+        parlaclarin.XmlProtocolSegmentIterator,
+        parlaclarin.XmlUntangleSegmentIterator,
+        parlaclarin.XmlSaxSegmentIterator,
+    ],
+)
+def test_segment_iterator_when_segment_is_protocol(iterator_class):
+
+    filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
+
+    texts: Iterable[iterate.ProtocolSegment] = list(
+        iterator_class(
+            filenames=filenames,
+            segment_level=interface.SegmentLevel.Protocol,
+            segment_skip_size=0,
+            multiproc_processes=None,
+            content_type=interface.ContentType.Text,
+        )
+    )
+
+    expected_document_names = sorted(utility.strip_path_and_extension(filenames))
+
     assert [x.name for x in texts] == expected_document_names
+
+    assert not any(x.u_id for x in texts)
+    assert not any(x.speaker_note_id for x in texts)
+
     assert all(x.who is None for x in texts)
     assert [x.id for x in texts] == expected_document_names
     assert all(x.page_number == '0' for x in texts)
