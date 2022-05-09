@@ -130,7 +130,9 @@ class Utterance:
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
         self.page_number: Optional[str] = page_number if isinstance(page_number, str) else ''
-        self.speaker_note_id: Optional[str] = speaker_note_id if isinstance(speaker_note_id, str) else MISSING_SPEAKER_NOTE_ID
+        self.speaker_note_id: Optional[str] = (
+            speaker_note_id if isinstance(speaker_note_id, str) else MISSING_SPEAKER_NOTE_ID
+        )
 
     @property
     def is_unknown(self) -> bool:

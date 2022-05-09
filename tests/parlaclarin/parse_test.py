@@ -1,5 +1,5 @@
-from collections import defaultdict
 import os
+from collections import defaultdict
 
 import pytest
 
@@ -10,6 +10,7 @@ from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOL
 from .utility import count_speaker_notes, count_utterances
 
 jj = os.path.join
+
 
 def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml():
 
@@ -48,6 +49,7 @@ def test_parlaclarin_n_utterances(filename: str):
     assert len(protocol.utterances) == count_utterances(path)
     assert not any(not bool(u.speaker_note_id) for u in protocol.utterances)
 
+
 @pytest.mark.parametrize(
     'filename',
     [
@@ -69,4 +71,3 @@ def test_parlaclarin_n_speaker_notes(filename: str):
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path, segment_skip_size=0)
 
     assert len(set(u.speaker_note_id for u in protocol.utterances)) == n_speaker_notes_with_utterances
-
