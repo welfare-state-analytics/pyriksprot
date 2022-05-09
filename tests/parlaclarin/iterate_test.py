@@ -44,7 +44,7 @@ def test_segment_iterator_when_segment_is_speech(iterator_class):
     # assert not any(not x.page_number for x in texts) # FAILS [x for x in texts if x.page_number == ""]
 
     """This might be data error"""
-    assert 3 == len([x for x in texts if x.speaker_note_id == "unknown"])
+    assert 3 == len([x for x in texts if x.speaker_note_id == "missing"])
 
 
 @pytest.mark.parametrize(
@@ -123,18 +123,17 @@ def test_xml_protocol_texts_iterator_texts():
             segment_level=interface.SegmentLevel.Speech,
             segment_skip_size=1,
             multiproc_processes=None,
+            merge_strategy='chain',
         )
     )
-    assert len(texts) == 415
+    assert len(texts) == 426
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
-    # FIXME Find out why count has changed!
-    # assert len(texts) == 111
-    assert len(texts) == 116
+    assert len(texts) == 122
 
     texts1 = list(
         parlaclarin.XmlUntangleSegmentIterator(
@@ -224,7 +223,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-3',
             u_id='i-3',
             data='Jag heter Adam.',
-            page_number='1',
+            page_number='0',
             year=1958,
             n_tokens=0,
         ),
@@ -237,7 +236,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-4',
             u_id='i-4',
             data='Ove är dum.',
-            page_number='1',
+            page_number='0',
             year=1958,
             n_tokens=0,
         ),
@@ -263,7 +262,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-3',
             u_id='i-3',
             data='Jag håller med.\nTalmannen är snäll.',
-            page_number='1',
+            page_number='0',
             year=1960,
             n_tokens=0,
         ),
@@ -276,7 +275,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-4',
             u_id='i-4',
             data='Jag håller också med.',
-            page_number='1',
+            page_number='0',
             year=1960,
             n_tokens=0,
         ),
@@ -304,7 +303,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-3',
             u_id='i-3',
             data='Jag heter Adam.\nOve är dum.',
-            page_number='1',
+            page_number='0',
             year=1958,
             n_tokens=0,
         ),
@@ -330,7 +329,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-3',
             u_id='i-3',
             data='Jag håller med.\nTalmannen är snäll.',
-            page_number='1',
+            page_number='0',
             year=1960,
             n_tokens=0,
         ),
@@ -343,7 +342,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-4',
             u_id='i-4',
             data='Jag håller också med.',
-            page_number='1',
+            page_number='0',
             year=1960,
             n_tokens=0,
         ),
@@ -384,7 +383,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-3',
             u_id='i-3',
             data='Jag heter Adam.',
-            page_number='1',
+            page_number='0',
             year=1958,
             n_tokens=0,
         ),
@@ -397,7 +396,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-4',
             u_id='i-4',
             data='Ove är dum.',
-            page_number='1',
+            page_number='0',
             year=1958,
             n_tokens=0,
         ),
@@ -436,7 +435,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-3',
             u_id='i-3',
             data='Jag håller med.\nTalmannen är snäll.',
-            page_number='1',
+            page_number='0',
             year=1960,
             n_tokens=0,
         ),
@@ -449,7 +448,7 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
             id='i-4',
             u_id='i-4',
             data='Jag håller också med.',
-            page_number='1',
+            page_number='0',
             year=1960,
             n_tokens=0,
         ),

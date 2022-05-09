@@ -13,6 +13,7 @@ from pyriksprot import utility
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
+from tests.parlaclarin.utility import count_utterances
 
 from .utility import RIKSPROT_PARLACLARIN_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances
 
@@ -59,6 +60,30 @@ def utterances() -> list[interface.Utterance]:
             [
                 'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
                 'Jag heter Adam.\nOve är dum.',
+                'Adam är dum.',
+            ],
+        ),
+        (
+            ts.MergeBySpeakerNoteIdSequence,
+            4,
+            [{'A'}, {'B'}, {'B'}, {'A'}],
+            ['i-1', 'i-3', 'i-4', 'i-5'],
+            [
+                'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
+                'Jag heter Adam.',
+                'Ove är dum.',
+                'Adam är dum.',
+            ],
+        ),
+        (
+            ts.MergeByWhoSpeakerNoteIdSequence,
+            4,
+            [{'A'}, {'B'}, {'B'}, {'A'}],
+            ['i-1', 'i-3', 'i-4', 'i-5'],
+            [
+                'Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
+                'Jag heter Adam.',
+                'Ove är dum.',
                 'Adam är dum.',
             ],
         ),
@@ -149,36 +174,44 @@ def test_speech_annotation():
     # Test file ending with NL
 
 
+"""
+Note: Grouping by just speaker-note-id is not enough due to utterances that lack speaker-note
+Hence it is (for now) commented out.
+"""
+
+
 @pytest.mark.parametrize(
-    'filename, speech_count, non_empty_speech_count, strategy',
+    'filename, speech_count, strategy',
     [
-        ("prot-1933--fk--5.xml", 1, 1, ts.MergeStrategyType.chain),
-        # ("prot-1933--fk--5.xml", 1, 1, ts.MergeSpeechStrategyType.Who),
-        # ("prot-1933--fk--5.xml", 1, 1, ts.MergeSpeechStrategyType.WhoSequence),
-        ("prot-1955--ak--22.xml", 151, 151, ts.MergeStrategyType.chain),
-        # ("prot-1955--ak--22.xml", 53, 53, ts.MergeSpeechStrategyType.Who),
-        # ("prot-1955--ak--22.xml", 149, 149, ts.MergeSpeechStrategyType.WhoSequence),
-        ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.chain),
-        ('prot-199192--127.xml', 51, 51, ts.MergeStrategyType.who),
-        ('prot-199192--127.xml', 208, 208, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 222, 222, ts.MergeStrategyType.who_speaker_note_id_sequence),
-        # ('prot-199192--127.xml', 208, 208, ts.MergeSpeechStrategyType.speaker_note_id_sequence),
+        ("prot-1933--fk--5.xml", 1, ts.MergeStrategyType.chain),
+        ("prot-1933--fk--5.xml", 1, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        # ("prot-1933--fk--5.xml", 1, ts.MergeStrategyType.speaker_note_id_sequence),
+        ('prot-1933--fk--5.xml', 1, ts.MergeStrategyType.who_sequence),
+        ("prot-1955--ak--22.xml", 151, ts.MergeStrategyType.chain),
+        ("prot-1955--ak--22.xml", 151, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        # ("prot-1955--ak--22.xml", 149, ts.MergeStrategyType.speaker_note_id_sequence),
+        ("prot-1955--ak--22.xml", 149, ts.MergeStrategyType.who_sequence),
+        ('prot-199192--127.xml', 231, ts.MergeStrategyType.chain),
+        ('prot-199192--127.xml', 52, ts.MergeStrategyType.who),
+        ('prot-199192--127.xml', 220, ts.MergeStrategyType.who_sequence),
+        ('prot-199192--127.xml', 231, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        # ('prot-199192--127.xml', 208, ts.MergeStrategyType.speaker_note_id_sequence),
     ],
 )
-def test_protocol_to_speeches_with_different_strategies(
-    filename: str, speech_count: int, non_empty_speech_count: int, strategy: str
-):
-
-    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+def test_protocol_to_speeches_with_different_strategies(filename: str, speech_count: int, strategy: str):
     document_name: str = utility.strip_path_and_extension(filename)
 
-    protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(path)
+    xml_path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+
+    # log_utterance_sequence(xml_path, f"tests/output/{document_name}_sequence.log")
+    # counter: dict[str, int] = count_speaker_notes(xml_path)
+
+    # n_speaker_note_without_utterance: int = len([k for k in counter if not counter[k]])
+
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(xml_path)
 
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
     assert len(speeches) == speech_count
-
-    speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=1)
-    assert len(speeches) == non_empty_speech_count
 
     assert all(x.text != "" for x in speeches)
     assert document_name == protocol.name
@@ -280,27 +313,29 @@ def test_load_protocols_from_folder():
 
 
 @pytest.mark.parametrize(
-    'protocol_name,merge_strategy,expected_utterance_count,expected_speech_count',
+    'protocol_name,merge_strategy,expected_speech_count',
     [
-        ('prot-1955--ak--22', 'who_sequence', 414, 146),
-        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 414, 151),
-        ('prot-1955--ak--22', 'speaker_note_id_sequence', 414, 151),
-        ('prot-1955--ak--22', 'chain', 414, 151),
-        ('prot-199192--127', 'who_sequence', 274, 208),
-        ('prot-199192--127', 'who_speaker_note_id_sequence', 274, 222),
-        ('prot-199192--127', 'speaker_note_id_sequence', 274, 222),
-        ('prot-199192--127', 'chain', 274, 222),
+        ('prot-1955--ak--22', 'who_sequence', 149),
+        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 149),
+        ('prot-1955--ak--22', 'speaker_note_id_sequence', 151),
+        ('prot-1955--ak--22', 'chain', 150),
+        ('prot-199192--127', 'who_sequence', 220),
+        ('prot-199192--127', 'who_speaker_note_id_sequence', 220),
+        ('prot-199192--127', 'speaker_note_id_sequence', 222),
+        ('prot-199192--127', 'chain', 231),
     ],
 )
-def test_protocol_to_items(
-    protocol_name: str, merge_strategy: str, expected_utterance_count: int, expected_speech_count: int
-):
+def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):
 
     filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
 
     assert protocol is not None
+
+    xml_filename = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", protocol_name.split("-")[1], f"{protocol_name}.xml")
+    expected_utterance_count = count_utterances(xml_filename)
+
     assert len(protocol.utterances) == expected_utterance_count
 
     items = iterate.to_segments(

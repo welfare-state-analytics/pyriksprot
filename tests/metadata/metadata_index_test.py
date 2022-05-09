@@ -193,14 +193,14 @@ def test_speaker_info_service(person_index: md.PersonIndex):
 
     person: md.Person = service.person_index.get_person('Q5556026')
     assert person.alt_parties
-    assert len(person.alt_parties) == 8
+    assert len(person.alt_parties) == 9
     assert set(a.party_id for a in person.alt_parties) == {1, 6}
-    assert set(a.start_year for a in person.alt_parties) == {0, 1985, 1988, 1991, 1994, 1998, 1983}
-    assert set(a.end_year for a in person.alt_parties) == {0, 1985, 1988, 1991, 1994, 1998, 2002}
+    assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
+    assert set(a.end_year for a in person.alt_parties) == {0, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
     assert person.party_at(1950) == 0
     assert person.party_at(1994) == 6
     assert person.party_at(2000) == 6
-    assert person.party_at(2010) == 0
+    assert person.party_at(2010) == 1
 
 
 def test_unknown(person_index: md.PersonIndex):
@@ -214,21 +214,19 @@ def test_unknown(person_index: md.PersonIndex):
 
     assert service.utterance_index
 
-    u_id: str = 'i-01aa4aee345aa508-19'
+    u_id: str = 'i-b5b6a1f0ed7099a3-4'
 
     assert service.utterance_index.unknown_gender_lookup.get(u_id) == 1
 
     speaker: md.SpeakerInfo = service.get_speaker_info(u_id=u_id)
     assert speaker.person_id == "unknown"
     assert speaker.gender_id == 1
-    assert speaker.party_id == 0
+    assert speaker.party_id == 8
 
     speaker: md.SpeakerInfo = service.get_speaker_info(u_id='i-957dd4ed552513d0-37')
     assert speaker.person_id == "unknown"
     assert speaker.gender_id == 1
     assert speaker.party_id == 8
-
-    assert service.get_speaker_info(u_id="i-f0c73dc8f12170da-7").party_id == 6
 
 
 @pytest.mark.skip("infra test")

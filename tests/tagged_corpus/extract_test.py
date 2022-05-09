@@ -84,12 +84,12 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
 @pytest.mark.parametrize(
     'target_type,merge_strategy,compress_type',
     [
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_note_id_sequence, 'csv'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_note_id_sequence, 'feather'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
+        ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'feather'),
         ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.speaker_note_id_sequence, 'csv'),
         ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.speaker_note_id_sequence, 'feather'),
-        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
-        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_note_id_sequence, 'csv'),
-        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.chain, 'csv'),
-        # ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.who_speaker_note_id_sequence, 'csv'),
     ],
 )
 def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
@@ -108,7 +108,7 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
         segment_skip_size=1,
         years=None,
         group_keys=None,
-        force=False,
+        force=True,
         skip_lemma=False,
         skip_text=True,
         skip_puncts=True,
