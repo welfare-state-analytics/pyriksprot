@@ -13,6 +13,8 @@ from pyriksprot.utility import deprecated
 
 XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 
+SPEAKER_NOTE_ID_MISSING: str = "missing"
+
 
 class XmlProtocol(abc.ABC):
     def __init__(self, data: str, segment_skip_size: int = 0, delimiter: str = '\n'):
@@ -86,6 +88,7 @@ class XmlUntangleProtocol(XmlProtocol):
         return []
 
     def create_utterances(self) -> List[interface.Utterance]:
+
         utterances: List[interface.Utterance] = []
         page_number: str = None
 
@@ -93,21 +96,43 @@ class XmlUntangleProtocol(XmlProtocol):
         if parent is None:
             return utterances
 
-        speaker_note_id: str = ''
+        speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
+        previous_who: str = None
 
         for child in parent.children:
+
             if child.name == 'pb':
                 page_number = child['n']
+
             elif child.name == "note":
+
                 if child['type'] == "speaker":
                     speaker_note_id = child["xml:id"]
+
                     if not speaker_note_id:
                         raise ValueError("no xml:id in speaker's note tag")
+
                     self.speaker_notes[speaker_note_id] = " ".join(child.cdata.split())
+
+                    previous_who: str = None
+
             elif child.name == 'u':
+
+                who: str = child.get_attribute('who')
+
+                if previous_who and previous_who != who:
+                    speaker_note_id = SPEAKER_NOTE_ID_MISSING
+
+                previous_who: str = who
+
                 utterances.append(
-                    UtteranceMapper.create(element=child, page_number=page_number, speaker_note_id=speaker_note_id)
+                    UtteranceMapper.create(
+                        element=child,
+                        page_number=page_number,
+                        speaker_note_id=speaker_note_id,
+                    )
                 )
+
         return utterances
 
     def get_date(self) -> str:
@@ -231,9 +256,10 @@ class XmlIterParseProtocol(XmlProtocol):
 
             context = iter(context)
             current_page: int = 0
-            current_utterance: dict = None
-            speaker_note_id: str = ''
+            current_utterance: interface.Utterance = None
+            speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
             is_preface: bool = False
+            previous_who: str = None
 
             for event, elem in context:
 
@@ -250,6 +276,7 @@ class XmlIterParseProtocol(XmlProtocol):
 
                     elif tag == "note" and elem.attrib.get('type') == "speaker":
                         speaker_note_id = elem.attrib.get(XML_ID)
+                        previous_who: str = None
                         if not speaker_note_id:
                             raise ValueError("no xml:id in speaker's note")
                         if speaker_note_id:
@@ -263,6 +290,10 @@ class XmlIterParseProtocol(XmlProtocol):
 
                     elif tag == "u":
                         is_preface = False
+                        who: str = elem.attrib.get('who')
+                        if previous_who and previous_who != who:
+                            speaker_note_id = SPEAKER_NOTE_ID_MISSING
+
                         current_utterance: interface.Utterance = interface.Utterance(
                             page_number=current_page,
                             speaker_note_id=speaker_note_id,
@@ -273,6 +304,7 @@ class XmlIterParseProtocol(XmlProtocol):
                             n=elem.attrib.get('n'),
                             paragraphs=[],
                         )
+                        previous_who = elem.attrib.get('who')
                         # speaker_note_id = None
                     elif tag == "seg" and value is not None:
                         value = (dedent_text(value) if self.dedent else value).strip()
