@@ -13,7 +13,7 @@ from pyriksprot.utility import deprecated
 
 XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 
-SPEAKER_NOTE_ID_MISSING: str = "missing"
+MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 
 class XmlProtocol(abc.ABC):
@@ -96,7 +96,7 @@ class XmlUntangleProtocol(XmlProtocol):
         if parent is None:
             return utterances
 
-        speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
+        speaker_note_id: str = MISSING_SPEAKER_NOTE_ID
         previous_who: str = None
 
         for child in parent.children:
@@ -121,7 +121,7 @@ class XmlUntangleProtocol(XmlProtocol):
                 who: str = child.get_attribute('who')
 
                 if previous_who and previous_who != who:
-                    speaker_note_id = SPEAKER_NOTE_ID_MISSING
+                    speaker_note_id = MISSING_SPEAKER_NOTE_ID
 
                 previous_who: str = who
 
@@ -257,7 +257,7 @@ class XmlIterParseProtocol(XmlProtocol):
             context = iter(context)
             current_page: int = 0
             current_utterance: interface.Utterance = None
-            speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
+            speaker_note_id: str = MISSING_SPEAKER_NOTE_ID
             is_preface: bool = False
             previous_who: str = None
 
@@ -292,7 +292,7 @@ class XmlIterParseProtocol(XmlProtocol):
                         is_preface = False
                         who: str = elem.attrib.get('who')
                         if previous_who and previous_who != who:
-                            speaker_note_id = SPEAKER_NOTE_ID_MISSING
+                            speaker_note_id = MISSING_SPEAKER_NOTE_ID
 
                         current_utterance: interface.Utterance = interface.Utterance(
                             page_number=current_page,

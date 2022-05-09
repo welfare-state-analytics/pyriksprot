@@ -11,14 +11,13 @@ from io import StringIO
 from typing import Any, Callable, Mapping, Optional, Union
 
 import pandas as pd
-from loguru import logger
 from pandas.io import json
+
+from pyriksprot.corpus.parlaclarin.parse import MISSING_SPEAKER_NOTE_ID
 
 from .utility import flatten, merge_tagged_csv, strip_extensions
 
 # pylint: disable=too-many-arguments, no-member
-
-EMPTY_SPEAKER_NOTE_ID: str = "unknown"
 
 
 class ParlaClarinError(ValueError):
@@ -116,9 +115,9 @@ class Utterance:
     ):
 
         if not speaker_note_id:
-            speaker_note_id = EMPTY_SPEAKER_NOTE_ID
+            speaker_note_id = MISSING_SPEAKER_NOTE_ID
             # FIXME #15 Exists utterances in data not preceeded by a speakers's intro note
-            logger.warning(f"utterance {u_id}: empty speaker_note_id")
+            # logger.warning(f"utterance {u_id}: empty speaker_note_id")
             # raise ValueError(f"utterance {u_id}: empty speaker_note_id not allowed")
 
         self.u_id: str = u_id
@@ -131,7 +130,7 @@ class Utterance:
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
         self.page_number: Optional[str] = page_number if isinstance(page_number, str) else ''
-        self.speaker_note_id: Optional[str] = speaker_note_id if isinstance(speaker_note_id, str) else ''
+        self.speaker_note_id: Optional[str] = speaker_note_id if isinstance(speaker_note_id, str) else MISSING_SPEAKER_NOTE_ID
 
     @property
     def is_unknown(self) -> bool:
@@ -333,8 +332,8 @@ class Speech(UtteranceMixIn):
 
     @property
     def speaker_note_id(self):
-        """Hash for preceeding speaker-note."""
-        return None if not self.utterances else self.utterances[0].speaker_note_id
+        """xml:id for preceeding speaker-note."""
+        return MISSING_SPEAKER_NOTE_ID if not self.utterances else self.utterances[0].speaker_note_id
 
     def add(self, item: Utterance) -> "Speech":
         self.utterances.append(item)
