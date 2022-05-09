@@ -183,7 +183,7 @@ def store_dict(data: dict, filename: str):
 
 
 def load_dict(filename: str) -> defaultdict(int):
-    logger.info(f"loading {filename}")
+    # logger.info(f"loading {filename}")
     if isfile(filename):
         with open(filename, 'rb') as fp:
             return pickle.load(fp)
