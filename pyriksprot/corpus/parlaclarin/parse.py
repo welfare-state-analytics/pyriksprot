@@ -17,6 +17,7 @@ MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 # pylint: disable=too-many-statements
 
+
 class XmlProtocol(abc.ABC):
     def __init__(self, data: str, segment_skip_size: int = 0, delimiter: str = '\n'):
 
