@@ -316,12 +316,12 @@ def test_load_protocols_from_folder():
     'protocol_name,merge_strategy,expected_speech_count',
     [
         ('prot-1955--ak--22', 'who_sequence', 149),
-        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 149),
+        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 151),
         ('prot-1955--ak--22', 'speaker_note_id_sequence', 151),
-        ('prot-1955--ak--22', 'chain', 150),
+        ('prot-1955--ak--22', 'chain', 151),
         ('prot-199192--127', 'who_sequence', 220),
-        ('prot-199192--127', 'who_speaker_note_id_sequence', 220),
-        ('prot-199192--127', 'speaker_note_id_sequence', 222),
+        ('prot-199192--127', 'who_speaker_note_id_sequence', 231),
+        ('prot-199192--127', 'speaker_note_id_sequence', 231),
         ('prot-199192--127', 'chain', 231),
     ],
 )
