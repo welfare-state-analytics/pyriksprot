@@ -121,11 +121,20 @@ test-data-corpus-config:
 ACTUAL_TAG:=$(RIKSPROT_REPOSITORY_TAG)
 .PHONY: extract-speeches-to-feather
 extract-speeches-to-feather:
-	@PYTHONPATH=. python pyriksprot/scripts/riksprot2speech.py --compress-type feather \
-	 	--target-type single-id-tagged-frame-per-group --skip-stopwords --skip-text --lowercase --skip-puncts --force \
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech.py \
+		--compress-type feather \
+		--merge-strategy chain \
+	 	--target-type single-id-tagged-frame-per-group \
+		--skip-stopwords  \
+		--skip-text \
+		--lowercase \
+		--skip-puncts \
+		--force \
 		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG) \
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
 				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.beta.feather
+
+
 
 ########################################################################################################
 # PURGATORY
