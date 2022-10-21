@@ -25,7 +25,7 @@ CLI_OPTIONS = {
     '--dedent': dict(default=False, is_flag=True, help='Remove indentation'),
     '--dehyphen': dict(default=False, is_flag=True, help='Dehyphen text'),
     '--group-key': dict(help='Partition key(s)', multiple=True, type=click.STRING),
-    '--lowercase': dict(default=True, type=click.BOOL, is_flag=True, help='Lowercase tokem/text'),
+    '--lowercase': dict(default=True, type=click.BOOL, is_flag=True, help='Lowercase token/text'),
     '--merge-strategy': dict(default='chain', type=click.Choice(MERGE_STRATEGIES), help='Merge strategy'),
     '--multiproc-keep-order': dict(default=False, is_flag=True, help='Process is sort order (slower, multiproc)'),
     '--multiproc-processes': dict(default=None, type=click.IntRange(1, 40), help='Number of processes to use'),
