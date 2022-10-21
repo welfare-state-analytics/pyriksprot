@@ -109,12 +109,12 @@ def test_person_index(person_index: md.PersonIndex):
         == sorted(person.terms_of_office, key=lambda x: x.start_year)
         == sorted(
             [
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1983, end_year=1985),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1985, end_year=1988),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1988, end_year=1991),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1991, end_year=1994),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1994, end_year=1998),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1998, end_year=2002),
+                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1983, end_year=1985),
+                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1985, end_year=1988),
+                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1988, end_year=1991),
+                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1991, end_year=1994),
+                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1994, end_year=1998),
+                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1998, end_year=2002),
             ],
             key=lambda x: x.start_year,
         )

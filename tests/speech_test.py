@@ -183,18 +183,18 @@ Hence it is (for now) commented out.
 @pytest.mark.parametrize(
     'filename, speech_count, strategy',
     [
-        ("prot-1933--fk--5.xml", 1, ts.MergeStrategyType.chain),
-        ("prot-1933--fk--5.xml", 1, ts.MergeStrategyType.who_speaker_note_id_sequence),
-        # ("prot-1933--fk--5.xml", 1, ts.MergeStrategyType.speaker_note_id_sequence),
-        ('prot-1933--fk--5.xml', 1, ts.MergeStrategyType.who_sequence),
-        ("prot-1955--ak--22.xml", 151, ts.MergeStrategyType.chain),
-        ("prot-1955--ak--22.xml", 151, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.chain),
+        ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        ('prot-1933--fk--5.xml', 0, ts.MergeStrategyType.who_sequence),
+        ("prot-1955--ak--22.xml", 163, ts.MergeStrategyType.chain),
+        ("prot-1955--ak--22.xml", 163, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        ("prot-1955--ak--22.xml", 160, ts.MergeStrategyType.who_sequence),
+        ('prot-199192--127.xml', 248, ts.MergeStrategyType.chain),
+        ('prot-199192--127.xml', 53, ts.MergeStrategyType.who),
+        ('prot-199192--127.xml', 248, ts.MergeStrategyType.who_sequence),
+        ('prot-199192--127.xml', 248, ts.MergeStrategyType.who_speaker_note_id_sequence),
         # ("prot-1955--ak--22.xml", 149, ts.MergeStrategyType.speaker_note_id_sequence),
-        ("prot-1955--ak--22.xml", 149, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 231, ts.MergeStrategyType.chain),
-        ('prot-199192--127.xml', 52, ts.MergeStrategyType.who),
-        ('prot-199192--127.xml', 220, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 231, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        # ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.speaker_note_id_sequence),
         # ('prot-199192--127.xml', 208, ts.MergeStrategyType.speaker_note_id_sequence),
     ],
 )
@@ -249,7 +249,6 @@ def test_store_protocols(storage_format: interface.StorageFormat):
         utterances=[
             interface.Utterance(
                 u_id='i-1',
-                n='c01',
                 who='A',
                 speaker_note_id='a1',
                 prev_id=None,
@@ -315,14 +314,14 @@ def test_load_protocols_from_folder():
 @pytest.mark.parametrize(
     'protocol_name,merge_strategy,expected_speech_count',
     [
-        ('prot-1955--ak--22', 'who_sequence', 149),
-        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 151),
-        ('prot-1955--ak--22', 'speaker_note_id_sequence', 151),
-        ('prot-1955--ak--22', 'chain', 151),
-        ('prot-199192--127', 'who_sequence', 220),
-        ('prot-199192--127', 'who_speaker_note_id_sequence', 231),
-        ('prot-199192--127', 'speaker_note_id_sequence', 231),
-        ('prot-199192--127', 'chain', 231),
+        ('prot-1955--ak--22', 'who_sequence', 160),
+        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 163),
+        ('prot-1955--ak--22', 'speaker_note_id_sequence', 163),
+        ('prot-1955--ak--22', 'chain', 163),
+        ('prot-199192--127', 'who_sequence', 248),
+        ('prot-199192--127', 'who_speaker_note_id_sequence', 248),
+        ('prot-199192--127', 'speaker_note_id_sequence', 248),
+        ('prot-199192--127', 'chain', 248),
     ],
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):

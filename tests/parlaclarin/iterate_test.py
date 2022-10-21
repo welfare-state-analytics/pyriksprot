@@ -35,7 +35,7 @@ def test_segment_iterator_when_segment_is_speech(iterator_class):
         )
     )
 
-    assert len(texts) == 426
+    assert len(texts) == 475
     assert all(x.u_id for x in texts)
     assert all(x.id == x.u_id for x in texts)
     assert all(x.speaker_note_id for x in texts)
@@ -44,7 +44,7 @@ def test_segment_iterator_when_segment_is_speech(iterator_class):
     # assert not any(not x.page_number for x in texts) # FAILS [x for x in texts if x.page_number == ""]
 
     """This might be data error"""
-    assert 3 == len([x for x in texts if x.speaker_note_id == "missing"])
+    assert 2 == len([x for x in texts if x.speaker_note_id == "missing"])
 
 
 @pytest.mark.parametrize(
@@ -126,14 +126,14 @@ def test_xml_protocol_texts_iterator_texts():
             merge_strategy='chain',
         )
     )
-    assert len(texts) == 426
+    assert len(texts) == 475
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
-    assert len(texts) == 122
+    assert len(texts) == 145
 
     texts1 = list(
         parlaclarin.XmlUntangleSegmentIterator(
