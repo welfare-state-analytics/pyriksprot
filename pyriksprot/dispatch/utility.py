@@ -16,7 +16,7 @@ def hashcoder_with_no_grouping_keys(item: iterate.ProtocolSegment, **_) -> tuple
 
 def create_grouping_hashcoder(
     grouping_keys: list[str],
-) -> Callable[[iterate.ProtocolSegment, corpus_index.CorpusSourceItem], str]:
+) -> Callable[[iterate.ProtocolSegment, corpus_index.ICorpusSourceItem], str]:
     """Create a hashcode function for given grouping keys"""
 
     grouping_keys: set[str] = set(grouping_keys)
@@ -26,12 +26,12 @@ def create_grouping_hashcoder(
         return hashcoder_with_no_grouping_keys
 
     speaker_keys, item_keys, corpus_index_keys = utility.split_properties_by_dataclass(
-        grouping_keys, md.SpeakerInfo, iterate.ProtocolSegment, corpus_index.CorpusSourceItem
+        grouping_keys, md.SpeakerInfo, iterate.ProtocolSegment, corpus_index.ICorpusSourceItem
     )
 
-    def hashcoder(item: iterate.ProtocolSegment, source_item: corpus_index.CorpusSourceItem) -> tuple[dict, str, str]:
+    def hashcoder(item: iterate.ProtocolSegment, source_item: corpus_index.ICorpusSourceItem) -> tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
-        assert isinstance(source_item, corpus_index.CorpusSourceItem)
+        assert issubclass(type(source_item), corpus_index.ICorpusSourceItem)
         try:
             speaker_data: dict = (
                 {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys} if speaker_keys else {}

@@ -1,7 +1,7 @@
 # type: ignore
 
 from . import metadata
-from .corpus.corpus_index import CorpusSourceIndex, CorpusSourceItem
+from .corpus.corpus_index import CorpusSourceIndex, ICorpusSourceItem
 from .corpus.iterate import ProtocolSegment, ProtocolSegmentIterator
 from .corpus.parlaclarin import pretokenize
 from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService

@@ -19,21 +19,19 @@ Creates a recursive index of files in a source folder that match given pattern.
 
 
 @dataclass
-class CorpusSourceItem:
+class ICorpusSourceItem:
 
     path: str
     filename: str = None
     name: str = None
     subfolder: str = None
     year: Optional[int] = None
-    metadata: dict | None = None
 
     def __post_init__(self):
 
         self.filename = basename(self.path)
         self.name = utility.strip_path_and_extension(self.path)
         self.subfolder = basename(dirname(self.path))
-        self.metadata = load_metadata(self.path)
 
         if not self.name.startswith("prot-"):
             raise ValueError(f"illegal filename {self.name}")
@@ -41,26 +39,41 @@ class CorpusSourceItem:
         """Year extracted from filename"""
         self.year = int(self.filename.split("-")[1][:4])
 
-        """Year from data in metadata (the actual year)"""
-        self.actual_year = int(self.metadata['date'][:4]) if self.metadata else self.year
-
     @property
     def is_empty(self) -> bool:
-        return not bool(self.metadata)
+        return False
 
     def to_dict(self) -> dict:
 
         return asdict(self)
 
+@dataclass
+class TaggedCorpusSourceItem(ICorpusSourceItem):
+
+    metadata: dict | None = None
+    # actual_year: int = None
+
+    def __post_init__(self):
+
+        super().__post_init__()
+        self.metadata = load_metadata(self.path)
+        """Year from data in metadata (the actual year)"""
+        # self.actual_year = int(self.metadata['date'][:4]) if self.metadata else self.year
+
+    @property
+    def is_empty(self) -> bool:
+        """Checks if file is empty. Only valid for tagged ZIP files"""
+        return not bool(self.metadata)
+
 
 @dataclass
 class CorpusSourceIndex:
-    def __init__(self, source_items: List[CorpusSourceItem]):
+    def __init__(self, source_items: list[ICorpusSourceItem]):
 
-        self.source_items: List[CorpusSourceItem] = source_items
+        self.source_items: list[ICorpusSourceItem] = source_items
         self.lookup: dict = {x.name: x for x in self.source_items}
 
-    def __getitem__(self, key: str) -> CorpusSourceItem:
+    def __getitem__(self, key: str) -> ICorpusSourceItem:
         return self.lookup.get(key)
 
     def __contains__(self, key: str) -> bool:
@@ -83,7 +96,7 @@ class CorpusSourceIndex:
             None if years is None else (set(utility.parse_range_list(years)) if isinstance(years, str) else set(years))
         )
 
-        source_items = [CorpusSourceItem(path=path) for path in paths]
+        source_items = [CorpusSourceIndex.create(path=path) for path in paths]
 
         if target_years is not None:
             source_items = [x for x in source_items if x.year in target_years]
@@ -94,6 +107,12 @@ class CorpusSourceIndex:
         source_index: CorpusSourceIndex = CorpusSourceIndex(source_items)
 
         return source_index
+
+    @staticmethod
+    def create(path: str) -> ICorpusSourceItem:
+        if path.endswith("zip"):
+            return TaggedCorpusSourceItem(path)
+        return ICorpusSourceItem(path)
 
     @property
     def filenames(self) -> List[str]:
@@ -113,6 +132,6 @@ class CorpusSourceIndex:
     @staticmethod
     def read_csv(filename: str) -> "CorpusSourceIndex":
         df: pd.DataFrame = pd.read_csv(filename, sep="\t", index_col=None)
-        source_items: List[CorpusSourceItem] = [CorpusSourceItem(**d) for d in df.to_dict('records')]
+        source_items: list[ICorpusSourceItem] = [ICorpusSourceItem(**d) for d in df.to_dict('records')]
         source_index: CorpusSourceIndex = CorpusSourceIndex(source_items)
         return source_index

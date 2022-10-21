@@ -60,7 +60,7 @@ class SegmentMerger:
             current_temporal_value: str = None
             current_group: dict[str, DispatchItem] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
-            source_item: corpus_index.CorpusSourceItem
+            source_item: corpus_index.ICorpusSourceItem
 
             if grouping_keys and getattr(iterator, 'segment_level', None) == SegmentLevel.Protocol:
                 raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
@@ -111,7 +111,7 @@ class SegmentMerger:
             logger.exception(ex)
             raise
 
-    def to_year(self, source_item: corpus_index.CorpusSourceItem, temporal_key: TemporalKey) -> int:
+    def to_year(self, source_item: corpus_index.ICorpusSourceItem, temporal_key: TemporalKey) -> int:
         """Compute a year that represents the group."""
         if temporal_key == TemporalKey.Decade:
             return source_item.year - source_item.year % 10

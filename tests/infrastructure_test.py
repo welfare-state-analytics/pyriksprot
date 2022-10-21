@@ -56,3 +56,10 @@ def test_setup_sample_speech_corpora():
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_test_corpora():
     ensure_test_corpora_exist(force=True)
+
+@pytest.mark.skip(reason="Test infrastructure debug test")
+def test_create_matadatabase():
+    filename = "metadata/riksprot_metadata.v0.4.6.db"
+    branch = None
+    folder = "./metadata/data/v0.4.6"
+    md.create_database(database_filename=filename, branch=branch, folder=folder, force=True)
