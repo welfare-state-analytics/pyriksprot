@@ -8,7 +8,7 @@ from pyriksprot.dispatch import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
 from pyriksprot.workflows import extract_text
 
-from .utils import option2, update_arguments_from_options_file
+from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 
 # pylint: disable=too-many-arguments, unused-argument
 
@@ -72,3 +72,32 @@ def main(
 
 if __name__ == "__main__":
     main()
+
+    # from click.testing import CliRunner
+
+    # runner = CliRunner()
+    # result = runner.invoke(
+    #     main,
+    #     [
+    #         "--multiproc-processes",
+    #         "1",
+    #         "--compress-type",
+    #         "zip",
+    #         "--segment-level",
+    #         "speech",
+    #         "--target-type",
+    #         "files-in-zip",
+    #         "--temporal-key",
+    #         "decade",
+    #         "--group-key",
+    #         "gender_id",
+    #         "--force",
+    #         "/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/",
+    #         "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db",
+    #         "apa.zip",
+    #     ],
+    # )
+
+    # print(result.output)
+
+    # PYTHONPATH=. python pyriksprot/scripts/riksprot2text.py --multiproc-processes 1 --compress-type zip --segment-level speech --target-type files-in-zip --temporal-key decade --group-key gender_id --force /data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/ /data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db apa.zip
