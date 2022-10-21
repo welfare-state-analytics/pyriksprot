@@ -73,11 +73,7 @@ def extract_corpus_text(
     )
 
     dehypenator = create_dehyphen(data_path) if dehyphen else None
-
-    get_speaker = None
-    if segment_level == interface.SegmentLevel.Speech:
-        speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
-        get_speaker = speaker_service.get_speaker_info
+    speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     def preprocess(item: ProtocolSegment) -> None:
 
@@ -87,15 +83,15 @@ def extract_corpus_text(
         if dehypenator:
             item.data = dehypenator(item.data)  # pylint: disable=not-callable
 
-        if get_speaker:
-            item.speaker_info = get_speaker(item.u_id, item.who, item.year)
+        if segment_level not in ('protocol', None):
+            item.speaker_info =  speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
     segments: iterate.XmlUntangleSegmentIterator = iterate.XmlUntangleSegmentIterator(
         filenames=source_index.paths,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,
-        multiproc_processes=multiproc_processes,
         multiproc_keep_order=multiproc_keep_order,
+        multiproc_processes=multiproc_processes,
         multiproc_chunksize=multiproc_chunksize,
         preprocess=preprocess,
     )
