@@ -66,11 +66,13 @@ RIKSPROT_METADATA_TABLES: dict = {
         'end': 'date',
         # ':options:': {'auto_increment': 'government_id'},
         ':index:': {},
+        ':drop_duplicates:': 'government',
     },
     'location_specifier': {
         # 'location_specifier_id': 'AUTO_INCREMENT',
         'person_id': 'text references person (person_id) not null',
         'location': 'text',
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'member_of_parliament': {
         # 'member_of_parliament_id': 'AUTO_INCREMENT',
@@ -80,6 +82,7 @@ RIKSPROT_METADATA_TABLES: dict = {
         'role': 'text',
         'start': 'date',
         'end': 'date',
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'minister': {
         'person_id': 'text references person (person_id) not null',
@@ -87,11 +90,13 @@ RIKSPROT_METADATA_TABLES: dict = {
         'role': 'text',
         'start': 'date',
         'end': 'date',
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'name': {
         'person_id': 'text references person (person_id) not null',
         'name': 'text not null',
         'primary_name': 'integer not null',
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'party_abbreviation': {
         'party': 'text',
@@ -103,7 +108,7 @@ RIKSPROT_METADATA_TABLES: dict = {
         'party': 'text',
         'start': 'int',
         'end': 'int',
-        # ':loaded_hook:': _to_year_period
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'person': {
         'person_id': 'text primary key',
@@ -113,17 +118,20 @@ RIKSPROT_METADATA_TABLES: dict = {
         'wiki_id': 'text',
         'riksdagen_guid': 'text',
         'riksdagen_id': 'text',
-        ':drop_duplicates:': 'person_id',
+        ':drop_duplicates:': 'wiki_id',
+        ':copy_column:': {'person_id': 'wiki_id'},
     },
     'speaker': {
         'person_id': 'text references person (person_id) not null',
         'role': 'text',
         'start': 'date',
         'end': 'date',
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'twitter': {
         'twitter': 'text',  # primary key',
         'person_id': 'text references person (person_id) not null',
+        ':rename_column:': {'wiki_id': 'person_id'},
     },
     'unknowns': {
         'protocol_id': 'text',  # primary key',
@@ -228,9 +236,14 @@ def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, 
     ]
 
     for tablename in person_tables:
+
         filename: str = f"{tablename}.csv"
+
         table: pd.DataFrame = pd.read_csv(jj(source_metadata, filename), sep=',', index_col=None)
-        table = table[table['person_id'].isin(person_ids)]
+
+        id_name = 'wiki_id' if 'wiki_id' in table.columns else 'person_id'
+        table = table[table[id_name].isin(person_ids)]
+
         table.to_csv(jj(target_folder, filename), sep=',', index=False)
 
     unknowns: pd.DataFrame = pd.read_csv(jj(source_metadata, "unknowns.csv"), sep=',', index_col=None)
@@ -259,6 +272,32 @@ def sql_ddl_insert(*, tablename: str, columns: list[str]) -> str:
     """
     return insert_sql
 
+def transform_table(table: pd.DataFrame, specification: dict) -> pd.DataFrame:
+
+    table = table.copy()
+
+    if ':drop_duplicates:' in specification:
+        table = table.drop_duplicates(subset=specification[':drop_duplicates:'], keep='first')
+
+    if ':rename_column:' in specification:
+        assert isinstance(specification[':rename_column:'], dict)
+        for k, v in specification[':rename_column:'].items():
+            table = table.rename(columns={k: v})
+
+    if ':copy_column:' in specification:
+        assert isinstance(specification[':copy_column:'], dict)
+        for k, v in specification[':copy_column:'].items():
+            table[k] = table[v]
+
+    # if ':loaded_hook:' in specification:
+    #     table = specification[':loaded_hook:'](table)
+
+    for c in table.columns:
+        if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
+            table[c] = [int(x) for x in table[c]]
+
+    return table
+
 
 def create_database(
     database_filename: str,
@@ -286,24 +325,18 @@ def create_database(
     for tablename, specification in RIKSPROT_METADATA_TABLES.items():
         logger.info(f"loading table: {tablename}")
 
-        if ':url:' in specification and folder is None:
-            table: pd.DataFrame = pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
-        else:
-            table: pd.DataFrame = smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
+        table: pd.DataFrame = (
+            pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
+            if ':url:' in specification and folder is None
+            else smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
+        )
 
-        if ':drop_duplicates:' in specification:
-            table = table.drop_duplicates(subset='person_id', keep='first')
-
-        # if ':loaded_hook:' in specification:
-        #     table = specification[':loaded_hook:'](table)
-
-        for c in table.columns:
-            if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
-                table[c] = [int(x) for x in table[c]]
+        table = transform_table(table, specification=specification)
 
         with closing(db.cursor()) as cursor:
             columns: list[str] = [k for k in specification if k[0] not in "+:"]
             data = table[columns].to_records(index=False)
+            # data = table.to_records(index=False)
             insert_sql = sql_ddl_insert(tablename=tablename, columns=columns)
             cursor.executemany(insert_sql, data)
 
