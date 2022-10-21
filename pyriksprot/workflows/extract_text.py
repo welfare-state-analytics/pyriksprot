@@ -84,7 +84,7 @@ def extract_corpus_text(
             item.data = dehypenator(item.data)  # pylint: disable=not-callable
 
         if segment_level not in ('protocol', None):
-            item.speaker_info =  speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
+            item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 
     segments: iterate.XmlUntangleSegmentIterator = iterate.XmlUntangleSegmentIterator(
         filenames=source_index.paths,

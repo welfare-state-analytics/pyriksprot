@@ -8,6 +8,7 @@ from pyriksprot import interface
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.workflows import tag
 
+
 @pytest.mark.parametrize('storage_format', [interface.StorageFormat.JSON, interface.StorageFormat.CSV])
 def test_store_protocols(storage_format: interface.StorageFormat):
     protocol: interface.Protocol = interface.Protocol(

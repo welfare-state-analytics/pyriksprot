@@ -272,6 +272,7 @@ def sql_ddl_insert(*, tablename: str, columns: list[str]) -> str:
     """
     return insert_sql
 
+
 def transform_table(table: pd.DataFrame, specification: dict) -> pd.DataFrame:
 
     table = table.copy()

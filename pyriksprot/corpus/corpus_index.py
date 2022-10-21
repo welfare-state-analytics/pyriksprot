@@ -47,6 +47,7 @@ class ICorpusSourceItem:
 
         return asdict(self)
 
+
 @dataclass
 class TaggedCorpusSourceItem(ICorpusSourceItem):
 

@@ -6,9 +6,8 @@ import click
 
 from pyriksprot.dispatch import dispatch
 from pyriksprot.interface import GroupingKey, SegmentLevel, TemporalKey
-from pyriksprot.workflows import extract_text
-
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
+from pyriksprot.workflows import extract_text
 
 # pylint: disable=too-many-arguments, unused-argument
 
