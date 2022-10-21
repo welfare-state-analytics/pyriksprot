@@ -105,7 +105,6 @@ class Utterance:
         u_id: str,
         speaker_note_id: str,
         who: str,
-        n: str = "",
         prev_id: str = None,
         next_id: str = None,
         paragraphs: Union[list[str], str] = None,
@@ -121,7 +120,6 @@ class Utterance:
             # raise ValueError(f"utterance {u_id}: empty speaker_note_id not allowed")
 
         self.u_id: str = u_id
-        self.n: str = n
         self.who: str = who
         self.prev_id: str = prev_id if isinstance(prev_id, str) else None
         self.next_id: str = next_id if isinstance(next_id, str) else None
@@ -174,7 +172,6 @@ class UtteranceHelper:
         return [
             {
                 'u_id': u.u_id,
-                'n': u.n,
                 'who': u.who,
                 'speaker_note_id': u.speaker_note_id,
                 'prev_id': u.prev_id,

@@ -92,7 +92,7 @@ class XmlUntangleProtocol(XmlProtocol):
     def create_utterances(self) -> List[interface.Utterance]:
 
         utterances: List[interface.Utterance] = []
-        page_number: str = None
+        page_number: int = -1
 
         parent: untangle.Element = self.get_content_root()
         if parent is None:
@@ -104,7 +104,7 @@ class XmlUntangleProtocol(XmlProtocol):
         for child in parent.children:
 
             if child.name == 'pb':
-                page_number = child['n']
+                page_number += 1
 
             elif child.name == "note":
 
@@ -130,7 +130,7 @@ class XmlUntangleProtocol(XmlProtocol):
                 utterances.append(
                     UtteranceMapper.create(
                         element=child,
-                        page_number=page_number,
+                        page_number=str(page_number),
                         speaker_note_id=speaker_note_id,
                     )
                 )
@@ -181,7 +181,6 @@ class UtteranceMapper:
             prev_id=element.get_attribute('prev'),
             next_id=element.get_attribute('next'),
             paragraphs=UtteranceMapper.to_paragraphs(element, dedent),
-            n=element.get_attribute('n'),
         )
         return utterance
 
@@ -257,7 +256,7 @@ class XmlIterParseProtocol(XmlProtocol):
             context = ET.iterparse(self.filename, events=("start", "end"))
 
             context = iter(context)
-            current_page: int = 0
+            current_page: int = -1
             current_utterance: interface.Utterance = None
             speaker_note_id: str = MISSING_SPEAKER_NOTE_ID
             is_preface: bool = False
@@ -288,7 +287,7 @@ class XmlIterParseProtocol(XmlProtocol):
                                 pass
 
                     elif tag == "pb":
-                        current_page = elem.attrib['n']
+                        current_page += 1
 
                     elif tag == "u":
                         is_preface = False
@@ -297,13 +296,12 @@ class XmlIterParseProtocol(XmlProtocol):
                             speaker_note_id = MISSING_SPEAKER_NOTE_ID
 
                         current_utterance: interface.Utterance = interface.Utterance(
-                            page_number=current_page,
+                            page_number=str(current_page),
                             speaker_note_id=speaker_note_id,
                             u_id=elem.attrib.get(XML_ID),
                             who=elem.attrib.get('who'),
                             prev_id=elem.attrib.get('prev'),
                             next_id=elem.attrib.get('next'),
-                            n=elem.attrib.get('n'),
                             paragraphs=[],
                         )
                         previous_who = elem.attrib.get('who')

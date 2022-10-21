@@ -206,7 +206,6 @@ TAGGED_CSV_STR = (
 UTTERANCES_DICTS = [
     {
         'u_id': 'i-1',
-        'n': 'c01',
         'who': 'A',
         'prev_id': None,
         'next_id': 'i-2',
@@ -218,7 +217,6 @@ UTTERANCES_DICTS = [
     },
     {
         'u_id': 'i-2',
-        'n': 'c02',
         'who': 'A',
         'prev_id': 'i-1',
         'next_id': None,
@@ -230,7 +228,6 @@ UTTERANCES_DICTS = [
     },
     {
         'u_id': 'i-3',
-        'n': 'c03',
         'who': 'B',
         'prev_id': None,
         'next_id': None,
@@ -242,7 +239,6 @@ UTTERANCES_DICTS = [
     },
     {
         'u_id': 'i-4',
-        'n': 'c03',
         'who': 'B',
         'prev_id': None,
         'next_id': None,
@@ -254,7 +250,6 @@ UTTERANCES_DICTS = [
     },
     {
         'u_id': 'i-5',
-        'n': 'c09',
         'who': 'A',
         'prev_id': None,
         'next_id': None,
@@ -271,7 +266,6 @@ def create_utterances() -> List[interface.Utterance]:
     return [
         interface.Utterance(
             u_id='i-1',
-            n='c01',
             who='A',
             speaker_note_id="a1",
             prev_id=None,
@@ -282,7 +276,6 @@ def create_utterances() -> List[interface.Utterance]:
         ),
         interface.Utterance(
             u_id='i-2',
-            n='c02',
             who='A',
             speaker_note_id="a1",
             prev_id='i-1',
@@ -293,7 +286,6 @@ def create_utterances() -> List[interface.Utterance]:
         ),
         interface.Utterance(
             u_id='i-3',
-            n='c03',
             who='B',
             speaker_note_id="b1",
             prev_id=None,
@@ -304,7 +296,6 @@ def create_utterances() -> List[interface.Utterance]:
         ),
         interface.Utterance(
             u_id='i-4',
-            n='c03',
             who='B',
             speaker_note_id="b2",
             prev_id=None,
@@ -315,7 +306,6 @@ def create_utterances() -> List[interface.Utterance]:
         ),
         interface.Utterance(
             u_id='i-5',
-            n='c09',
             who='A',
             speaker_note_id="a2",
             prev_id=None,

@@ -22,12 +22,12 @@ def log_utterance_sequence(xml_protocol: str | parlaclarin.XmlUntangleProtocol, 
 
     speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
     previous_who: str = None
-    page_id: int = 0
+    page_id: int = -1
 
     for child in xml_protocol.get_content_root().children:
 
         if child.name == "pb":
-            page_id = int(child['n'])
+            page_id += 1
 
         if child.name == "note":
             if child['type'] == "speaker":
