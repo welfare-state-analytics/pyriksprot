@@ -9,8 +9,8 @@ rule-assign-party:
   - name: "Person has many parties"
     when:
       - persons.party_id is NULL
-      - person_id is not "unknown"
-      - persons.person_id is in person_multiple_party
+      - wiki_id is not "unknown"
+      - persons.wiki_id is in person_multiple_party
     action:
       - rule:
         name: "Party specification spans year"
@@ -35,7 +35,7 @@ rule-assign-party:
 
   - name: "Person is unknown"
     when:
-      - person_id is "unknown"
+      - wiki_id is "unknown"
     action:
       - rule:
         name: "Party specified in unknowns metadata"
@@ -49,12 +49,12 @@ rule-assign-gender:
   - description: "Assign gender to utterance"
   - name: "Person is known"
     when:
-      - persons.person_id is not "unknown"
+      - persons.wiki_id is not "unknown"
     action:
       - gender_id := person.gender_id
   - name: "Person is unknown"
     when:
-      - persons.person_id is "unknown"
+      - persons.wiki_id is "unknown"
       - u_id is in unknowns
       - unknowns[u_id].gender_id is not null
     action:
@@ -68,7 +68,7 @@ rule-assign-terms-of-office:
   - description: "Assign terms-of-office to utterance"
   - name: "Person is known"
     when:
-      - persons.person_id is not "unknown"
+      - persons.wiki_id is not "unknown"
     action:
       - gender_id := person.gender_id
     otherwise:

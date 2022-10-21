@@ -26,7 +26,7 @@ The extracted text can be stored as optionally compressed plain text files on di
 
 ## Pre-requisites
 
-- Python >=3.8
+- Python >=3.9
 - A folder containing the Riksdagen Protokoll (parliamentary protocols) Github repository.
 
 ```bash
