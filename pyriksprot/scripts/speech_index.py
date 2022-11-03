@@ -7,6 +7,7 @@ import click
 
 from pyriksprot import interface, to_speech
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
+from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows.speech_index import extract_speech_index
 
 jj = os.path.join
@@ -31,7 +32,7 @@ def main(
     multiproc_processes: int = 1,
 ):
     """Extracts a speech index from given speech corpus"""
-    arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
+    arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name))
     arguments['merge_strategy'] = to_speech.MergeStrategyType(arguments['merge_strategy'])
 
     try:

@@ -7,6 +7,7 @@ import click
 from pyriksprot import interface
 from pyriksprot.dispatch import dispatch
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
+from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_tags
 
 sys.path.insert(0, '.')
@@ -70,7 +71,7 @@ def main(
     force: bool = False,
 ):
     try:
-        arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
+        arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name))
         arguments['content_type'] = interface.ContentType(arguments['content_type'])
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 

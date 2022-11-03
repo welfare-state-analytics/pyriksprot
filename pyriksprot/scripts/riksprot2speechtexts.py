@@ -7,6 +7,7 @@ import click
 from pyriksprot.dispatch import dispatch
 from pyriksprot.interface import GroupingKey, TemporalKey
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
+from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_speech
 
 # pylint: disable=too-many-arguments, unused-argument
@@ -56,7 +57,9 @@ def main(
     force: bool = False,
 ):
     try:
-        arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
+        arguments: dict = update_arguments_from_options_file(
+            arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)
+        )
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
         arguments['group_keys'] = arguments['group_key']
         del arguments['group_key']

@@ -3,6 +3,7 @@ import click
 from pyriksprot import interface, to_speech
 from pyriksprot.dispatch import dispatch
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
+from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_tags
 
 # pylint: disable=too-many-arguments, unused-argument
@@ -41,7 +42,9 @@ def main(
     lowercase: bool = True,
     force: bool = False,
 ):
-    arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename')
+    arguments: dict = update_arguments_from_options_file(
+        arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)
+    )
     arguments['content_type'] = interface.ContentType(arguments['content_type'])
     arguments['merge_strategy'] = to_speech.MergeStrategyType(arguments['merge_strategy'])
     arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())

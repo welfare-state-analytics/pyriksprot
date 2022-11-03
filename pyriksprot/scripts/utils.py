@@ -51,6 +51,7 @@ def update_arguments_from_options_file(
     log_args: bool = True,
     ctx: click.Context = None,
     skip_keys: str = 'ctx,options_filename',
+    suffix: str = None
 ) -> dict:
     """Updates `arguments` based on values found in file specified by `filename_key`.
     Values specified at the command line overrides values from options file."""
@@ -66,12 +67,12 @@ def update_arguments_from_options_file(
             del arguments[k]
 
     if log_args:
-        log_arguments(arguments)
+        log_arguments(arguments, suffix=suffix)
 
     return arguments
 
 
-def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename') -> None:
+def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename', suffix: str=None) -> None:
     def fix_value(v: Any):
         if isinstance(v, tuple):
             v = list(v)
@@ -87,6 +88,10 @@ def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,option
     os.makedirs(log_dir, exist_ok=True)
 
     log_name: str = utility.ts_data_path(log_dir, f"{cli_command}.yml")
+
+    if suffix is not None:
+        log_name = utility.path_add_suffix(log_name, suffix=suffix)
+
     log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(',')}
     utility.write_yaml(log_args, log_name)
 
