@@ -25,7 +25,7 @@ class Codec:
     type: Literal['encoder', 'decoder']
     from_column: str
     to_column: str
-    fx: Callable[[int], str]
+    get: Callable[[int], str]
     default: str = None
 
 
@@ -94,6 +94,15 @@ class Codecs:
             Codec('encode', 'sub_office_type', 'sub_office_type_id', self.sub_office_type2id.get),
         ]
 
+    def lookup_name(self, key: str, key_id: int, default_value: str = "unknown") -> str:
+        return self.decoder(key=key).get(key_id, default_value)
+
+    def decoder(self, key: str) -> Codec:
+        return next((x for x in self.decoders if x.from_column == key), {})
+
+    def encoder(self, key: str) -> Codec:
+        return next((x for x in self.encoders if x.from_column == key), lambda _: 0)
+
     @property
     def decoders(self) -> list[Codec]:
         return [c for c in self.codecs if c.type == 'decode']
@@ -107,7 +116,7 @@ class Codecs:
         for codec in codecs:
             if codec.from_column in df.columns:
                 if codec.to_column not in df:
-                    df[codec.to_column] = df[codec.from_column].apply(codec.fx)
+                    df[codec.to_column] = df[codec.from_column].apply(codec.get)
                 if codec.default is not None:
                     df[codec.to_column] = df[codec.to_column].fillna(codec.default)
             if drop:
