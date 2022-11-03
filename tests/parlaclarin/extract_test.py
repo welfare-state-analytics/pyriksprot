@@ -127,9 +127,7 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
     g: dict[str, merge.DispatchItem] = groups[0]
     key = list(g.keys())[0]  # '72e6f6e0f08ca88f02b1480464afd55b'
     data = g[key]
-    # FIXME: 'who' is added to values (bugfix)
-    # assert set(data.grouping_keys) == {'gender_id', 'party_id'}
-    assert set(data.group_values.keys()) == {'gender_id', 'party_id', 'who'}
+    assert set(data.group_values.keys()) == {'gender_id', 'party_id'}
 
 
 def test_extract_corpus_text_yearly_grouped_by_party():
@@ -216,3 +214,25 @@ def test_aggregator_extract_gender_party_no_temporal_key():
     assert os.path.isfile(target_filename)
 
     os.unlink(target_filename)
+
+
+def test_extract_corpus_with_sorted_files():
+    target_name: str = f'tests/output/{uuid.uuid1()}.zip'
+
+    def file_namer():
+        return None
+
+    workflows.extract_corpus_text(
+        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
+        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        target_name=target_name,
+        target_type='files-in-zip',
+        segment_level=interface.SegmentLevel.Speech,
+        temporal_key=None,
+        group_keys=None,
+        file_namer=file_namer,
+    )
+
+    assert os.path.isfile(target_name)
+
+    os.unlink(target_name)

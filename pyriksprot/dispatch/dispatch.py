@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import os
+import string
 import sys
 import zipfile
 from collections import defaultdict
@@ -13,12 +14,16 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.dispatch.item import DispatchItem
+from pyriksprot.dispatch.utility import to_temporal_category
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
+from pyriksprot.foss.sparv_tokenize import default_tokenize
 from pyriksprot.foss.stopwords import STOPWORDS
+from pyriksprot.metadata import Codecs
 
 from .. import utility
-from ..interface import IDispachItem, SegmentLevel
+from ..interface import IDispatchItem, SegmentLevel
 
 jj = os.path.join
 
@@ -30,7 +35,10 @@ TargetTypeKey = Literal[
     'checkpoint-per-group',
     'files-in-folder',
     'one-hot-sparse',
+    'sorted-speeches-in-zip',
 ]
+
+PERSON_ATTRIBUTES = {'sub_office_type_id', 'office_type_id', 'protocol_name', 'gender_id', 'party_id'}
 
 
 class CompressType(str, Enum):
@@ -59,7 +67,7 @@ class IDispatcher(abc.ABC):
 
     name: str = 'parent'
 
-    def __init__(self, *, target_name: str, compress_type: CompressType, **kwargs):
+    def __init__(self, *, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
         """Dispatches text blocks to a target_name zink.
 
         Args:
@@ -73,6 +81,7 @@ class IDispatcher(abc.ABC):
         self.kwargs: dict = kwargs
         self.lowercase: bool = kwargs.get('lowercase', False)
         self.skip_stopwords: bool = kwargs.get('skip_stopwords', False)
+        self.lookups: Codecs = lookups
 
     def __enter__(self) -> IDispatcher:
         self.open_target(self.target_name)
@@ -98,7 +107,7 @@ class IDispatcher(abc.ABC):
         """Dispatch an index of dispatched documents."""
         ...
 
-    def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
+    def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
         for item in dispatch_items:
             self._dispatch_index_item(item)
             self._dispatch_item(item)
@@ -107,13 +116,13 @@ class IDispatcher(abc.ABC):
         self.document_data = []
         self.document_id: int = 0
 
-    def _dispatch_index_item(self, item: IDispachItem) -> None:
+    def _dispatch_index_item(self, item: IDispatchItem) -> None:
         """Default one document per group"""
         self.document_data.append({**item.to_dict(), **{'document_id': self.document_id}})
         self.document_id += 1
 
     @abc.abstractmethod
-    def _dispatch_item(self, item: IDispachItem) -> None:
+    def _dispatch_item(self, item: IDispatchItem) -> None:
         ...
 
     def document_index(self) -> pd.DataFrame:
@@ -163,20 +172,50 @@ class IDispatcher(abc.ABC):
         # FIXME: PoS tags gets lowercased???
         return text.lower() if self.lowercase else text
 
+    def get_filename(self, item: IDispatchItem) -> str:
+        if isinstance(item, DispatchItem):
+            return self.decoded_filename(item)
+        return item.filename
+
+    def decoded_group_name(self, item: DispatchItem) -> str:
+        group_name: str = ""
+        for key, key_id in item.group_values.items():
+            try:
+                value_name: str = self.lookups.lookup_name(key, int(key_id), None)
+                group_name = (
+                    f"{group_name}_{key_id}"
+                    if value_name is None
+                    else f"{group_name}_unknown"
+                    if value_name == "?"
+                    else f"{group_name}_{value_name}"
+                )
+            except Exception as _:
+                group_name = f"{group_name}_{key_id}"
+        return group_name
+
+    def decoded_document_name(self, item: DispatchItem) -> str:
+        group_name: str = self.decoded_group_name(item)
+        if group_name != "":
+            group_name = f"_{group_name}"
+        return f'{item.group_temporal_value}{self.decoded_group_name(item)}'
+
+    def decoded_filename(self, item: DispatchItem) -> str:
+        return f'{self.decoded_document_name(item=item)}.{item.extension}'
+
 
 class FilesInFolderDispatcher(IDispatcher):
     """Dispatch text to filesystem as single files (optionally compressed)"""
 
-    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
-        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+    def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
 
     name: str = 'files-in-folder'
 
     def open_target(self, target_name: Any) -> None:
         os.makedirs(target_name, exist_ok=True)
 
-    def _dispatch_item(self, item: IDispachItem) -> None:
-        self.store(item.filename, self.to_lower(item.text))
+    def _dispatch_item(self, item: IDispatchItem) -> None:
+        self.store(self.get_filename(item), self.to_lower(item.text))
 
     def dispatch_index(self) -> None:
         """Write index of documents to disk."""
@@ -188,9 +227,9 @@ class FilesInZipDispatcher(IDispatcher):
 
     name: str = 'files-in-zip'
 
-    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
+    def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
         self.zup: zipfile.ZipFile = None
-        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
 
     def open_target(self, target_name: Any) -> None:
         """Create and open a new zip file."""
@@ -212,15 +251,86 @@ class FilesInZipDispatcher(IDispatcher):
         csv_str: str = self.document_index_str()
         self.zup.writestr('document_index.csv', csv_str)
 
-    def _dispatch_item(self, item: IDispachItem) -> None:
-        self.zup.writestr(item.filename, self.to_lower(item.text))
+    def _dispatch_item(self, item: IDispatchItem) -> None:
+        self.zup.writestr(self.get_filename(item), self.to_lower(item.text))
+
+
+class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
+    """Dispatch speeches to files in a single zip file."""
+
+    name: str = 'sorted-speeches-in-zip'
+
+    def __init__(
+        self,
+        target_name: str,
+        compress_type: CompressType,
+        lookups: Codecs,
+        temporal_key: str = None,
+        naming_keys: list[str] = None,
+        **kwargs,
+    ):
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
+        self.temporal_key: str = temporal_key
+        self.naming_keys: list[str] = naming_keys
+
+    def to_speech_segment(self, item: IDispatchItem) -> ProtocolSegment:
+
+        if item.segment_level != SegmentLevel.Speech:
+            raise ValueError(f"{type(self).__name__}: requires speech segment level")
+
+        if issubclass(type(item), ProtocolSegment):
+            return item
+
+        if hasattr(item, "protocol_segments"):
+            segments: list[ProtocolSegment] = getattr(item, "protocol_segments")
+            if len(segments) > 0:
+                return segments[0]
+
+        raise ValueError(f"{type(self).__name__}: item has no protocol segments")
+
+    def _dispatch_index_item(self, item: IDispatchItem) -> None:
+        tokens: list[str] = default_tokenize(item.text)
+        tokens = [t for t in tokens if len(t) > 1 or t not in string.punctuation]
+        item.n_tokens = len(tokens)
+        return super()._dispatch_index_item(item)
+
+    def _dispatch_item(self, item: IDispatchItem) -> None:
+
+        speech: ProtocolSegment = self.to_speech_segment(item)
+
+        basename, extension = os.path.splitext(self.get_filename(speech))
+
+        sub_folder = to_temporal_category(self.temporal_key, speech.year, speech.protocol_name)
+        suffix: str = ""
+
+        for key in self.naming_keys:
+
+            if hasattr(speech, key):
+                key_value: int = getattr(speech, key)
+            elif hasattr(speech.speaker_info, key):
+                key_value: int = getattr(speech.speaker_info, key)
+            else:
+                raise ValueError(f"attribute {key} not found")
+
+            key_value_label: str = self.lookups.lookup_name(key, key_value, "unknown")
+
+            suffix = f"{suffix}_{key_value_label}"
+
+        if speech.speaker_info is not None:
+            suffix += f"_{speech.speaker_info.name[:80]}_{speech.speaker_info.person_id}"
+
+        suffix = utility.slugify(suffix.lower(), True)
+
+        filename: str = f"{sub_folder}/{basename}_{suffix}{extension}"
+
+        self.zup.writestr(filename, self.to_lower(speech.text))
 
 
 class CheckpointPerGroupDispatcher(IDispatcher):
     """Store as sequence of zipped CSV files (stream of Checkpoint)."""
 
-    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
-        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+    def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
 
     name: str = 'checkpoint-per-group'
 
@@ -230,13 +340,13 @@ class CheckpointPerGroupDispatcher(IDispatcher):
     def close_target(self) -> None:
         return
 
-    def _dispatch_item(self, item: IDispachItem) -> None:
+    def _dispatch_item(self, item: IDispatchItem) -> None:
         return
 
     def dispatch_index(self) -> None:
         return
 
-    def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
+    def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
 
         self._reset_index()
 
@@ -267,36 +377,57 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     NOTE! This dispatcher is ONLY valid for Speech level segments.
     """
 
-    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
-        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+    def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
         self.skip_text: bool = kwargs.get('skip_text', False)
         self.skip_lemma: bool = kwargs.get('skip_lemma', False)
         self.skip_puncts: bool = kwargs.get('skip_puncts', False)
 
     name: str = 'single-tagged-frame-per-group'
 
-    def _dispatch_item(self, item: IDispachItem) -> None:
+    def _dispatch_item(self, item: IDispatchItem) -> None:
         return
 
-    def _dispatch_index_item(self, item: IDispachItem) -> None:
+    def _dispatch_index_item(self, item: IDispatchItem) -> None:
 
         item: DispatchItem = item
 
         if item.segment_level != SegmentLevel.Speech:
             raise ValueError(f"TaggedFramePerGroupDispatcher: expected Speech, found {item.segment_level}")
 
-        if len(item.protocol_segments) != 1:
-            raise ValueError(
-                f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
-            )
+        if item.group_values == {}:
+            """ Speech level segments and no grouping => Add all speech metadata to index """
+            if len(item.protocol_segments) > 1:
+                raise ValueError(
+                    f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
+                )
+            speech_data: dict = item.protocol_segments[0].to_dict()
+            item_data: dict = {**{'document_id': self.document_id}, **item.to_dict(), **speech_data}
+        else:
+            item_data: dict = {**{'document_id': self.document_id}, **item.to_dict()}
+            speech_data: dict = item.protocol_segments[0].to_dict()
+            if 'who' in item.group_values:
+                """ If `who` in grouping attributes => add person attribute from first speech """
+                for key in PERSON_ATTRIBUTES:
+                    if key in speech_data:
+                        item_data[key] = speech_data[key]
+            if 'n_tokens' in speech_data:
+                n_tokens: int = 0
+                for sd in item.protocol_segments:
+                    n_tokens += sd.n_tokens
+                item_data['n_tokens'] = n_tokens
 
-        for speech_segment in item.protocol_segments:
-            self.document_data.append(
-                {**{'document_id': self.document_id}, **item.to_dict(), **speech_segment.to_dict()}
-            )
-            self.document_id += 1
+            # FIXME #39 Protocol segements must be merged into one Document index item.
+            # for speech_segment in item.protocol_segments:
+            #     self.document_data.append(
+            #         {**{'document_id': self.document_id}, **item.to_dict(), **speech_segment.to_dict()}
+            #     )
+            #     self.document_id += 1
 
-    def dispatch(self, dispatch_items: list[IDispachItem]) -> None:
+        self.document_data.append(item_data)
+        self.document_id += 1
+
+    def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
 
         if len(dispatch_items) == 0:
             return
@@ -313,7 +444,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
             self.flush(total_frame, dispatch_items)
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispachItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
         temporal_value: str = dispatch_items[0].group_temporal_value
         sub_folder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, sub_folder)
@@ -321,7 +452,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         target_name: str = jj(path, f'{temporal_value}.csv')
         self.store(filename=target_name, data=tagged_frame)
 
-    def create_tagged_frame(self, item: IDispachItem) -> pd.DataFrame:
+    def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
 
         pads: set = {'MID', 'MAD', 'PAD'}
 
@@ -393,14 +524,14 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
 
     name: str = 'single-id-tagged-frame-per-group'
 
-    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
-        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+    def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
         self.token2id: defaultdict = defaultdict()
         self.tfs: defaultdict = defaultdict()
         self.token2id.default_factory = self.token2id.__len__
         self.pos_schema: PoS_Tag_Scheme = PoS_TAGS_SCHEMES.SUC
 
-    def create_tagged_frame(self, item: IDispachItem) -> pd.DataFrame:
+    def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
         fg = lambda t: self.token2id[t]
         pg = self.pos_schema.pos_to_id.get
@@ -435,11 +566,11 @@ class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
     name: str = 'single-id-tagged-frame'
     corpus_name: str = "corpus.feather"
 
-    def __init__(self, target_name: str, compress_type: CompressType, **kwargs):
-        super().__init__(target_name=target_name, compress_type=compress_type, **kwargs)
+    def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
+        super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
         self.tagged_frames: list[pd.DataFrame] = []
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispachItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
         self.tagged_frames.append(tagged_frame)
 
     def close_target(self) -> None:

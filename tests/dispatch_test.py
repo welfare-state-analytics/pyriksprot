@@ -12,6 +12,7 @@ from pyriksprot import to_speech, utility
 from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import dispatch
 from pyriksprot.dispatch import merge as sg
+from tests.utility import SAMPLE_METADATA_DATABASE_NAME
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -45,9 +46,11 @@ def test_find_dispatchers():
 
 def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with dispatch.FilesInFolderDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Plain,
+        lookups=lookups,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -56,9 +59,32 @@ def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
 
 def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with dispatch.FilesInZipDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Zip,
+        lookups=lookups,
+    ) as dispatcher:
+        for group in tagged_speeches:
+            dispatcher.dispatch(list(group.values()))
+    assert isfile(target_name)
+
+
+@pytest.mark.parametrize(
+    'temporal_key,naming_keys',
+    [("decade", ("gender_id", "party_id")), ("year", ("gender_id",)), ("decade", [])],
+)
+def test_organized_speeches_in_zip_dispatch(
+    tagged_speeches: list[sg.DispatchItem], temporal_key: str, naming_keys: list[str]
+):
+    target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
+    with dispatch.SortedSpeechesInZipDispatcher(
+        target_name=target_name,
+        compress_type=dispatch.CompressType.Zip,
+        temporal_key=temporal_key,
+        naming_keys=naming_keys,
+        lookups=lookups,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -87,9 +113,11 @@ def test_find_dispatch_class():
 def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
 
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with dispatch.CheckpointPerGroupDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Zip,
+        lookups=lookups,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -118,9 +146,11 @@ def test_single_feather_per_group_dispatch(
 ):
 
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with cls(
         target_name=target_name,
         compress_type=dispatch.CompressType.Feather,
+        lookups=lookups,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))
@@ -142,8 +172,13 @@ def test_single_feather_per_group_dispatch_with_skips(
 ):
 
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
+    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with cls(
-        target_name=target_name, compress_type=dispatch.CompressType.Feather, lowercase=True, skip_text=True
+        target_name=target_name,
+        compress_type=dispatch.CompressType.Feather,
+        lookups=lookups,
+        lowercase=True,
+        skip_text=True,
     ) as dispatcher:
         for group in tagged_speeches:
             dispatcher.dispatch(list(group.values()))

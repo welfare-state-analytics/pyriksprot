@@ -97,10 +97,12 @@ def extract_corpus_tags(
             ),
         }
 
+    lookups: md.Codecs = md.Codecs().load(metadata_filename)
+
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
     )
-    logger.info("loading parliamentary metadata...")
+    # logger.info("loading parliamentary metadata...")
 
     # FIXME: How to ensure metadata tag is the same as corpus??? Add tag to DB?
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
@@ -130,7 +132,7 @@ def extract_corpus_tags(
     )
 
     with dispatch.IDispatcher.dispatcher(target_type)(
-        target_name=target_name, compress_type=compress_type, **dispatch_opts
+        target_name=target_name, compress_type=compress_type, lookups=lookups, **dispatch_opts
     ) as dispatcher:
         data: t.Iterable[dict[str, DispatchItem]]
         n_total: int = len(source_index.source_items)

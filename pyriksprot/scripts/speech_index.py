@@ -54,10 +54,13 @@ def main(
 if __name__ == "__main__":
     main()
 
+    # tag: str = "v0.4.6"
+    # data_folder: str = "/data/riksdagen_corpus_data"
+
     # arguments = {
-    #     'source_folder': '/data/riksdagen_corpus_data/tagged_frames_vx.x.x',
-    #     'target_name': 'speech_index.csv.gz',
-    #     'database_filename': '/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db',
+    #     'source_folder': f'{data_folder}/tagged_frames_{tag}',
+    #     'target_name': f'speech_index.{tag}.csv.gz',
+    #     'database_filename': f'{data_folder}/metadata/riksprot_metadata.{tag}.db',
     #     'merge_strategy': 'chain',
     #     'multiproc_processes': None,
     #     'segment_skip_size': 0,
@@ -68,3 +71,5 @@ if __name__ == "__main__":
     #     'multiproc_chunksize': 10,
     # }
     # extract_speech_index(**arguments)
+
+    #  # poetry run python pyriksprot/scripts/speech_index.py /data/riksdagen_corpus_data/tagged_frames_v0.4.6 speech_index.v0.4.6.csv.gz /data/riksdagen_corpus_data/metadata/data/v0.4.6/riksprot_metadata.v0.4.6.db

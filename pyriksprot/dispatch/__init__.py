@@ -8,6 +8,7 @@ from .dispatch import (
     IDispatcher,
     IdTaggedFramePerGroupDispatcher,
     SingleIdTaggedFrameDispatcher,
+    SortedSpeechesInZipDispatcher,
     TaggedFramePerGroupDispatcher,
     TargetTypeKey,
 )

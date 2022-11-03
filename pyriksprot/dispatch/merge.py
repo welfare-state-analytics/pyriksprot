@@ -7,7 +7,7 @@ from loguru import logger
 from ..corpus import corpus_index, iterate
 from ..interface import GroupingKey, SegmentLevel, TemporalKey
 from .item import DispatchItem
-from .utility import create_grouping_hashcoder
+from .utility import create_grouping_hashcoder, to_temporal_category
 
 # pylint: disable=too-many-arguments, unbalanced-tuple-unpacking
 
@@ -58,7 +58,7 @@ class SegmentMerger:
 
         try:
             current_temporal_value: str = None
-            current_group: dict[str, DispatchItem] = {}
+            current_temporal_group: dict[str, DispatchItem] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
             source_item: corpus_index.ICorpusSourceItem
 
@@ -73,23 +73,26 @@ class SegmentMerger:
                     logger.error(f"source item not found: {item.name}")
                     continue
 
-                temporal_value: str = self.to_temporal_value(item)
+                # assert item.speaker_info is not None
 
+                temporal_value: str = to_temporal_category(
+                    temporal_key=self.temporal_key, year=item.year, default_value=item.protocol_name
+                )
                 if current_temporal_value != temporal_value:
                     """Yield previous group"""
-                    if current_group:
-                        yield current_group
+                    if current_temporal_group:
+                        yield current_temporal_group
 
-                    current_group, current_temporal_value = {}, temporal_value
+                    current_temporal_group, current_temporal_value = {}, temporal_value
 
                 grouping_values, hashcode_str, hashcode = hashcoder(item=item, source_item=source_item)
 
                 # FIXME: #14 This fix cannot work. It prevents groupings that exclude `who` added https://github.com/welfare-state-analytics/pyriksprot/commit/8479a7c03458adcc0a0f0d0750cf48e55eec4bb0
-                grouping_values['who'] = item.who
+                # grouping_values['who'] = item.who
 
-                if hashcode not in current_group:
+                if hashcode not in current_temporal_group:
 
-                    current_group[hashcode] = DispatchItem(
+                    current_temporal_group[hashcode] = DispatchItem(
                         segment_level=item.segment_level,
                         content_type=item.content_type,
                         group_name=hashcode_str,
@@ -101,48 +104,12 @@ class SegmentMerger:
                         n_tokens=0,
                     )
 
-                current_group[hashcode].add(item)
+                current_temporal_group[hashcode].add(item)
 
             """Yield last group"""
-            if current_group:
-                yield current_group
+            if current_temporal_group:
+                yield current_temporal_group
 
         except Exception as ex:
             logger.exception(ex)
             raise
-
-    def to_year(self, source_item: corpus_index.ICorpusSourceItem, temporal_key: TemporalKey) -> int:
-        """Compute a year that represents the group."""
-        if temporal_key == TemporalKey.Decade:
-            return source_item.year - source_item.year % 10
-        if temporal_key == TemporalKey.Lustrum:
-            return source_item.year - source_item.year % 5
-        return source_item.year
-
-    def to_temporal_value(self, item: iterate.ProtocolSegment) -> str:
-
-        year: int = item.year
-        if isinstance(self.temporal_key, (TemporalKey, str, type(None))):
-
-            if self.temporal_key in [None, '', 'document', 'protocol', TemporalKey.NONE]:
-                """No temporal key gives a group per document/protocol"""
-                return item.protocol_name
-
-            if self.temporal_key == TemporalKey.Year:
-                return str(year)
-
-            if self.temporal_key == TemporalKey.Lustrum:
-                low_year: int = year - (year % 5)
-                return f"{low_year}-{low_year+4}"
-
-            if self.temporal_key == TemporalKey.Decade:
-                low_year: int = year - (year % 10)
-                return f"{low_year}-{low_year+9}"
-
-        elif isinstance(self.temporal_key, dict):
-            """custom periods as a dict {'category-name': (from_year,to_year), ...}"""
-            for k, v in self.temporal_key:
-                if v[0] <= year <= v[1]:
-                    return k
-
-        raise ValueError(f"temporal period failed for {item.protocol_name}")

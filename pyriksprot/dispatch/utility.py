@@ -6,6 +6,7 @@ from typing import Callable
 from .. import metadata as md
 from .. import utility
 from ..corpus import corpus_index, iterate
+from ..interface import TemporalKey
 
 # pylint: disable=unbalanced-tuple-unpacking
 
@@ -51,3 +52,38 @@ def create_grouping_hashcoder(
         return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
 
     return hashcoder if grouping_keys else hashcoder_with_no_grouping_keys
+
+
+def truncate_year_to_category(year: int, temporal_key: TemporalKey) -> int:
+    """truncates year to closest lustrum or decade."""
+    if temporal_key == TemporalKey.Decade:
+        return year - year % 10
+    if temporal_key == TemporalKey.Lustrum:
+        return year - year % 5
+    return year
+
+
+def to_temporal_category(temporal_key: str | TemporalKey | dict, year: int, default_value: str) -> str:
+
+    if isinstance(temporal_key, (TemporalKey, str, type(None))):
+
+        if temporal_key == TemporalKey.Year:
+            return str(year)
+
+        if temporal_key == TemporalKey.Lustrum:
+            low_year: int = year - (year % 5)
+            return f"{low_year}-{low_year+4}"
+
+        if temporal_key == TemporalKey.Decade:
+            low_year: int = year - (year % 10)
+            return f"{low_year}-{low_year+9}"
+
+        return default_value
+
+    if isinstance(temporal_key, dict):
+        """custom periods as a dict {'category-name': (from_year,to_year), ...}"""
+        for k, v in temporal_key:
+            if v[0] <= year <= v[1]:
+                return k
+
+    raise ValueError(f"temporal period failed for {default_value}")
