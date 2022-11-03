@@ -91,8 +91,8 @@ insert into terms_of_office (person_id, office_type_id, sub_office_type_id, dist
             coalesce(district.district_id, 0),
             _member_of_parliament.[start],
             _member_of_parliament.[end],
-            cast(strftime('%Y', _member_of_parliament.[start]) as integer) as start_year,
-            cast(strftime('%Y', _member_of_parliament.[end]) as integer) as end_year
+            cast(substr(_member_of_parliament.[start], 1, 4) as integer) as start_year,
+            cast(substr(_member_of_parliament.[end], 1, 4) as integer) as end_year
     from _member_of_parliament
     join persons_of_interest using (person_id)
     left join district on district.district = _member_of_parliament.district
@@ -104,8 +104,8 @@ insert into terms_of_office (person_id, office_type_id, sub_office_type_id, star
             coalesce(sub_office_type.sub_office_type_id, 0),
             _minister.[start],
             _minister.[end],
-            cast(strftime('%Y', _minister.[start]) as integer) as start_year,
-            cast(strftime('%Y', _minister.[end]) as integer) as end_year,
+            cast(substr(_minister.[start], 1, 4) as integer) as start_year,
+            cast(substr(_minister.[end], 1, 4) as integer) as end_year,
             government.government_id
     from _minister
     join government
@@ -114,14 +114,15 @@ insert into terms_of_office (person_id, office_type_id, sub_office_type_id, star
     left join sub_office_type
       on sub_office_type.office_type_id = 2
      and sub_office_type.identifier = _minister.role;
+
 insert into terms_of_office (person_id, office_type_id, sub_office_type_id, start_date, end_date, start_year, end_year)
     select  _speaker.person_id,
             3,
             coalesce(sub_office_type.sub_office_type_id, 0),
             _speaker.[start],
             _speaker.[end],
-            cast(strftime('%Y', _speaker.[start]) as integer) as start_year,
-            cast(strftime('%Y', _speaker.[end]) as integer) as end_year
+            cast(substr(_speaker.[start], 1, 4) as integer) as start_year,
+            cast(substr(_speaker.[end], 1, 4) as integer) as end_year
     from _speaker
     join persons_of_interest using (person_id)
     left join sub_office_type
@@ -137,33 +138,3 @@ insert into minister_government (terms_of_office_id, government_id)
     select terms_of_office_id, _government_id
     from terms_of_office
     where office_type_id = 2;
-
-/* End drop column */
-
--- select count(*)
--- from _minister
--- join persons_of_interest using (person_id)
--- join terms_of_office
---   on terms_of_office.person_id = _minister.person_id
---  and terms_of_office.office_type_id = 2
---  and coalesce(_minister.[start], '') = coalesce(terms_of_office.start_date, '')
---  and coalesce(_minister.[end], '') = coalesce(terms_of_office.end_date, '')
-
--- -- left join _government using (government)
--- select count(*) from terms_of_office where office_type_id = 2;
--- select  _minister.person_id,
---         2,
---         coalesce(sub_office_type.sub_office_type_id, 0),
---         _minister.[start],
---         _minister.[end],
---         cast(strftime('%Y', _minister.[start]) as integer) as start_year,
---         cast(strftime('%Y', _minister.[end]) as integer) as end_year
--- ;
--- select count(*)
--- from _minister
--- join government
---   on government.government = _minister.government
--- join persons_of_interest using (person_id)
--- left join sub_office_type
---     on sub_office_type.office_type_id = 2
---     and sub_office_type.identifier = _minister.role;

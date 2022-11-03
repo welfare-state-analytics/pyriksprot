@@ -36,8 +36,8 @@ create table person_party (
 insert into person_party (person_id, source_id, party_id, start_year, end_year)
     select
         mops.person_id, 1 as source_id, party.party_id,
-        cast(strftime('%Y', mops.[start]) as integer) as start_year,
-        cast(strftime('%Y', mops.[end]) as integer) as end_year
+        cast(substr(mops.[start], 1, 4) as integer) as start_year,
+        cast(substr(mops.[end], 1, 4) as integer) as end_year
     from _member_of_parliament mops
     join persons_of_interest using (person_id)
     join _party_abbreviation pa using (party)
@@ -49,15 +49,15 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
         select
             person_id,
             party,
-            case when "start" like '%-%' then substr("start",1,4) else "start" end as "start",
-            case when "end" like '%-%' then substr("end",1,4) else "end" end as "end"
+            cast(substr(_party_affiliation.[start], 1, 4) as integer) as start_year,
+            cast(substr(_party_affiliation.[end], 1, 4) as integer) as end_year
         from _party_affiliation
     )
         select
             affiliation.person_id, 2 as source_id,
             coalesce(party.party_id, 1), -- 1 is code for "Other", 84 records
-            cast(affiliation.[start] as integer) as start_year,
-            cast(affiliation.[end] as integer) as end_year
+            affiliation.start_year,
+            affiliation.end_year
         from affiliation
         join persons_of_interest using (person_id)
         left join _party_abbreviation using (party)

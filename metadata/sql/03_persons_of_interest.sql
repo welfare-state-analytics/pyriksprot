@@ -28,8 +28,8 @@ insert into persons_of_interest (person_id)
 insert into persons_of_interest (person_id, gender_id, year_of_birth, year_of_death)
     select  persons_of_interest.person_id,
             gender.gender_id,
-            cast(strftime('%Y', _person.born) as integer) as year_of_birth,
-            cast(strftime('%Y', _person.dead) as integer) as year_of_death
+            cast(substr(_person.[born], 1, 4) as integer) as year_of_birth,
+            cast(substr(_person.[dead], 1, 4) as integer) as year_of_death
     from persons_of_interest
     join _person using (person_id)
     join gender using (gender)
