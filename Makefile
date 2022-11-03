@@ -14,6 +14,7 @@ endif
 # PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
 METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
 METADATA_FOLDER=./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+RIKSPROT_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
 
 CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describe --tags)"
 
@@ -33,6 +34,13 @@ refresh-tag: metadata test-data metadata-database-deploy
 .PHONY: metadata metadata-download metadata-corpus-index metadata-database metadata-database-deploy
 metadata: funkis metadata-download metadata-corpus-index metadata-database metadata-database-vacuum
 	@echo "info: metadata $(RIKSPROT_REPOSITORY_TAG) has been updated!"
+
+speech-index:
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/speech_index.py \
+		--merge-strategy chain \
+		$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(RIKSPROT_REPOSITORY_TAG) \
+		$(METADATA_FOLDER)/speech_index.$(RIKSPROT_REPOSITORY_TAG).csv.gz \
+		$(RIKSPROT_METADATA_FOLDER)/$(METADATA_DB_NAME)
 
 metadata-download: funkis
 	@echo "info: downloading metadata $(RIKSPROT_REPOSITORY_TAG)"
@@ -58,6 +66,7 @@ metadata-database:
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
 		metadata/$(METADATA_DB_NAME) \
 		--force \
+		--tag "$(RIKSPROT_REPOSITORY_TAG)" \
 		--load-index \
 		--source-folder $(METADATA_FOLDER) \
 		--scripts-folder ./metadata/sql
@@ -132,7 +141,7 @@ extract-speeches-to-feather:
 		--force \
 		 	$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG) \
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
-				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.beta.feather
+				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.feather
 
 
 
