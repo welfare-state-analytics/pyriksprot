@@ -72,4 +72,4 @@ if __name__ == "__main__":
     # }
     # extract_speech_index(**arguments)
 
-    #  # poetry run python pyriksprot/scripts/speech_index.py /data/riksdagen_corpus_data/tagged_frames_v0.4.6 speech_index.v0.4.6.csv.gz /data/riksdagen_corpus_data/metadata/data/v0.4.6/riksprot_metadata.v0.4.6.db
+     # poetry run python pyriksprot/scripts/speech_index.py /data/riksdagen_corpus_data/tagged_frames_v0.4.6 speech_index.v0.4.6.csv.gz /data/riksdagen_corpus_data/metadata/data/v0.4.6/riksprot_metadata.v0.4.6.db
