@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for filename in "$@"
+do
+    # filename=/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/1920/prot-1920--ak--1.xml
+    protocol_name=`xmlstarlet sel --text -N x=http://www.tei-c.org/ns/1.0 --template --match /x:teiCorpus/x:TEI/x:text/x:front/x:div/x:head --value-of "text()" ${filename}`
+    xmlstarlet sel --text -N x=http://www.tei-c.org/ns/1.0  --noblanks --template --match "/x:teiCorpus/x:TEI/x:text/x:body/x:div/x:note[@type = 'speaker']" \
+        --var linebreak -n --break \
+        -o ${protocol_name} \
+            --value-of "concat(';', @xml:id,';',normalize-space(translate(text(),\$linebreak,' ')))" \
+                --nl ${filename}
+done
