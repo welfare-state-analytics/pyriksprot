@@ -99,8 +99,8 @@ RIKSPROT_METADATA_TABLES: dict = {
         ':rename_column:': {'wiki_id': 'person_id'},
     },
     'party_abbreviation': {
-        'party': 'text',
-        'abbreviation': 'text',
+        'party': 'text primary key not null',
+        'abbreviation': 'text not null',
         'ocr_correction': 'text',
     },
     'party_affiliation': {
