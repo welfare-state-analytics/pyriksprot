@@ -3,12 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..corpus import ProtocolSegment
-from ..interface import ContentType, IDispachItem
+from ..interface import ContentType, IDispatchItem
 from ..utility import merge_tagged_csv
 
 
 @dataclass
-class DispatchItem(IDispachItem):
+class DispatchItem(IDispatchItem):
     """Groups segments for dispatch to a zink.
     One item corresponds to either...
      - A single document made up of the aggregate of contained segments
@@ -38,7 +38,7 @@ class DispatchItem(IDispachItem):
 
     @property
     def filename(self) -> str:
-        return f'{self.document_name}.{self._extension}'
+        return f'{self.document_name}.{self.extension}'
 
     @property
     def text(self) -> str:
@@ -64,7 +64,7 @@ class DispatchItem(IDispachItem):
         return [s.data for s in self.protocol_segments]
 
     @property
-    def _extension(self) -> str:
+    def extension(self) -> str:
         return 'txt' if self.content_type == ContentType.Text else 'csv'
 
     """Not used"""
