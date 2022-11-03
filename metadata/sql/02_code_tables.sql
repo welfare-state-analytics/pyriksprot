@@ -56,10 +56,32 @@ insert into government (government, start_date, end_date)
 
 /* Party table: records are added in 05_person_party.sql */
 drop table if exists party;
+
 create table if not exists party (
     party_id integer primary key,
-    party varchar not null,
-    party_abbrev varchar not null,
+    party varchar not null unique,
+    party_abbrev varchar not null unique,
     party_color varchar default('#3f1105')
 );
--- alter table party add column party_color varchar default('#3f1105');
+
+with party_data(party_id, party, party_abbrev, party_color) as (
+    values
+        (0, 'unknown', '?', '#000000'),
+        (1, 'Other', 'X', '#333333'),
+        (2, 'Centerpartiet', 'C', '#009933'),
+        (3, 'Kristdemokraterna', 'KD', '#000077'),
+        (4, 'Socialistiska partiet', 'SP', '#FF112d'),
+        (5, 'Liberalerna', 'L', '#006AB3'),
+        (6, 'Miljöpartiet', 'MP', '#83CF39'),
+        (7, 'Moderaterna', 'M', '#52BDEC'),
+        (8, 'Ny demokrati', 'NYD', '#007700'),
+        (9, 'Socialdemokraterna', 'S', '#E8112d'),
+        (10, 'Sverigedemokraterna', 'SD', '#DDDD00'),
+        (11, 'Vänsterpartiet', 'V', '#DA291C'),
+        (12, 'Frisinnad', 'FRIS', '#226AB3'),
+        (13, 'Arbetarpartiet kommunisterna', 'APK', '#DA291C')
+)
+    insert into party(party_id, party, party_abbrev, party_color)
+        select party_id, party, party_abbrev, party_color
+        from party_data
+;

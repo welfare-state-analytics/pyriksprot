@@ -1,27 +1,4 @@
 
-delete from party;
-
-/* Ansats: endast partier i MOPS blir egna poster, övriga blir "Other" */
-insert into party (party_id, party, party_abbrev, party_color)
-    values (0, 'unknown', '?', '#000000'), (1, 'Other', 'X', '#000000');
-
-insert into party (party, party_abbrev, party_color)
-    select party, coalesce(abbreviation, party), '#3f1105'
-    from _member_of_parliament
-    join persons_of_interest using (person_id)
-    left join _party_abbreviation using (party)
-    where party is not null
-    group by party, abbreviation;
-
-update party set party_color = '#E8112d' where party_abbrev = 'S';
-update party set party_color = '#52BDEC' where party_abbrev = 'M';
-update party set party_color = '#009933' where party_abbrev = 'C';
-update party set party_color = '#006AB3' where party_abbrev = 'L';
-update party set party_color = '#DA291C' where party_abbrev = 'V';
-update party set party_color = '#83CF39' where party_abbrev = 'MP';
-update party set party_color = '#000077' where party_abbrev = 'KD';
-update party set party_color = '#007700' where party_abbrev = 'NYD';
-update party set party_color = '#DDDD00' where party_abbrev = 'SD';
 
 drop table if exists person_party;
 create table person_party (
@@ -33,6 +10,7 @@ create table person_party (
     end_year int null
 );
 
+-- Add parties from _member_of_parliament for persons of interest
 insert into person_party (person_id, source_id, party_id, start_year, end_year)
     select
         mops.person_id, 1 as source_id, party.party_id,
@@ -44,6 +22,7 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
     join party on party.party_abbrev = pa.abbreviation
     where mops.party is not null;
 
+-- Add parties from _party_affiliation for persons of interest
 insert into person_party (person_id, source_id, party_id, start_year, end_year)
     with affiliation as (
         select
@@ -63,8 +42,6 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
         left join _party_abbreviation using (party)
         left join party on party.party_abbrev = _party_abbreviation.abbreviation
         ;
-
-
 
 /* Update party_id for persons having only one party */
 with persons_with_single_party as (
