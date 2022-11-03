@@ -152,3 +152,4 @@ apa.*
 logs
 metadata/**/*.db
 *.jar
+*.session.sql
