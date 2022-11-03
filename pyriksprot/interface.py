@@ -8,7 +8,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from io import StringIO
-from typing import Any, Callable, Mapping, Optional, Union
+from typing import Any, Callable, Literal, Mapping, Optional, Union
 
 import pandas as pd
 from pandas.io import json
@@ -73,7 +73,7 @@ PARAGRAPH_MARKER: str = '@#@'
 
 
 @dataclass
-class IDispachItem(abc.ABC):
+class IDispatchItem(abc.ABC):
     segment_level: SegmentLevel
     content_type: ContentType
     n_tokens: int
@@ -346,8 +346,13 @@ class Protocol(UtteranceMixIn):
         self.date: str = date
         self.name: str = name
         self.utterances: list[Utterance] = utterances
-        self.year: int = int(self.date[:4])
         self.speaker_notes: dict[str, str] = speaker_notes or {}
+
+    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
+        """Returns protocol's year either extracted from filename or from `date` tag in XML header """
+        if which != "filename":
+            return int(self.date[:4])
+        return int(self.name.split("-")[1][:4])
 
     def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
         """Apply text transforms. Return self."""

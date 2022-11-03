@@ -3,12 +3,12 @@ from __future__ import annotations
 import abc
 from dataclasses import dataclass
 from multiprocessing import get_context
-from typing import TYPE_CHECKING, Callable, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable, Literal
 
 import numpy as np
 
 from .. import to_speech as mu
-from ..interface import ContentType, IDispachItem, Protocol, SegmentLevel
+from ..interface import ContentType, IDispatchItem, Protocol, SegmentLevel
 from ..utility import compress
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ProtocolSegment(IDispachItem):
+class ProtocolSegment(IDispatchItem):
     """Container for a subset of utterances within a single protocol"""
 
     protocol_name: str
@@ -83,13 +83,15 @@ class ProtocolSegment(IDispachItem):
         return self.data
 
 
-def to_protocol_segment(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
+def to_protocol_segment(
+    *, protocol: Protocol, content_type: ContentType, which_year: Literal["filename", "date"] = "filename", **_
+) -> list[ProtocolSegment]:
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
             content_type=content_type,
             segment_level=SegmentLevel.Protocol,
-            year=protocol.year,
+            year=protocol.get_year(which=which_year),
             name=protocol.name,
             who=None,
             id=protocol.name,
@@ -110,6 +112,7 @@ def to_speech_segments(
     content_type: ContentType,
     segment_skip_size: int,
     merge_strategy: mu.MergeStrategyType,
+    which_year: Literal["filename", "date"] = "filename",
     **_,
 ) -> list[ProtocolSegment]:
     return [
@@ -117,7 +120,7 @@ def to_speech_segments(
             protocol_name=protocol.name,
             content_type=content_type,
             segment_level=SegmentLevel.Speech,
-            year=protocol.year,
+            year=protocol.get_year(which=which_year),
             name=s.document_name,
             who=s.who,
             id=s.speech_id,
@@ -134,14 +137,19 @@ def to_speech_segments(
 
 
 def to_who_segments(
-    *, protocol: Protocol, content_type: ContentType, segment_skip_size: int, **_
+    *,
+    protocol: Protocol,
+    content_type: ContentType,
+    segment_skip_size: int,
+    which_year: Literal["filename", "date"] = "filename",
+    **_,
 ) -> list[ProtocolSegment]:
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
             content_type=content_type,
             segment_level=SegmentLevel.Who,
-            year=protocol.year,
+            year=protocol.get_year(which=which_year),
             name=s.document_name,
             who=s.who,
             id=s.speech_id,
@@ -155,13 +163,15 @@ def to_who_segments(
     ]
 
 
-def to_utterance_segments(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
+def to_utterance_segments(
+    *, protocol: Protocol, content_type: ContentType, which_year: Literal["filename", "date"] = "filename", **_
+) -> list[ProtocolSegment]:
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
             content_type=content_type,
             segment_level=SegmentLevel.Utterance,
-            year=protocol.year,
+            year=protocol.get_year(which=which_year),
             name=f'{protocol.name}_{i+1:03}',
             who=u.who,
             id=u.u_id,
@@ -175,13 +185,15 @@ def to_utterance_segments(*, protocol: Protocol, content_type: ContentType, **_)
     ]
 
 
-def to_paragraph_segments(*, protocol: Protocol, content_type: ContentType, **_) -> list[ProtocolSegment]:
+def to_paragraph_segments(
+    *, protocol: Protocol, content_type: ContentType, which_year: Literal["filename", "date"] = "filename", **_
+) -> list[ProtocolSegment]:
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
             content_type=content_type,
             segment_level=SegmentLevel.Paragraph,
-            year=protocol.year,
+            year=protocol.get_year(which=which_year),
             name=f'{protocol.name}_{j+1:03}_{i+1:03}',
             who=u.who,
             id=f"{u.u_id}@{i}",
@@ -204,6 +216,7 @@ def to_segments(
     merge_strategy: mu.MergeStrategyType,
     segment_skip_size: int = 1,
     preprocess: Callable[[str], str] = None,
+    which_year: Literal["filename", "date"] = "filename",
 ) -> Iterable[ProtocolSegment]:
     """Splits protocol to sequence of text/tagged text segments
 
@@ -222,6 +235,7 @@ def to_segments(
         content_type=content_type,
         segment_skip_size=segment_skip_size,
         merge_strategy=merge_strategy,
+        which_year=which_year,
     )
 
     if preprocess is not None:
@@ -259,6 +273,7 @@ class ProtocolSegmentIterator(abc.ABC):
         multiproc_keep_order: bool = False,
         merge_strategy: str = 'chain',
         preprocess: Callable[[str], str] = None,
+        which_year: Literal["filename", "date"] = "filename",
     ):
         """Merge utterances within protocols to segments.
 
@@ -272,6 +287,7 @@ class ProtocolSegmentIterator(abc.ABC):
             multiproc_keep_order (bool, optional): Keep doc order. Defaults to False.
             merge_strategy (str, optional): Speech merge strategy. Defaults to 'chain'.
             preprocess (Callable[[str], str], optional): Preprocess funcion, only used for text. Defaults to None.
+            which_year (Literal["filename", "date"]): Take year from filename or XML tag `date` in content
         """
         self.filenames: list[str] = sorted(filenames)
         self.iterator = None
@@ -283,6 +299,7 @@ class ProtocolSegmentIterator(abc.ABC):
         self.multiproc_chunksize: int = multiproc_chunksize
         self.multiproc_keep_order: bool = multiproc_keep_order
         self.preprocess: Callable[[ProtocolSegment], str] = preprocess
+        self.which_year: str = which_year
 
     def __iter__(self):
         self.iterator = self.create_iterator()
@@ -299,7 +316,14 @@ class ProtocolSegmentIterator(abc.ABC):
 
         if self.multiproc_processes > 1:
             args: list[tuple[str, str, str, int]] = [
-                (name, self.content_type, self.segment_level, self.segment_skip_size, self.merge_strategy)
+                (
+                    name,
+                    self.content_type,
+                    self.segment_level,
+                    self.segment_skip_size,
+                    self.merge_strategy,
+                    self.which_year,
+                )
                 for name in self.filenames
             ]
             with get_context("spawn").Pool(processes=self.multiproc_processes) as executor:

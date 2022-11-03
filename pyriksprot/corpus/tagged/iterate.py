@@ -20,6 +20,7 @@ def multiprocessing_load(args) -> Iterable[iterate.ProtocolSegment]:
             segment_level=args[2],
             segment_skip_size=args[3],
             merge_strategy=args[4],
+            which_year=args[5],
         )
     )
 
@@ -40,6 +41,7 @@ class ProtocolIterator(iterate.ProtocolSegmentIterator):
                 segment_level=self.segment_level,
                 segment_skip_size=self.segment_skip_size,
                 merge_strategy=self.merge_strategy,
+                which_year=self.which_year,
             )
         )
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import xml.etree.cElementTree as ET
-from typing import Iterable, List, Union
+from typing import Iterable, List, Literal, Union
 
 from loguru import logger
 
@@ -30,11 +30,16 @@ class XmlProtocol(abc.ABC):
 
         self.date = self.get_date()
         self.name = self.get_name()
-        self.year = int(self.date[:4])
 
     @abc.abstractmethod
     def create_iterator(self) -> Iterable[interface.Utterance]:
         return []
+
+    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
+        """Returns protocol's year either extracted from filename or from `date` tag in XML header """
+        if which != "filename":
+            return int(self.date[:4])
+        return int(self.name.split("-")[1][:4])
 
     @abc.abstractmethod
     def create_utterances(self) -> List[interface.Utterance]:

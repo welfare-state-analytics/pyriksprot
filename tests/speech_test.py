@@ -342,6 +342,7 @@ def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_spe
         content_type=interface.ContentType.Text,
         segment_level=interface.SegmentLevel.Speech,
         merge_strategy=merge_strategy,
+        which_year="filename",
     )
     assert len(items) == expected_speech_count
 

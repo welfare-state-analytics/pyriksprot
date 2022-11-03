@@ -17,6 +17,7 @@ def multiprocessing_xml_load(args) -> Iterable[iterate.ProtocolSegment]:
         segment_level=args[2],
         merge_strategy=args[4],
         segment_skip_size=args[3],
+        which_year=args[5],
     )
 
 
@@ -31,6 +32,7 @@ class XmlUntangleSegmentIterator(iterate.ProtocolSegmentIterator):
             segment_level=self.segment_level,
             merge_strategy=self.merge_strategy,
             segment_skip_size=self.segment_skip_size,
+            which_year=self.which_year,
         )
 
     def map_futures(self, imap, args: List[Tuple[str, str, int]]):
@@ -45,6 +47,7 @@ def multiprocessing_load(args):
         segment_level=args[2],
         segment_skip_size=args[3],
         merge_strategy=args[4],
+        which_year=args[5],
     )
 
 
@@ -59,6 +62,7 @@ class XmlProtocolSegmentIterator(iterate.ProtocolSegmentIterator):
             segment_level=self.segment_level,
             segment_skip_size=self.segment_skip_size,
             merge_strategy=self.merge_strategy,
+            which_year=self.which_year,
         )
 
     def map_futures(self, imap, args):
@@ -74,6 +78,7 @@ def multiprocessing_xml_iter_load(args) -> Iterable[iterate.ProtocolSegment]:
         segment_level=args[2],
         merge_strategy=args[4],
         segment_skip_size=args[3],
+        which_year=args[5],
     )
 
 
@@ -89,6 +94,7 @@ class XmlSaxSegmentIterator(iterate.ProtocolSegmentIterator):
             segment_level=self.segment_level,
             merge_strategy=self.merge_strategy,
             segment_skip_size=self.segment_skip_size,
+            which_year=self.which_year,
         )
 
     def map_futures(self, imap, args):
