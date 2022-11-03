@@ -29,14 +29,14 @@ def create_utterance_index(corpus_folder: str, target_folder: str):
 
 @click.command()
 @click.argument('target', type=click.STRING)
-@click.option('--branch', type=click.STRING, help='Text or tags', default=None)
+@click.option('--tag', type=click.STRING, help='Metadata version', default=None)
 @click.option('--source-folder', type=click.STRING, default=None)
 @click.option('--force', type=click.BOOL, is_flag=True, help='Force overwrite', default=False)
 @click.option('--load-index', type=click.BOOL, is_flag=True, help='Load utterance index', default=False)
 @click.option('--scripts-folder', type=click.STRING, help='If set, apply scripts in folder to DB', default=None)
 def create_database(
     target: str,
-    branch: str = None,
+    tag: str = None,
     source_folder: str = None,
     force: bool = False,
     scripts_folder: str = None,
@@ -47,7 +47,7 @@ def create_database(
 
         md.create_database(
             database_filename=target,
-            branch=branch,
+            tag=tag,
             folder=source_folder,
             force=force,
         )

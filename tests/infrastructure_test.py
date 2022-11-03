@@ -63,4 +63,4 @@ def test_create_matadatabase():
     filename = "metadata/riksprot_metadata.v0.4.6.db"
     branch = None
     folder = "./metadata/data/v0.4.6"
-    md.create_database(database_filename=filename, branch=branch, folder=folder, force=True)
+    md.create_database(database_filename=filename, tag=branch, folder=folder, force=True)

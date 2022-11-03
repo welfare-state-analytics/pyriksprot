@@ -174,12 +174,13 @@ def register_numpy_adapters():
 
 
 def smart_load_table(tablename: str, folder: str = None, branch: str = None, **opts) -> pd.DataFrame:
-    if bool(folder is None) == bool(branch is None):
-        raise ValueError("either folder or branch must be set - not both")
     if isinstance(folder, str):
         tablename: str = probe_filename(jj(folder, f"{tablename}.csv"), ["zip", "csv.gz"])
     elif isinstance(branch, str):
         tablename: str = table_url(tablename, branch)
+    else:
+        raise ValueError("either folder or branch must be set")
+
     table: pd.DataFrame = pd.read_csv(tablename, **opts)
     return table
 
@@ -300,13 +301,50 @@ def transform_table(table: pd.DataFrame, specification: dict) -> pd.DataFrame:
     return table
 
 
+def set_db_tag(*, path_or_db: str | sqlite3.Connection, tag: str) -> str:
+
+    sql_ddl: str = f"""
+        create table if not exists version (
+            version text
+        );
+        delete from version;
+        insert into version(version) values ('{tag}');
+    """
+    db: sqlite3.Connection = sqlite3.connect(path_or_db) if isinstance(path_or_db, str) else path_or_db
+
+    with closing(db.cursor()) as cursor:
+        cursor.executescript(sql_ddl)
+
+    return sql_ddl
+
+
+def db_table_exists(database_filename: str, table: str):
+    with closing(sqlite3.connect(database_filename)) as db:
+        with closing(db.cursor()) as cursor:
+            cursor.execute(f"select count(name) from sqlite_master where type='table' and name='{table}'")
+            return cursor.fetchone()[0] == 1
+
+
+def get_db_tag(path_or_db: str | sqlite3.Connection) -> str | None:
+    db: sqlite3.Connection = sqlite3.connect(path_or_db) if isinstance(path_or_db, str) else path_or_db
+    with closing(db.cursor()) as cursor:
+        cursor.execute("select version from version")
+        return cursor.fetchone()[0]
+
+
+def assert_db_tag(path_or_db: str | sqlite3.Connection, tag: str) -> None:
+    db_tag = get_db_tag(path_or_db)
+    if db_tag != tag:
+        raise ValueError(f"metadata version mismatch: db version {db_tag} differs from {tag}")
+
+
 def create_database(
     database_filename: str,
-    branch: str = None,
+    tag: str = None,
     folder: str = None,
     force: bool = False,
 ):
-    logger.info(f"Creating database {database_filename}, using source {branch}/{folder} (tag/folder).")
+    logger.info(f"Creating database {database_filename}, using source {tag}/{folder} (tag/folder).")
 
     os.makedirs(dirname(database_filename), exist_ok=True)
 
@@ -315,9 +353,14 @@ def create_database(
             raise ValueError("DB exists, use `force=True` to overwrite")
         os.remove(database_filename)
 
-    db = sqlite3.connect(database_filename)
+    if tag is None:
+        raise ValueError("Git version tag cannot be NULL!")
+
+    db: sqlite3.Connection = sqlite3.connect(database_filename)
 
     register_numpy_adapters()
+
+    set_db_tag(path_or_db=db, tag=tag)
 
     for tablename, specification in RIKSPROT_METADATA_TABLES.items():
         with closing(db.cursor()) as cursor:
@@ -327,9 +370,9 @@ def create_database(
         logger.info(f"loading table: {tablename}")
 
         table: pd.DataFrame = (
-            pd.read_csv(fx_or_url(specification[':url:'], branch), sep=',')
+            pd.read_csv(fx_or_url(specification[':url:'], tag), sep=',')
             if ':url:' in specification and folder is None
-            else smart_load_table(tablename=tablename, folder=folder, branch=branch, sep=',')
+            else smart_load_table(tablename=tablename, folder=folder, branch=tag, sep=',')
         )
 
         table = transform_table(table, specification=specification)

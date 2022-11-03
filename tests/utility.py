@@ -94,7 +94,7 @@ def create_sample_metadata():
     """Create metadata database"""
     md.create_database(
         database_filename=SAMPLE_METADATA_DATABASE_NAME,
-        branch=None,
+        tag=None,
         folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
         force=True,
     )
@@ -172,7 +172,7 @@ def create_sample_speech_corpus():
             multiproc_chunksize=100,
             segment_skip_size=1,
             years=None,
-            group_keys=None,
+            group_keys=('who',),
             force=True,
             skip_lemma=False,
             skip_text=True,

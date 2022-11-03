@@ -70,33 +70,47 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
 
-    # from click.testing import CliRunner
+    # main()
 
-    # runner = CliRunner()
-    # result = runner.invoke(
-    #     main,
-    #     [
-    #         "--multiproc-processes",
-    #         "1",
-    #         "--compress-type",
-    #         "zip",
-    #         "--segment-level",
-    #         "speech",
-    #         "--target-type",
-    #         "files-in-zip",
-    #         "--temporal-key",
-    #         "decade",
-    #         "--group-key",
-    #         "gender_id",
-    #         "--force",
-    #         "/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/",
-    #         "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db",
-    #         "apa.zip",
-    #     ],
-    # )
+    from click.testing import CliRunner
+
+    source_folder: str = "/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/"
+    metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
+
+    # source_folder: str = "tests/test_data/source/v0.4.6/parlaclarin/protocols/"
+    # metadata_filename: str = "tests/test_data/source/v0.4.6/riksprot_metadata.db"
+
+    # source_folder: str = "tests/test_data/tmp/"
+    # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "--multiproc-processes",
+            "1",
+            "--compress-type",
+            "zip",
+            "--segment-level",
+            "speech",
+            "--target-type",
+            "files-in-zip",
+            "--multiproc-keep-order",
+            "--temporal-key",
+            "year",
+            "--years",
+            "1921",
+            "--group-key",
+            "party_id",
+            "--force",
+            source_folder,
+            metadata_filename,
+            "apa.zip",
+        ],
+    )
+    # PYTHONPATH=. python pyriksprot/scripts/riksprot2text.py --multiproc-processes 1 --compress-type zip --segment-level speech --target-type files-in-zip --temporal-key decade --group-key party_id --force /data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/ /data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db riksprot_v0.4.6_text_by_decade_party.zi
 
     # print(result.output)
-
+    # PYTHONPATH=. python pyriksprot/scripts/riksprot2text.py --multiproc-processes 1 --compress-type zip --segment-level speech --target-type files-in-zip --multiproc-keep-order --temporal-key year --years "2000-2002" --group-key gender_id --force /data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/ /data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db apa.zi
     # PYTHONPATH=. python pyriksprot/scripts/riksprot2text.py --multiproc-processes 1 --compress-type zip --segment-level speech --target-type files-in-zip --temporal-key decade --group-key gender_id --force /data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/ /data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db apa.zip
