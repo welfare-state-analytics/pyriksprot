@@ -1,7 +1,6 @@
 # type: ignore
 
 from .codecs import Codecs
-
 from .generate import (
     RIKSPROT_METADATA_TABLES,
     assert_db_tag,

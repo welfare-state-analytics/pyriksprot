@@ -1,8 +1,10 @@
-from contextlib import closing
 import os
 import sqlite3
 import uuid
+from contextlib import closing
+
 import pytest
+
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 
@@ -71,7 +73,7 @@ def test_generate_and_load_corpus_indexes():
 
 
 def test_load_scripts():
-    
+
     tag: str = RIKSPROT_REPOSITORY_TAG
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
