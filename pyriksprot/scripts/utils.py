@@ -25,12 +25,14 @@ CLI_OPTIONS = {
     '--dedent': dict(default=False, is_flag=True, help='Remove indentation'),
     '--dehyphen': dict(default=False, is_flag=True, help='Dehyphen text'),
     '--group-key': dict(help='Partition key(s)', multiple=True, type=click.STRING),
+    '--naming-key': dict(help='Property values to be added to filename(s)', multiple=True, type=click.STRING),
     '--lowercase': dict(default=True, type=click.BOOL, is_flag=True, help='Lowercase token/text'),
     '--merge-strategy': dict(default='chain', type=click.Choice(MERGE_STRATEGIES), help='Merge strategy'),
     '--multiproc-keep-order': dict(default=False, is_flag=True, help='Process is sort order (slower, multiproc)'),
     '--multiproc-processes': dict(default=None, type=click.IntRange(1, 40), help='Number of processes to use'),
     '--segment-level': dict(default='who', type=click.Choice(SEGMENT_LEVELS), help='Protocol iterate level'),
     '--segment-skip-size': dict(default=1, type=click.IntRange(1, 1024), help='Skip smaller than threshold'),
+    '--skip-size': dict(default=1, type=click.IntRange(1, 1024), help='Skip size less than threshold'),
     '--skip-lemma': dict(default=False, type=click.BOOL, is_flag=True, help='Skip lemma'),
     '--skip-puncts': dict(default=False, type=click.BOOL, is_flag=True, help='Skip puncts'),
     '--skip-stopwords': dict(default=False, type=click.BOOL, is_flag=True, help='Skip stopwords'),
@@ -39,6 +41,7 @@ CLI_OPTIONS = {
         default='single-id-tagged-frame-per-group', type=click.Choice(TARGET_TYPES), help='Target type'
     ),
     '--temporal-key': dict(default=None, help='Temporal partition key(s)', type=click.STRING),
+    '--subfolder-key': dict(default=None, help='Subfolder sort key', type=click.STRING),
     '--years': dict(default=None, help='Years to include in output', type=click.STRING),
     '--force': dict(default=False, help='Force remove of existing files', is_flag=True),
 }
@@ -51,7 +54,7 @@ def update_arguments_from_options_file(
     log_args: bool = True,
     ctx: click.Context = None,
     skip_keys: str = 'ctx,options_filename',
-    suffix: str = None
+    suffix: str = None,
 ) -> dict:
     """Updates `arguments` based on values found in file specified by `filename_key`.
     Values specified at the command line overrides values from options file."""
@@ -72,7 +75,9 @@ def update_arguments_from_options_file(
     return arguments
 
 
-def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename', suffix: str=None) -> None:
+def log_arguments(
+    args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename', suffix: str = None
+) -> None:
     def fix_value(v: Any):
         if isinstance(v, tuple):
             v = list(v)

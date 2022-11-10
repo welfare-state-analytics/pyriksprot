@@ -19,7 +19,7 @@ def get_kwargs():
 
 
 """
-Extract an aggregated subset of ParlaCLARIN XML corpus.
+Extract speech texts from a ParlaCLARIN corpus.
 """
 
 
@@ -30,10 +30,11 @@ Extract an aggregated subset of ParlaCLARIN XML corpus.
 @option2('--options-filename')
 @option2('--target-type')
 @option2('--compress-type')
-@option2('--segment-skip-size')
-@option2('--temporal-key')
-@option2('--group-key')
+@option2('--subfolder-key')
+@option2('--naming-key')
+@option2('--merge-strategy')
 @option2('--years')
+@option2('--skip-size')
 @option2('--multiproc-processes')
 @option2('--multiproc-keep-order')
 @option2('--dedent')
@@ -46,23 +47,26 @@ def main(
     target_name: str = None,
     target_type: str = None,
     compress_type: str = "zip",
-    segment_skip_size: int = 1,
-    temporal_key: TemporalKey = None,
-    group_key: Sequence[GroupingKey] = None,
+    subfolder_key: TemporalKey = None,
+    naming_key: Sequence[GroupingKey] = None,
+    merge_strategy: str = "chain",
     years: str = None,
+    skip_size: int = 1,
     multiproc_processes: int = 1,
     multiproc_keep_order: str = None,
     dedent: bool = False,
     dehyphen: bool = False,
     force: bool = False,
 ):
+    """Extracts `speeches` from a Parla-CLARIN XML corpus.  Speeches are (optionally) stored in subfolders.
+    """
     try:
         arguments: dict = update_arguments_from_options_file(
             arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)
         )
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
-        arguments['group_keys'] = arguments['group_key']
-        del arguments['group_key']
+        arguments['naming_keys'] = arguments['naming_key']
+        del arguments['naming_key']
         extract_speech_text.extract_speech_texts(**arguments)
 
     except Exception as ex:
