@@ -265,12 +265,12 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
         target_name: str,
         compress_type: CompressType,
         lookups: Codecs,
-        temporal_key: str = None,
+        subfolder_key: str = None,
         naming_keys: list[str] = None,
         **kwargs,
     ):
         super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
-        self.temporal_key: str = temporal_key
+        self.subfolder_key: str = subfolder_key
         self.naming_keys: list[str] = naming_keys
 
     def to_speech_segment(self, item: IDispatchItem) -> ProtocolSegment:
@@ -300,7 +300,7 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
 
         basename, extension = os.path.splitext(self.get_filename(speech))
 
-        sub_folder = to_temporal_category(self.temporal_key, speech.year, speech.protocol_name)
+        subfolder = to_temporal_category(self.subfolder_key, speech.year, speech.protocol_name)
         suffix: str = ""
 
         for key in self.naming_keys:
@@ -321,7 +321,7 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
 
         suffix = utility.slugify(suffix.lower(), True)
 
-        filename: str = f"{sub_folder}/{basename}_{suffix}{extension}"
+        filename: str = jj(subfolder or "", f"{basename}_{suffix}{extension}")
 
         self.zup.writestr(filename, self.to_lower(speech.text))
 
@@ -354,8 +354,8 @@ class CheckpointPerGroupDispatcher(IDispatcher):
             return
 
         checkpoint_name: str = f'{dispatch_items[0].group_temporal_value}.zip'
-        sub_folder: str = dispatch_items[0].group_temporal_value.split('-')[1]
-        path: str = jj(self.target_name, sub_folder)
+        subfolder: str = dispatch_items[0].group_temporal_value.split('-')[1]
+        path: str = jj(self.target_name, subfolder)
 
         os.makedirs(path, exist_ok=True)
 
@@ -446,8 +446,8 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
     def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
         temporal_value: str = dispatch_items[0].group_temporal_value
-        sub_folder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
-        path: str = jj(self.target_name, sub_folder)
+        subfolder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
+        path: str = jj(self.target_name, subfolder)
         os.makedirs(path, exist_ok=True)
         target_name: str = jj(path, f'{temporal_value}.csv')
         self.store(filename=target_name, data=tagged_frame)

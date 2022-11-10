@@ -32,7 +32,7 @@ def extract_speech_texts(
     source_folder: str = None,
     metadata_filename: str = None,
     target_name: str = None,
-    temporal_key: interface.TemporalKey = None,
+    subfolder_key: interface.TemporalKey = None,
     naming_keys: Sequence[interface.GroupingKey] = None,
     years: str = None,
     segment_skip_size: int = 1,
@@ -46,21 +46,22 @@ def extract_speech_texts(
     **_,
 ) -> None:
     """Special case of `extract_text.extract_corpus_text` for speech extraction.
-    Adds ability to organize files according to `temporal_key`, and to add naming keys to filenames.
 
-    The temporal key, and grouping keys are used for subfolders (temporal key) and naming (grouping keys).
+    Adds ability to organize files according to `subfolder_key`.
+    Adds attribute values of `naming_keys` to each filename.
 
-    Temporal key kan be any of None, 'Year', 'Lustrum', 'Decade' or custom year periods
+    The temporal key, and naming keys are used for subfolders (temporal key) and naming of result file.
+
+    Sub-folder key kan be any of None, 'Year', 'Lustrum', 'Decade' or custom year periods
     - 'Year', 'Lustrum', 'Decade' or custom year periods given as comma separated string
-
 
     Args:
         source_folder (str, optional): Corpus source folder. Defaults to None.
         target_name (str, optional): Target name. Defaults to None.
         segment_level (interface.SegmentLevel, optional): Level of protocol segments yielded by iterator. Defaults to None.
         segment_skip_size (int, optional): Segment skip size. Defaults to 1.
-        group_temporal_key (str, optional): Temporal grouping key used in merge. Defaults to None.
-        group_keys (Sequence[str], optional): Other grouping keys. Defaults to None.
+        subfolder_key (str, optional): Sub-folder key used in store. Defaults to None.
+        naming_keys (Sequence[str], optional): Naming keys. Defaults to None.
         years (str, optional): Years filter. Defaults to None.
         multiproc_keep_order (str, optional): Force correct iterate yield order when multiprocessing. Defaults to None.
         multiproc_processes (int, optional): Number of processes during iterate. Defaults to 1.
@@ -68,6 +69,7 @@ def extract_speech_texts(
         dedent (bool, optional): Dedent text. Defaults to True.
         dehyphen (bool, optional): Dehyphen text. Defaults to False.
         data_path (str, optional): Path to model data (used by dedent/dehyphen). Defaults to '.'.
+        compress_type (CompressType, optional): Target file compression type. Defaults to CompressType.zip.
     """
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
@@ -98,7 +100,7 @@ def extract_speech_texts(
     )
 
     with sd.SortedSpeechesInZipDispatcher(
-        target_name, compress_type=compress_type, temporal_key=temporal_key, naming_keys=naming_keys, lookups=lookups
+        target_name, compress_type=compress_type, subfolder_key=subfolder_key, naming_keys=naming_keys, lookups=lookups
     ) as dispatcher:
         for segment in segments:
             dispatcher.dispatch([segment])

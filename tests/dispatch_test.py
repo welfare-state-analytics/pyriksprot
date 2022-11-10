@@ -82,7 +82,7 @@ def test_organized_speeches_in_zip_dispatch(
     with dispatch.SortedSpeechesInZipDispatcher(
         target_name=target_name,
         compress_type=dispatch.CompressType.Zip,
-        temporal_key=temporal_key,
+        subfolder_key=temporal_key,
         naming_keys=naming_keys,
         lookups=lookups,
     ) as dispatcher:
