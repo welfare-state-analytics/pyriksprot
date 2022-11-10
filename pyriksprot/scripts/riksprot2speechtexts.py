@@ -8,7 +8,7 @@ from pyriksprot.dispatch import dispatch
 from pyriksprot.interface import GroupingKey, TemporalKey
 from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 from pyriksprot.utility import strip_path_and_extension
-from pyriksprot.workflows import extract_speech
+from pyriksprot.workflows import extract_speech_text
 
 # pylint: disable=too-many-arguments, unused-argument
 
@@ -63,7 +63,7 @@ def main(
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
         arguments['group_keys'] = arguments['group_key']
         del arguments['group_key']
-        extract_speech.extract_speech_texts(**arguments)
+        extract_speech_text.extract_speech_texts(**arguments)
 
     except Exception as ex:
         click.echo(ex)
