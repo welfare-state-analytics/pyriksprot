@@ -33,7 +33,7 @@ def extract_speech_texts(
     metadata_filename: str = None,
     target_name: str = None,
     temporal_key: interface.TemporalKey = None,
-    group_keys: Sequence[interface.GroupingKey] = None,
+    naming_keys: Sequence[interface.GroupingKey] = None,
     years: str = None,
     segment_skip_size: int = 1,
     multiproc_keep_order: str = None,
@@ -98,7 +98,7 @@ def extract_speech_texts(
     )
 
     with sd.SortedSpeechesInZipDispatcher(
-        target_name, compress_type=compress_type, temporal_key=temporal_key, naming_keys=group_keys, lookups=lookups
+        target_name, compress_type=compress_type, temporal_key=temporal_key, naming_keys=naming_keys, lookups=lookups
     ) as dispatcher:
         for segment in segments:
             dispatcher.dispatch([segment])
