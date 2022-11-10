@@ -6,6 +6,7 @@ from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable, Literal
 
 import numpy as np
+import tqdm
 
 from .. import to_speech as mu
 from ..interface import ContentType, IDispatchItem, Protocol, SegmentLevel
@@ -335,7 +336,7 @@ class ProtocolSegmentIterator(abc.ABC):
                             fx(item)
                         yield item
         else:
-            for filename in self.filenames:
+            for filename in tqdm.tqdm(self.filenames):
                 for item in self.load(filename=filename):
                     if fx:
                         fx(item)
