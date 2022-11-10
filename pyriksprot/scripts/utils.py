@@ -89,8 +89,8 @@ def log_arguments(args: dict, subdir: bool = False, skip_keys: str = 'ctx,option
 
     log_name: str = utility.ts_data_path(log_dir, f"{cli_command}.yml")
 
-    if suffix is not None:
-        log_name = utility.path_add_suffix(log_name, suffix=suffix)
+    if suffix:
+        log_name = utility.path_add_suffix(log_name, suffix=f"_{suffix.strip('_')}")
 
     log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(',')}
     utility.write_yaml(log_args, log_name)
