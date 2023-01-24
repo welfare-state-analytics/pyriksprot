@@ -14,7 +14,8 @@ endif
 # PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
 METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
 METADATA_FOLDER=./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
-RIKSPROT_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
+RIKSPROT_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/metadata
+TAGGED_FRAMES_FOLDER=$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(RIKSPROT_REPOSITORY_TAG)
 
 CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describe --tags)"
 
@@ -29,18 +30,39 @@ refresh-tag: metadata test-data metadata-database-deploy
 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) metadata and test-data has been refreshed!"
 
 ########################################################################################################
-# ENTRYPOINT: Main recipe that creates metadata database for current tag
+# ENTRYPOINT: Main recipes that creates metadata database for current tag
 ########################################################################################################
 .PHONY: metadata metadata-download metadata-corpus-index metadata-database metadata-database-deploy
 metadata: funkis metadata-download metadata-corpus-index metadata-database metadata-database-vacuum
 	@echo "info: metadata $(RIKSPROT_REPOSITORY_TAG) has been updated!"
 
+MERGE_STRATEGY=chain
+SPEECH_INDEX_TARGET_NAME=$(METADATA_FOLDER)/speech_index.$(MERGE_STRATEGY).$(RIKSPROT_REPOSITORY_TAG).csv.gz
+
 speech-index:
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/speech_index.py \
-		--merge-strategy chain \
-		$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(RIKSPROT_REPOSITORY_TAG) \
-		$(METADATA_FOLDER)/speech_index.$(RIKSPROT_REPOSITORY_TAG).csv.gz \
+		--merge-strategy $(MERGE_STRATEGY) \
+		$(TAGGED_FRAMES_FOLDER) \
+		$(SPEECH_INDEX_TARGET_NAME) \
 		$(RIKSPROT_METADATA_FOLDER)/$(METADATA_DB_NAME)
+	@cp -f $(SPEECH_INDEX_TARGET_NAME) $(RIKSPROT_METADATA_FOLDER)/
+	@cp -f $(SPEECH_INDEX_TARGET_NAME) $(TAGGED_FRAMES_FOLDER)/
+
+
+.PHONY: metadata-database-deploy
+metadata-database-deploy:
+	@echo "info: clearing existing deployed $(RIKSPROT_REPOSITORY_TAG) metadata"
+	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
+	@mkdir -p $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
+	@cp -r $(METADATA_FOLDER) $(RIKSPROT_DATA_FOLDER)/metadata
+	@echo "info: $(METADATA_FOLDER) copied to $(RIKSPROT_DATA_FOLDER)/metadata"
+	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
+	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
+	@echo "info: $(METADATA_DB_NAME) copied to $(RIKSPROT_DATA_FOLDER)/metadata"
+
+########################################################################################################
+# Sub-recepis follows
+########################################################################################################
 
 metadata-download: funkis
 	@echo "info: downloading metadata $(RIKSPROT_REPOSITORY_TAG)"
@@ -70,17 +92,6 @@ metadata-database:
 		--load-index \
 		--source-folder $(METADATA_FOLDER) \
 		--scripts-folder ./metadata/sql
-
-.PHONY: metadata-database-deploy
-metadata-database-deploy:
-	@echo "info: clearing existing deployed $(RIKSPROT_REPOSITORY_TAG) metadata"
-	@rm -rf $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
-	@mkdir -p $(RIKSPROT_DATA_FOLDER)/metadata/$(RIKSPROT_REPOSITORY_TAG)
-	@cp -r $(METADATA_FOLDER) $(RIKSPROT_DATA_FOLDER)/metadata
-	@echo "info: $(METADATA_FOLDER) copied to $(RIKSPROT_DATA_FOLDER)/metadata"
-	@sqlite3 metadata/$(METADATA_DB_NAME) "VACUUM;"
-	@cp metadata/$(METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
-	@echo "info: $(METADATA_DB_NAME) copied to $(RIKSPROT_DATA_FOLDER)/metadata"
 
 .PHONY: metadata-database-vacuum
 metadata-database-vacuum:
