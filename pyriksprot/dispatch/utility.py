@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from os.path import splitext
 from typing import Callable
 
 from .. import metadata as md
@@ -87,3 +88,30 @@ def to_temporal_category(temporal_key: str | TemporalKey | dict, year: int, defa
                 return k
 
     raise ValueError(f"temporal period failed for {default_value}")
+
+
+def decode_protocol_segment_filename(lookups: md.Codecs, speech: iterate.ProtocolSegment, naming_keys: list[str]):
+
+    basename, extension = splitext(speech.filename)
+
+    suffix: str = ""
+
+    for key in naming_keys:
+        if hasattr(speech, key):
+            key_value: int = getattr(speech, key)
+        elif hasattr(speech.speaker_info, key):
+            key_value: int = getattr(speech.speaker_info, key)
+        else:
+            raise ValueError(f"attribute {key} not found")
+
+        key_value_label: str = lookups.lookup_name(key, key_value, "unknown")
+
+        suffix = f"{suffix}_{key_value_label}"
+
+    if speech.speaker_info is not None:
+        suffix += f"_{speech.speaker_info.name[:80]}_{speech.speaker_info.person_id}"
+
+    suffix = utility.slugify(suffix.lower(), True)
+
+    filename: str = f"{basename}_{suffix}{extension}"
+    return filename

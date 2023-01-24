@@ -16,7 +16,7 @@ from loguru import logger
 
 from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.dispatch.item import DispatchItem
-from pyriksprot.dispatch.utility import to_temporal_category
+from pyriksprot.dispatch.utility import decode_protocol_segment_filename, to_temporal_category
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
 from pyriksprot.foss.sparv_tokenize import default_tokenize
 from pyriksprot.foss.stopwords import STOPWORDS
@@ -172,6 +172,8 @@ class IDispatcher(abc.ABC):
         # FIXME: PoS tags gets lowercased???
         return text.lower() if self.lowercase else text
 
+    # FIXME: Consolidate this code!
+
     def get_filename(self, item: IDispatchItem) -> str:
         if isinstance(item, DispatchItem):
             return self.decoded_filename(item)
@@ -298,30 +300,9 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
 
         speech: ProtocolSegment = self.to_speech_segment(item)
 
-        basename, extension = os.path.splitext(self.get_filename(speech))
+        subfolder: str = to_temporal_category(self.subfolder_key, speech.year, speech.protocol_name)
 
-        subfolder = to_temporal_category(self.subfolder_key, speech.year, speech.protocol_name)
-        suffix: str = ""
-
-        for key in self.naming_keys:
-
-            if hasattr(speech, key):
-                key_value: int = getattr(speech, key)
-            elif hasattr(speech.speaker_info, key):
-                key_value: int = getattr(speech.speaker_info, key)
-            else:
-                raise ValueError(f"attribute {key} not found")
-
-            key_value_label: str = self.lookups.lookup_name(key, key_value, "unknown")
-
-            suffix = f"{suffix}_{key_value_label}"
-
-        if speech.speaker_info is not None:
-            suffix += f"_{speech.speaker_info.name[:80]}_{speech.speaker_info.person_id}"
-
-        suffix = utility.slugify(suffix.lower(), True)
-
-        filename: str = jj(subfolder or "", f"{basename}_{suffix}{extension}")
+        filename: str = jj(subfolder or "", decode_protocol_segment_filename(self.lookups, speech, self.naming_keys))
 
         self.zup.writestr(filename, self.to_lower(speech.text))
 
