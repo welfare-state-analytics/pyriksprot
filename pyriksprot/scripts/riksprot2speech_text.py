@@ -58,8 +58,7 @@ def main(
     dehyphen: bool = False,
     force: bool = False,
 ):
-    """Extracts `speeches` from a Parla-CLARIN XML corpus.  Speeches are (optionally) stored in subfolders.
-    """
+    """Extracts `speeches` from a Parla-CLARIN XML corpus.  Speeches are (optionally) stored in subfolders."""
     try:
         arguments: dict = update_arguments_from_options_file(
             arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)

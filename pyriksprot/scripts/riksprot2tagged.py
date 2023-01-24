@@ -71,7 +71,9 @@ def main(
     force: bool = False,
 ):
     try:
-        arguments: dict = update_arguments_from_options_file(arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name))
+        arguments: dict = update_arguments_from_options_file(
+            arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)
+        )
         arguments['content_type'] = interface.ContentType(arguments['content_type'])
         arguments['compress_type'] = dispatch.CompressType(arguments['compress_type'].lower())
 
