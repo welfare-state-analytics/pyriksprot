@@ -68,7 +68,6 @@ RIKSPROT_METADATA_TABLES: dict = {
         'dead': 'int',
         'gender': 'text',
         'wiki_id': 'text',
-        'riksdagen_guid': 'text',
         'riksdagen_id': 'text',
         ':drop_duplicates:': 'wiki_id',
         ':copy_column:': {'person_id': 'wiki_id'},
