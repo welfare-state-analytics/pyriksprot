@@ -24,7 +24,7 @@ def create_grouping_hashcoder(
     grouping_keys: set[str] = set(grouping_keys)
 
     if not grouping_keys:
-        """No grouping apart from temporal key """
+        """No grouping apart from temporal key"""
         return hashcoder_with_no_grouping_keys
 
     speaker_keys, item_keys, corpus_index_keys = utility.split_properties_by_dataclass(

@@ -36,7 +36,7 @@ class XmlProtocol(abc.ABC):
         return []
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
-        """Returns protocol's year either extracted from filename or from `date` tag in XML header """
+        """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
         if which != "filename":
             return int(self.date[:4])
         return int(self.name.split("-")[1][:4])

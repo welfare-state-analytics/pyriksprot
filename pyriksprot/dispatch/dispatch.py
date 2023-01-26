@@ -377,7 +377,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             raise ValueError(f"TaggedFramePerGroupDispatcher: expected Speech, found {item.segment_level}")
 
         if item.group_values == {}:
-            """ Speech level segments and no grouping => Add all speech metadata to index """
+            """Speech level segments and no grouping => Add all speech metadata to index"""
             if len(item.protocol_segments) > 1:
                 raise ValueError(
                     f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
@@ -388,7 +388,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             item_data: dict = {**{'document_id': self.document_id}, **item.to_dict()}
             speech_data: dict = item.protocol_segments[0].to_dict()
             if 'who' in item.group_values:
-                """ If `who` in grouping attributes => add person attribute from first speech """
+                """If `who` in grouping attributes => add person attribute from first speech"""
                 for key in PERSON_ATTRIBUTES:
                     if key in speech_data:
                         item_data[key] = speech_data[key]
