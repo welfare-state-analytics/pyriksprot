@@ -85,6 +85,11 @@ RIKSPROT_METADATA_TABLES: dict = {
         'person_id': 'text references person (person_id) not null',
         ':rename_column:': {'wiki_id': 'person_id'},
     },
+    'alias': {
+        'person_id': 'text references person (person_id) not null',
+        'alias': 'text not null',
+        ':rename_column:': {'wiki_id': 'person_id'},
+    },
     'unknowns': {
         'protocol_id': 'text',  # primary key',
         'uuid': 'text',
