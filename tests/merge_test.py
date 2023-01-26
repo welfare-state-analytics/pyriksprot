@@ -48,4 +48,4 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
 
     groups = merger.merge(protocol_segments)
 
-    assert sum([len(g.values()) for g in groups]) == sum([len(set(u.who for u in p.utterances)) for p in protocols])
+    assert sum(len(g.values()) for g in groups) == sum(len(set(u.who for u in p.utterances)) for p in protocols)

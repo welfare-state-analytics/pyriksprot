@@ -97,7 +97,6 @@ class IDispatcher(abc.ABC):
     @abc.abstractmethod
     def open_target(self, target_name: Any) -> None:
         """Open zink."""
-        ...
 
     def close_target(self) -> None:
         """Close zink."""
@@ -105,7 +104,6 @@ class IDispatcher(abc.ABC):
 
     def dispatch_index(self) -> None:
         """Dispatch an index of dispatched documents."""
-        ...
 
     def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
         for item in dispatch_items:
@@ -514,8 +512,8 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
 
     def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
-        fg = lambda t: self.token2id[t]
-        pg = self.pos_schema.pos_to_id.get
+        fg = self.token2id.get  # lambda t: self.token2id[t]
+        pg = self.pos_schema.pos_to_id.get  # pylint: disable=unnecessary-lambda-assignment
 
         if not self.skip_text:
             tagged_frame['token_id'] = tagged_frame.token.apply(fg)

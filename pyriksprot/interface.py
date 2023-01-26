@@ -13,11 +13,11 @@ from typing import Any, Callable, Literal, Mapping, Optional, Union
 import pandas as pd
 from pandas.io import json
 
-from pyriksprot.corpus.parlaclarin.parse import MISSING_SPEAKER_NOTE_ID
-
 from .utility import flatten, merge_tagged_csv, strip_extensions
 
 # pylint: disable=too-many-arguments, no-member
+
+MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 
 class ParlaClarinError(ValueError):
@@ -360,8 +360,8 @@ class Protocol(UtteranceMixIn):
         if preprocess is None:
             return self
 
-        for utterance in self.utterances:
-            utterance.paragraphs = [preprocess(p.strip()) for p in utterance.paragraphs]
+        for uttr in self.utterances:
+            uttr.paragraphs = [preprocess(p.strip()) for p in uttr.paragraphs]
 
         return self
 

@@ -41,7 +41,7 @@ def repository_tags(repository_folder: str = None) -> list[str]:
         path=repository_folder
         or jj(os.environ.get('RIKSPROT_DATA_FOLDER', '/data/riksdagen_corpus_data'), "riksdagen-corpus")
     )
-    rx: re.Pattern = re.compile('^refs/tags/v\d+\.\d+\.\d+$')
+    rx: re.Pattern = re.compile(r'^refs/tags/v\d+\.\d+\.\d+$')
     tags: list[str] = sorted([r.removeprefix('refs/tags/') for r in repo.references if rx.match(r)])
     return tags
 
@@ -256,7 +256,7 @@ def download_url_to_file(url: str, target_name: str, force: bool = False) -> Non
     ensure_path(target_name)
 
     with open(target_name, 'w', encoding="utf-8") as fp:
-        data: str = requests.get(url, allow_redirects=True).content.decode("utf-8")
+        data: str = requests.get(url, allow_redirects=True, timeout=10).content.decode("utf-8")
         fp.write(data)
 
 
