@@ -15,14 +15,18 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
+from .config import PERSON_TABLES, RIKSPROT_METADATA_TABLES, table_url
 from .utility import download_url_to_file, probe_filename
 
 jj = os.path.join
 
 
+# pylint: disable=unsupported-assignment-operation, unsubscriptable-object
+
+
 class IParser(abc.ABC):
 
-    """IParser = parse.ProtocolMapper """
+    """IParser = parse.ProtocolMapper"""
 
     @dataclass
     class IUtterance:
@@ -43,124 +47,6 @@ class IParser(abc.ABC):
         self, filename: str, segment_skip_size: int, ignore_tags: set[str]  # pylint: disable=unused-argument
     ) -> IParser.IProtocol:
         ...
-
-
-# pylint: disable=unsupported-assignment-operation, unsubscriptable-object
-
-
-def input_unknown_url(tag: str = "main"):
-    return (
-        f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/input/matching/unknowns.csv"
-    )
-
-
-def table_url(tablename: str, tag: str = "main") -> str:
-    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/metadata/{tablename}.csv"
-
-
-RIKSPROT_METADATA_TABLES: dict = {
-    'government': {
-        # '+government_id': 'integer primary key',
-        'government': 'text primary key not null',
-        'start': 'date',
-        'end': 'date',
-        # ':options:': {'auto_increment': 'government_id'},
-        ':index:': {},
-        ':drop_duplicates:': 'government',
-    },
-    'location_specifier': {
-        # 'location_specifier_id': 'AUTO_INCREMENT',
-        'person_id': 'text references person (person_id) not null',
-        'location': 'text',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'member_of_parliament': {
-        # 'member_of_parliament_id': 'AUTO_INCREMENT',
-        'person_id': 'text references person (person_id) not null',
-        'party': 'text',
-        'district': 'text',
-        'role': 'text',
-        'start': 'date',
-        'end': 'date',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'minister': {
-        'person_id': 'text references person (person_id) not null',
-        'government': 'text',
-        'role': 'text',
-        'start': 'date',
-        'end': 'date',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'name': {
-        'person_id': 'text references person (person_id) not null',
-        'name': 'text not null',
-        'primary_name': 'integer not null',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'party_abbreviation': {
-        'party': 'text primary key not null',
-        'abbreviation': 'text not null',
-        'ocr_correction': 'text',
-    },
-    'party_affiliation': {
-        'person_id': 'text references person (person_id) not null',
-        'party': 'text',
-        'start': 'int',
-        'end': 'int',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'person': {
-        'person_id': 'text primary key',
-        'born': 'int',
-        'dead': 'int',
-        'gender': 'text',
-        'wiki_id': 'text',
-        'riksdagen_guid': 'text',
-        'riksdagen_id': 'text',
-        ':drop_duplicates:': 'wiki_id',
-        ':copy_column:': {'person_id': 'wiki_id'},
-    },
-    'speaker': {
-        'person_id': 'text references person (person_id) not null',
-        'role': 'text',
-        'start': 'date',
-        'end': 'date',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'twitter': {
-        'twitter': 'text',  # primary key',
-        'person_id': 'text references person (person_id) not null',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'unknowns': {
-        'protocol_id': 'text',  # primary key',
-        'uuid': 'text',
-        'gender': 'text',
-        'party': 'text',
-        'other': 'text',
-        ':url:': input_unknown_url,
-    },
-}
-
-EXTRA_TABLES = {
-    'speech_index': {
-        'document_id': 'int primary key',
-        'document_name': 'text',
-        'year': 'int',
-        'who': 'text',
-        'gender_id': 'int',
-        'party_id': 'int',
-        'office_type_id': 'int',
-        'sub_office_type_id': 'int',
-        'n_tokens': 'int',
-        'filename': 'text',
-        'u_id': 'text',
-        'n_utterances': 'int',
-        'speaker_note_id': 'text',
-        'speach_index': 'int',
-    },
-}
 
 
 def register_numpy_adapters():
@@ -225,18 +111,7 @@ def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, 
     for tablename in ["government", "party_abbreviation"]:
         shutil.copy(jj(source_metadata, f"{tablename}.csv"), jj(target_folder, f"{tablename}.csv"))
 
-    person_tables: list[str] = [
-        "location_specifier",
-        "member_of_parliament",
-        "minister",
-        "name",
-        "party_affiliation",
-        "person",
-        "speaker",
-        "twitter",
-    ]
-
-    for tablename in person_tables:
+    for tablename in PERSON_TABLES:
 
         filename: str = f"{tablename}.csv"
 
