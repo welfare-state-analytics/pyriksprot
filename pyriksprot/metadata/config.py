@@ -86,8 +86,16 @@ RIKSPROT_METADATA_TABLES: dict = {
         ':rename_column:': {'wiki_id': 'person_id'},
     },
     'alias': {
-        'person_id': 'text references person (person_id) not null',
-        'alias': 'text not null',
+        # 'alias_id': 'AUTO_INCREMENT'
+        'person_id': 'text references person (person_id) not null',  # compound key
+        'alias': 'text not null',  # compound key
+        ':rename_column:': {'wiki_id': 'person_id'},
+    },
+    'name_location_specifier': {
+        # 'name_location_specifier_id': 'AUTO_INCREMENT'
+        'person_id': 'text references person (person_id) not null',  # compound key
+        'alias': 'text',  # compound key
+        'name': 'text not null',
         ':rename_column:': {'wiki_id': 'person_id'},
     },
     'unknowns': {
@@ -118,14 +126,3 @@ EXTRA_TABLES = {
         'speach_index': 'int',
     },
 }
-
-PERSON_TABLES: list[str] = [
-    "location_specifier",
-    "member_of_parliament",
-    "minister",
-    "name",
-    "party_affiliation",
-    "person",
-    "speaker",
-    "twitter",
-]
