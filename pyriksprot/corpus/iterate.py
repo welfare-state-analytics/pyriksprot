@@ -260,8 +260,6 @@ SEGMENT_FUNCTIONS: dict = {
 
 
 class ProtocolSegmentIterator(abc.ABC):
-    ...
-
     def __init__(
         self,
         *,

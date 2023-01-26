@@ -60,7 +60,7 @@ class IMergeStrategy(abc.ABC):
 
 
 class MergeByWho(IMergeStrategy):
-    """Merge all uterrances for a unique `who` into a single speech """
+    """Merge all uterrances for a unique `who` into a single speech"""
 
     def cluster(self, utterances: Protocol) -> list[list[Utterance]]:
         """Create a speech for each unique `who`. Return list of Speech."""
@@ -71,7 +71,7 @@ class MergeByWho(IMergeStrategy):
 
 
 class MergeByWhoSequence(IMergeStrategy):
-    """Merge sequences with same `who` into a speech """
+    """Merge sequences with same `who` into a speech"""
 
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.who)]
@@ -79,7 +79,7 @@ class MergeByWhoSequence(IMergeStrategy):
 
 
 class MergeBySpeakerNoteIdSequence(IMergeStrategy):
-    """Merge sequences with same `speaker_note_id` into a speech """
+    """Merge sequences with same `speaker_note_id` into a speech"""
 
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         groups: list[list[Utterance]] = [list(g) for _, g in groupby(utterances or [], key=lambda x: x.speaker_note_id)]
@@ -87,7 +87,7 @@ class MergeBySpeakerNoteIdSequence(IMergeStrategy):
 
 
 class MergeByWhoSpeakerNoteIdSequence(IMergeStrategy):
-    """Merge sequences with same `who` & 'speaker_note_id' into a speech """
+    """Merge sequences with same `who` & 'speaker_note_id' into a speech"""
 
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         groups: list[list[Utterance]] = [

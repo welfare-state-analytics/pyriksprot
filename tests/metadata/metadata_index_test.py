@@ -6,7 +6,8 @@ import pandas as pd
 import pytest
 
 from pyriksprot import metadata as md
-from pyriksprot.metadata.generate import EXTRA_TABLES, register_numpy_adapters, sql_ddl_create, sql_ddl_insert
+from pyriksprot.metadata.config import EXTRA_TABLES
+from pyriksprot.metadata.generate import register_numpy_adapters, sql_ddl_create, sql_ddl_insert
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
 from ..utility import SAMPLE_METADATA_DATABASE_NAME

@@ -13,8 +13,6 @@ from pyriksprot.utility import deprecated
 
 XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 
-MISSING_SPEAKER_NOTE_ID: str = "missing"
-
 # pylint: disable=too-many-statements
 
 
@@ -36,7 +34,7 @@ class XmlProtocol(abc.ABC):
         return []
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
-        """Returns protocol's year either extracted from filename or from `date` tag in XML header """
+        """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
         if which != "filename":
             return int(self.date[:4])
         return int(self.name.split("-")[1][:4])
@@ -103,7 +101,7 @@ class XmlUntangleProtocol(XmlProtocol):
         if parent is None:
             return utterances
 
-        speaker_note_id: str = MISSING_SPEAKER_NOTE_ID
+        speaker_note_id: str = interface.MISSING_SPEAKER_NOTE_ID
         previous_who: str = None
 
         for child in parent.children:
@@ -128,7 +126,7 @@ class XmlUntangleProtocol(XmlProtocol):
                 who: str = child.get_attribute('who')
 
                 if previous_who and previous_who != who:
-                    speaker_note_id = MISSING_SPEAKER_NOTE_ID
+                    speaker_note_id = interface.MISSING_SPEAKER_NOTE_ID
 
                 previous_who: str = who
 
@@ -263,7 +261,7 @@ class XmlIterParseProtocol(XmlProtocol):
             context = iter(context)
             current_page: int = -1
             current_utterance: interface.Utterance = None
-            speaker_note_id: str = MISSING_SPEAKER_NOTE_ID
+            speaker_note_id: str = interface.MISSING_SPEAKER_NOTE_ID
             is_preface: bool = False
             previous_who: str = None
 
@@ -298,7 +296,7 @@ class XmlIterParseProtocol(XmlProtocol):
                         is_preface = False
                         who: str = elem.attrib.get('who')
                         if previous_who and previous_who != who:
-                            speaker_note_id = MISSING_SPEAKER_NOTE_ID
+                            speaker_note_id = interface.MISSING_SPEAKER_NOTE_ID
 
                         current_utterance: interface.Utterance = interface.Utterance(
                             page_number=str(current_page),

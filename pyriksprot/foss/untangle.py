@@ -50,19 +50,19 @@ class Element:
         self.cdatas = [cdata]
 
     def add_child(self, element: "Element") -> None:
-        """ Store child elements. """
+        """Store child elements."""
         self.children.append(element)
 
     def add_cdata(self, cdata: str) -> None:
-        """ Store cdata """
+        """Store cdata"""
         self.cdatas.append(cdata)
 
     def get_attribute(self, key) -> Optional[str]:
-        """ Get attributes by key """
+        """Get attributes by key"""
         return self.attributes.get(key)
 
     def get_elements(self, name: str = None) -> List["Element"]:
-        """ Find a child element by name """
+        """Find a child element by name"""
         if name:
             return [e for e in self.children if e.name == name]
         return self.children

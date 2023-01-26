@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriksprot"
-version = "2022.5.2"
+version = "v0.5.0"
 description = "Python API for Riksdagens Protokoll"
 authors = ["Roger Mähler <roger.mahler@hotmail.com>"]
 packages = [
@@ -12,7 +12,7 @@ classifiers = [
     'Topic :: Software Development',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.11',
 ]
 license = "Apache-2.0"
 readme = "README.md"
@@ -20,7 +20,7 @@ homepage = "https://westac.se"
 repository = "https://github.com/welfare-state-analytics/pyriksprot"
 
 [tool.poetry.dependencies]
-python = "==3.9.10"
+python = "==3.11.*"
 Jinja2 = "*"
 click = "*"
 pandas = "*"
@@ -29,27 +29,25 @@ lz4 = "*"
 pdoc = "*"
 requests = "*"
 tqdm = "*"
-Unidecode = "*"
 pyarrow = "*"
 more-itertools = "*"
 python-dotenv = "*"
+pygit2 = "^1.11.1"
 
 [tool.poetry.dev-dependencies]
-black = "==20.*,>=20.8.0.b1"
-coverage = "==5.*,>=5.4.0"
-flake8 = "==3.*,>=3.8.4"
-flake8-black = "==0.*,>=0.2.1"
-isort = "==5.*,>=5.7.0"
-mypy = "==0.*,>=0.812.0"
-pre-commit = "==2.*,>=2.10.1"
-pycodestyle = "==2.*,>=2.6.0"
-pyflakes = "==2.*,>=2.2.0"
-pylint = "==2.*,>=2.7.1"
-pytest = "==6.*,>=6.2.2"
-pytest-cov = "==2.*,>=2.11.1"
-pyinstrument = "^4.0.3"
-ipykernel = "^6.6.0"
-pytest-codeblocks = "^0.12.2"
+black = "*"
+coverage = "*"
+flake8 = "*"
+flake8-black = "*"
+isort = "*"
+pre-commit = "*"
+pycodestyle = "*"
+pyflakes = "*"
+pylint = "*"
+pytest = "*"
+pytest-cov = "*"
+pyinstrument = "*"
+pytest-codeblocks = "*"
 
 [tool.poetry.scripts]
 riksprot2any = "pyriksprot.scripts.riksprot2any:main"
@@ -145,4 +143,4 @@ reportUntypedClassDecorator = true
 reportOptionalSubscript = false
 reportOptionalMemberAccess = false
 reportOptionalCall = false
-pythonVersion = "3.9"
+pythonVersion = "3.11"

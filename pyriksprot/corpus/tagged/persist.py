@@ -56,7 +56,7 @@ def store_protocol(
 
 
 def load_metadata(filename: str) -> Optional[dict]:
-    """Read metadata attributes stored in `metadata.json` """
+    """Read metadata attributes stored in `metadata.json`"""
 
     try:
         with zipfile.ZipFile(filename, 'r') as fp:
