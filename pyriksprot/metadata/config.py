@@ -29,7 +29,6 @@ RIKSPROT_METADATA_TABLES: dict = {
     'member_of_parliament': {
         # 'member_of_parliament_id': 'AUTO_INCREMENT',
         'person_id': 'text references person (person_id) not null',
-        'party': 'text',
         'district': 'text',
         'role': 'text',
         'start': 'date',
@@ -57,9 +56,10 @@ RIKSPROT_METADATA_TABLES: dict = {
     },
     'party_affiliation': {
         'person_id': 'text references person (person_id) not null',
-        'party': 'text',
         'start': 'int',
         'end': 'int',
+        'party': 'text',
+        'party_id': 'text',
         ':rename_column:': {'wiki_id': 'person_id'},
     },
     'person': {
