@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import abc
-import xml.etree.cElementTree as ET
 from typing import Iterable, List, Literal, Union
 
 from loguru import logger
@@ -9,7 +8,6 @@ from loguru import logger
 from pyriksprot import interface
 from pyriksprot.foss import untangle
 from pyriksprot.utility import dedent as dedent_text
-from pyriksprot.utility import deprecated
 
 XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 
@@ -216,125 +214,3 @@ class ProtocolMapper:
         )
 
         return protocol
-
-
-@deprecated
-class XmlIterParseProtocol(XmlProtocol):
-    """Load ParlaClarin XML file using SAX parsing."""
-
-    def create_iterator(self) -> Iterable[interface.Utterance]:
-        return XmlIterParseProtocol.XmlIterParser(self.data)
-
-    def create_utterances(self) -> List[interface.Utterance]:
-        return list(self.iterator)
-
-    def get_date(self) -> str:
-        return self.iterator.doc_date
-
-    def get_name(self) -> str:
-        return self.iterator.doc_name
-
-    def get_speaker_notes(self) -> dict[str, str]:
-        return self.iterator.speaker_notes
-
-    class XmlIterParser:
-        def __init__(self, filename: str):
-
-            self.doc_date = None
-            self.doc_name = None
-            self.filename = filename
-            self.iterator = None
-            self.dedent: bool = True
-            self.speaker_notes: dict[str, str] = {}
-
-        def __iter__(self):
-            self.iterator = self.create_iterator()
-            return self
-
-        def __next__(self):
-            return next(self.iterator)
-
-        def create_iterator(self) -> Iterable[interface.Utterance]:
-
-            context = ET.iterparse(self.filename, events=("start", "end"))
-
-            context = iter(context)
-            current_page: int = -1
-            current_utterance: interface.Utterance = None
-            speaker_note_id: str = interface.MISSING_SPEAKER_NOTE_ID
-            is_preface: bool = False
-            previous_who: str = None
-
-            for event, elem in context:
-
-                tag = elem.tag.rpartition('}')[2]
-                value = elem.text
-
-                if event == 'start':
-
-                    if tag == 'head' and is_preface:
-                        self.doc_name = value
-
-                    elif tag == 'docDate' and is_preface:
-                        self.doc_date = elem.attrib.get('when')
-
-                    elif tag == "note" and elem.attrib.get('type') == "speaker":
-                        speaker_note_id = elem.attrib.get(XML_ID)
-                        previous_who: str = None
-                        if not speaker_note_id:
-                            raise ValueError("no xml:id in speaker's note")
-                        if speaker_note_id:
-                            if value:
-                                self.speaker_notes[speaker_note_id] = " ".join(value.split())
-                            else:
-                                pass
-
-                    elif tag == "pb":
-                        current_page += 1
-
-                    elif tag == "u":
-                        is_preface = False
-                        who: str = elem.attrib.get('who')
-                        if previous_who and previous_who != who:
-                            speaker_note_id = interface.MISSING_SPEAKER_NOTE_ID
-
-                        current_utterance: interface.Utterance = interface.Utterance(
-                            page_number=str(current_page),
-                            speaker_note_id=speaker_note_id,
-                            u_id=elem.attrib.get(XML_ID),
-                            who=elem.attrib.get('who'),
-                            prev_id=elem.attrib.get('prev'),
-                            next_id=elem.attrib.get('next'),
-                            paragraphs=[],
-                        )
-                        previous_who = elem.attrib.get('who')
-                        # speaker_note_id = None
-                    elif tag == "seg" and value is not None:
-                        value = (dedent_text(value) if self.dedent else value).strip()
-                        if value:
-                            current_utterance.paragraphs.append(value)
-
-                    elif tag == 'div' and elem.attrib.get('type') == 'preface':
-                        is_preface = True
-
-                    # else:
-                    #     speaker_note_id = None
-
-                elif event == 'end':
-
-                    if tag == "seg" and value is not None:
-                        value = (dedent_text(value) if self.dedent else value).strip()
-                        if value:
-                            current_utterance.paragraphs.append(value)
-
-                    elif tag == 'u':
-                        yield current_utterance
-                        current_utterance = None
-
-                    elif tag == 'div' and elem.attrib.get('type') == 'preface':
-                        is_preface = False
-
-                    # elif tag == "note" and elem.attrib.get('type') == "speaker":
-                    #     self.speaker_notes[speaker_note_id] = " ".join(value.split())
-
-                elem.clear()

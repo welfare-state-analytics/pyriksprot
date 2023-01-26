@@ -6,7 +6,7 @@ from pyriksprot.corpus import iterate
 from pyriksprot.interface import ContentType
 from pyriksprot.utility import deprecated
 
-from .parse import ProtocolMapper, XmlIterParseProtocol, XmlUntangleProtocol
+from .parse import ProtocolMapper, XmlUntangleProtocol
 
 
 def multiprocessing_xml_load(args) -> Iterable[iterate.ProtocolSegment]:
@@ -67,35 +67,3 @@ class XmlProtocolSegmentIterator(iterate.ProtocolSegmentIterator):
 
     def map_futures(self, imap, args):
         return imap(multiprocessing_load, args, chunksize=self.multiproc_chunksize)
-
-
-@deprecated
-def multiprocessing_xml_iter_load(args) -> Iterable[iterate.ProtocolSegment]:
-    """Load protocol from XML. Aggregate text to `segment_level`. Return (name, who, id, text)."""
-    return iterate.to_segments(
-        content_type=ContentType.Text,
-        protocol=XmlIterParseProtocol(data=args[0], segment_skip_size=args[3]),
-        segment_level=args[2],
-        merge_strategy=args[4],
-        segment_skip_size=args[3],
-        which_year=args[5],
-    )
-
-
-# @deprecated
-class XmlSaxSegmentIterator(iterate.ProtocolSegmentIterator):
-    """Reads xml files and returns a stream of (name, who, id, text, page_number).
-    Uses SAX streaming"""
-
-    def load(self, filename: str) -> List[iterate.ProtocolSegment]:
-        return iterate.to_segments(
-            content_type=ContentType.Text,
-            protocol=XmlIterParseProtocol(data=filename, segment_skip_size=self.segment_skip_size),
-            segment_level=self.segment_level,
-            merge_strategy=self.merge_strategy,
-            segment_skip_size=self.segment_skip_size,
-            which_year=self.which_year,
-        )
-
-    def map_futures(self, imap, args):
-        return imap(multiprocessing_xml_iter_load, args, chunksize=self.multiproc_chunksize)
