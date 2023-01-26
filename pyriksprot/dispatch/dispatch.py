@@ -97,7 +97,6 @@ class IDispatcher(abc.ABC):
     @abc.abstractmethod
     def open_target(self, target_name: Any) -> None:
         """Open zink."""
-        ...
 
     def close_target(self) -> None:
         """Close zink."""
@@ -105,7 +104,6 @@ class IDispatcher(abc.ABC):
 
     def dispatch_index(self) -> None:
         """Dispatch an index of dispatched documents."""
-        ...
 
     def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
         for item in dispatch_items:
@@ -377,7 +375,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             raise ValueError(f"TaggedFramePerGroupDispatcher: expected Speech, found {item.segment_level}")
 
         if item.group_values == {}:
-            """ Speech level segments and no grouping => Add all speech metadata to index """
+            """Speech level segments and no grouping => Add all speech metadata to index"""
             if len(item.protocol_segments) > 1:
                 raise ValueError(
                     f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
@@ -388,7 +386,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             item_data: dict = {**{'document_id': self.document_id}, **item.to_dict()}
             speech_data: dict = item.protocol_segments[0].to_dict()
             if 'who' in item.group_values:
-                """ If `who` in grouping attributes => add person attribute from first speech """
+                """If `who` in grouping attributes => add person attribute from first speech"""
                 for key in PERSON_ATTRIBUTES:
                     if key in speech_data:
                         item_data[key] = speech_data[key]
@@ -514,8 +512,8 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
 
     def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
-        fg = lambda t: self.token2id[t]
-        pg = self.pos_schema.pos_to_id.get
+        fg = self.token2id.get  # lambda t: self.token2id[t]
+        pg = self.pos_schema.pos_to_id.get  # pylint: disable=unnecessary-lambda-assignment
 
         if not self.skip_text:
             tagged_frame['token_id'] = tagged_frame.token.apply(fg)

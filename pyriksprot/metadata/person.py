@@ -215,7 +215,7 @@ class PersonIndex:
 
     @cached_property
     def terms_of_office_lookup(self) -> dict:
-        """Builds a person_id to person's terms-of-offices dict """
+        """Builds a person_id to person's terms-of-offices dict"""
         lookup: dict = mdu.group_to_list_of_records(
             df=self.terms_of_office,
             key='person_id',
@@ -226,7 +226,7 @@ class PersonIndex:
 
     @cached_property
     def person_multiple_party_lookup(self) -> dict:
-        """Builds a person_id to person's parties lookup, only for person """
+        """Builds a person_id to person's parties lookup, only for person"""
         lookup: dict = mdu.group_to_list_of_records(
             df=self.person_multiple_party,
             key='person_id',
