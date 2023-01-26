@@ -14,6 +14,32 @@ def main():
 
 
 @click.command()
+@click.argument('source_folder', type=click.STRING)
+def verify_metadata_filenames(source_folder: str):
+    try:
+        md.verify_metadata_files(source_folder)
+    except ValueError as ex:
+        logger.error(ex)
+        sys.exit(-1)
+
+
+@click.command()
+@click.argument(
+    'tags',
+    nargs=-1,
+    type=click.STRING,
+)
+def verify_metadata_columns(tags: str):
+    try:
+        if len(tags) not in (1, 2):
+            raise ValueError("please speciy 1 or 2 tags")
+        md.verify_metadata_columns(*tags)
+    except ValueError as ex:
+        logger.error(ex)
+        sys.exit(-1)
+
+
+@click.command()
 @click.argument('tag', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
 def download_metadata(tag: str, target_folder: str):
@@ -69,6 +95,8 @@ def create_database(
 # type: ignore
 
 if __name__ == "__main__":
+    main.add_command(verify_metadata_filenames, "filenames")
+    main.add_command(verify_metadata_columns, "columns")
     main.add_command(create_utterance_index, "index")
     main.add_command(create_database, "database")
     main.add_command(download_metadata, "download")

@@ -29,10 +29,21 @@ from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
+import pygit2
 import requests
 import unidecode  # pylint: disable=import-error
 import yaml
 from loguru import logger
+
+
+def repository_tags(repository_folder: str = None) -> list[str]:
+    repo: pygit2.Repository = pygit2.Repository(
+        path=repository_folder
+        or jj(os.environ.get('RIKSPROT_DATA_FOLDER', '/data/riksdagen_corpus_data'), "riksdagen-corpus")
+    )
+    rx: re.Pattern = re.compile('^refs/tags/v\d+\.\d+\.\d+$')
+    tags: list[str] = sorted([r.removeprefix('refs/tags/') for r in repo.references if rx.match(r)])
+    return tags
 
 
 def norm_join(a: str, *paths: str):

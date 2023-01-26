@@ -150,6 +150,14 @@ def download_url_to_file(url: str, target_name: str, force: bool = False) -> Non
         fp.write(data)
 
 
+def download_url(url: str) -> None | str:
+    try:
+        data: str = requests.get(url, allow_redirects=True).content.decode("utf-8")
+        return data
+    except:  # pylint: disable=bare-except
+        return None
+
+
 def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
     """Probes existence of filename with any of given extensions in folder"""
     for probe_name in set([filename] + ([replace_extension(filename, ext) for ext in exts] if exts else [])):
