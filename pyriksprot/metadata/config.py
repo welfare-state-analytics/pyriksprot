@@ -126,3 +126,5 @@ EXTRA_TABLES = {
         'speach_index': 'int',
     },
 }
+
+PERSON_TABLES: list[str] = [key for key, item in RIKSPROT_METADATA_TABLES.items() if 'person_id' in item]
