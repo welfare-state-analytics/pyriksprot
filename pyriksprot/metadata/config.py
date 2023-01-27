@@ -12,7 +12,7 @@ def table_url(tablename: str, tag: str = "main") -> str:
 
 RIKSPROT_METADATA_TABLES: dict = {
     'government': {
-        'government_id': 'text primary key',
+        'government_id': 'text not null', # actual primary key
         'government': 'text primary key not null',
         'start': 'date',
         'end': 'date',
