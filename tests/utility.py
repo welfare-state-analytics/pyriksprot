@@ -94,7 +94,7 @@ def create_sample_metadata():
     """Create metadata database"""
     md.create_database(
         database_filename=SAMPLE_METADATA_DATABASE_NAME,
-        tag=None,
+        tag=RIKSPROT_REPOSITORY_TAG,
         folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
         force=True,
     )
