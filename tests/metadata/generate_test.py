@@ -6,6 +6,8 @@ import pytest
 
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
+from pyriksprot.utility import download_metadata, gh_ls
+import pyriksprot.sql as sql
 
 jj = os.path.join
 
@@ -13,6 +15,22 @@ RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
 
 DUMMY_METADATA_DATABASE_NAME: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
+def test_list_sql_files():
+    data = sql.sql_file_paths()
+    assert len(data) > 0
+
+def test_gh_ls():
+
+    data: list[dict] = gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG)
+    assert len(data) > 0
+
+def test_download_metadata():
+
+    data: list[dict] = gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG)
+    assert len(data) > 0
+
+    filenames: list[str] = download_metadata(folder="./tests/output", tag = RIKSPROT_REPOSITORY_TAG, force=True)
+    assert len(filenames) > 0
 
 def test_get_and_set_db_version():
 
@@ -76,7 +94,7 @@ def test_load_scripts():
     tag: str = RIKSPROT_REPOSITORY_TAG
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
-    script_folder: str = "./metadata/sql"
+    script_folder: str = None # "./metadata/sql"
 
     md.create_database(database_filename=database_filename, tag=tag, folder=source_folder, force=True)
     md.load_corpus_indexes(database_filename=database_filename, source_folder=source_folder)

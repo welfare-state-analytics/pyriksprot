@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 from .config import PERSON_TABLES, RIKSPROT_METADATA_TABLES, table_url
 from .utility import download_url_to_file, probe_filename
+from ..sql import sql_file_paths
 
 jj = os.path.join
 
@@ -91,12 +92,12 @@ def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
         # download_url(url, target_folder, filename)
 
 
-def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, target_folder: str):
+def subset_to_folder(parser: IParser, source_folder: str, metadata_source_folder: str, target_folder: str):
     """Creates a subset of metadata in source metadata that includes only protocols found in source_folder"""
 
     logger.info("Subsetting metadata database.")
     logger.info(f"    Source folder: {source_folder}")
-    logger.info(f"  Source metadata: {source_metadata}")
+    logger.info(f"  Source metadata: {metadata_source_folder}")
     logger.info(f"    Target folder: {target_folder}")
 
     data: tuple = generate_corpus_indexes(parser, corpus_folder=source_folder, target_folder=target_folder)
@@ -109,20 +110,20 @@ def subset_to_folder(parser: IParser, source_folder: str, source_metadata: str, 
     logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
 
     for tablename in ["government", "party_abbreviation"]:
-        shutil.copy(jj(source_metadata, f"{tablename}.csv"), jj(target_folder, f"{tablename}.csv"))
+        shutil.copy(jj(metadata_source_folder, f"{tablename}.csv"), jj(target_folder, f"{tablename}.csv"))
 
     for tablename in PERSON_TABLES:
 
         filename: str = f"{tablename}.csv"
 
-        table: pd.DataFrame = pd.read_csv(jj(source_metadata, filename), sep=',', index_col=None)
+        table: pd.DataFrame = pd.read_csv(jj(metadata_source_folder, filename), sep=',', index_col=None)
 
         id_name = 'wiki_id' if 'wiki_id' in table.columns else 'person_id'
         table = table[table[id_name].isin(person_ids)]
 
         table.to_csv(jj(target_folder, filename), sep=',', index=False)
 
-    unknowns: pd.DataFrame = pd.read_csv(jj(source_metadata, "unknowns.csv"), sep=',', index_col=None)
+    unknowns: pd.DataFrame = pd.read_csv(jj(metadata_source_folder, "unknowns.csv"), sep=',', index_col=None)
     unknowns = unknowns[unknowns['protocol_id'].isin({f"{x}.xml" for x in protocols['document_name']})]
     unknowns.to_csv(jj(target_folder, "unknowns.csv"), sep=',', index=False)
 
@@ -334,12 +335,15 @@ def load_corpus_indexes(*, database_filename: str, source_folder: str = None) ->
 
 def load_scripts(database_filename: str, script_folder: str = None) -> None:
 
-    script_folder: str = script_folder or jj(dirname(database_filename), "sql")
-
-    if not isdir(script_folder):
-        raise FileNotFoundError(script_folder)
-
-    filenames = sorted(glob.glob(jj(script_folder, "*.sql")))
+    if script_folder:
+        """Load SQL files from specified folder"""
+        # script_folder: str = script_folder or jj(dirname(database_filename), "sql")
+        if not isdir(script_folder):
+            raise FileNotFoundError(script_folder)
+        filenames = sorted(glob.glob(jj(script_folder, "*.sql")))
+    else:
+        """Load SQL scripts from module"""
+        filenames: list[str] = sql_file_paths()
 
     with closing(sqlite3.connect(database_filename)) as db:
 
