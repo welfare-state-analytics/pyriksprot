@@ -46,7 +46,7 @@ doc3:
 	@poetry run rmdir docs/pyriksprot
 
 test: output-dir
-	@poetry run pytest $(PYTEST_ARGS)  tests
+	@poetry run pytest $(PYTEST_ARGS) tests
 	@rm -rf ./tests/output/*
 
 output-dir:
