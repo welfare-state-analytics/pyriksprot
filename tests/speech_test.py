@@ -15,7 +15,7 @@ from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
 from tests.parlaclarin.utility import count_utterances
 
-from .utility import RIKSPROT_PARLACLARIN_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances
+from .utility import RIKSPROT_PARLACLARIN_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances, sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name
 
@@ -293,6 +293,7 @@ def test_load_protocols_with_non_existing_file():
     assert protocol is None
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocol_with_empty_existing_file():
     protocol: interface.Protocol | None = tagged_corpus.load_protocol(
         filename=jj(TAGGED_SOURCE_FOLDER, 'prot-1973--21.zip')
@@ -300,17 +301,20 @@ def test_load_protocol_with_empty_existing_file():
     assert protocol is None
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols_from_filenames():
     filenames: list[str] = glob.glob(TAGGED_SOURCE_PATTERN, recursive=True)
     protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
     assert len(protocols) == 5
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols_from_folder():
     protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=TAGGED_SOURCE_FOLDER)]
     assert len(protocols) == 5
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize(
     'protocol_name,merge_strategy,expected_speech_count',
     [

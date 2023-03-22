@@ -10,11 +10,12 @@ from pyriksprot import CorpusSourceIndex, interface, to_speech, workflows
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.dispatch import dispatch
 
-from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER
+from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER, sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name,no-member
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_glob_protocols():
     corpus_source: str = TAGGED_SOURCE_FOLDER
     filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, file_pattern='prot-*.zip', strip_path=True)
@@ -23,6 +24,7 @@ def test_glob_protocols():
     assert 'prot-1955--ak--22.zip' in filenames
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_create_source_index_for_tagged_corpus():
     corpus_source: str = TAGGED_SOURCE_FOLDER
     source_index = CorpusSourceIndex.load(source_folder=corpus_source, source_pattern='**/prot-*.zip')
@@ -33,6 +35,7 @@ def test_create_source_index_for_tagged_corpus():
     assert len(source_index) == 6
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols():
     corpus_source: str = TAGGED_SOURCE_FOLDER
     filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, file_pattern='prot-*.zip')
@@ -44,6 +47,7 @@ def test_load_protocols():
     assert len(protocols) == len(filenames) - 1
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize(
     'temporal_key, group_keys',
     [
@@ -81,6 +85,7 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     os.unlink(opts['target_name'])
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize(
     'target_type,merge_strategy,compress_type',
     [
