@@ -15,6 +15,10 @@ create table if not exists _party_abbreviation_jj (
     ocr_correction text not null
 );
 
+/*
+    2023-03-20: all correnctions seems to be fixed in source except "partilös" -> "X"
+*/
+
 -- update _party_affiliation set party = 'Miljöpartiet' where person_id = 'Q21731075';
  with _party_abbreviation_jj_data(party, abbreviation, ocr_correction) as (
         values
