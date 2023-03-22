@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Callable, Dict, Set
 
-from ..utility import load_dict, load_token_set, store_dict, store_token_set
+from .utility import load_dict, load_token_set, store_dict, store_token_set
 
 PARAGRAPH_MARKER = '##PARAGRAPH##'
 
