@@ -34,6 +34,8 @@ more-itertools = "*"
 python-dotenv = "*"
 unidecode = "^1.3.6"
 pygit2 = "^1.11.1"
+sqlalchemy = "^2.0.6"
+psycopg2-binary = "^2.9.5"
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -54,6 +56,9 @@ pytest-codeblocks = "*"
 riksprot2any = "pyriksprot.scripts.riksprot2any:main"
 riksprot2tfs = "pyriksprot.scripts.riksprot2tfs:main"
 riksprot2text = "pyriksprot.scripts.riksprot2text:main"
+subset-corpus = "pyriksprot.scripts.subset_corpus:main"
+speech-index = "pyriksprot.scripts.speech_index:main"
+metadata2db = "pyriksprot.scripts.metadata2db:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
