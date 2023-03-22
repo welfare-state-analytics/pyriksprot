@@ -1,82 +1,117 @@
 from __future__ import annotations
 
-import glob
+import contextlib
 import os
-from os.path import basename, splitext
+from glob import glob
 
-from loguru import logger
-
-from ..utility import repository_tags
-from .config import RIKSPROT_METADATA_TABLES, table_url
-from .generate import fx_or_url
-from .utility import download_url
+from ..utility import strip_path_and_extension
+from .config import MetadataTableConfigs
+from .repository import gh_dl_metadata
 
 jj = os.path.join
 
 
-def table_url2(tablename: str, tag: str = "main") -> str:
-    specification: dict = RIKSPROT_METADATA_TABLES.get(tablename)
-    return (
-        table_url(tablename=tablename, tag=tag)
-        if ':url:' not in specification
-        else fx_or_url(specification[':url:'], tag)
-    )
+class ConformBaseSpecification:
+    """Verifies that tags metadata conform"""
+
+    def __init__(self):
+        self.left_key: str = "left"
+        self.left_tables: dict = {}
+        self.right_key: str = "right"
+        self.right_tables: dict = {}
+        self.errors: list[str] = []
+        self.ignore_tables: set[str] = {'unknowns','protocols','utterances','speaker_notes'}
+
+    @property
+    def all_tablenames(self) -> set[str]:
+        return set(self.left_tables.keys()) | set(self.right_tables.keys()) - self.ignore_tables
+
+    def is_satisfied(self, **_) -> bool:
+
+        for tablename in self.all_tablenames:
+            try:
+                if tablename not in self.left_tables:
+                    self.errors.append(f"{tablename}: found in {self.right_key} but not found in {self.left_key}")
+                    continue
+
+                if tablename not in self.right_tables:
+                    self.errors.append(f"{tablename}: found in {self.left_key} but not found in {self.right_key}")
+                    continue
+
+                self.compare_columns(tablename)
+
+            except:  # pylint: disable=bare-except
+                self.errors.append(f"{tablename}: comparision failed")
+
+        if self.errors:
+            raise ValueError("\n" + ("\n".join(self.errors)))
+
+    def compare_columns(self, tablename: str) -> None:
+        left_columns: set[str] = set(self.left_tables.get(tablename, {}))
+        right_columns: set[str] = set(self.left_tables.get(tablename, {}))
+
+        if left_columns.difference(right_columns):
+            self.errors.append(
+                f"{tablename}: unexpected column(s) in {self.left_key}: {' '.join(left_columns.difference(right_columns))}"
+            )
+
+        if right_columns.difference(left_columns):
+            self.errors.append(
+                f"{tablename}: missing column(s) in {self.right_key}: {' '.join(right_columns.difference(left_columns))}"
+            )
 
 
-def verify_metadata_files(source_folder: str):
+class TagsConformSpecification(ConformBaseSpecification):
+    """Verifies that tags metadata conform"""
 
-    ignore_filenames: list[str] = ["unknowns"]
-    filenames: list[str] = [splitext(basename(x))[0] for x in glob.glob(f"{source_folder}/*.csv")]
+    def __init__(self, tag1: str, tag2: str) -> None:
+        super().__init__()
 
-    expected_filenames: list[str] = [x for x in RIKSPROT_METADATA_TABLES if x not in ignore_filenames]
+        self.left_key: str = tag1
+        self.right_key: str = tag2
 
-    missing_filenames: list[str] = [x for x in expected_filenames if x not in filenames]
-    unknown_filenames: list[str] = [x for x in filenames if x not in expected_filenames]
+        tag1_data: dict = gh_dl_metadata(tag=tag1, folder=None)
+        tag2_data: dict = gh_dl_metadata(tag=tag2, folder=None)
 
-    if len(missing_filenames) > 0 or len(unknown_filenames) > 0:
-
-        msg: str = ""
-
-        if len(missing_filenames) > 0:
-            msg += f"expected but not found: [{', '.join(missing_filenames)}]  "
-
-        if len(unknown_filenames) > 0:
-            msg += f"found but not expected: [{', '.join(unknown_filenames)}]"
-
-        raise ValueError(msg)
-
-    logger.info("metadata filenames is verified")
+        self.left_tables: dict = {n: v['headers'] for n,v in tag1_data.items()}
+        self.right_tables: dict = {n: v['headers'] for n,v in tag2_data.items()}
 
 
-def verify_metadata_columns(tag1: str, tag2: str = None) -> None:
+class ConfigConformsToTagSpecification(ConformBaseSpecification):
+    """Verifies that current table specification conforms to given tag"""
 
-    tags: list[str] = repository_tags()
-    errors: list[str] = []
+    def __init__(self, tag: str):
+        super().__init__()
 
-    if tag1 not in tags:
-        raise ValueError(f"unknown tag {tag1}")
+        self.table_configs: MetadataTableConfigs = MetadataTableConfigs()
 
-    if tag2 is None:
-        tag2 = tags[tags.index(tag1) - 1]
+        self.left_key: str = "config"
+        self.right_key: str = tag
 
-    tablenames: list[str] = [x for x in RIKSPROT_METADATA_TABLES]
-    for tablename in tablenames:
-        try:
-            columns1, columns2 = [
-                set(d.split('\n')[0].split(','))
-                for d in [download_url(table_url2(tablename, tag)) for tag in (tag1, tag2)]
-            ]
+        tag2_data: dict = gh_dl_metadata(tag=tag, folder=None)
 
-            if columns1.difference(columns2) or columns2.difference(columns1):
+        self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
+        self.right_tables: dict = {n: v['headers'] for n,v in tag2_data.items()}
 
-                if columns1.difference(columns2):
-                    errors.append(f"{tablename}: unexpected column(s): {' '.join(columns1.difference(columns2))}")
+class ConfigConformsToFolderSpecification(ConformBaseSpecification):
+    """Verifies that current table specification has same files as in specified folder"""
 
-                if columns2.difference(columns1):
-                    errors.append(f"{tablename}: missing column(s): {' '.join(columns2.difference(columns1))}")
+    def __init__(self, folder: str):
+        super().__init__()
 
-        except:  # pylint: disable=bare-except
-            errors.append(f"{tablename}: comparision failed")
+        self.table_configs: MetadataTableConfigs = MetadataTableConfigs()
 
-    if errors:
-        raise ValueError("\n" + ("\n".join(errors)))
+        self.left_key: str = "config"
+        self.right_key: str = folder
+
+        self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
+        self.right_tables: dict = self.get_folder_info(folder)
+
+    def get_folder_info(self, folder: str) -> dict:
+        return {strip_path_and_extension(t): self.load_columns(t) for t in glob(jj(folder, "*.csv"))}
+
+    def load_columns(self, filename: str) -> list[str]:
+        with contextlib.suppress():
+            with open(filename, mode="r", encoding="utf-8") as fp:
+                return fp.read().splitlines()[0].split(',')
+        return []
