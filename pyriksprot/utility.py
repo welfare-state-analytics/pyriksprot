@@ -7,10 +7,10 @@ import functools
 import glob
 import gzip
 import inspect
+import json
 import lzma
 import os
 import pathlib
-import pickle
 import re
 import shutil
 import tempfile
@@ -18,32 +18,19 @@ import time
 import unicodedata
 import warnings
 import zlib
-from collections import defaultdict
-from dataclasses import fields, is_dataclass
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
 from types import ModuleType
 from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
-from urllib.error import URLError
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 
-import pygit2
+import pandas as pd
 import requests
 import unidecode  # pylint: disable=import-error
 import yaml
 from loguru import logger
-
-
-def repository_tags(repository_folder: str = None) -> list[str]:
-    repo: pygit2.Repository = pygit2.Repository(
-        path=repository_folder
-        or jj(os.environ.get('RIKSPROT_DATA_FOLDER', '/data/riksdagen_corpus_data'), "riksdagen-corpus")
-    )
-    rx: re.Pattern = re.compile(r'^refs/tags/v\d+\.\d+\.\d+$')
-    tags: list[str] = sorted([r.removeprefix('refs/tags/') for r in repo.references if rx.match(r)])
-    return tags
 
 
 def norm_join(a: str, *paths: str):
@@ -122,17 +109,8 @@ def ts_data_path(directory: str, filename: str):
     return jj(directory, f'{time.strftime("%Y%m%d%H%M")}_{filename}')
 
 
-def data_path_ts(directory: str, path: str):
-    name, extension = splitext(path)
-    return jj(directory, f'{name}_{time.strftime("%Y%m%d%H%M")}{extension}')
-
-
 def path_add_sequence(path: str, i: int, j: int = 0) -> str:
     return path_add_suffix(path, f"_{str(i).zfill(j)}")
-
-
-def strip_path_and_add_counter(filename: str, i: int, n_zfill: int = 3):
-    return f'{basename(strip_extensions(filename))}_{str(i).zfill(n_zfill)}.txt'
 
 
 def strip_paths(filenames: str | List[str]) -> str | List[str]:
@@ -161,44 +139,10 @@ def hasattr_path(data: Any, path: str) -> bool:
     return True
 
 
-def dict_get_by_path(data: dict, path: str, default=None) -> Any:
-    for attrib in path.split("."):
-        if not attrib in data:
-            return default
-        data = data[attrib]
-    return data
-
-
 def lookup(data, *keys):
     for key in keys or []:
         data = data.get(key, {})
     return data
-
-
-def load_token_set(filename: str) -> Set[str]:
-    """Load tokens from `filename`, one token per line"""
-    if isfile(filename):
-        with gzip.open(filename, 'rb') as f:
-            return set(f.read().decode().split('\n'))
-    return set()
-
-
-def store_token_set(tokens: Set[str], filename: str):
-    with gzip.open(filename, 'wb') as f:
-        f.write('\n'.join(list(tokens)).encode())
-
-
-def store_dict(data: dict, filename: str):
-    with open(filename, 'wb') as fp:
-        pickle.dump(data, fp, pickle.HIGHEST_PROTOCOL)
-
-
-def load_dict(filename: str) -> defaultdict(int):
-    # logger.info(f"loading {filename}")
-    if isfile(filename):
-        with open(filename, 'rb') as fp:
-            return pickle.load(fp)
-    return defaultdict(int)
 
 
 @contextlib.contextmanager
@@ -224,29 +168,9 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
             path.unlink()
 
 
-def download_url(*, url: str, target_folder: str, filename: str = None) -> None:
-    """Download a file from a url and place it in `target_folder`.
-    https://stackoverflow.com/a/61003039/12383895
-    Args:
-        url (str): URL to download file from
-        target_folder (str): Directory to place downloaded file in
-        filename (str, optional): Name to save the file under. If None, use the basename of the URL
-    """
-
-    target_folder: str = expanduser(target_folder)
-    target_filename: str = jj(target_folder, filename or basename(url))
-
-    os.makedirs(target_folder, exist_ok=True)
-
-    logger.info(f'downloading: {filename}')
-    try:
-        urlretrieve(url, target_filename)
-    except (URLError, IOError):
-        if url.startswith('https:'):
-            urlretrieve(url.replace('https:', 'http:'), target_filename)
-
-
 def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
+
+    target_name: str = expanduser(target_name)
 
     if os.path.isfile(target_name):
         if not force:
@@ -255,6 +179,7 @@ def download_url_to_file(url: str, target_name: str, force: bool = False) -> Non
 
     ensure_path(target_name)
 
+    logger.info(f'downloading: {target_name}')
     with open(target_name, 'w', encoding="utf-8") as fp:
         data: str = requests.get(url, allow_redirects=True, timeout=10).content.decode("utf-8")
         fp.write(data)
@@ -288,8 +213,26 @@ def touch(f: str) -> None:
     pathlib.Path(f).touch()
 
 
-def ensure_path(f: str) -> None:
-    os.makedirs(dirname(f), exist_ok=True)
+def ensure_path(path: str) -> str:
+    os.makedirs(dirname(path), exist_ok=True)
+    return path
+
+
+def reset_folder(folder: str, force: bool = False) -> str:
+    if os.path.isdir(folder) and not force:
+        raise FileExistsError(folder)
+
+    shutil.rmtree(folder, ignore_errors=True)
+    os.makedirs(folder, exist_ok=True)
+
+
+def reset_file(path: str, force: bool):
+    if path is None:
+        return
+    if os.path.isfile(path):
+        if not force:
+            raise FileExistsError(path)
+        os.unlink(path)
 
 
 def get_kwargs():
@@ -371,13 +314,6 @@ def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
     return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)
 
 
-# def dedent(text: str) -> str:
-#     """Remove any white-space indentation from `text`."""
-#     if isinstance(text, Undefined):
-#         raise TypeError("dedent: jinja2.Undefined value string encountered")
-#     return textwrap.dedent(text) if text is not None else ""
-
-
 def dedent(text: str) -> str:
     """Remove whitespaces before and after newlines"""
     return '\n'.join(x.strip() for x in text.split('\n'))
@@ -398,7 +334,7 @@ def strip_csv_header(csv_str: str, sep: str = '\n') -> str:
     return csv_str[idx + 1 :]
 
 
-def merge_tagged_csv(csv_strings: List[str], sep: str = '\n') -> str:
+def merge_csv_strings(csv_strings: List[str], sep: str = '\n') -> str:
     """Merge tagged CSV strings into a single tagged CSV string"""
     if len(csv_strings or []) == 0:
         return ''
@@ -449,6 +385,14 @@ def write_yaml(data: dict, file: str) -> None:
         return yaml.dump(data=data, stream=fp)
 
 
+def read_sql_table(table_name: str, con: Any) -> pd.DataFrame:
+    return pd.read_sql(f"select * from {table_name}", con)
+
+
+def read_sql_tables(tables: list[str] | dict, db: Any) -> dict[str, pd.DataFrame]:
+    return tables if isinstance(tables, dict) else {table_name: read_sql_table(table_name, db) for table_name in tables}
+
+
 def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
     """Update dict `data` with values found in `yaml_file`."""
     if yaml_file is None:
@@ -458,25 +402,8 @@ def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
     return data
 
 
-def download_protocols(*, protocols: List[str], target_folder: str, create_subfolder: bool, tag: str) -> None:
-    """Downloads protocols. Used only in tests."""
-
-    def _protocol_uri(filename: str, subfolder: str, tag: str) -> str:
-        return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{tag}/corpus/protocols/{subfolder}/{filename}"
-
-    shutil.rmtree(target_folder, ignore_errors=True)
-    os.makedirs(target_folder, exist_ok=True)
-
-    logger.info(f"downloading protocols from branch {tag}.")
-
-    for filename in protocols:
-        subfolder: str = filename.split('-')[1]
-        filename: str = replace_extension(filename, 'xml')
-        download_url(
-            url=_protocol_uri(filename=filename, subfolder=subfolder, tag=tag),
-            target_folder=target_folder if not create_subfolder else jj(target_folder, subfolder),
-            filename=filename,
-        )
+def load_json(url: str) -> list[dict]:
+    return json.loads(urlopen(url).read())
 
 
 def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
@@ -489,29 +416,6 @@ def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
 
 def revdict(d: dict) -> dict:
     return {v: k for k, v in d.items()}
-
-
-def split_properties_by_dataclass(properties: set[str], *cls_list: tuple[Type, ...]) -> tuple[set[str], ...]:
-
-    properties = set(properties)
-
-    key_sets: list[set[str]] = []
-
-    for cls in cls_list:
-
-        if not is_dataclass(cls):
-            raise ValueError(f"{cls.__name__} is not a dataclass")
-
-        key_set: set[str] = properties.intersection({f.name for f in fields(cls)})
-
-        properties -= key_set
-
-        key_sets.append(key_set)
-
-    if properties:
-        raise ValueError(f"split_properties_by_dataclass: {','.join(properties)} not found.")
-
-    return tuple(key_sets)
 
 
 def props(cls: Type) -> list[str]:
