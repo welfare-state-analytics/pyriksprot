@@ -33,17 +33,17 @@ def extract_speech_index(
     """Generates a speech index for corpus in `source_folder`, and according to given parameters..
 
     Args:
-        source_folder (str): _description_
-        database_filename (str): _description_
-        target_name (str): _description_
-        content_type (interface.ContentType, optional): _description_. Defaults to interface.ContentType.TaggedFrame.
-        segment_level (interface.SegmentLevel, optional): _description_. Defaults to None.
-        segment_skip_size (int, optional): _description_. Defaults to 1.
-        years (str, optional): _description_. Defaults to None.
-        multiproc_keep_order (str, optional): _description_. Defaults to None.
-        multiproc_processes (int, optional): _description_. Defaults to 1.
-        multiproc_chunksize (int, optional): _description_. Defaults to 100.
-        merge_strategy (to_speech.MergeStrategyType, optional): _description_. Defaults to 'chain'.
+        source_folder (str): Source folder
+        database_filename (str): Metadata database filename (Sqlite3)
+        target_name (str): Target filename.
+        content_type (interface.ContentType, optional): Text or PoS-tagged. Defaults to interface.ContentType.TaggedFrame.
+        segment_level (interface.SegmentLevel, optional): Document level. Defaults to None.
+        segment_skip_size (int, optional): Size of text to include. Defaults to 1.
+        years (str, optional): Years filter. Defaults to None.
+        multiproc_keep_order (str, optional): Multiprocessing option. Defaults to None.
+        multiproc_processes (int, optional): Number of processes. Defaults to 1.
+        multiproc_chunksize (int, optional): Size of work loads assigned to each process. Defaults to 100.
+        merge_strategy (to_speech.MergeStrategyType, optional): Speech merge strategy. Defaults to 'chain'.
     """
     logger.info("extracting corpus speech index...")
 
