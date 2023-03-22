@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from ..corpus import ProtocolSegment
 from ..interface import ContentType, IDispatchItem
-from ..utility import merge_tagged_csv
+from ..utility import merge_csv_strings
 
 
 @dataclass
@@ -43,7 +43,7 @@ class DispatchItem(IDispatchItem):
     @property
     def text(self) -> str:
         return (
-            merge_tagged_csv(self._get_texts(), sep='\n')
+            merge_csv_strings(self._get_texts(), sep='\n')
             if self.content_type == ContentType.TaggedFrame
             else '\n'.join(self._get_texts())
         )

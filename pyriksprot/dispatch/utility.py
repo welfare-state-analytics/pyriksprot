@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import fields, is_dataclass
 from os.path import splitext
-from typing import Callable
+from typing import Callable, Type
 
 from .. import metadata as md
 from .. import utility
@@ -27,7 +28,7 @@ def create_grouping_hashcoder(
         """No grouping apart from temporal key"""
         return hashcoder_with_no_grouping_keys
 
-    speaker_keys, item_keys, corpus_index_keys = utility.split_properties_by_dataclass(
+    speaker_keys, item_keys, corpus_index_keys = _split_properties_by_dataclass(
         grouping_keys, md.SpeakerInfo, iterate.ProtocolSegment, corpus_index.ICorpusSourceItem
     )
 
@@ -115,3 +116,26 @@ def decode_protocol_segment_filename(lookups: md.Codecs, speech: iterate.Protoco
 
     filename: str = f"{basename}_{suffix}{extension}"
     return filename
+
+
+def _split_properties_by_dataclass(properties: set[str], *cls_list: tuple[Type, ...]) -> tuple[set[str], ...]:
+
+    properties = set(properties)
+
+    key_sets: list[set[str]] = []
+
+    for cls in cls_list:
+
+        if not is_dataclass(cls):
+            raise ValueError(f"{cls.__name__} is not a dataclass")
+
+        key_set: set[str] = properties.intersection({f.name for f in fields(cls)})
+
+        properties -= key_set
+
+        key_sets.append(key_set)
+
+    if properties:
+        raise ValueError(f"split_properties_by_dataclass: {','.join(properties)} not found.")
+
+    return tuple(key_sets)
