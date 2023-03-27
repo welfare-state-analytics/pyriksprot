@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import fields, is_dataclass
 from os.path import splitext
-from typing import Callable, Type
+from typing import Any, Callable
 
 from .. import metadata as md
 from .. import utility
@@ -17,6 +16,14 @@ def hashcoder_with_no_grouping_keys(item: iterate.ProtocolSegment, **_) -> tuple
     return ({}, item.name, hashlib.md5(item.name.encode('utf-8')).hexdigest())
 
 
+def take(d: dict, properties: set[str]) -> dict:
+    return {k: v for k, v in (d.items() or {}) if k in properties}
+
+
+def probe(x: Any, properties: set[str]) -> dict:
+    return {k: getattr(x, k) for k in properties if hasattr(x, k)}
+
+
 def create_grouping_hashcoder(
     grouping_keys: list[str],
 ) -> Callable[[iterate.ProtocolSegment, corpus_index.ICorpusSourceItem], str]:
@@ -28,28 +35,23 @@ def create_grouping_hashcoder(
         """No grouping apart from temporal key"""
         return hashcoder_with_no_grouping_keys
 
-    speaker_keys, item_keys, corpus_index_keys = _split_properties_by_dataclass(
-        grouping_keys, md.SpeakerInfo, iterate.ProtocolSegment, corpus_index.ICorpusSourceItem
-    )
-
     def hashcoder(item: iterate.ProtocolSegment, source_item: corpus_index.ICorpusSourceItem) -> tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
         assert issubclass(type(source_item), corpus_index.ICorpusSourceItem)
-        try:
-            speaker_data: dict = (
-                {attr: str(getattr(item.speaker_info, attr)) for attr in speaker_keys} if speaker_keys else {}
-            )
-        except AttributeError as ex:
-            raise ValueError(
-                f"Grouping hashcoder: failed on retrieving key values from item.speaker_info. {ex}"
-            ) from ex
-
         parts: dict[str, str | int] = {
-            **speaker_data,
-            **{attr: str(getattr(source_item, attr)) for attr in corpus_index_keys},
-            **{attr: str(getattr(item, attr)) for attr in item_keys},
+            # **take(item.speaker_info.asdict(), grouping_keys),
+            # **take(source_item.to_dict(), grouping_keys),
+            # **take(item.to_dict(), grouping_keys),
+            **probe(item.speaker_info.term_of_office, grouping_keys),
+            **probe(item.speaker_info, grouping_keys),
+            **probe(source_item, grouping_keys),
+            **probe(item, grouping_keys),
         }
-        hashcode_str = utility.slugify('_'.join(x.lower().replace(' ', '_') for x in parts.values()))
+        missing: set[str] = grouping_keys - set(parts.keys())
+        if len(missing) > 0:
+            raise ValueError(f"unknown keys: {', '.join(list(missing))}")
+
+        hashcode_str = utility.slugify('_'.join(str(x).lower().replace(' ', '_') for x in parts.values()))
 
         return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
 
@@ -118,24 +120,24 @@ def decode_protocol_segment_filename(lookups: md.Codecs, speech: iterate.Protoco
     return filename
 
 
-def _split_properties_by_dataclass(properties: set[str], *cls_list: tuple[Type, ...]) -> tuple[set[str], ...]:
+# def _split_properties_by_dataclass(properties: set[str], *cls_list: tuple[Type, ...]) -> tuple[set[str], ...]:
 
-    properties = set(properties)
+#     properties = set(properties)
 
-    key_sets: list[set[str]] = []
+#     key_sets: list[set[str]] = []
 
-    for cls in cls_list:
+#     for cls in cls_list:
 
-        if not is_dataclass(cls):
-            raise ValueError(f"{cls.__name__} is not a dataclass")
+#         if not is_dataclass(cls):
+#             raise ValueError(f"{cls.__name__} is not a dataclass")
 
-        key_set: set[str] = properties.intersection({f.name for f in fields(cls)})
+#         key_set: set[str] = properties.intersection({f.name for f in fields(cls)})
 
-        properties -= key_set
+#         properties -= key_set
 
-        key_sets.append(key_set)
+#         key_sets.append(key_set)
 
-    if properties:
-        raise ValueError(f"split_properties_by_dataclass: {','.join(properties)} not found.")
+#     if properties:
+#         raise ValueError(f"split_properties_by_dataclass: {','.join(properties)} not found.")
 
-    return tuple(key_sets)
+#     return tuple(key_sets)
