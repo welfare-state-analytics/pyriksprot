@@ -1,23 +1,21 @@
 from __future__ import annotations
 
-import abc
-import glob
 import os
-import shutil
 import sqlite3
-from contextlib import closing
-from dataclasses import dataclass
-from os.path import dirname, isdir, isfile
-from typing import Any
+from glob import glob
+from os.path import isdir, isfile
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from .config import PERSON_TABLES, RIKSPROT_METADATA_TABLES, table_url
-from .utility import download_url_to_file, probe_filename
+from pyriksprot.interface import IProtocol, IProtocolParser
+
 from ..sql import sql_file_paths
+from ..utility import ensure_path, probe_filename, reset_file
+from . import config as cfg
+from . import utility
 
 jj = os.path.join
 
@@ -25,333 +23,194 @@ jj = os.path.join
 # pylint: disable=unsupported-assignment-operation, unsubscriptable-object
 
 
-class IParser(abc.ABC):
+class DatabaseHelper:
+    def __init__(self, filename: str):
+        self.filename: str = filename if isinstance(filename, str) else None
+        self.connection: sqlite3.Connection = None
 
-    """IParser = parse.ProtocolMapper"""
+        utility.register_numpy_adapters()
 
-    @dataclass
-    class IUtterance:
-        u_id: str
-        who: str
-        speaker_note_id: str
+    def open(self):
+        self.connection = sqlite3.connect(self.filename)
 
-    @dataclass
-    class IProtocol:
-        name: str
-        date: str
-        utterances: list[IParser.IUtterance]
+    def close(self):
+        if self.connection is None:
+            return
+        self.connection.commit()
+        self.connection.close()
+        self.connection = None
 
-        def get_speaker_notes(self) -> dict[str, str]:
-            return {}
+    def commit(self) -> None:
+        if self.connection is None:
+            return
+        self.connection.commit()
 
-    def to_protocol(
-        self, filename: str, segment_skip_size: int, ignore_tags: set[str]  # pylint: disable=unused-argument
-    ) -> IParser.IProtocol:
-        ...
+    def __enter__(self):
+        self.open()
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
-def register_numpy_adapters():
-    for dt in [np.int8, np.int16, np.int32, np.int64]:
-        sqlite3.register_adapter(dt, int)
-    for dt in [np.float16, np.float32, np.float64]:
-        sqlite3.register_adapter(dt, float)
-    sqlite3.register_adapter(np.nan, lambda _: "'NaN'")
-    sqlite3.register_adapter(np.inf, lambda _: "'Infinity'")
-    sqlite3.register_adapter(-np.inf, lambda _: "'-Infinity'")
+    def get_tag(self) -> str | None:
+        with self:
+            return (self.connection.execute("select version from version").fetchone() or [None])[0]
 
+    def set_tag(self, tag: str) -> None:
+        sql: str = f"""
+            create table if not exists version (
+                version text
+            );
+            delete from version;
+            insert into version(version) values ('{tag}');
+        """
+        with self:
+            self.connection.executescript(sql).close()
 
-def smart_load_table(tablename: str, folder: str = None, branch: str = None, **opts) -> pd.DataFrame:
-    if isinstance(folder, str):
-        tablename: str = probe_filename(jj(folder, f"{tablename}.csv"), ["zip", "csv.gz"])
-    elif isinstance(branch, str):
-        tablename: str = table_url(tablename, branch)
-    else:
-        raise ValueError("either folder or branch must be set")
+    def verify_tag(self, tag: str) -> DatabaseHelper:
+        if self.get_tag() != tag:
+            raise ValueError(f"metadata version mismatch: db version {self.get_tag()} differs from {tag}")
+        return self
 
-    table: pd.DataFrame = pd.read_csv(tablename, **opts)
-    return table
+    def reset(self, tag: str, force: bool) -> DatabaseHelper:
 
+        ensure_path(self.filename)
+        reset_file(self.filename, force=force)
 
-def download_to_folder(*, tag: str, folder: str, force: bool = False) -> None:
+        if tag is None:
+            raise ValueError("Git version tag cannot be NULL!")
 
-    os.makedirs(folder, exist_ok=True)
+        self.set_tag(tag)
+        return self
 
-    for tablename, specification in RIKSPROT_METADATA_TABLES.items():
-        target_name: str = jj(folder, f"{tablename}.csv")
-        if isfile(target_name):
-            if not force:
-                raise ValueError(f"File {target_name} exists, use `force=True` to overwrite")
-            os.remove(target_name)
-        logger.info(f"downloading {tablename} ({tag}) to {target_name}...")
-        url: str = (
-            table_url(tablename=tablename, tag=tag)
-            if ':url:' not in specification
-            else fx_or_url(specification[':url:'], tag)
-        )
-        download_url_to_file(url, target_name, force)
-        # download_url(url, target_folder, filename)
+    def create(self, tag: str = None, folder: str = None, force: bool = False):
+        logger.info(f"Creating database {self.filename}, using source {tag}/{folder} (tag/folder).")
 
+        configs: cfg.MetadataTableConfigs = cfg.MetadataTableConfigs()
 
-def subset_to_folder(parser: IParser, source_folder: str, metadata_source_folder: str, target_folder: str):
-    """Creates a subset of metadata in source metadata that includes only protocols found in source_folder"""
+        self.reset(tag=tag, force=force)
+        self.create_base_tables(configs)
+        self.load_base_tables(configs, folder)
 
-    logger.info("Subsetting metadata database.")
-    logger.info(f"    Source folder: {source_folder}")
-    logger.info(f"  Source metadata: {metadata_source_folder}")
-    logger.info(f"    Target folder: {target_folder}")
+        return self
 
-    data: tuple = generate_corpus_indexes(parser, corpus_folder=source_folder, target_folder=target_folder)
+    def create_base_tables(self, configs: cfg.MetadataTableConfigs) -> DatabaseHelper:
+        with self:
+            for _, config in configs.items():
+                self.connection.executescript(config.to_sql_create()).close()
+        return self
 
-    protocols: pd.DataFrame = data[0]
-    utterances: pd.DataFrame = data[1]
-    # speaker_notes: pd.DataFrame = data[2]
+    def load_base_tables(self, configs: cfg.MetadataTableConfigs, folder: str) -> DatabaseHelper:
 
-    person_ids: list[str] = set(utterances.person_id.unique().tolist())
-    logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
+        tag: str = self.get_tag()
 
-    for tablename in ["government", "party_abbreviation"]:
-        shutil.copy(jj(metadata_source_folder, f"{tablename}.csv"), jj(target_folder, f"{tablename}.csv"))
+        with self:
+            for _, config in configs.items():
+                self.load_base_table(config, folder, tag)
 
-    for tablename in PERSON_TABLES:
+        return self
 
-        filename: str = f"{tablename}.csv"
+    def load_base_table(self, config: cfg.MetadataTableConfig, folder: str, tag: str) -> DatabaseHelper:
+        logger.info(f"loading table: {config.name}")
+        table: pd.DataFrame = config.load_table(folder, tag)
+        transformed_table: pd.DataFrame = config.transform(table)[config.all_columns]
+        logger.warning(f"{','.join(transformed_table.columns)}")
+        data: np.recarray = transformed_table.to_records(index=False)
+        self.connection.executemany(config.to_sql_insert(), data).close()
+        return self
 
-        table: pd.DataFrame = pd.read_csv(jj(metadata_source_folder, filename), sep=',', index_col=None)
+    def load_scripts(self, folder: str = None) -> DatabaseHelper:
+        """Loads SQL files from specified folder otherwise loads files in sql module"""
 
-        id_name = 'wiki_id' if 'wiki_id' in table.columns else 'person_id'
-        table = table[table[id_name].isin(person_ids)]
+        if folder and not isdir(folder):
+            raise FileNotFoundError(folder)
 
-        table.to_csv(jj(target_folder, filename), sep=',', index=False)
+        filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths()
 
-    unknowns: pd.DataFrame = pd.read_csv(jj(metadata_source_folder, "unknowns.csv"), sep=',', index_col=None)
-    unknowns = unknowns[unknowns['protocol_id'].isin({f"{x}.xml" for x in protocols['document_name']})]
-    unknowns.to_csv(jj(target_folder, "unknowns.csv"), sep=',', index=False)
+        with self:
 
+            for filename in filenames:
+                logger.info(f"loading script: {os.path.split(filename)[1]}")
+                with open(filename, "r", encoding="utf-8") as fp:
+                    sql_str: str = fp.read()
+                self.connection.executescript(sql_str).close()
 
-def fx_or_url(url: Any, tag: str) -> str:
-    return url(tag) if callable(url) else url
+        return self
 
+    def load_corpus_indexes(self, *, folder: str) -> DatabaseHelper:
+        """Loads corpus indexes into iven database."""
 
-def sql_ddl_create(*, tablename: str, specification: dict[str, str]) -> str:
-    lf = '\n' + (12 * ' ')
-    sql_ddl: str = f"""
-        create table {tablename} (
-            {(','+lf).join(f"{k.removeprefix('+')} {t}" for k, t in specification.items() if not k.startswith(":"))}
-        );
-    """
-    return sql_ddl
+        tablenames: list[str] = ["protocols", "utterances", "speaker_notes"]
+        filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
 
+        if not all(isfile(filename) for filename in filenames):
+            raise FileNotFoundError(','.join(filenames))
 
-def sql_ddl_insert(*, tablename: str, columns: list[str]) -> str:
-    insert_sql = f"""
-    insert into {tablename} ({', '.join(columns)})
-        values ({', '.join(['?'] * len(columns))});
-    """
-    return insert_sql
+        with self:
+            for tablename in tablenames:
+                self.connection.executescript(f"drop table if exists {tablename};").close()
 
+            for tablename, filename in zip(tablenames, filenames):
+                logger.info(f"loading table: {tablename}")
+                pd.read_csv(filename, sep='\t', index_col=0).to_sql(tablename, self.connection, if_exists="replace")
 
-def transform_table(table: pd.DataFrame, specification: dict) -> pd.DataFrame:
+        return self
 
-    table = table.copy()
+    def load_data_tables(self, data_tables: dict[str, str | None]):
+        with self:
+            data: dict[str, pd.DataFrame] = utility.load_tables(data_tables, db=self.connection)
+            return data
 
-    if ':drop_duplicates:' in specification:
-        table = table.drop_duplicates(subset=specification[':drop_duplicates:'], keep='first')
 
-    if ':rename_column:' in specification:
-        assert isinstance(specification[':rename_column:'], dict)
-        for k, v in specification[':rename_column:'].items():
-            table = table.rename(columns={k: v})
+class CorpusIndexFactory:
+    def __init__(self, parser: IProtocolParser) -> None:
+        self.parser = parser
+        self.data: dict[str, pd.DataFrame]
 
-    if ':copy_column:' in specification:
-        assert isinstance(specification[':copy_column:'], dict)
-        for k, v in specification[':copy_column:'].items():
-            table[k] = table[v]
+    def generate(self, corpus_folder: str, target_folder: str = None) -> CorpusIndexFactory:
 
-    # if ':loaded_hook:' in specification:
-    #     table = specification[':loaded_hook:'](table)
+        logger.info("Generating utterance, protocol and speaker notes indices.")
+        logger.info(f"  source: {corpus_folder}")
+        logger.info(f"  target: {target_folder}")
 
-    for c in table.columns:
-        if table.dtypes[c] == np.dtype('bool'):  # pylint: disable=no-member
-            table[c] = [int(x) for x in table[c]]
+        filenames = glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
 
-    return table
+        return self.collect(filenames).store(target_folder)
 
+    def collect(self, filenames) -> CorpusIndexFactory:
 
-def set_db_tag(*, path_or_db: str | sqlite3.Connection, tag: str) -> str:
+        utterance_data: list[tuple] = []
+        protocol_data: list[tuple[int, str]] = []
+        speaker_notes: dict[str, str] = {}
 
-    sql_ddl: str = f"""
-        create table if not exists version (
-            version text
-        );
-        delete from version;
-        insert into version(version) values ('{tag}');
-    """
-    db: sqlite3.Connection = sqlite3.connect(path_or_db) if isinstance(path_or_db, str) else path_or_db
+        for document_id, filename in tqdm(enumerate(filenames)):
+            protocol: IProtocol = self.parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
+            protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
+            for u in protocol.utterances:
+                utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_note_id]))
+            speaker_notes.update(protocol.get_speaker_notes())
 
-    with closing(db.cursor()) as cursor:
-        cursor.executescript(sql_ddl)
+        self.data = {
+            "protocols": pd.DataFrame(
+                data=protocol_data, columns=['document_id', 'document_name', 'date', 'year']
+            ).set_index("document_id"),
+            "utterances": pd.DataFrame(
+                data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_note_id']
+            ).set_index("u_id"),
+            "speaker_notes": pd.DataFrame(speaker_notes.items(), columns=['speaker_note_id', 'speaker_note']).set_index(
+                'speaker_note_id'
+            ),
+        }
 
-    return sql_ddl
+        return self
 
+    def store(self, target_folder: str) -> CorpusIndexFactory:
 
-def db_table_exists(database_filename: str, table: str):
-    with closing(sqlite3.connect(database_filename)) as db:
-        with closing(db.cursor()) as cursor:
-            cursor.execute(f"select count(name) from sqlite_master where type='table' and name='{table}'")
-            return cursor.fetchone()[0] == 1
+        if target_folder:
 
+            os.makedirs(target_folder, exist_ok=True)
 
-def get_db_tag(path_or_db: str | sqlite3.Connection) -> str | None:
-    db: sqlite3.Connection = sqlite3.connect(path_or_db) if isinstance(path_or_db, str) else path_or_db
-    with closing(db.cursor()) as cursor:
-        cursor.execute("select version from version")
-        return cursor.fetchone()[0]
+            for tablename, df in self.data.items():
+                filename: str = jj(target_folder, f"{tablename}.csv")
+                df.to_csv(filename, sep="\t")
 
-
-def assert_db_tag(path_or_db: str | sqlite3.Connection, tag: str) -> None:
-    db_tag = get_db_tag(path_or_db)
-    if db_tag != tag:
-        raise ValueError(f"metadata version mismatch: db version {db_tag} differs from {tag}")
-
-
-def create_database(
-    database_filename: str,
-    tag: str = None,
-    folder: str = None,
-    force: bool = False,
-):
-    logger.info(f"Creating database {database_filename}, using source {tag}/{folder} (tag/folder).")
-
-    os.makedirs(dirname(database_filename), exist_ok=True)
-
-    if isfile(database_filename):
-        if not force:
-            raise ValueError("DB exists, use `force=True` to overwrite")
-        os.remove(database_filename)
-
-    if tag is None:
-        raise ValueError("Git version tag cannot be NULL!")
-
-    db: sqlite3.Connection = sqlite3.connect(database_filename)
-
-    register_numpy_adapters()
-
-    set_db_tag(path_or_db=db, tag=tag)
-
-    for tablename, specification in RIKSPROT_METADATA_TABLES.items():
-        with closing(db.cursor()) as cursor:
-            cursor.executescript(sql_ddl_create(tablename=tablename, specification=specification))
-
-    for tablename, specification in RIKSPROT_METADATA_TABLES.items():
-        logger.info(f"loading table: {tablename}")
-
-        table: pd.DataFrame = (
-            pd.read_csv(fx_or_url(specification[':url:'], tag), sep=',')
-            if ':url:' in specification and folder is None
-            else smart_load_table(tablename=tablename, folder=folder, branch=tag, sep=',')
-        )
-
-        table = transform_table(table, specification=specification)
-
-        with closing(db.cursor()) as cursor:
-            columns: list[str] = [k for k in specification if k[0] not in "+:"]
-            data = table[columns].to_records(index=False)
-            # data = table.to_records(index=False)
-            insert_sql = sql_ddl_insert(tablename=tablename, columns=columns)
-            cursor.executemany(insert_sql, data)
-
-    db.commit()
-    return db
-
-
-def generate_corpus_indexes(
-    parser: IParser, corpus_folder: str, target_folder: str = None
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-
-    logger.info("Generating utterance, protocol and speaker notes indices.")
-    logger.info(f"  source: {corpus_folder}")
-    logger.info(f"  target: {target_folder}")
-
-    utterance_data: list[tuple] = []
-    protocol_data: list[tuple[int, str]] = []
-    filenames = glob.glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
-    speaker_notes: dict[str, str] = {}
-
-    for document_id, filename in tqdm(enumerate(filenames)):
-        protocol: IParser.IProtocol = parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
-        protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
-        for u in protocol.utterances:
-            utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_note_id]))
-        speaker_notes.update(protocol.get_speaker_notes())
-
-    data: tuple[pd.DataFrame, pd.DataFrame] = (
-        pd.DataFrame(data=protocol_data, columns=['document_id', 'document_name', 'date', 'year']).set_index(
-            "document_id"
-        ),
-        pd.DataFrame(data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_note_id']).set_index(
-            "u_id"
-        ),
-        pd.DataFrame(speaker_notes.items(), columns=['speaker_note_id', 'speaker_note']).set_index('speaker_note_id'),
-    )
-
-    if target_folder:
-
-        os.makedirs(target_folder, exist_ok=True)
-
-        for df, tablename in zip(data, ["protocols", "utterances", "speaker_notes"]):
-            filename: str = jj(target_folder, f"{tablename}.csv")
-            if os.path.isfile(filename):
-                os.unlink(filename)
-            df.to_csv(filename, sep="\t")
-
-    return data
-
-
-def load_corpus_indexes(*, database_filename: str, source_folder: str = None) -> None:
-
-    folder: str = source_folder or dirname(database_filename)
-    tablenames: list[str] = ["protocols", "utterances", "speaker_notes"]
-    filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
-
-    if not isfile(database_filename):
-        raise FileNotFoundError(database_filename)
-
-    if not all(isfile(filename) for filename in filenames):
-        raise FileNotFoundError(','.join(filenames))
-
-    with closing(sqlite3.connect(database_filename)) as db:
-
-        for tablename in tablenames:
-            with closing(db.cursor()) as cursor:
-                cursor.executescript(f"drop table if exists {tablename};")
-
-        for tablename, filename in zip(tablenames, filenames):
-            logger.info(f"loading table: {tablename}")
-            data: pd.DataFrame = pd.read_csv(filename, sep='\t', index_col=0)
-            data.to_sql(tablename, db, if_exists="replace")
-
-        db.commit()
-
-
-def load_scripts(database_filename: str, script_folder: str = None) -> None:
-
-    if script_folder:
-        """Load SQL files from specified folder"""
-        # script_folder: str = script_folder or jj(dirname(database_filename), "sql")
-        if not isdir(script_folder):
-            raise FileNotFoundError(script_folder)
-        filenames = sorted(glob.glob(jj(script_folder, "*.sql")))
-    else:
-        """Load SQL scripts from module"""
-        filenames: list[str] = sql_file_paths()
-
-    with closing(sqlite3.connect(database_filename)) as db:
-
-        for filename in filenames:
-            logger.info(f"loading script: {os.path.split(filename)[1]}")
-            with open(filename, "r", encoding="utf-8") as fp:
-                sql_str: str = fp.read()
-            with closing(db.cursor()) as cursor:
-                cursor.executescript(sql_str)
-
-        db.commit()
+        return self

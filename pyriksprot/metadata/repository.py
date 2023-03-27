@@ -9,7 +9,7 @@ import requests
 from loguru import logger
 
 from ..utility import download_url_to_file, load_json, reset_folder
-from .config import MetadataTableConfig, MetadataTableConfigs, input_unknown_url, table_url
+from .config import MetadataTableConfigs, input_unknown_url, table_url
 
 
 def gh_ls(user: str, repository: str, path: str = "", tag: str = "main") -> list[dict]:
@@ -69,8 +69,7 @@ def gh_dl_metadata_by_config(*, configs: MetadataTableConfigs, tag: str, folder:
 
     os.makedirs(folder, exist_ok=True)
 
-    for tablename in configs.definitions.items():
-        config: MetadataTableConfig = configs[tablename]
+    for tablename, config in configs.definitions.items():
         target_name: str = jj(folder, f"{tablename}.csv")
         if isfile(target_name):
             if not force:
