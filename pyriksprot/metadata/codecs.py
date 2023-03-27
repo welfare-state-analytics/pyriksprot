@@ -8,6 +8,7 @@ from typing import Callable, Literal, Mapping
 
 import pandas as pd
 
+from .. import utility as pu
 from . import utility as mdu
 
 CODE_TABLES: dict[str, str] = {
@@ -55,7 +56,7 @@ class Codecs:
 
     @cached_property
     def gender2id(self) -> dict:
-        return mdu.revdict(self.gender2name)
+        return pu.revdict(self.gender2name)
 
     @cached_property
     def office_type2name(self) -> dict:
@@ -63,7 +64,7 @@ class Codecs:
 
     @cached_property
     def office_type2id(self) -> dict:
-        return mdu.revdict(self.office_type2name)
+        return pu.revdict(self.office_type2name)
 
     @cached_property
     def sub_office_type2name(self) -> dict:
@@ -71,7 +72,7 @@ class Codecs:
 
     @cached_property
     def sub_office_type2id(self) -> dict:
-        return mdu.revdict(self.sub_office_type2name)
+        return pu.revdict(self.sub_office_type2name)
 
     @cached_property
     def party_abbrev2name(self) -> dict:
@@ -79,7 +80,7 @@ class Codecs:
 
     @cached_property
     def party_abbrev2id(self) -> dict:
-        return mdu.revdict(self.party_abbrev2name)
+        return pu.revdict(self.party_abbrev2name)
 
     @property
     def codecs(self) -> list[Codec]:

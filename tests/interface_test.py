@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import glob
+import itertools
 import os
 import uuid
 from typing import Callable
 
 import pandas as pd
 import pytest
-from black import itertools
 
 from pyriksprot import interface, to_speech
 from pyriksprot.corpus import tagged as tagged_corpus

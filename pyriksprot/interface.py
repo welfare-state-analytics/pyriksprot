@@ -13,11 +13,11 @@ from typing import Any, Callable, Literal, Mapping, Optional, Union
 import pandas as pd
 from pandas.io import json
 
-from pyriksprot.corpus.parlaclarin.parse import MISSING_SPEAKER_NOTE_ID
-
-from .utility import flatten, merge_tagged_csv, strip_extensions
+from .utility import flatten, merge_csv_strings, strip_extensions
 
 # pylint: disable=too-many-arguments, no-member
+
+MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 
 class ParlaClarinError(ValueError):
@@ -90,8 +90,73 @@ class IDispatchItem(abc.ABC):
         ...
 
 
+# class IUtterance(abc.ABC):
+
+#     delimiter: str
+#     u_id: str
+#     speaker_note_id: str
+#     who: str
+#     prev_id: str
+#     next_id: str
+#     paragraphs: Union[list[str], str]
+#     annotation: Optional[str]
+#     page_number: Optional[str]
+
+#     @abc.abstractmethod
+#     @property
+#     def is_unknown(self) -> bool:
+#         ...
+
+#     @abc.abstractmethod
+#     @property
+#     def document_name(self) -> str:
+#         ...
+
+#     @abc.abstractmethod
+#     @property
+#     def tagged_text(self) -> str:
+#         ...
+
+#     @abc.abstractmethod
+#     @property
+#     def text(self) -> str:
+#         ...
+
+#     @abc.abstractmethod
+#     def checksum(self) -> str:
+#         ...
+
+#     @abc.abstractmethod
+#     def to_str(self, what: ContentType) -> str:
+#         ...
+
+
 class IProtocol(abc.ABC):
-    ...
+
+    date: str
+    name: str
+    utterances: list[Utterance]
+    speaker_notes: dict[str, str]
+
+    @abc.abstractmethod
+    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
+        ...
+
+    @abc.abstractmethod
+    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
+        ...
+
+    @abc.abstractmethod
+    def checksum(self) -> Optional[str]:
+        ...
+
+    @abc.abstractmethod
+    def get_content(self, content_type: ContentType) -> str:
+        ...
+
+    @abc.abstractmethod
+    def get_speaker_notes(self) -> dict[str, str]:
+        ...
 
 
 class Utterance:
@@ -225,11 +290,11 @@ class UtteranceHelper:
     @staticmethod
     def merge_tagged_texts(utterances: list[Utterance], sep: str = '\n') -> str:
         """Merge annotations into a single tagged CSV string"""
-        return merge_tagged_csv([u.tagged_text for u in (utterances or [])], sep=sep)
+        return merge_csv_strings([u.tagged_text for u in (utterances or [])], sep=sep)
 
     @staticmethod
     def merge_tagged_csv(csv_strings: list[str], sep: str = '\n') -> str:
-        return merge_tagged_csv(csv_strings, sep=sep)
+        return merge_csv_strings(csv_strings, sep=sep)
 
 
 class UtteranceMixIn:
@@ -339,7 +404,7 @@ class Speech(UtteranceMixIn):
         return self
 
 
-class Protocol(UtteranceMixIn):
+class Protocol(UtteranceMixIn, IProtocol):
     """Entity that represents a ParlaCLARIN document."""
 
     def __init__(self, date: str, name: str, utterances: list[Utterance], speaker_notes: dict[str, str], **_):
@@ -349,7 +414,7 @@ class Protocol(UtteranceMixIn):
         self.speaker_notes: dict[str, str] = speaker_notes or {}
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
-        """Returns protocol's year either extracted from filename or from `date` tag in XML header """
+        """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
         if which != "filename":
             return int(self.date[:4])
         return int(self.name.split("-")[1][:4])
@@ -360,8 +425,8 @@ class Protocol(UtteranceMixIn):
         if preprocess is None:
             return self
 
-        for utterance in self.utterances:
-            utterance.paragraphs = [preprocess(p.strip()) for p in utterance.paragraphs]
+        for uttr in self.utterances:
+            uttr.paragraphs = [preprocess(p.strip()) for p in uttr.paragraphs]
 
         return self
 
@@ -376,3 +441,11 @@ class Protocol(UtteranceMixIn):
 
     def get_speaker_notes(self) -> dict[str, str]:
         return self.speaker_notes
+
+
+class IProtocolParser(abc.ABC):
+    @staticmethod
+    def to_protocol(
+        filename: str, segment_skip_size: int, ignore_tags: set[str]  # pylint: disable=unused-argument
+    ) -> IProtocol:
+        ...

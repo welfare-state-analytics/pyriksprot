@@ -14,17 +14,43 @@ def main():
 
 
 @click.command()
+@click.argument('source_folder', type=click.STRING)
+def verify_metadata_filenames(source_folder: str):
+    try:
+        md.ConfigConformsToTagSpecification(source_folder).is_satisfied()
+    except ValueError as ex:
+        logger.error(ex)
+        sys.exit(-1)
+
+
+@click.command()
+@click.argument('tags', nargs=-1, tag=click.STRING)
+def verify_metadata_columns(tags: str):
+    try:
+        if len(tags) == 1:
+            md.ConfigConformsToTagSpecification(tags[0]).is_satisfied()
+        elif len(tags) == 2:
+            md.TagsConformSpecification(**tags).is_satisfied()
+        else:
+            raise ValueError("please specify 1 or 2 tags")
+    except ValueError as ex:
+        logger.error(ex)
+        sys.exit(-1)
+
+
+@click.command()
 @click.argument('tag', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
 def download_metadata(tag: str, target_folder: str):
-    md.download_to_folder(tag=tag, folder=target_folder, force=True)
+    md.gh_dl_metadata_by_config(configs=md.MetadataTableConfigs(), tag=tag, folder=target_folder, force=True)
 
 
 @click.command()
 @click.argument('corpus_folder', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
-def create_utterance_index(corpus_folder: str, target_folder: str):
-    md.generate_corpus_indexes(ProtocolMapper, corpus_folder=corpus_folder, target_folder=target_folder)
+def create_corpus_indexes(corpus_folder: str, target_folder: str):
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
+    factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
 @click.command()
@@ -33,7 +59,13 @@ def create_utterance_index(corpus_folder: str, target_folder: str):
 @click.option('--source-folder', type=click.STRING, default=None)
 @click.option('--force', type=click.BOOL, is_flag=True, help='Force overwrite', default=False)
 @click.option('--load-index', type=click.BOOL, is_flag=True, help='Load utterance index', default=False)
-@click.option('--scripts-folder', type=click.STRING, help='If set, apply scripts in folder to DB', default=None)
+@click.option(
+    '--scripts-folder',
+    type=click.STRING,
+    help='Apply scripts in specified folder to DB. If not specified the scripts are loaded from SQL-module.',
+    default=None,
+)
+@click.option('--skip-scripts', type=click.BOOL, is_flag=True, help='Skip loading SQL scripts', default=False)
 def create_database(
     target: str,
     tag: str = None,
@@ -41,12 +73,13 @@ def create_database(
     force: bool = False,
     scripts_folder: str = None,
     load_index: bool = True,
+    skip_scripts: bool = False,
 ) -> None:
 
     try:
 
-        md.create_database(
-            database_filename=target,
+        service: md.DatabaseHelper = md.DatabaseHelper(target)
+        service.create(
             tag=tag,
             folder=source_folder,
             force=force,
@@ -54,11 +87,11 @@ def create_database(
 
         if load_index:
             logger.info("loading index...")
-            md.load_corpus_indexes(database_filename=target, source_folder=source_folder or dirname(target))
+            service.load_corpus_indexes(folder=source_folder or dirname(target))
 
-        if scripts_folder:
-            logger.info("loading scripts...")
-            md.load_scripts(database_filename=target, script_folder=scripts_folder)
+        if not skip_scripts:
+            logger.info(f"loading scripts from {scripts_folder if scripts_folder else 'sql module'}...")
+            service.load_scripts(folder=scripts_folder)
 
     except Exception as ex:
         logger.error(ex)
@@ -69,7 +102,9 @@ def create_database(
 # type: ignore
 
 if __name__ == "__main__":
-    main.add_command(create_utterance_index, "index")
+    main.add_command(verify_metadata_filenames, "filenames")
+    main.add_command(verify_metadata_columns, "columns")
+    main.add_command(create_corpus_indexes, "index")
     main.add_command(create_database, "database")
     main.add_command(download_metadata, "download")
     main()  # pylint: disable=no-value-for-parameter

@@ -1,0 +1,151 @@
+wiki_id,start,end,government,role
+Q298317,1917-10-19,1920-03-10,Regeringen Edén,konsultativt statsråd
+Q298317,1920-03-10,1920-06-30,Regeringen Branting I,justitieminister
+Q298317,,1920-06-30,Regeringen Branting I,justitieminister
+Q298317,1924-10-18,1926-06-07,Regeringen Branting III,utrikesminister
+Q298317,1924-10-18,1926-06-07,Regeringen Sandler,utrikesminister
+Q298317,1932-09-24,1936-06-19,Regeringen Hansson I,konsultativt statsråd
+Q6180686,1932-09-24,1936-06-19,Regeringen Hansson I,jordbruksminister
+Q6180686,1936-09-28,1938-12-16,Regeringen Hansson II,handelsminister
+Q6180686,,1938-12-16,Regeringen Hansson II,handelsminister
+Q6180686,1938-12-16,1945-07-31,Regeringen Hansson II,försvarsminister
+Q6180686,1938-12-16,1945-07-31,Regeringen Hansson III,försvarsminister
+Q179493,1944-09-30,1945-07-31,Regeringen Hansson III,handelsminister
+Q5715273,1945-07-31,1948-10-28,Regeringen Erlander I,konsultativt statsråd
+Q5715273,1945-07-31,1948-10-28,Regeringen Hansson IV,konsultativt statsråd
+Q5715273,,1948-10-28,Regeringen Erlander I,konsultativt statsråd
+Q6180686,1945-07-31,1948-10-29,Regeringen Erlander I,jordbruksminister
+Q6180686,1945-07-31,1948-10-29,Regeringen Hansson IV,jordbruksminister
+Q6180686,,1948-10-29,Regeringen Erlander I,landsbygdsminister
+Q6180686,1948-10-28,1949-10-21,Regeringen Erlander I,samordningsminister
+Q5715273,1950-01-01,1950-06-30,Regeringen Erlander I,folkhushållningsminister
+Q5715273,1948-10-28,1955-09-12,Regeringen Erlander I,handelsminister
+Q5715273,1948-10-28,1955-09-12,Regeringen Erlander II,handelsminister
+Q6180686,1949-10-21,1955-09-12,Regeringen Erlander I,finansminister
+Q6180686,1949-10-21,1955-09-12,Regeringen Erlander II,finansminister
+Q6157673,1951-10-01,1957-02-01,Regeringen Erlander II,jordbruksminister
+Q5715273,1955-09-12,1957-03-22,Regeringen Erlander II,socialminister
+Q5801470,1957-03-22,1957-04-22,Regeringen Erlander II,kommunikationsminister
+Q514209,1951-10-01,1957-10-31,Regeringen Erlander II,inrikesminister
+Q6042992,1951-10-01,1957-10-31,Regeringen Erlander II,ecklesiastikminister
+Q5789491,1957-07-29,1957-10-31,Regeringen Erlander II,jordbruksminister
+Q298317,1945-07-31,1962-09-19,Regeringen Erlander I,utrikesminister
+Q298317,1945-07-31,1962-09-19,Regeringen Erlander II,utrikesminister
+Q298317,1945-07-31,1962-09-19,Regeringen Erlander III,utrikesminister
+Q298317,1945-07-31,1962-09-19,Regeringen Hansson IV,utrikesminister
+Q5777699,1973-11-03,1973-12-31,Regeringen Erlander III,civilminister
+Q5777699,1973-11-03,1976-10-08,Regeringen Palme I,samfundsminister
+Q5777699,1974-01-01,1976-10-08,Regeringen Palme I,kommunminister
+Q2408431,1975-11-01,1976-10-08,Regeringen Palme I,samordningsminister
+Q6206776,1978-10-18,1979-10-12,Regeringen Ullsten,energiminister
+Q6206776,1978-10-18,1979-10-12,Regeringen Ullsten,samordningsminister
+Q887398,1982-10-08,1982-12-31,Regeringen Palme II,kommunminister
+Q887398,,1982-12-31,Regeringen Palme II,kommunminister
+Q459226,1982-10-08,1986-10-10,Regeringen Carlsson I,invandrarminister
+Q459226,1982-10-08,1986-10-10,Regeringen Carlsson I,jämställdhetsminister
+Q459226,1982-10-08,1986-10-10,Regeringen Palme II,invandrarminister
+Q459226,1982-10-08,1986-10-10,Regeringen Palme II,jämställdhetsminister
+Q459226,,1986-10-10,Regeringen Carlsson I,invandrarminister
+Q459226,,1986-10-10,Regeringen Carlsson I,jämställdhetsminister
+Q2408431,1982-10-08,1988-09-30,Regeringen Carlsson I,näringsminister
+Q2408431,1982-10-08,1988-09-30,Regeringen Palme II,näringsminister
+Q2408431,1988-06-07,1988-09-30,Regeringen Carlsson I,justitieminister
+Q2408431,1988-07-07,1988-09-30,Regeringen Carlsson I,justitieminister
+Q2408431,,1988-09-30,Regeringen Carlsson I,näringsminister
+Q5777699,1982-10-08,1988-10-04,Regeringen Carlsson I,bostadsminister
+Q5777699,1982-10-08,1988-10-04,Regeringen Palme II,bostadsminister
+Q887398,1982-10-08,1988-10-04,Regeringen Carlsson I,samfundsminister
+Q887398,1982-10-08,1988-10-04,Regeringen Palme II,samfundsminister
+Q5969868,1986-10-10,1988-10-04,Regeringen Carlsson I,minister för nordiskt samarbete
+Q5969868,1986-10-10,1988-10-04,Regeringen Carlsson I,ungdomsminister
+Q5777699,,1988-10-04,Regeringen Carlsson I,bostadsminister
+Q887398,,1988-10-04,Regeringen Carlsson I,civilminister
+Q887398,,1988-10-04,Regeringen Carlsson I,samfundsminister
+Q459226,1986-10-10,1991-10-04,Regeringen Carlsson I,utrikeshandelsminister
+Q459226,1986-10-10,1991-10-04,Regeringen Carlsson II,utrikeshandelsminister
+Q5969868,1986-10-10,1991-10-04,Regeringen Carlsson I,idrottsminister
+Q5969868,1986-10-10,1991-10-04,Regeringen Carlsson II,idrottsminister
+Q291648,1988-10-04,1991-10-04,Regeringen Carlsson I,justitieminister
+Q291648,1988-10-04,1991-10-04,Regeringen Carlsson II,justitieminister
+Q5969868,1988-10-04,1991-10-04,Regeringen Carlsson I,bostadsminister
+Q5969868,1988-10-04,1991-10-04,Regeringen Carlsson II,bostadsminister
+Q297850,1991-10-04,1994-10-07,Regeringen Carl Bildt,skolminister
+Q4931118,1991-10-04,1994-10-07,Regeringen Carl Bildt,sjukvårdsminister
+Q4931118,1991-10-04,1994-10-07,Regeringen Carl Bildt,socialförsäkringsminister
+Q4944305,1991-10-04,1994-10-07,Regeringen Carl Bildt,konsumentminister
+Q4944305,1991-10-04,1994-10-07,Regeringen Carl Bildt,samfundsminister
+Q4944305,1991-10-04,1994-10-07,Regeringen Carl Bildt,ungdomsminister
+Q4944305,1991-10-21,1994-10-07,Regeringen Carl Bildt,civilminister
+Q4953085,1994-10-07,1996-03-22,Regeringen Carlsson III,socialförsäkringsminister
+Q2408431,1994-10-07,1997-02-01,Regeringen Carlsson III,försvarsminister
+Q2408431,1994-10-07,1997-02-01,Regeringen Persson,försvarsminister
+Q2408431,,1997-02-01,Regeringen Persson,försvarsminister
+Q3369258,1994-10-07,1998-10-06,Regeringen Carlsson III,skolminister
+Q3369258,1994-10-07,1998-10-06,Regeringen Persson,skolminister
+Q6206776,1994-10-07,1998-10-06,Regeringen Carlsson III,utbildningsminister
+Q6206776,1994-10-07,1998-10-06,Regeringen Persson,utbildningsminister
+Q4984124,,1998-10-06,Regeringen Persson,infrastrukturminister
+Q4984124,1994-10-07,1998-10-07,Regeringen Carlsson III,kommunikationsminister
+Q4984124,1994-10-07,1998-10-07,Regeringen Persson,kommunikationsminister
+Q2408431,1997-02-01,1998-10-07,Regeringen Persson,samordningsminister
+Q3369258,,1998-10-07,Regeringen Persson,skolminister
+Q6206776,,1998-10-07,Regeringen Persson,utbildningsminister
+Q291648,1994-10-07,2000-09-21,Regeringen Carlsson III,justitieminister
+Q291648,1994-10-07,2000-09-21,Regeringen Persson,justitieminister
+Q291648,,2000-09-21,Regeringen Persson,justitieminister
+Q291648,2004-10-01,2004-11-01,Regeringen Persson,Statsministerns ställföretädare
+Q291648,2003-10-10,2006-03-21,Regeringen Persson,utrikesminister
+Q3369258,2004-10-01,2006-10-06,Regeringen Persson,sjukvårdsminister
+Q719015,,2007-09-05,Regeringen Reinfeldt,försvarsminister
+Q297850,2006-10-06,2014-10-03,Regeringen Reinfeldt,justitieminister
+Q3369258,2016-05-25,2019-01-21,Regeringen Löfven I,integrationsminister
+Q3369258,2014-10-03,2019-09-10,Regeringen Löfven I,arbetsmarknadsminister
+Q3369258,2014-10-03,2019-09-10,Regeringen Löfven II,arbetsmarknadsminister
+Q3369258,,2019-09-10,Regeringen Löfven II,arbetsmarknadsminister
+Q6180686,1938-12-16,,Regeringen Hansson II,försvarsminister
+Q179493,1944-09-30,,Regeringen Hansson III,handelsminister
+Q5715273,1948-09-24,,Regeringen Erlander I,handelsminister
+Q6180686,1949-10-21,,Regeringen Erlander I,finansminister
+Q5715273,1950-01-01,,Regeringen Erlander I,folkhushållningsminister
+Q5777699,1973-11-03,,Regeringen Palme I,civilminister
+Q5777699,1973-11-03,,Regeringen Palme I,samfundsminister
+Q5777699,1974-01-01,,Regeringen Palme I,kommunminister
+Q2408431,1975-11-01,,Regeringen Palme I,samordningsminister
+Q887398,1983-01-01,,Regeringen Palme II,civilminister
+Q459226,1986-10-10,,Regeringen Carlsson I,utrikeshandelsminister
+Q5969868,1986-10-10,,Regeringen Carlsson I,idrottsminister
+Q291648,1988-10-04,,Regeringen Carlsson I,justitieminister
+Q5969868,1988-10-04,,Regeringen Carlsson I,bostadsminister
+Q3369258,2004-10-01,,Regeringen Persson,sjukvårdsminister
+Q2408431,,,Regeringen Carlsson III,försvarsminister
+Q2408431,,,Regeringen Palme II,näringsminister
+Q291648,,,Regeringen Carlsson II,justitieminister
+Q291648,,,Regeringen Carlsson III,justitieminister
+Q297850,,,Regeringen Carl Bildt,skolminister
+Q297850,,,Regeringen Reinfeldt,justitieminister
+Q298317,,,Regeringen Branting III,utrikesminister
+Q298317,,,Regeringen Edén,konsultativt statsråd
+Q298317,,,Regeringen Erlander I,utrikesminister
+Q298317,,,Regeringen Hansson IV,utrikesminister
+Q3369258,,,Regeringen Carlsson III,skolminister
+Q3369258,,,Regeringen Löfven I,arbetsmarknadsminister
+Q459226,,,Regeringen Carlsson II,utrikeshandelsminister
+Q459226,,,Regeringen Palme II,invandrarminister
+Q459226,,,Regeringen Palme II,jämställdhetsminister
+Q4931118,,,Regeringen Carl Bildt,sjukvårdsminister
+Q4931118,,,Regeringen Carl Bildt,socialförsäkringsminister
+Q4944305,,,Regeringen Carl Bildt,civilminister
+Q4944305,,,Regeringen Carl Bildt,samfundsminister
+Q4944305,,,Regeringen Carl Bildt,ungdomsminister
+Q4953085,,,Regeringen Carlsson III,sjukvårdsminister
+Q4984124,,,Regeringen Carlsson III,infrastrukturminister
+Q5715273,,,Regeringen Hansson IV,konsultativt statsråd
+Q5777699,,,Regeringen Palme II,bostadsminister
+Q5969868,,,Regeringen Carlsson II,bostadsminister
+Q5969868,,,Regeringen Carlsson II,idrottsminister
+Q6180686,,,Regeringen Hansson III,försvarsminister
+Q6180686,,,Regeringen Hansson IV,landsbygdsminister
+Q6206776,,,Regeringen Carlsson III,utbildningsminister
+Q6206776,,,Regeringen Ullsten,energiminister
+Q6206776,,,Regeringen Ullsten,samordningsminister
+Q887398,,,Regeringen Palme II,samfundsminister

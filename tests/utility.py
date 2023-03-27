@@ -10,8 +10,8 @@ from loguru import logger
 from pyriksprot import dispatch, interface
 from pyriksprot import metadata as md
 from pyriksprot import workflows
-from pyriksprot.corpus.parlaclarin import ProtocolMapper
-from pyriksprot.utility import download_protocols, replace_extension
+from pyriksprot.utility import replace_extension
+from pyriksprot.workflows import subset_corpus_and_metadata
 
 load_dotenv()
 
@@ -47,7 +47,8 @@ def sample_parlaclarin_corpus_exists():
 
 
 def sample_metadata_exists():
-    return all(isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata", f"{x}.csv")) for x in md.RIKSPROT_METADATA_TABLES)
+    configs: md.MetadataTableConfigs = md.MetadataTableConfigs()
+    return configs.files_exist(jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"))
 
 
 def sample_tagged_frames_corpus_exists():
@@ -60,60 +61,30 @@ def sample_tagged_speech_corpus_exists():
 
 def ensure_test_corpora_exist(force: bool = False):
 
-    if force or not sample_parlaclarin_corpus_exists():
-        create_sample_parlaclarin_corpus()
-
     if force or not sample_metadata_exists():
-        create_sample_metadata()
+        create_test_corpus_and_metadata()
 
     if force or not sample_tagged_frames_corpus_exists():
-        create_sample_tagged_frames_corpus()
+        create_test_tagged_frames_corpus()
 
     if force or not sample_tagged_speech_corpus_exists:
-        create_sample_speech_corpus()
+        create_test_speech_corpus()
 
 
-def create_sample_parlaclarin_corpus():
-    # FIXME Read from local folder instead or prevent "main" tag
-    download_protocols(
-        protocols=TEST_DOCUMENTS,
-        target_folder=jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols"),
-        create_subfolder=True,
-        tag=RIKSPROT_REPOSITORY_TAG,
+def create_test_corpus_and_metadata():
+
+    tag: str = RIKSPROT_REPOSITORY_TAG
+    documents: list[str] = TEST_DOCUMENTS
+
+    subset_corpus_and_metadata(
+        documents=documents,
+        target_folder="tests/test_data/source/",
+        tag=tag,
+        scripts_folder=None,
     )
 
 
-def create_sample_metadata():
-    """Subset metadata to folder"""
-    md.subset_to_folder(
-        ProtocolMapper,
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        source_metadata=jj("metadata/data", RIKSPROT_REPOSITORY_TAG),
-        target_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
-    )
-    """Create metadata database"""
-    md.create_database(
-        database_filename=SAMPLE_METADATA_DATABASE_NAME,
-        tag=None,
-        folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
-        force=True,
-    )
-    md.generate_corpus_indexes(
-        ProtocolMapper,
-        corpus_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        target_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
-    )
-    md.load_corpus_indexes(
-        database_filename=SAMPLE_METADATA_DATABASE_NAME,
-        source_folder=RIKSPROT_PARLACLARIN_METADATA_FOLDER,
-    )
-    md.load_scripts(
-        database_filename=SAMPLE_METADATA_DATABASE_NAME,
-        script_folder="./metadata/sql",
-    )
-
-
-def create_sample_tagged_frames_corpus() -> None:
+def create_test_tagged_frames_corpus() -> None:
 
     protocols: str = TEST_DOCUMENTS
     source_folder: str = os.environ["TEST_RIKSPROT_TAGGED_FOLDER"]
@@ -138,11 +109,12 @@ def create_sample_tagged_frames_corpus() -> None:
         if not isfile(source_filename):
             logger.warning(f"test data: test file {name} not found")
             continue
+
         shutil.copy(src=source_filename, dst=target_filename)
         logger.info(f"  copied: {source_filename} to {jj(target_folder, filename)}")
 
 
-def create_sample_speech_corpus():
+def create_test_speech_corpus():
 
     # target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
     target_type: str = 'single-id-tagged-frame-per-group'

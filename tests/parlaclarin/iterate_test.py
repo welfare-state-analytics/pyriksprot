@@ -17,7 +17,6 @@ jj = os.path.join
     [
         parlaclarin.XmlProtocolSegmentIterator,
         parlaclarin.XmlUntangleSegmentIterator,
-        parlaclarin.XmlSaxSegmentIterator,
     ],
 )
 def test_segment_iterator_when_segment_is_speech(iterator_class):
@@ -52,7 +51,6 @@ def test_segment_iterator_when_segment_is_speech(iterator_class):
     [
         parlaclarin.XmlProtocolSegmentIterator,
         parlaclarin.XmlUntangleSegmentIterator,
-        parlaclarin.XmlSaxSegmentIterator,
     ],
 )
 def test_segment_iterator_when_segment_is_protocol(iterator_class):
@@ -134,39 +132,6 @@ def test_xml_protocol_texts_iterator_texts():
         )
     )
     assert len(texts) == 145
-
-    texts1 = list(
-        parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames,
-            segment_level=interface.SegmentLevel.Utterance,
-            segment_skip_size=1,
-            multiproc_processes=None,
-        )
-    )
-    texts2 = list(
-        parlaclarin.XmlSaxSegmentIterator(
-            filenames=filenames,
-            segment_level=interface.SegmentLevel.Utterance,
-            segment_skip_size=1,
-            multiproc_processes=None,
-        )
-    )
-    assert all(''.join(texts1[i].data.split()) == ''.join(texts2[i].data.split()) for i in range(0, len(texts1)))
-
-    texts1 = list(
-        parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
-        )
-    )
-    texts2 = list(
-        parlaclarin.XmlSaxSegmentIterator(
-            filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
-        )
-    )
-    assert all(''.join(texts1[i].data.split()) == ''.join(texts2[i].data.split()) for i in range(0, len(texts1)))
-
-    # with open('a.txt', 'w') as fp: fp.write(texts1[1].text)
-    # with open('b.txt', 'w') as fp: fp.write(texts2[1].text)
 
 
 EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
@@ -461,7 +426,6 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
     [
         # DEPRECATED parlaclarin.XmlProtocolSegmentIterator,
         parlaclarin.XmlUntangleSegmentIterator,
-        # DEPRECATED parlaclarin.XmlSaxSegmentIterator,
     ],
 )
 def test_protocol_texts_iterator(iterator_class):
@@ -481,36 +445,6 @@ def test_protocol_texts_iterator(iterator_class):
 
 
 @pytest.mark.parametrize(
-    'segment_level',
-    [
-        interface.SegmentLevel.Protocol,
-        interface.SegmentLevel.Speech,
-        interface.SegmentLevel.Who,
-        interface.SegmentLevel.Utterance,
-    ],
-)
-def test_protocol_texts_iterator_levels_compare(segment_level):
-
-    filenames = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
-
-    texts1 = list(
-        parlaclarin.XmlUntangleSegmentIterator(
-            filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None
-        )
-    )
-    # with open('a.txt', 'w') as fp: fp.write(texts1[1].text)
-
-    texts2 = list(
-        parlaclarin.XmlSaxSegmentIterator(
-            filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None
-        )
-    )
-    # with open('b.txt', 'w') as fp: fp.write(texts2[1].text)
-
-    assert all(''.join(texts1[i].data.split()) == ''.join(texts2[i].data.split()) for i in range(0, len(texts1)))
-
-
-@pytest.mark.parametrize(
     'iterator_class, segment_level',
     [
         # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Protocol),
@@ -521,10 +455,6 @@ def test_protocol_texts_iterator_levels_compare(segment_level):
         (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Speech),
         (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Who),
         (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Utterance),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Protocol),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Speech),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Who),
-        # DEPRECATED (parlaclarin.XmlSaxSegmentIterator, interface.SegmentLevel.Utterance),
     ],
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):

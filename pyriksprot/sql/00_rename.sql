@@ -1,6 +1,7 @@
-
+alter table alias rename to _alias;
 alter table government rename to _government;
 alter table location_specifier rename to _location_specifier;
+alter table name_location_specifier rename to _name_location_specifier;
 alter table member_of_parliament rename to _member_of_parliament;
 alter table minister rename to _minister;
 alter table [name] rename to _name;

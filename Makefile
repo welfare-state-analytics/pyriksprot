@@ -14,6 +14,7 @@ endif
 # PARENT_DATA_FOLDER=$(shell dirname $(RIKSPROT_DATA_FOLDER))
 METADATA_DB_NAME=riksprot_metadata.$(RIKSPROT_REPOSITORY_TAG).db
 METADATA_FOLDER=./metadata/data/$(RIKSPROT_REPOSITORY_TAG)
+CORPUS_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/metadata
 RIKSPROT_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/metadata
 TAGGED_FRAMES_FOLDER=$(RIKSPROT_DATA_FOLDER)/tagged_frames_$(RIKSPROT_REPOSITORY_TAG)
 
@@ -21,9 +22,9 @@ CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describ
 
 funkis:
 ifeq ($(RIKSPROT_REPOSITORY_TAG),$(CHECKED_OUT_TAG))
-	@echo "check: repository tag matches .env tag"
+	@echo "check: using version $(RIKSPROT_REPOSITORY_TAG) which matches checked out version"
 else
-	$(error repository tag and .env tag mismatch)
+	$(error repository tag $(CHECKED_OUT_TAG) and .env tag $(RIKSPROT_REPOSITORY_TAG) mismatch)
 endif
 
 refresh-tag: metadata test-data metadata-database-deploy
@@ -64,6 +65,13 @@ metadata-database-deploy:
 # Sub-recepis follows
 ########################################################################################################
 
+
+verify-metadata-filenames:
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py filenames $(CORPUS_METADATA_FOLDER)
+
+verify-metadata-columns:
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py columns $(RIKSPROT_REPOSITORY_TAG)
+
 metadata-download: funkis
 	@echo "info: downloading metadata $(RIKSPROT_REPOSITORY_TAG)"
 	@rm -rf ./metadata/$(METADATA_DB_NAME) $(METADATA_FOLDER)
@@ -82,7 +90,7 @@ metadata-corpus-index:
 		$(METADATA_FOLDER)/utterances.csv \
 		$(METADATA_FOLDER)/speaker_notes.csv
 
-metadata-database:
+metadata-database: metadata-corpus-index
 	@echo "info: generating metadata/$(METADATA_DB_NAME) using source $(METADATA_FOLDER)"
 	@rm -f metadata/$(METADATA_DB_NAME)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
@@ -105,6 +113,13 @@ metadata-light-database:
 	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) < ./metadata/10_make_light.sql
 	@sqlite3 metadata/$(LIGHT_METADATA_DB_NAME) "VACUUM;"
 	@cp -f metadata/$(LIGHT_METADATA_DB_NAME) $(RIKSPROT_DATA_FOLDER)/metadata
+
+TEST_METADATA=tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/riksprot_metadata.db
+
+.PHONY: metadata-dump-schema
+metadata-dump-schema:
+	@echo -e ".output riksprot_metadata_testdata_$(RIKSPROT_REPOSITORY_TAG).sql\n.dump\n.exit" | sqlite3 $(TEST_METADATA)
+	@echo -e ".output riksprot_metadata_testdata_schema_$(RIKSPROT_REPOSITORY_TAG).sql\n.schema\n.exit" | sqlite3 $(TEST_METADATA)
 
 ########################################################################################################
 # ENTRYPOINT: Main recipe that creates sample test data for current tag

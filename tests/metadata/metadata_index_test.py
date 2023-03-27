@@ -1,12 +1,11 @@
 import sqlite3
-from contextlib import closing
 from dataclasses import asdict
 
+import numpy as np
 import pandas as pd
 import pytest
 
 from pyriksprot import metadata as md
-from pyriksprot.metadata.generate import EXTRA_TABLES, register_numpy_adapters, sql_ddl_create, sql_ddl_insert
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
 
 from ..utility import SAMPLE_METADATA_DATABASE_NAME
@@ -24,13 +23,13 @@ def dummy() -> md.Person:
         year_of_birth=1885,
         year_of_death=1961,
         terms_of_office=[
-            md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1922, end_year=1924),
-            md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_year=1929, end_year=1944),
+            md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_date=1922, end_date=1924),
+            md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_date=1929, end_date=1944),
         ],
         alt_parties=[
-            md.PersonParty(party_id=8, start_year=0, end_year=0),
-            md.PersonParty(party_id=1, start_year=0, end_year=0),
-            md.PersonParty(party_id=10, start_year=0, end_year=0),
+            md.PersonParty(party_id=8, start_date=0, end_date=0),
+            md.PersonParty(party_id=1, start_date=0, end_date=0),
+            md.PersonParty(party_id=10, start_date=0, end_date=0),
         ],
     )
 
@@ -55,7 +54,7 @@ def test_code_lookups():
     df: pd.DataFrame = pd.DataFrame(
         data=dict(
             gender_id=[0, 1, 2],
-            party_id=[0, 5, 3],
+            party_id=[0, 6, 3],
             office_type_id=[0, 2, 3],
             sub_office_type_id=[
                 0,
@@ -109,12 +108,54 @@ def test_person_index(person_index: md.PersonIndex):
         == sorted(person.terms_of_office, key=lambda x: x.start_year)
         == sorted(
             [
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1983, end_year=1985),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1985, end_year=1988),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1988, end_year=1991),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1991, end_year=1994),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1994, end_year=1998),
-                md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_year=1998, end_year=2002),
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="1983-05-31",
+                    end_date="1985-09-30",
+                    start_flag="D",
+                    end_flag="D",
+                ),
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="1985-09-30",
+                    end_date="1988-10-03",
+                    start_flag="D",
+                    end_flag="D",
+                ),
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="1988-10-03",
+                    end_date="1991-09-30",
+                    start_flag="D",
+                    end_flag="D",
+                ),
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="1991-09-30",
+                    end_date="1994-10-03",
+                    start_flag="D",
+                    end_flag="D",
+                ),
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="1994-10-03",
+                    end_date="1998-10-05",
+                    start_flag="D",
+                    end_flag="D",
+                ),
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="1998-10-05",
+                    end_date="2002-09-30",
+                    start_flag="D",
+                    end_flag="D",
+                ),
             ],
             key=lambda x: x.start_year,
         )
@@ -132,7 +173,7 @@ def test_overload_by_person(person_index: md.PersonIndex):
     assert set(df_overloaded.columns) == {'person_id', 'pid', 'gender_id', 'party_id'}
     assert (df_overloaded.pid == [person_index.person_id2pid.get(x) for x in person_ids]).all()
     assert (df_overloaded.gender_id == [1, 1, 1, 0]).all()
-    assert (df_overloaded.party_id == [8, 0, 6, 0]).all()
+    assert (df_overloaded.party_id == [9, 0, 7, 0]).all()
 
     df_decoded: pd.DataFrame = person_index.lookups.decode(df_overloaded)
     assert set(df_decoded.columns) == {'person_id', 'gender', 'party_abbrev'}
@@ -156,9 +197,9 @@ def test_person_party_at():
 
     person: md.Person = dummy()
     person.alt_parties = [
-        md.PersonParty(party_id=8, start_year=1950, end_year=1952),
-        md.PersonParty(party_id=1, start_year=1952, end_year=1953),
-        md.PersonParty(party_id=10, start_year=1955, end_year=1956),
+        md.PersonParty(party_id=8, start_date=1950, end_date=1952),
+        md.PersonParty(party_id=1, start_date=1952, end_date=1953),
+        md.PersonParty(party_id=10, start_date=1955, end_date=1956),
     ]
     person.party_id = 5
     assert person.party_at(1950) == 5
@@ -178,14 +219,14 @@ def test_person_party_at():
 
     """Ambigoues parties"""
     person.alt_parties = [
-        md.PersonParty(party_id=8, start_year=1923, end_year=1926),
-        md.PersonParty(party_id=1, start_year=0, end_year=0),
-        md.PersonParty(party_id=10, start_year=0, end_year=0),
+        md.PersonParty(party_id=8, start_date=1923, end_date=1926),
+        md.PersonParty(party_id=1, start_date=0, end_date=0),
+        md.PersonParty(party_id=10, start_date=0, end_date=0),
     ]
 
     assert person.party_at(1923) == 8
-    assert person.party_at(1922) == 0
-    assert person.party_at(1990) == 0
+    assert person.party_at(1922) == 1
+    assert person.party_at(1990) == 1
 
 
 def test_speaker_info_service(person_index: md.PersonIndex):
@@ -194,15 +235,16 @@ def test_speaker_info_service(person_index: md.PersonIndex):
     person: md.Person = service.person_index.get_person('Q5556026')
     assert person.alt_parties
     assert len(person.alt_parties) == 9
-    assert set(a.party_id for a in person.alt_parties) == {1, 6}
+    assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
-    assert set(a.end_year for a in person.alt_parties) == {0, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
+    assert set(a.end_year for a in person.alt_parties) == {np.nan, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
     assert person.party_at(1950) == 0
-    assert person.party_at(1994) == 6
-    assert person.party_at(2000) == 6
-    assert person.party_at(2010) == 1
+    assert person.party_at(1994) == 7
+    assert person.party_at(2000) == 7
+    assert person.party_at(2010) == 0
 
 
+@pytest.mark.skip("No unknown in test data")
 def test_unknown(person_index: md.PersonIndex):
     service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
     person: md.Person = service.person_index.get_person('unknown')
@@ -227,34 +269,6 @@ def test_unknown(person_index: md.PersonIndex):
     assert speaker.person_id == "unknown"
     assert speaker.gender_id == 1
     assert speaker.party_id == 8
-
-
-@pytest.mark.skip("infra test")
-def test_load_speaker_index():
-
-    database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
-
-    db = sqlite3.connect(database_filename)
-
-    register_numpy_adapters()
-
-    tablename: str = "speech_index"
-    specification: dict[str, str] = EXTRA_TABLES[tablename]
-
-    with closing(db.cursor()) as cursor:
-        cursor.executescript(f"drop table if exists {tablename};")
-        cursor.executescript(sql_ddl_create(tablename=tablename, specification=specification))
-
-    speech_index: pd.DataFrame = pd.read_feather(
-        "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"
-    )
-
-    columns: list[str] = [k for k in specification if k[0] not in "+:"]
-    data = speech_index[columns].to_records(index=False)
-
-    with closing(db.cursor()) as cursor:
-        insert_sql = sql_ddl_insert(tablename=tablename, columns=columns)
-        cursor.executemany(insert_sql, data)
 
 
 @pytest.mark.skip("infra test")

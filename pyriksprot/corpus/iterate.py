@@ -58,7 +58,16 @@ class ProtocolSegment(IDispatchItem):
             'speaker_note_id': self.speaker_note_id,
             'speech_index': self.speech_index,
             'page_number': self.page_number,
-            **({} if not self.speaker_info else self.speaker_info.to_dict()),
+            **(
+                {}
+                if not self.speaker_info
+                else {
+                    'gender_id': self.speaker_info.gender_id,
+                    'party_id': self.speaker_info.party_id,
+                    'office_type_id': self.speaker_info.term_of_office.office_type_id,
+                    'sub_office_type_id': self.speaker_info.term_of_office.sub_office_type_id,
+                }  # FIXME: Call self.speaker_info.to_dict() instead
+            ),
         }
 
     @staticmethod
@@ -260,8 +269,6 @@ SEGMENT_FUNCTIONS: dict = {
 
 
 class ProtocolSegmentIterator(abc.ABC):
-    ...
-
     def __init__(
         self,
         *,

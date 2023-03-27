@@ -12,7 +12,8 @@ from pyriksprot import to_speech, utility
 from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import dispatch
 from pyriksprot.dispatch import merge as sg
-from tests.utility import SAMPLE_METADATA_DATABASE_NAME
+
+from .utility import SAMPLE_METADATA_DATABASE_NAME, sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -110,6 +111,7 @@ def test_find_dispatch_class():
     assert expected_keys.intersection(dispatch_keys) == expected_keys
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
 
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
@@ -138,6 +140,7 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
     return files
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch(
     tagged_speeches: list[sg.DispatchItem],
@@ -164,6 +167,7 @@ def test_single_feather_per_group_dispatch(
     assert isfile(join(target_name, 'document_index.feather'))
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch_with_skips(
     tagged_speeches: list[sg.DispatchItem],

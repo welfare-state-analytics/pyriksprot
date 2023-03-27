@@ -4,24 +4,18 @@ from . import metadata
 from .corpus.corpus_index import CorpusSourceIndex, ICorpusSourceItem
 from .corpus.iterate import ProtocolSegment, ProtocolSegmentIterator
 from .corpus.parlaclarin import pretokenize
-from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
+from .dehyphenation import SwedishDehyphenator
 from .dispatch import DispatchItem, SegmentMerger, create_grouping_hashcoder
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
 from .to_speech import MergerFactory, MergeStrategyType, to_speeches
 from .utility import (
     compose,
-    data_path_ts,
     dedent,
     deprecated,
-    dict_get_by_path,
-    download_protocols,
-    download_url,
     ensure_path,
     flatten,
     hasattr_path,
     is_empty,
-    load_dict,
-    load_token_set,
     lookup,
     norm_join,
     parse_range_list,
@@ -29,13 +23,11 @@ from .utility import (
     path_add_sequence,
     path_add_suffix,
     path_add_timestamp,
+    reset_file,
+    reset_folder,
     sanitize,
     slugify,
-    split_properties_by_dataclass,
-    store_dict,
-    store_token_set,
     strip_extensions,
-    strip_path_and_add_counter,
     strip_path_and_extension,
     strip_paths,
     sync_delta_names,
