@@ -6,7 +6,7 @@ from pyriksprot import interface
 from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import merge
 
-from .utility import TAGGED_SOURCE_FOLDER
+from .utility import TAGGED_SOURCE_FOLDER, sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -26,6 +26,7 @@ def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[iter
     return segments
 
 
+@pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_segment_merger_merge_on_protocol_level_group_by_who(
     source_index: corpus_index.CorpusSourceIndex,
     protocol_segments: List[iterate.ProtocolSegment],

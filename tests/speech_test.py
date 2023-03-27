@@ -15,7 +15,13 @@ from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
 from tests.parlaclarin.utility import count_utterances
 
-from .utility import RIKSPROT_PARLACLARIN_FOLDER, TAGGED_SOURCE_FOLDER, TAGGED_SOURCE_PATTERN, create_utterances, sample_tagged_frames_corpus_exists
+from .utility import (
+    RIKSPROT_PARLACLARIN_FOLDER,
+    TAGGED_SOURCE_FOLDER,
+    TAGGED_SOURCE_PATTERN,
+    create_utterances,
+    sample_tagged_frames_corpus_exists,
+)
 
 # pylint: disable=redefined-outer-name
 
