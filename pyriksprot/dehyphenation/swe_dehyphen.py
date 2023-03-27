@@ -15,13 +15,14 @@ import os
 import re
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Callable, Dict, Set
+from typing import Callable
 
 from .utility import load_dict, load_token_set, store_dict, store_token_set
 
 PARAGRAPH_MARKER = '##PARAGRAPH##'
 
 # pylint: disable=too-many-arguments
+jj = os.path.join
 
 
 class WhitelistReason(IntEnum):
@@ -31,7 +32,7 @@ class WhitelistReason(IntEnum):
     UnknownParts = 3
 
 
-IGNORE_CONJUNCTION_WORDS: Set[str] = {
+IGNORE_CONJUNCTION_WORDS: set[str] = {
     'än',
     'eller',
     'framför',
@@ -57,60 +58,9 @@ def is_ignored_by_conjunction_word(dashed_word: str) -> bool:
     return any(dashed_word.endswith(f' {w}') for w in IGNORE_CONJUNCTION_WORDS)
 
 
-def find_dashed_words(text: str) -> Set[str]:
+def find_dashed_words(text: str) -> set[str]:
     dashed_words = [d for d in re.findall(r'\w+- \w+', text) if not is_ignored_by_conjunction_word(d)]
     return dashed_words
-
-
-class SwedishDehyphenatorService:
-    """Dehyphen text"""
-
-    def __init__(
-        self,
-        word_frequency_filename: str,
-        whitelist_filename: str,
-        whitelist_log_filename: str,
-        unresolved_filename: str,
-        word_frequencies: dict = None,
-        whitelist: Set = None,
-        whitelist_log: dict = None,
-        unresolved: Set = None,
-    ):
-
-        self.word_frequency_filename: str = word_frequency_filename
-        self.whitelist_filename: str = whitelist_filename
-        self.whitelist_log_filename: str = whitelist_log_filename
-        self.unresolved_filename: str = unresolved_filename
-
-        if not word_frequencies:
-            if not os.path.isfile(self.word_frequency_filename):
-                raise FileNotFoundError(self.word_frequency_filename)
-
-        # FIXME: Use PersistentDict to load/store dicts
-        self.dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
-            word_frequencies=load_dict(self.word_frequency_filename) if word_frequencies is None else word_frequencies,
-            whitelist=load_token_set(self.whitelist_filename) if whitelist is None else whitelist,
-            whitelist_log=load_dict(self.whitelist_log_filename) if whitelist_log is None else whitelist_log,
-            unresolved=load_token_set(self.unresolved_filename) if unresolved is None else unresolved,
-        )
-
-    def flush(self):
-        store_token_set(self.dehyphenator.whitelist, self.whitelist_filename)
-        store_token_set(self.dehyphenator.unresolved, self.unresolved_filename)
-        store_dict(self.dehyphenator.whitelist_log, self.whitelist_log_filename)
-
-    @staticmethod
-    def create_dehypen(**opts) -> Callable[[str], str]:
-        """Create a dehypen service. Return wrapped dehypen function."""
-        service = SwedishDehyphenatorService(**opts)
-
-        def dehyphen(text: str) -> str:
-            """Remove hyphens from `text`."""
-            dehyphenated_text = service.dehyphenator.dehyphen_text(text)
-
-            return dehyphenated_text
-
-        return dehyphen
 
 
 class ParagraphMergeStrategy(IntEnum):
@@ -123,15 +73,39 @@ class ParagraphMergeStrategy(IntEnum):
 class SwedishDehyphenator:
     """Dehyphens Swedish text"""
 
-    # External data
-    word_frequencies: Dict[str, int]
+    data_folder: str
+    word_frequencies: dict[str, int]
 
     # Internal data
-    whitelist: Set[str] = field(default_factory=set)
-    whitelist_log: Dict[str, int] = field(default_factory=dict)
-    unresolved: Set[str] = field(default_factory=set)
+    whitelist: set[str] = field(default_factory=set)
+    whitelist_log: dict[str, int] = field(default_factory=dict)
+    unresolved: set[str] = field(default_factory=set)
 
     paragraph_merge_strategy: ParagraphMergeStrategy = 0
+
+    def __post_init__(self) -> "SwedishDehyphenator":
+
+        if self.word_frequencies is None:
+            self.word_frequencies = os.path.join(self.data_folder, 'riksdagen-corpus-term-frequencies.pkl')
+
+        if isinstance(self.word_frequencies, str):
+            if not os.path.isfile(self.word_frequencies):
+                raise FileNotFoundError(self.word_frequencies)
+            self.word_frequencies = load_dict(self.word_frequencies)
+
+        self.load()
+
+    @property
+    def whitelist_filename(self) -> str:
+        return jj(self.data_folder, 'dehyphen_whitelist.txt.gz')
+
+    @property
+    def whitelist_log_filename(self) ->str:
+        return jj(self.data_folder, 'dehyphen_whitelist_log.pkl')
+
+    @property
+    def unresolved_filename(self) ->str:
+        return jj(self.data_folder, 'dehyphen_unresolved.txt.gz')
 
     def is_whitelisted(self, word: str) -> bool:
         return word.lower() in self.whitelist
@@ -162,8 +136,8 @@ class SwedishDehyphenator:
         compound_word: str = re.sub('- ', '', dash)
         dashed_word: str = re.sub('- ', '-', dash)
 
-        _compound_word = compound_word.lower()
-        _dashed_word = dashed_word.lower()
+        _compound_word: str = compound_word.lower()
+        _dashed_word: str = dashed_word.lower()
 
         if self.is_whitelisted(_compound_word):
             return compound_word
@@ -174,8 +148,8 @@ class SwedishDehyphenator:
         if self.is_hyphenated_compound(dashed_word):
             return self.add_to_whitelist(dashed_word, WhitelistReason.HyphenatedCompound)
 
-        _compound_word_frequency = self.word_frequencies.get(_compound_word, 0)
-        _dashed_word_frequency = self.word_frequencies.get(_dashed_word, 0)
+        _compound_word_frequency: int = self.word_frequencies.get(_compound_word, 0)
+        _dashed_word_frequency: int = self.word_frequencies.get(_dashed_word, 0)
 
         if _compound_word_frequency > _dashed_word_frequency:
             return self.add_to_whitelist(compound_word, WhitelistReason.Frequency)
@@ -202,7 +176,7 @@ class SwedishDehyphenator:
 
     def dehyphen_text(self, text: str) -> str:
         """Remove dehyphens in text"""
-        text = re.sub(r'\n{3,}', r'\n\n', text)
+        text: str = re.sub(r'\n{3,}', r'\n\n', text)
 
         # add paragraph markers:
         text = re.sub(r'\n\n', PARAGRAPH_MARKER, text)
@@ -226,6 +200,31 @@ class SwedishDehyphenator:
         text = merge_paragraphs(text, self.paragraph_merge_strategy)
 
         return text
+
+    def flush(self):
+        store_token_set(self.whitelist, self.whitelist_filename)
+        store_token_set(self.unresolved, self.unresolved_filename)
+        store_dict(self.whitelist_log, self.whitelist_log_filename)
+
+    def load(self) -> None:
+        self.whitelist = load_token_set(self.whitelist_filename)
+        self.whitelist_log = load_dict(self.whitelist_log_filename)
+        self.unresolved = load_token_set(self.unresolved_filename)
+
+    @staticmethod
+    def create_dehypen(data_folder: str, word_frequencies: str | dict = None) -> Callable[[str], str]:
+        """Create a dehypen service. Return wrapped dehypen function."""
+        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
+            data_folder=data_folder, word_frequencies=word_frequencies
+        )
+
+        def dehyphen(text: str) -> str:
+            """Remove hyphens from `text`."""
+            dehyphenated_text = dehyphenator.dehyphen_text(text)
+
+            return dehyphenated_text
+
+        return dehyphen
 
 
 def merge_paragraphs(text: str, paragraph_merge_strategy: ParagraphMergeStrategy) -> str:

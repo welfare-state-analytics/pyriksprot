@@ -7,7 +7,7 @@ import pytest
 from pyriksprot import temporary_file
 from pyriksprot.dehyphenation.swe_dehyphen import (
     ParagraphMergeStrategy,
-    SwedishDehyphenatorService,
+    SwedishDehyphenator,
     find_dashed_words,
     merge_paragraphs,
 )
@@ -20,14 +20,8 @@ nj = os.path.normpath
 os.makedirs(jj("tests", "output"), exist_ok=True)
 
 
-@pytest.fixture
-def cfg() -> dict:
-    return dict(
-        word_frequency_filename='./tests/output/riksdagen-corpus-term-frequencies.pkl',
-        whitelist_filename='./tests/output/dehyphen_whitelist.txt.gz',
-        whitelist_log_filename='./tests/output/dehyphen_whitelist_log.pkl',
-        unresolved_filename='./tests/output/dehyphen_unresolved.txt.gz',
-    )
+WORD_FREQUENCY_FILENAME = './tests/output/riksdagen-corpus-term-frequencies.pkl'
+DEHYPHEN_FOLDER = './tests/output'
 
 
 def test_merge_paragraphs():
@@ -51,66 +45,63 @@ def test_merge_paragraphs():
 #     assert dehyphened_text == expected_text
 
 
-def test_create_dehyphenator_service_fails_if_no_word_frequency_file(cfg):
+def test_create_dehyphenator_service_fails_if_no_word_frequency_file():
 
-    if os.path.isfile(cfg.get('word_frequency_filename')):
-        os.remove(cfg.get('word_frequency_filename'))
+    if os.path.isfile(WORD_FREQUENCY_FILENAME):
+        os.remove(WORD_FREQUENCY_FILENAME)
 
     with pytest.raises(FileNotFoundError):
         with patch('pyriksprot.dehyphenation.swe_dehyphen.SwedishDehyphenator', return_value=Mock()) as _:
-            _ = SwedishDehyphenatorService(**cfg)
+            _ = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME)
 
 
-def test_create_dehyphenator_service_succeeds_when_frequency_file_exists(cfg):
-    with temporary_file(filename=cfg.get('word_frequency_filename'), content=pickle.dumps({'a': 1})):
-        with patch(
-            'pyriksprot.dehyphenation.swe_dehyphen.SwedishDehyphenator', return_value=Mock()
-        ) as mock_dehyphenator:
-            _ = SwedishDehyphenatorService(**cfg)
-            mock_dehyphenator.assert_called_once()
+def test_dehyphenator_service_flush_creates_expected_files():
+    with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
+
+        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
+            data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
+        )
+
+        dehyphenator.flush()
+
+        assert os.path.isfile(dehyphenator.whitelist_filename)
+        assert os.path.isfile(dehyphenator.unresolved_filename)
+        assert os.path.isfile(dehyphenator.whitelist_log_filename)
+
+        os.remove(dehyphenator.whitelist_filename)
+        os.remove(dehyphenator.unresolved_filename)
+        os.remove(dehyphenator.whitelist_log_filename)
 
 
-def test_dehyphenator_service_flush_creates_expected_files(cfg):
-    with temporary_file(filename=cfg.get('word_frequency_filename'), content=pickle.dumps({'a': 1})):
+def test_dehyphenator_service_can_load_flushed_data():
 
-        service: SwedishDehyphenatorService = SwedishDehyphenatorService(**cfg)
+    with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
 
-        service.flush()
+        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
+            data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
+        )
 
-        assert os.path.isfile(service.whitelist_filename)
-        assert os.path.isfile(service.unresolved_filename)
-        assert os.path.isfile(service.whitelist_log_filename)
+        dehyphenator.unresolved = {"a", "b", "c"}
+        dehyphenator.whitelist = {"e", "f", "g"}
+        dehyphenator.whitelist_log = {"e": 0, "f": 1, "g": 1}
 
-        os.remove(service.whitelist_filename)
-        os.remove(service.unresolved_filename)
-        os.remove(service.whitelist_log_filename)
+        dehyphenator.flush()
 
+        assert os.path.isfile(dehyphenator.whitelist_filename)
+        assert os.path.isfile(dehyphenator.unresolved_filename)
+        assert os.path.isfile(dehyphenator.whitelist_log_filename)
 
-def test_dehyphenator_service_can_load_flushed_data(cfg):
+        dehyphenator2: SwedishDehyphenator = SwedishDehyphenator(
+            data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
+        )
 
-    with temporary_file(filename=cfg.get('word_frequency_filename'), content=pickle.dumps({'a': 1})):
+        assert dehyphenator2.whitelist == dehyphenator.whitelist
+        assert dehyphenator2.unresolved == dehyphenator.unresolved
+        assert dehyphenator2.whitelist_log == dehyphenator.whitelist_log
 
-        service: SwedishDehyphenatorService = SwedishDehyphenatorService(**cfg)
-
-        service.dehyphenator.unresolved = {"a", "b", "c"}
-        service.dehyphenator.whitelist = {"e", "f", "g"}
-        service.dehyphenator.whitelist_log = {"e": 0, "f": 1, "g": 1}
-
-        service.flush()
-
-        assert os.path.isfile(service.whitelist_filename)
-        assert os.path.isfile(service.unresolved_filename)
-        assert os.path.isfile(service.whitelist_log_filename)
-
-        service2 = SwedishDehyphenatorService(**cfg)
-
-        assert service2.dehyphenator.whitelist == service.dehyphenator.whitelist
-        assert service2.dehyphenator.unresolved == service.dehyphenator.unresolved
-        assert service2.dehyphenator.whitelist_log == service.dehyphenator.whitelist_log
-
-        os.remove(service.whitelist_filename)
-        os.remove(service.unresolved_filename)
-        os.remove(service.whitelist_log_filename)
+        os.remove(dehyphenator.whitelist_filename)
+        os.remove(dehyphenator.unresolved_filename)
+        os.remove(dehyphenator.whitelist_log_filename)
 
 
 def test_find_dashed_words():
@@ -119,15 +110,9 @@ def test_find_dashed_words():
     assert tokens is not None
 
 
-def test_dehyphenator_service_dehyphen(cfg):
+def test_dehyphenator_service_dehyphen():
 
-    dehyphenator = SwedishDehyphenatorService(
-        **cfg,
-        word_frequencies={'a': 1},
-        whitelist=set(),
-        unresolved=set(),
-        whitelist_log={},
-    ).dehyphenator
+    dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})
 
     text = "Detta mening har inget bindestreck."
     result = dehyphenator.dehyphen_text(text)
@@ -149,15 +134,9 @@ def test_dehyphenator_service_dehyphen(cfg):
     assert len(dehyphenator.unresolved) == 0
 
 
-def test_dehyphenator_service_dehyphen_by_frequency(cfg):
+def test_dehyphenator_service_dehyphen_by_frequency():
 
-    dehyphenator = SwedishDehyphenatorService(
-        **cfg,
-        word_frequencies={'a': 1},
-        whitelist=set(),
-        unresolved=set(),
-        whitelist_log={},
-    ).dehyphenator
+    dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})
 
     text = "Detta är ett binde-\nstreck. "
     dehyphenator.word_frequencies = {'bindestreck': 1, 'binde-streck': 2}

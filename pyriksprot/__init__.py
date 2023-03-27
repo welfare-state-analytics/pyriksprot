@@ -4,7 +4,7 @@ from . import metadata
 from .corpus.corpus_index import CorpusSourceIndex, ICorpusSourceItem
 from .corpus.iterate import ProtocolSegment, ProtocolSegmentIterator
 from .corpus.parlaclarin import pretokenize
-from .dehyphenation import SwedishDehyphenator, SwedishDehyphenatorService
+from .dehyphenation import SwedishDehyphenator
 from .dispatch import DispatchItem, SegmentMerger, create_grouping_hashcoder
 from .interface import ParlaClarinError, Protocol, SegmentLevel, Speech, Utterance
 from .to_speech import MergerFactory, MergeStrategyType, to_speeches

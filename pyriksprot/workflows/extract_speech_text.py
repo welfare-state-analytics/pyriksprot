@@ -17,15 +17,7 @@ from ..corpus import corpus_index
 
 # pylint: disable=too-many-arguments
 
-
-def create_dehyphen(data_path: str) -> dehyphenation.SwedishDehyphenatorService:
-    opts = dict(
-        word_frequency_filename=os.path.join(data_path, 'riksdagen-corpus-term-frequencies.pkl'),
-        whitelist_filename=os.path.join(data_path, 'dehyphen_whitelist.txt.gz'),
-        whitelist_log_filename=os.path.join(data_path, 'dehyphen_whitelist_log.pkl'),
-        unresolved_filename=os.path.join(data_path, 'dehyphen_unresolved.txt.gz'),
-    )
-    return dehyphenation.SwedishDehyphenatorService.create_dehypen(*opts)
+jj = os.path.join
 
 
 def extract_speech_texts(
@@ -76,7 +68,9 @@ def extract_speech_texts(
     )
     lookups: md.Codecs = md.Codecs().load(metadata_filename)
 
-    dehypenator = create_dehyphen(data_path) if dehyphen else None
+    dehypenator: dehyphenation.SwedishDehyphenator = (
+        dehyphenation.SwedishDehyphenator(data_folder=data_path, word_frequencies=None) if dehyphen else None
+    )
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     def preprocess(item: ProtocolSegment) -> None:
