@@ -1,17 +1,21 @@
 import os
+from posixpath import splitext
 
 import pytest
+import requests
 
+from pyriksprot import corpus as pc
 from pyriksprot import metadata as md
-from pyriksprot.utility import download_protocols
+from pyriksprot.metadata.config import table_url
+from pyriksprot.scripts.csv2pgsql import csv2pgsql
 
 from .utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
     RIKSPROT_REPOSITORY_TAG,
     TEST_DOCUMENTS,
-    create_sample_metadata,
-    create_sample_speech_corpus,
-    create_sample_tagged_frames_corpus,
+    create_test_corpus_and_metadata,
+    create_test_speech_corpus,
+    create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
@@ -26,31 +30,32 @@ FORCE_RUN_SKIPS = os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 def test_setup_sample_xml_corpus():
     protocols: list[str] = TEST_DOCUMENTS
     target_folder: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols")
-    download_protocols(
-        protocols=protocols, target_folder=target_folder, create_subfolder=True, tag=RIKSPROT_REPOSITORY_TAG
+    pc.download_protocols(
+        filenames=protocols, target_folder=target_folder, create_subfolder=True, tag=RIKSPROT_REPOSITORY_TAG
     )
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_to_folder():
     target_folder: str = jj('./metadata/data/', RIKSPROT_REPOSITORY_TAG)
-    md.download_to_folder(tag=RIKSPROT_REPOSITORY_TAG, folder=target_folder, force=True)
-    assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in md.RIKSPROT_METADATA_TABLES)
+    configs: md.MetadataTableConfigs = md.MetadataTableConfigs()
+    md.gh_dl_metadata_by_config(configs=configs, tag=RIKSPROT_REPOSITORY_TAG, folder=target_folder, force=True)
+    assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in configs.tablesnames0)
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus():
-    create_sample_tagged_frames_corpus()
+    create_test_tagged_frames_corpus()
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_create_subset_metadata_to_folder():
-    create_sample_metadata()
+def test_create_test_corpus_and_metadata():
+    create_test_corpus_and_metadata()
 
 
-# @pytest.mark.skip(reason="Test infrastructure test")
+@pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
-    create_sample_speech_corpus()
+    create_test_speech_corpus()
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
@@ -58,9 +63,16 @@ def test_setup_test_corpora():
     ensure_test_corpora_exist(force=True)
 
 
-@pytest.mark.skip(reason="Test infrastructure debug test")
-def test_create_matadatabase():
-    filename = "metadata/riksprot_metadata.v0.4.6.db"
-    branch = None
-    folder = "./metadata/data/v0.4.6"
-    md.create_database(database_filename=filename, tag=branch, folder=folder, force=True)
+def test_gh_tables_data():
+    tag: str = "v0.6.0"
+    items: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
+    infos: dict[str, dict] = {}
+    for item in items:
+        table, extension = splitext(item.get("name"))
+        if not extension.endswith("csv"):
+            continue
+        url: str = item.get("download_url", table_url(table, tag))
+        data: str = requests.get(url, timeout=10).content.decode("utf-8")
+        headers: list[str] = data.splitlines()[0].split(sep=',')
+        infos['table'] = {'name': table, 'headers': headers, 'content': data}
+    return infos
