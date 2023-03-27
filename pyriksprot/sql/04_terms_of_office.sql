@@ -78,32 +78,44 @@ create table terms_of_office (
    [sub_office_type_id] integer not null default(0) references sub_office_type(sub_office_type_id),
    [district_id] integer null references district(district_id),
    [start_date] date null,
+   [start_flag] text not null default('X'),
    [end_date] date null,
+   [end_flag] text not null default('X'),
    [start_year] integer null,
    [end_year] integer null,
-   [_government_id] integer null
+   [government_id] integer null
 );
 
-insert into terms_of_office (person_id, office_type_id, sub_office_type_id, district_id, start_date, end_date, start_year, end_year)
+insert into terms_of_office (
+        person_id, office_type_id, sub_office_type_id, district_id,
+        [start_date], [start_flag], [end_date], [end_flag], [start_year], [end_year]
+    )
     select  _member_of_parliament.person_id,
             1,
             coalesce(sub_office_type.sub_office_type_id, 0),
             coalesce(district.district_id, 0),
             _member_of_parliament.[start],
+            _member_of_parliament.[start_flag],
             _member_of_parliament.[end],
-            cast(substr(_member_of_parliament.[start], 1, 4) as integer) as start_year,
-            cast(substr(_member_of_parliament.[end], 1, 4) as integer) as end_year
+            _member_of_parliament.[end_flag],
+            cast(substr(_member_of_parliament.[start], 1, 4) as integer) as [start_year],
+            cast(substr(_member_of_parliament.[end], 1, 4) as integer) as [end_year]
     from _member_of_parliament
     join persons_of_interest using (person_id)
     left join district on district.district = _member_of_parliament.district
     left join sub_office_type on sub_office_type.identifier = _member_of_parliament.role;
 --insert into terms_of_office (person_id, office_type_id, sub_office_type_id, district_id, start_year, end_year)
-insert into terms_of_office (person_id, office_type_id, sub_office_type_id, start_date, end_date, start_year, end_year, _government_id)
+insert into terms_of_office (
+        [person_id], [office_type_id], [sub_office_type_id],
+        [start_date], [start_flag], [end_date], [end_flag], [start_year], [end_year], government_id
+    )
     select  _minister.person_id,
             2,
             coalesce(sub_office_type.sub_office_type_id, 0),
             _minister.[start],
+            _minister.[start_flag],
             _minister.[end],
+            _minister.[end_flag],
             cast(substr(_minister.[start], 1, 4) as integer) as start_year,
             cast(substr(_minister.[end], 1, 4) as integer) as end_year,
             government.government_id
@@ -115,12 +127,17 @@ insert into terms_of_office (person_id, office_type_id, sub_office_type_id, star
       on sub_office_type.office_type_id = 2
      and sub_office_type.identifier = _minister.role;
 
-insert into terms_of_office (person_id, office_type_id, sub_office_type_id, start_date, end_date, start_year, end_year)
+insert into terms_of_office (
+        person_id, office_type_id, sub_office_type_id,
+        [start_date], [start_flag], [end_date], [end_flag], [start_year], [end_year]
+    )
     select  _speaker.person_id,
             3,
             coalesce(sub_office_type.sub_office_type_id, 0),
             _speaker.[start],
+            _speaker.[start_flag],
             _speaker.[end],
+            _speaker.[end_flag],
             cast(substr(_speaker.[start], 1, 4) as integer) as start_year,
             cast(substr(_speaker.[end], 1, 4) as integer) as end_year
     from _speaker
@@ -135,6 +152,6 @@ create table minister_government (
     government_id integer not null references government(government_id)
 );
 insert into minister_government (terms_of_office_id, government_id)
-    select terms_of_office_id, _government_id
+    select terms_of_office_id, government_id
     from terms_of_office
     where office_type_id = 2;

@@ -6,8 +6,6 @@ from typing import Any, Literal, Type
 import numpy as np
 import pandas as pd
 
-from ..utility import read_sql_tables
-
 COLUMN_TYPES = {
     'year_of_birth': np.int16,
     'year_of_death': np.int16,
@@ -34,6 +32,21 @@ COLUMN_DEFAULTS = {
     'end_year': 0,
 }
 
+DATE_COLUMNS = ['start_date', 'end_date']
+
+
+def read_sql_table(table_name: str, con: Any) -> pd.DataFrame:
+    return pd.read_sql(f"select * from {table_name}", con)
+
+
+def read_sql_tables(tables: list[str] | dict, db: Any) -> dict[str, pd.DataFrame]:
+    return tables if isinstance(tables, dict) else {table_name: read_sql_table(table_name, db) for table_name in tables}
+
+
+def sql_table_info(table_name: str, con: Any) -> pd.DataFrame:
+    data: pd.DataFrame = pd.read_sql(f"select * from PRAGMA_TABLE_INFO('{table_name}');", con)
+    return data
+
 
 def load_tables(
     tables: dict[str, str],
@@ -41,13 +54,29 @@ def load_tables(
     db: sqlite3.Connection,
     defaults: dict[str, Any] = None,
     types: dict[str, Any] = None,
-):
+) -> dict[str, pd.DataFrame]:
     """Loads tables as pandas dataframes, slims types, fills NaN, sets pandas index"""
-    data: dict[str, pd.DataFrame] = read_sql_tables(list(tables.keys()), db)
-    slim_table_types(data.values(), defaults=defaults, types=types)
-    for table_name, table in data.items():
-        if tables.get(table_name):
+    data: dict[str, pd.DataFrame] = {}
+    for table_name, primary_key in tables.items():
+        table: pd.DataFrame = read_sql_table(table_name, db)
+        table_info: pd.DataFrame = sql_table_info(table_name, db)
+        for bool_column in table_info[table_info.type == 'bool'].name:
+            table[bool_column] = table[bool_column].astype(bool)
+        for date_column in table_info[table_info.type == 'date'].name:
+            if pd.api.types.is_string_dtype(table[date_column]):
+                table[date_column] = pd.to_datetime(table[date_column])
+
+        if primary_key:
             table.set_index(tables.get(table_name), drop=True, inplace=True)
+        slim_table_types(table, defaults=defaults, types=types)
+        data[table_name] = table
+
+    # data: dict[str, pd.DataFrame] = read_sql_tables(list(tables.keys()), db)
+    # slim_table_types(data.values(), defaults=defaults, types=types)
+    # for table_name, table in data.items():
+    #     if tables.get(table_name):
+    #         table.set_index(tables.get(table_name), drop=True, inplace=True)
+
     return data
 
 
@@ -141,9 +170,7 @@ def fix_incomplete_datetime_series(
     if action == 'extend':
         dt: pd.Series = pd.to_datetime(df[column_name], errors='coerce')
         dt.loc[mask_year] = dt + pd.DateOffset(years=1) - pd.DateOffset(days=1)
-        dt.loc[mask_yearmonth] = (
-            dt + pd.DateOffset(months=1) - pd.DateOffset(days=1)
-        )
+        dt.loc[mask_yearmonth] = dt + pd.DateOffset(months=1) - pd.DateOffset(days=1)
         df[column_name] = dt.dt.strftime("%Y-%m-%d")
 
     df.loc[mask_year, f"{column_name}_flag"] = 'Y'

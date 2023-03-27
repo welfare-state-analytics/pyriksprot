@@ -26,7 +26,6 @@ from types import ModuleType
 from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
 from urllib.request import urlopen
 
-import pandas as pd
 import requests
 import unidecode  # pylint: disable=import-error
 import yaml
@@ -383,14 +382,6 @@ def write_yaml(data: dict, file: str) -> None:
     """Write yaml to file.."""
     with open(file, "w", encoding='utf-8') as fp:
         return yaml.dump(data=data, stream=fp)
-
-
-def read_sql_table(table_name: str, con: Any) -> pd.DataFrame:
-    return pd.read_sql(f"select * from {table_name}", con)
-
-
-def read_sql_tables(tables: list[str] | dict, db: Any) -> dict[str, pd.DataFrame]:
-    return tables if isinstance(tables, dict) else {table_name: read_sql_table(table_name, db) for table_name in tables}
 
 
 def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:

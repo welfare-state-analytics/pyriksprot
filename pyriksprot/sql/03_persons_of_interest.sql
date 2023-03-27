@@ -16,7 +16,8 @@ create table persons_of_interest (
    [party_id] integer null references party(party_id),
    [name] varchar not null default(''),
    [year_of_birth] integer null,
-   [year_of_death] integer null
+   [year_of_death] integer null,
+   [has_multiple_parties] bool not null default(FALSE)
 );
 
 delete from persons_of_interest;

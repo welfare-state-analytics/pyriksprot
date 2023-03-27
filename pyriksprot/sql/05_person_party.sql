@@ -6,28 +6,28 @@ create table person_party (
     person_id varchar not null references persons_of_interest(person_id),
     party_id integer not null references party(party_id),
     source_id integer not null,
-    start_year int null,
-    end_year int null
+    [start_date] date null,
+    [start_flag] text not null default('X'),
+    [end_date] date null,
+    [end_flag] text not null default('X'),
+    [start_year] int null,
+    [end_year] int null,
+    has_multiple_parties bool not null default(FALSE)
 );
 
--- Add parties from _member_of_parliament for persons of interest
--- insert into person_party (person_id, source_id, party_id, start_year, end_year)
---     select
---         mops.person_id, 1 as source_id, party.party_id,
---         cast(substr(mops.[start], 1, 4) as integer) as start_year,
---         cast(substr(mops.[end], 1, 4) as integer) as end_year
---     from _member_of_parliament mops
---     join persons_of_interest using (person_id)
---     join _party_abbreviation pa using (party)
---     join party on party.party_abbrev = pa.abbreviation
---     where mops.party is not null;
 
--- Add parties from _party_affiliation for persons of interest
-insert into person_party (person_id, source_id, party_id, start_year, end_year)
+insert into person_party (
+    person_id, source_id, party_id,
+    [start_date], [start_flag], [end_date], [end_flag], [start_year], [end_year]
+)
     with affiliation as (
         select
             person_id,
             party,
+            _party_affiliation.[start],
+            _party_affiliation.[start_flag],
+            _party_affiliation.[end],
+            _party_affiliation.[end_flag],
             cast(substr(_party_affiliation.[start], 1, 4) as integer) as start_year,
             cast(substr(_party_affiliation.[end], 1, 4) as integer) as end_year
         from _party_affiliation
@@ -35,6 +35,10 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
         select
             affiliation.person_id, 2 as source_id,
             coalesce(party.party_id, 1), -- 1 is code for "Other", 84 records
+            affiliation.start,
+            affiliation.start_flag,
+            affiliation.end,
+            affiliation.end_flag,
             affiliation.start_year,
             affiliation.end_year
         from affiliation
@@ -42,6 +46,24 @@ insert into person_party (person_id, source_id, party_id, start_year, end_year)
         left join _party_abbreviation using (party)
         left join party on party.party_abbrev = _party_abbreviation.abbreviation
         ;
+
+with persons_with_many_partys as (
+    select person_id
+    from person_party
+    group by person_id
+    having count(distinct party_id) > 1
+)
+    update persons_of_interest set has_multiple_parties = TRUE
+        where person_id in (select person_id from persons_with_many_partys);
+
+with persons_with_many_partys as (
+    select person_id
+    from person_party
+    group by person_id
+    having count(distinct party_id) > 1
+)
+    update person_party set has_multiple_parties = TRUE
+        where person_id in (select person_id from persons_with_many_partys);
 
 /* Update party_id for persons having only one party */
 with persons_with_single_party as (
@@ -54,53 +76,6 @@ with persons_with_single_party as (
         select person_id, persons_with_single_party.party_id
         from persons_of_interest
         join persons_with_single_party using (person_id)
-          on conflict(person_id) do update set party_id=excluded.[party_id];
-
-
-drop table if exists person_multiple_party;
-create table person_multiple_party (
-    person_multiple_party_id integer primary key,
-    person_id varchar not null,
-    party_id integer not null,
-    start_year int null,
-    end_year int null
-);
-with persons_with_many_partys as (
-    select person_id
-    from person_party
-    group by person_id
-    having count(distinct party_id) > 1
-)
-    insert into person_multiple_party (person_id, party_id, start_year, end_year)
-        select distinct person_party.person_id, party_id, start_year, end_year
-        from person_party
-        join persons_with_many_partys using (person_id);
-
-drop table if exists person_yearly_party;
-create table person_yearly_party (
-    person_yearly_party_id integer primary key,
-    person_id varchar not null references persons_of_interest(person_id),
-    [year] int null,
-    party_id integer not null
-);
-
-insert into person_yearly_party (person_id, [year], party_id)
-    select distinct person_id, years.[year], party_id
-    from person_multiple_party
-    join years
-    on years.[year] between person_multiple_party.[start_year] and ifnull(person_multiple_party.[end_year], 2030)
-    union
-    select distinct person_id, null, party_id
-    from person_multiple_party
-    where start_year is null
-      and end_year is null
-    union
-    select person_id, null, party_id
-    from persons_of_interest
-    where party_id is not null;
-
-insert into person_yearly_party (person_id, [year], party_id)
-    select person_id, null, 0
-    from persons_of_interest
-    where person_id not in (select person_id from person_yearly_party);
+        where persons_of_interest.has_multiple_parties = FALSE
+    on conflict(person_id) do update set party_id=excluded.[party_id];
 
