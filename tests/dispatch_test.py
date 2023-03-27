@@ -12,6 +12,7 @@ from pyriksprot import to_speech, utility
 from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import dispatch
 from pyriksprot.dispatch import merge as sg
+
 from .utility import SAMPLE_METADATA_DATABASE_NAME, sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name
