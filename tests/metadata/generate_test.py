@@ -9,7 +9,6 @@ import pytest
 import pyriksprot.sql as sql
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
-from pyriksprot.metadata.config import MetadataTableConfigs
 
 jj = os.path.join
 

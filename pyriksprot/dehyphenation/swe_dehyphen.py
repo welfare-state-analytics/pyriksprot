@@ -100,11 +100,11 @@ class SwedishDehyphenator:
         return jj(self.data_folder, 'dehyphen_whitelist.txt.gz')
 
     @property
-    def whitelist_log_filename(self) ->str:
+    def whitelist_log_filename(self) -> str:
         return jj(self.data_folder, 'dehyphen_whitelist_log.pkl')
 
     @property
-    def unresolved_filename(self) ->str:
+    def unresolved_filename(self) -> str:
         return jj(self.data_folder, 'dehyphen_unresolved.txt.gz')
 
     def is_whitelisted(self, word: str) -> bool:

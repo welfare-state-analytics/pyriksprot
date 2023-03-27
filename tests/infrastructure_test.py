@@ -7,7 +7,6 @@ import requests
 from pyriksprot import corpus as pc
 from pyriksprot import metadata as md
 from pyriksprot.metadata.config import table_url
-from pyriksprot.scripts.csv2pgsql import csv2pgsql
 
 from .utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
