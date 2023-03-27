@@ -20,7 +20,7 @@ class ConformBaseSpecification:
         self.right_key: str = "right"
         self.right_tables: dict = {}
         self.errors: list[str] = []
-        self.ignore_tables: set[str] = {'unknowns','protocols','utterances','speaker_notes'}
+        self.ignore_tables: set[str] = {'unknowns', 'protocols', 'utterances', 'speaker_notes'}
 
     @property
     def all_tablenames(self) -> set[str]:
@@ -73,8 +73,8 @@ class TagsConformSpecification(ConformBaseSpecification):
         tag1_data: dict = gh_dl_metadata(tag=tag1, folder=None)
         tag2_data: dict = gh_dl_metadata(tag=tag2, folder=None)
 
-        self.left_tables: dict = {n: v['headers'] for n,v in tag1_data.items()}
-        self.right_tables: dict = {n: v['headers'] for n,v in tag2_data.items()}
+        self.left_tables: dict = {n: v['headers'] for n, v in tag1_data.items()}
+        self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
 
 
 class ConfigConformsToTagSpecification(ConformBaseSpecification):
@@ -91,7 +91,8 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
         tag2_data: dict = gh_dl_metadata(tag=tag, folder=None)
 
         self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
-        self.right_tables: dict = {n: v['headers'] for n,v in tag2_data.items()}
+        self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
+
 
 class ConfigConformsToFolderSpecification(ConformBaseSpecification):
     """Verifies that current table specification has same files as in specified folder"""
