@@ -84,7 +84,43 @@ Options:
   -k, --dehyphen                  Dehyphen text
   --help                          Show this message and exit.
 
+  λ metadata2db --help
+Usage: metadata2db.py [OPTIONS] COMMAND [ARGS]...
+
+  CLI tool to manage riksprot metadata
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  columns
+  database
+  download
+  filenames
+  index
+
+  λ metadata2db.py database --help
+Usage: metadata2db.py database [OPTIONS] TARGET
+
+Options:
+  --tag TEXT             Metadata version
+  --source-folder TEXT
+  --force                Force overwrite
+  --load-index           Load utterance index
+  --scripts-folder TEXT  Apply scripts in specified folder to DB. If not
+                         specified the scripts are loaded from SQL-module.
+  --skip-scripts         Skip loading SQL scripts
+  --help                 Show this message and exit.
+
+
+  λ metadata2db index --help
+Usage: metadata2db.py index [OPTIONS] CORPUS_FOLDER TARGET_FOLDER
+
+Options:
+  --help  Show this message and exit.
+
 ```
+
 
 ### Examples CLI
 

@@ -24,7 +24,7 @@ def verify_metadata_filenames(source_folder: str):
 
 
 @click.command()
-@click.argument('tags', nargs=-1, tag=click.STRING)
+@click.argument('tags', nargs=-1, type=click.STRING)
 def verify_metadata_columns(tags: str):
     try:
         if len(tags) == 1:
