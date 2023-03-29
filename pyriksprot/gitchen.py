@@ -13,7 +13,7 @@ from pyriksprot.utility import read_yaml, write_yaml
 ts = datetime.datetime.fromtimestamp
 
 
-class GitUtility:
+class GitInfo:
 
     API_URL: str = "https://api.github.com/repos/welfare-state-analytics/riksdagen-corpus/git"
 
@@ -35,8 +35,8 @@ class GitUtility:
             "ref": f"refs/tags/{tag}" if tag else "",
             "sha": sha,
             "sha8": sha[:8],
-            "tag_url": f"{GitUtility.API_URL}/{head_tag.name}" if head_tag is not None else "",
-            "commit_url": f"{GitUtility.API_URL}/commits/{sha}",
+            "tag_url": f"{GitInfo.API_URL}/{head_tag.name}" if head_tag is not None else "",
+            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
         }
         return data
 
@@ -55,8 +55,8 @@ class GitUtility:
             "ref": tag_object.name,
             "sha": sha,
             "sha8": sha[:8],
-            "tag_url": f"{GitUtility.API_URL}/{tag}",
-            "commit_url": f"{GitUtility.API_URL}/commits/{sha}",
+            "tag_url": f"{GitInfo.API_URL}/{tag}",
+            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
         }
         return data
 
@@ -66,9 +66,9 @@ class GitUtility:
         if not tag.startswith("refs/tags"):
             tag = f"refs/tags/{tag}"
 
-        tag_url: str = f"{GitUtility.API_URL}/{tag}"
+        tag_url: str = f"{GitInfo.API_URL}/{tag}"
 
-        response: requests.Response = requests.get(tag_url)
+        response: requests.Response = requests.get(tag_url, timeout=10)
         if response.status_code != 200:
             raise TagNotFoundError(tag)
 
@@ -83,7 +83,7 @@ class GitUtility:
             "sha": sha,
             "sha8": sha[:8],
             "tag_url": tag_url,
-            "commit_url": f"{GitUtility.API_URL}/commits/{sha}",
+            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
         }
         return data
 
