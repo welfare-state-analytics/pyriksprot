@@ -132,7 +132,6 @@ class IDispatchItem(abc.ABC):
 
 
 class IProtocol(abc.ABC):
-
     date: str
     name: str
     utterances: list[Utterance]
@@ -177,7 +176,6 @@ class Utterance:
         page_number: Optional[str] = '',
         **_,
     ):
-
         if not speaker_note_id:
             speaker_note_id = MISSING_SPEAKER_NOTE_ID
             # FIXME #15 Exists utterances in data not preceeded by a speakers's intro note
@@ -223,7 +221,6 @@ class Utterance:
 
 
 class UtteranceHelper:
-
     CSV_OPTS = dict(
         quoting=csv.QUOTE_MINIMAL,
         escapechar="\\",
@@ -377,7 +374,6 @@ class Speech(UtteranceMixIn):
     delimiter: str = field(default='\n')
 
     def __post_init__(self):
-
         if len(self.utterances or []) == 0:
             raise ParlaClarinError("utterance list cannot be empty")
 
