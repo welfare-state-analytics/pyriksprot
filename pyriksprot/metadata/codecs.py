@@ -44,7 +44,7 @@ class Codecs:
         self.extra_codecs: list[Codec] = []
 
     def load(self, source: str | sqlite3.Connection | dict) -> Codecs:
-        with (sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source)) as db:
+        with sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source) as db:
             tables: dict[str, pd.DataFrame] = mdu.load_tables(CODE_TABLES, db=db)
             for table_name, table in tables.items():
                 setattr(self, table_name, table)
@@ -113,7 +113,6 @@ class Codecs:
         return [c for c in self.codecs if c.type == 'encode']
 
     def apply_codec(self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True) -> pd.DataFrame:
-
         for codec in codecs:
             if codec.from_column in df.columns:
                 if codec.to_column not in df:

@@ -19,7 +19,7 @@ from .utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
     TAGGED_SOURCE_FOLDER,
     TAGGED_SOURCE_PATTERN,
-    create_utterances,
+    create_sample_utterances,
     sample_tagged_frames_corpus_exists,
 )
 
@@ -30,7 +30,7 @@ jj = os.path.join
 
 @pytest.fixture(scope='module')
 def utterances() -> list[interface.Utterance]:
-    return create_utterances()
+    return create_sample_utterances()
 
 
 @pytest.mark.parametrize(
@@ -98,7 +98,6 @@ def utterances() -> list[interface.Utterance]:
 def test_merge_speech_by_strategy(
     utterances: list[interface.Utterance], strategy, expected_count, expected_whos, expected_ids, expected_texts
 ):
-
     protocol: interface.Protocol = interface.Protocol(
         date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}
     )
@@ -122,7 +121,6 @@ def test_merge_speech_by_strategy(
 
 
 def test_speech_annotation():
-
     utterances: list[interface.Utterance] = [
         interface.Utterance(u_id='i-1', who="apa", speaker_note_id="a1", annotation='header\nA\nB'),
         interface.Utterance(u_id='i-2', who="apa", speaker_note_id="a1", annotation='header\nC\nD'),
@@ -208,11 +206,6 @@ def test_protocol_to_speeches_with_different_strategies(filename: str, speech_co
     document_name: str = utility.strip_path_and_extension(filename)
 
     xml_path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
-
-    # log_utterance_sequence(xml_path, f"tests/output/{document_name}_sequence.log")
-    # counter: dict[str, int] = count_speaker_notes(xml_path)
-
-    # n_speaker_note_without_utterance: int = len([k for k in counter if not counter[k]])
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(xml_path)
 
@@ -335,7 +328,6 @@ def test_load_protocols_from_folder():
     ],
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):
-
     filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
@@ -362,7 +354,6 @@ def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_spe
     'protocol_name', ['prot-199192--21', 'prot-199192--127', 'prot-1933--fk--5', 'prot-1955--ak--22', 'prot-199596--35']
 )
 def test_protocol_to_speeches(protocol_name: str):
-
     filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
@@ -371,7 +362,6 @@ def test_protocol_to_speeches(protocol_name: str):
         columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_note_id'],
     )
     for merge_strategy in ['who_sequence', 'who_speaker_note_id_sequence', 'speaker_note_id_sequence', 'chain']:
-
         merger: ts.IMergeStrategy = ts.MergerFactory.get(merge_strategy)
 
         items: list[list[interface.Utterance]] = merger.group(protocol.utterances)

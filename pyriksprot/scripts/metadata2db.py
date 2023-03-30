@@ -75,9 +75,7 @@ def create_database(
     load_index: bool = True,
     skip_scripts: bool = False,
 ) -> None:
-
     try:
-
         service: md.DatabaseHelper = md.DatabaseHelper(target)
         service.create(
             tag=tag,

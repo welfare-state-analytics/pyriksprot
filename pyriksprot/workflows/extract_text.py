@@ -69,7 +69,6 @@ def extract_corpus_text(
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     def preprocess(item: ProtocolSegment) -> None:
-
         if dedent:
             item.data = utility.dedent(item.data)
 

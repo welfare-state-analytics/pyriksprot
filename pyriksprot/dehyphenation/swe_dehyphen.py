@@ -84,7 +84,6 @@ class SwedishDehyphenator:
     paragraph_merge_strategy: ParagraphMergeStrategy = 0
 
     def __post_init__(self) -> "SwedishDehyphenator":
-
         if self.word_frequencies is None:
             self.word_frequencies = os.path.join(self.data_folder, 'riksdagen-corpus-term-frequencies.pkl')
 

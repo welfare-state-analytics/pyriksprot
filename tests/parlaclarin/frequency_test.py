@@ -21,7 +21,6 @@ TEST_PARLACLARIN_XML_FILES = [
 
 @pytest.mark.parametrize('texts', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
 def test_word_frequency_counter(texts):
-
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
 
     counter.ingest(texts)
@@ -36,7 +35,6 @@ def test_word_frequency_counter(texts):
 
 @pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
-
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(filename)
@@ -48,7 +46,6 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
 @pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
 def test_persist_word_frequencies(filename: List[str]):
-
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
 

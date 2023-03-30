@@ -74,7 +74,6 @@ def main(
 
 
 if __name__ == "__main__":
-
     main()
 
     # from click.testing import CliRunner

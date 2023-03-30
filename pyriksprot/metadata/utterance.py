@@ -11,7 +11,6 @@ null_frame: pd.DataFrame = pd.DataFrame()
 
 class UtteranceIndex:
     def __init__(self):
-
         self.protocols: pd.DataFrame = null_frame
         self.utterances: pd.DataFrame = null_frame
         self.unknown_utterance_gender: pd.DataFrame = null_frame

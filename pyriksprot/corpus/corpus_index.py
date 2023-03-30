@@ -20,7 +20,6 @@ Creates a recursive index of files in a source folder that match given pattern.
 
 @dataclass
 class ICorpusSourceItem:
-
     path: str
     filename: str = None
     name: str = None
@@ -28,7 +27,6 @@ class ICorpusSourceItem:
     year: Optional[int] = None
 
     def __post_init__(self):
-
         self.filename = basename(self.path)
         self.name = utility.strip_path_and_extension(self.path)
         self.subfolder = basename(dirname(self.path))
@@ -44,18 +42,15 @@ class ICorpusSourceItem:
         return False
 
     def to_dict(self) -> dict:
-
         return asdict(self)
 
 
 @dataclass
 class TaggedCorpusSourceItem(ICorpusSourceItem):
-
     metadata: dict | None = None
     # actual_year: int = None
 
     def __post_init__(self):
-
         super().__post_init__()
         self.metadata = load_metadata(self.path)
         """Year from data in metadata (the actual year)"""
@@ -70,7 +65,6 @@ class TaggedCorpusSourceItem(ICorpusSourceItem):
 @dataclass
 class CorpusSourceIndex:
     def __init__(self, source_items: list[ICorpusSourceItem]):
-
         self.source_items: list[ICorpusSourceItem] = source_items
         self.lookup: dict = {x.name: x for x in self.source_items}
 
@@ -87,7 +81,6 @@ class CorpusSourceIndex:
     def load(
         *, source_folder: str, source_pattern: str, years: Optional[str | Set[int]] = None, skip_empty: bool = True
     ) -> "CorpusSourceIndex":
-
         if not isdir(source_folder):
             raise ValueError(f"folder {source_folder} not found")
 

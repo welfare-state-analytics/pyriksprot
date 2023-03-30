@@ -26,7 +26,6 @@ class MergeStrategyType(str, Enum):
 def to_speeches(
     *, protocol: Protocol, merge_strategy: MergeStrategyType | Type[IMergeStrategy], skip_size: int = 1
 ) -> list[Speech]:
-
     if not protocol.utterances:
         return []
 
@@ -135,7 +134,6 @@ class MergeByChain(IMergeStrategy):
             )
 
             if start_of_speech:
-
                 if bool(u.prev_id) and not bool(speech):
                     logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
 
@@ -143,9 +141,7 @@ class MergeByChain(IMergeStrategy):
                 speeches.append(speech)
 
             else:
-
                 if bool(speech):
-
                     if bool(u.prev_id) and speech[0].u_id != u.prev_id:
                         logger.warning(f"u[{u.u_id}]: current prev_id differs from first u.u_id '{speech[0].u_id}'")
 
@@ -166,7 +162,6 @@ class UndefinedMerge(IMergeStrategy):
 
 
 class MergerFactory:
-
     strategies: dict[MergeStrategyType, IMergeStrategy] = {
         'who': MergeByWho(),
         'who_sequence': MergeByWhoSequence(),

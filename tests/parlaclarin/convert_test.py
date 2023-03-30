@@ -11,7 +11,6 @@ from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 
 @pytest.mark.skip(reason="deprecated")
 def test_convert_to_xml():
-
     template_name: str = "speeches.xml.jinja"
     protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
         jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")

@@ -76,7 +76,6 @@ class ITagger(abc.ABC):
 
 
 def tag_protocol(tagger: ITagger, protocol: interface.Protocol, preprocess=False) -> interface.Protocol:
-
     texts = [u.text for u in protocol.utterances]
 
     documents: List[TaggedDocument] = tagger.tag(texts, preprocess=preprocess)

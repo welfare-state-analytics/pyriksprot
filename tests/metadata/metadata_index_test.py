@@ -180,7 +180,6 @@ def test_overload_by_person(person_index: md.PersonIndex):
 
 
 def test_swap_rows(person_index: md.PersonIndex):
-
     Q5556026_pid = index_of_person_id(person_index.persons, 'Q5556026')
     Q5556026_pid = index_of_person_id(person_index.persons, 'Q5556026')
 
@@ -194,7 +193,6 @@ def test_swap_rows(person_index: md.PersonIndex):
 
 
 def test_person_party_at():
-
     person: md.Person = dummy()
     person.alt_parties = [
         md.PersonParty(party_id=8, start_date=1950, end_date=1952),
@@ -273,7 +271,6 @@ def test_unknown(person_index: md.PersonIndex):
 
 @pytest.mark.skip("infra test")
 def test_load_speaker_index2():
-
     database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
     speech_index_filename: str = (
         "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"

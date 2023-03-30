@@ -317,7 +317,6 @@ class ProtocolSegmentIterator(abc.ABC):
         return next(self.iterator)
 
     def create_iterator(self) -> Iterable[ProtocolSegment]:
-
         item: ProtocolSegment
         fx = self.preprocess
         # speaker_service: SpeakerInfoService = self.speaker_service

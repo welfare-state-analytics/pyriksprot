@@ -123,7 +123,6 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
 
 
 def test_extract_corpus_text_yearly_grouped_by_party():
-
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
 
     workflows.extract_corpus_text(
@@ -183,7 +182,6 @@ def test_extract_corpus_with_no_matching_protocols():
 
 
 def test_aggregator_extract_gender_party_no_temporal_key():
-
     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
 
     workflows.extract_corpus_text(

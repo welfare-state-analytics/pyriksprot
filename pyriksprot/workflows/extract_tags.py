@@ -138,7 +138,6 @@ def extract_corpus_tags(
         n_total: int = len(source_index.source_items)
 
         for data in tqdm(merger.merge(texts), total=n_total, miniters=10, disable=not progress):
-
             if not data:
                 logger.error("merge returned empty data")
                 continue

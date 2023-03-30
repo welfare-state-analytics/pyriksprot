@@ -60,7 +60,6 @@ def sample_tagged_speech_corpus_exists():
 
 
 def ensure_test_corpora_exist(force: bool = False):
-
     if force or not sample_metadata_exists():
         create_test_corpus_and_metadata()
 
@@ -72,7 +71,6 @@ def ensure_test_corpora_exist(force: bool = False):
 
 
 def create_test_corpus_and_metadata():
-
     tag: str = RIKSPROT_REPOSITORY_TAG
     documents: list[str] = TEST_DOCUMENTS
 
@@ -85,7 +83,6 @@ def create_test_corpus_and_metadata():
 
 
 def create_test_tagged_frames_corpus() -> None:
-
     protocols: str = TEST_DOCUMENTS
     source_folder: str = os.environ["TEST_RIKSPROT_TAGGED_FOLDER"]
     target_folder: str = TAGGED_SOURCE_FOLDER
@@ -100,7 +97,6 @@ def create_test_tagged_frames_corpus() -> None:
     os.makedirs(target_folder, exist_ok=True)
 
     for name in protocols:
-
         filename: str = replace_extension(name, 'zip')
         subfolder: str = filename.split('-')[1]
         source_filename: str = jj(source_folder, subfolder, filename)
@@ -115,7 +111,6 @@ def create_test_tagged_frames_corpus() -> None:
 
 
 def create_test_speech_corpus():
-
     # target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
     target_type: str = 'single-id-tagged-frame-per-group'
     merge_strategy: str = 'chain'
@@ -126,7 +121,6 @@ def create_test_speech_corpus():
     logger.info(f"  metadata: {SAMPLE_METADATA_DATABASE_NAME}")
 
     for compress_type in compress_types:
-
         target_name: str = jj(
             "tests/test_data/source/", RIKSPROT_REPOSITORY_TAG, f"tagged_frames_speeches.{compress_type}"
         )
@@ -234,7 +228,7 @@ UTTERANCES_DICTS = [
 ]
 
 
-def create_utterances() -> List[interface.Utterance]:
+def create_sample_utterances() -> List[interface.Utterance]:
     return [
         interface.Utterance(
             u_id='i-1',

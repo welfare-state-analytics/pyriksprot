@@ -22,7 +22,6 @@ class TimePeriod:
     end_flag: str = "Y"
 
     def __post_init__(self):
-
         if isinstance(self.start_date, int):
             if self.start_date == 0:
                 self.start_date = None
@@ -308,7 +307,6 @@ class PersonIndex:
     def overload_by_person(
         self, df: pd.DataFrame, *, encoded: bool = True, drop: bool = True, columns: list[str] = None
     ) -> pd.DataFrame:
-
         persons: pd.DataFrame = self.persons
         fg = self.person_id2pid.get
 
@@ -384,7 +382,6 @@ class SpeakerInfoService:
         return self.kwargs.get('person_index') or PersonIndex(self.database_filename).load()
 
     def get_speaker_info(self, *, u_id: str, person_id: str = None, year: int = None) -> dict[str, SpeakerInfo]:
-
         if person_id is None or year is None:
             try:
                 uttr: pd.Series = self.utterance_index.utterances.loc[u_id]

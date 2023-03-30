@@ -66,7 +66,6 @@ class SegmentMerger:
                 raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
 
             for item in iterator:
-
                 source_item = self.source_index[item.protocol_name]
 
                 if not bool(source_item):
@@ -91,7 +90,6 @@ class SegmentMerger:
                 # grouping_values['who'] = item.who
 
                 if hashcode not in current_temporal_group:
-
                     current_temporal_group[hashcode] = DispatchItem(
                         segment_level=item.segment_level,
                         content_type=item.content_type,

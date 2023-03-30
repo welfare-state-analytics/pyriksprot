@@ -9,9 +9,9 @@ from pyriksprot.corpus.tagged.persist import update_speaker_note_id
 jj = os.path.join
 relpath = os.path.relpath
 
+
 # FIXME #20 Tagging does not assign correct speaker hashes to utterances
 def temporary_update(tag: str, target_tag: str):
-
     source_folder: str = f"/data/riksdagen_corpus_data/tagged_frames_{tag}"
     target_folder: str = f"/data/riksdagen_corpus_data/tagged_frames_{target_tag}"
     database_filename: str = f"/data/riksdagen_corpus_data/metadata/riksprot_metadata.{tag}.db"

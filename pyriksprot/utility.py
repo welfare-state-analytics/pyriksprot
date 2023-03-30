@@ -146,14 +146,12 @@ def lookup(data, *keys):
 
 @contextlib.contextmanager
 def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
-
     if filename is None:
         filename: str = tempfile.mktemp(**mktemp)
 
     path: pathlib.Path = pathlib.Path(filename)
 
     try:
-
         if content:
             mode: str = "wb" if isinstance(content, (bytes, bytearray)) else "w"
             with open(filename, mode) as fp:
@@ -168,7 +166,6 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
 
 
 def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
-
     target_name: str = expanduser(target_name)
 
     if os.path.isfile(target_name):
@@ -198,7 +195,6 @@ def deprecated(func):
 
 
 def unlink(f: str) -> None:
-
     fo = pathlib.Path(f)
 
     if fo.is_dir():

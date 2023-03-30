@@ -38,7 +38,6 @@ def gh_dl_metadata(tag: str, folder: str = None, force: bool = False) -> dict:
     infos: dict[str, dict] = {}
 
     for item in items:
-
         table, extension = splitext(item.get("name"))
         if not extension.endswith("csv"):
             continue

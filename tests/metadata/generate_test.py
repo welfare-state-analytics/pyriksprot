@@ -23,7 +23,6 @@ def test_list_sql_files():
 
 
 def test_gh_ls():
-
     data: list[dict] = md.gh_ls(
         "welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG
     )
@@ -31,7 +30,6 @@ def test_gh_ls():
 
 
 def test_download_metadata():
-
     data: list[dict] = md.gh_ls(
         "welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG
     )
@@ -42,7 +40,6 @@ def test_download_metadata():
 
 
 def test_get_and_set_db_version():
-
     dummy_db_name: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
     service: md.DatabaseHelper = md.DatabaseHelper(dummy_db_name)

@@ -64,7 +64,6 @@ class CompressType(str, Enum):
 
 
 class IDispatcher(abc.ABC):
-
     name: str = 'parent'
 
     def __init__(self, *, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
@@ -138,7 +137,6 @@ class IDispatcher(abc.ABC):
             filename = jj(self.target_name, f"{filename}")
 
         if isinstance(data, pd.DataFrame):
-
             if self.compress_type == 'feather':
                 data.to_feather(utility.replace_extension(filename, 'feather'))
                 return
@@ -274,7 +272,6 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
         self.naming_keys: list[str] = naming_keys
 
     def to_speech_segment(self, item: IDispatchItem) -> ProtocolSegment:
-
         if item.segment_level != SegmentLevel.Speech:
             raise ValueError(f"{type(self).__name__}: requires speech segment level")
 
@@ -295,7 +292,6 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
         return super()._dispatch_index_item(item)
 
     def _dispatch_item(self, item: IDispatchItem) -> None:
-
         speech: ProtocolSegment = self.to_speech_segment(item)
 
         subfolder: str = to_temporal_category(self.subfolder_key, speech.year, speech.protocol_name)
@@ -326,7 +322,6 @@ class CheckpointPerGroupDispatcher(IDispatcher):
         return
 
     def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
-
         self._reset_index()
 
         if len(dispatch_items) == 0:
@@ -341,7 +336,6 @@ class CheckpointPerGroupDispatcher(IDispatcher):
         with zipfile.ZipFile(
             jj(path, checkpoint_name), mode="w", compression=self.compress_type.to_zipfile_compression()
         ) as fp:
-
             for item in dispatch_items:
                 fp.writestr(item.filename, self.to_lower(item.text))
                 self._dispatch_index_item(item)
@@ -368,7 +362,6 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         return
 
     def _dispatch_index_item(self, item: IDispatchItem) -> None:
-
         item: DispatchItem = item
 
         if item.segment_level != SegmentLevel.Speech:
@@ -407,13 +400,11 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         self.document_id += 1
 
     def dispatch(self, dispatch_items: list[IDispatchItem]) -> None:
-
         if len(dispatch_items) == 0:
             return
 
         tagged_frames: list[pd.DataFrame] = []
         for item in dispatch_items:
-
             tagged_frame: pd.DataFrame = self.create_tagged_frame(item)
             tagged_frames.append(tagged_frame)
             item.n_tokens = len(tagged_frame)
@@ -432,7 +423,6 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         self.store(filename=target_name, data=tagged_frame)
 
     def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
-
         pads: set = {'MID', 'MAD', 'PAD'}
 
         tagged_frame: pd.DataFrame = pd.read_csv(StringIO(item.text), sep='\t', quoting=3, dtype=str)

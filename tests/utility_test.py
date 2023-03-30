@@ -13,7 +13,6 @@ jj = os.path.join
 
 
 def test_temporary_file():
-
     filename = jj("tests", "output", "trazan.txt")
 
     with pu.temporary_file(filename=filename) as path:
@@ -44,7 +43,6 @@ def test_dedent():
 
 
 def test_probe_filename():
-
     filename: str = "./tests/output/apa.csv"
     pu.touch(pu.replace_extension(filename, "txt"))
 
@@ -61,7 +59,6 @@ def test_repository_tags():
 
 
 def test_complete_datetime_series():
-
     df: pd.DataFrame = pd.DataFrame(data={'dt': ['2020', None, '2023-02', '2023-03-24']})
 
     md.fix_incomplete_datetime_series(df, "dt", action="truncate", inplace=True)

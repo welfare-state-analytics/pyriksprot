@@ -20,7 +20,6 @@ jj = os.path.join
     ],
 )
 def test_segment_iterator_when_segment_is_speech(iterator_class):
-
     filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
 
     texts: Iterable[iterate.ProtocolSegment] = list(
@@ -54,7 +53,6 @@ def test_segment_iterator_when_segment_is_speech(iterator_class):
     ],
 )
 def test_segment_iterator_when_segment_is_protocol(iterator_class):
-
     filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
 
     texts: Iterable[iterate.ProtocolSegment] = list(
@@ -80,7 +78,6 @@ def test_segment_iterator_when_segment_is_protocol(iterator_class):
 
 
 def test_xml_protocol_texts_iterator_texts():
-
     filenames: List[str] = sorted(glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
     expected_document_names: List[str] = sorted(utility.strip_path_and_extension(filenames))
 
@@ -429,7 +426,6 @@ EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
     ],
 )
 def test_protocol_texts_iterator(iterator_class):
-
     document_names: List[str] = ['prot-1958-fake', 'prot-1960-fake']
     filenames: List[str] = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
 
@@ -458,7 +454,6 @@ def test_protocol_texts_iterator(iterator_class):
     ],
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):
-
     filenames = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
     texts: list[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None)

@@ -9,7 +9,6 @@ from . import persist
 
 
 def multiprocessing_load(args) -> Iterable[iterate.ProtocolSegment]:
-
     protocol: iterate.Protocol = persist.load_protocol(filename=args[0])
     return (
         []
@@ -29,7 +28,6 @@ class ProtocolIterator(iterate.ProtocolSegmentIterator):
     """Reads xml files and returns a stream of `ProtocolSegment`"""
 
     def load(self, filename: str) -> List[Tuple[str, str, int]]:
-
         protocol: iterate.Protocol = persist.load_protocol(filename=filename)
 
         return (

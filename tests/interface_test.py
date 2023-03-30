@@ -35,7 +35,6 @@ def test_utterance_checksumtext():
 
 
 def test_utterances_to_dict():
-
     who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster(None)
     assert who_sequences == []
 
@@ -62,33 +61,28 @@ def test_utterances_to_dict():
 
 
 def test_utterances_who_sequences(utterances: list[interface.Utterance]):
-
     data = interface.UtteranceHelper.to_dict(utterances)
     assert data == UTTERANCES_DICTS
 
 
 def test_utterances_to_csv(utterances: list[interface.Utterance]):
-
     data: str = interface.UtteranceHelper.to_csv(utterances)
     loaded_utterances = interface.UtteranceHelper.from_csv(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
 def test_utterances_to_json(utterances: list[interface.Utterance]):
-
     data: str = interface.UtteranceHelper.to_json(utterances)
     loaded_utterances = interface.UtteranceHelper.from_json(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
 def test_utterances_to_pandas(utterances: list[interface.Utterance]):
-
     data: pd.DataFrame = interface.UtteranceHelper.to_dataframe(utterances)
     assert data.reset_index().to_dict(orient='records') == UTTERANCES_DICTS
 
 
 def test_protocol_create(utterances: list[interface.Utterance]):
-
     protocol: interface.Protocol = interface.Protocol(
         date="1958", name="prot-1958-fake", utterances=utterances, speaker_notes={}
     )

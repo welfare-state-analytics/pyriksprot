@@ -56,7 +56,6 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
 
 def test_to_csv():
-
     tagged_documents: list[tag.TaggedDocument] = [
         {
             'lemma': ['hej', '!', 'detta', 'vara', 'en', 'test', '!'],

@@ -72,7 +72,6 @@ class DatabaseHelper:
         return self
 
     def reset(self, tag: str, force: bool) -> DatabaseHelper:
-
         ensure_path(self.filename)
         reset_file(self.filename, force=force)
 
@@ -100,7 +99,6 @@ class DatabaseHelper:
         return self
 
     def load_base_tables(self, configs: cfg.MetadataTableConfigs, folder: str) -> DatabaseHelper:
-
         tag: str = self.get_tag()
 
         with self:
@@ -127,7 +125,6 @@ class DatabaseHelper:
         filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths()
 
         with self:
-
             for filename in filenames:
                 logger.info(f"loading script: {os.path.split(filename)[1]}")
                 with open(filename, "r", encoding="utf-8") as fp:
@@ -167,7 +164,6 @@ class CorpusIndexFactory:
         self.data: dict[str, pd.DataFrame]
 
     def generate(self, corpus_folder: str, target_folder: str = None) -> CorpusIndexFactory:
-
         logger.info("Generating utterance, protocol and speaker notes indices.")
         logger.info(f"  source: {corpus_folder}")
         logger.info(f"  target: {target_folder}")
@@ -177,7 +173,6 @@ class CorpusIndexFactory:
         return self.collect(filenames).store(target_folder)
 
     def collect(self, filenames) -> CorpusIndexFactory:
-
         utterance_data: list[tuple] = []
         protocol_data: list[tuple[int, str]] = []
         speaker_notes: dict[str, str] = {}
@@ -204,9 +199,7 @@ class CorpusIndexFactory:
         return self
 
     def store(self, target_folder: str) -> CorpusIndexFactory:
-
         if target_folder:
-
             os.makedirs(target_folder, exist_ok=True)
 
             for tablename, df in self.data.items():
