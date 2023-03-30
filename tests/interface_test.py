@@ -12,7 +12,7 @@ import pytest
 from pyriksprot import interface, to_speech
 from pyriksprot.corpus import tagged as tagged_corpus
 
-from .utility import TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_utterances
+from .utility import TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_sample_utterances
 
 # pylint: disable=redefined-outer-name
 
@@ -21,7 +21,7 @@ jj = os.path.join
 
 @pytest.fixture(scope='module')
 def utterances() -> list[interface.Utterance]:
-    return create_utterances()
+    return create_sample_utterances()
 
 
 def test_utterance_text():
@@ -109,7 +109,7 @@ def test_protocol_create(utterances: list[interface.Utterance]):
 
 def test_protocol_preprocess():
     """Modifies utterances:"""
-    utterances: list[interface.Utterance] = create_utterances()
+    utterances: list[interface.Utterance] = create_sample_utterances()
 
     protocol: interface.Protocol = interface.Protocol(
         date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}
