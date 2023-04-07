@@ -18,10 +18,10 @@ class MergeStrategyType(str, Enum):
     who = 'who'
     who_sequence = 'who_sequence'
     chain = 'chain'
+    chain_consecutive_unknowns = 'chain_consecutive_unknowns'
     who_speaker_note_id_sequence = 'who_speaker_note_id_sequence'
     speaker_note_id_sequence = 'speaker_note_id_sequence'
     undefined = 'undefined'
-
 
 def to_speeches(
     *, protocol: Protocol, merge_strategy: MergeStrategyType | Type[IMergeStrategy], skip_size: int = 1
@@ -96,12 +96,19 @@ class MergeByWhoSpeakerNoteIdSequence(IMergeStrategy):
 
 
 class MergeByChain(IMergeStrategy):
+    def __init__(self, merge_consecutive_unknowns: bool = False):
+        self.merge_consecutive_unknowns = merge_consecutive_unknowns
+
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
-        groups: list[list[Utterance]] = MergeByChain.group_utterances_by_chain(utterances)
+        groups: list[list[Utterance]] = MergeByChain.group_utterances_by_chain(
+            utterances, self.merge_consecutive_unknowns
+        )
         return groups
 
     @staticmethod
-    def group_utterances_by_chain(utterances: list[Utterance]) -> list[list[Utterance]]:
+    def group_utterances_by_chain(
+        utterances: list[Utterance], merge_consecutive_unknowns: bool
+    ) -> list[list[Utterance]]:
         """Split utterances based on prev/next pointers. Return list of lists."""
         speeches: list[list[Utterance]] = []
         speech: list[Utterance] = []
@@ -133,6 +140,11 @@ class MergeByChain(IMergeStrategy):
                 else not bool(speech) and bool(u.prev_id)
             )
 
+            if not start_of_speech:
+                if is_unknown_continuation:
+                    if not merge_consecutive_unknowns:
+                        start_of_speech = True
+
             if start_of_speech:
                 if bool(u.prev_id) and not bool(speech):
                     logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
@@ -153,6 +165,11 @@ class MergeByChain(IMergeStrategy):
         return speeches
 
 
+class MergeByChainAndConsecutiveUnknowns(MergeByChain):
+    def __init__(self):
+        super().__init__(True)
+
+
 class UndefinedMerge(IMergeStrategy):
     def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         raise ValueError("undefined merge strategy encountered")
@@ -167,7 +184,8 @@ class MergerFactory:
         'who_sequence': MergeByWhoSequence(),
         'who_speaker_note_id_sequence': MergeByWhoSpeakerNoteIdSequence(),
         'speaker_note_id_sequence': MergeBySpeakerNoteIdSequence(),
-        'chain': MergeByChain(),
+        'chain': MergeByChain(False),
+        'chain_consecutive_unknowns': MergeByChain(True),
         'undefined': UndefinedMerge(),
     }
 
