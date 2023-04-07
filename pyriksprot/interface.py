@@ -90,47 +90,6 @@ class IDispatchItem(abc.ABC):
         ...
 
 
-# class IUtterance(abc.ABC):
-
-#     delimiter: str
-#     u_id: str
-#     speaker_note_id: str
-#     who: str
-#     prev_id: str
-#     next_id: str
-#     paragraphs: Union[list[str], str]
-#     annotation: Optional[str]
-#     page_number: Optional[str]
-
-#     @abc.abstractmethod
-#     @property
-#     def is_unknown(self) -> bool:
-#         ...
-
-#     @abc.abstractmethod
-#     @property
-#     def document_name(self) -> str:
-#         ...
-
-#     @abc.abstractmethod
-#     @property
-#     def tagged_text(self) -> str:
-#         ...
-
-#     @abc.abstractmethod
-#     @property
-#     def text(self) -> str:
-#         ...
-
-#     @abc.abstractmethod
-#     def checksum(self) -> str:
-#         ...
-
-#     @abc.abstractmethod
-#     def to_str(self, what: ContentType) -> str:
-#         ...
-
-
 class IProtocol(abc.ABC):
     date: str
     name: str
@@ -158,6 +117,15 @@ class IProtocol(abc.ABC):
         ...
 
 
+@dataclass
+class SpeakerNote:
+    speaker_note_id: str
+    speaker_note: str
+
+
+MISSING_SPEAKER_NOTE: SpeakerNote = SpeakerNote(MISSING_SPEAKER_NOTE_ID, "")
+
+
 class Utterance:
     """Represents an utterance in the ParlaClarin XML file"""
 
@@ -167,21 +135,15 @@ class Utterance:
         self,
         *,
         u_id: str,
-        speaker_note_id: str,
         who: str,
         prev_id: str = None,
         next_id: str = None,
         paragraphs: Union[list[str], str] = None,
         annotation: Optional[str] = None,
-        page_number: Optional[str] = '',
+        page_number: Optional[int] = 0,
+        speaker_note_id: str = MISSING_SPEAKER_NOTE.speaker_note_id,
         **_,
     ):
-        if not speaker_note_id:
-            speaker_note_id = MISSING_SPEAKER_NOTE_ID
-            # FIXME #15 Exists utterances in data not preceeded by a speakers's intro note
-            # logger.warning(f"utterance {u_id}: empty speaker_note_id")
-            # raise ValueError(f"utterance {u_id}: empty speaker_note_id not allowed")
-
         self.u_id: str = u_id
         self.who: str = who
         self.prev_id: str = prev_id if isinstance(prev_id, str) else None
@@ -190,10 +152,8 @@ class Utterance:
             [] if not paragraphs else paragraphs if isinstance(paragraphs, list) else paragraphs.split(PARAGRAPH_MARKER)
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
-        self.page_number: Optional[str] = page_number if isinstance(page_number, str) else ''
-        self.speaker_note_id: Optional[str] = (
-            speaker_note_id if isinstance(speaker_note_id, str) else MISSING_SPEAKER_NOTE_ID
-        )
+        self.page_number: Optional[int] = page_number if isinstance(page_number, int) else None
+        self.speaker_note_id: str = speaker_note_id
 
     @property
     def is_unknown(self) -> bool:
@@ -214,10 +174,13 @@ class Utterance:
 
     def checksum(self) -> str:
         """Compute checksum of utterance text."""
-        return hashlib.sha1(self.text.encode('utf-8')).hexdigest()[:16]
+        return UtteranceHelper.compute_checksum(self.text)
 
     def to_str(self, what: ContentType) -> str:
         return self.tagged_text if what == ContentType.TaggedFrame else self.text
+
+    def to_dict(self) -> dict:
+        return UtteranceHelper.to_dict(self)
 
 
 class UtteranceHelper:
@@ -229,22 +192,39 @@ class UtteranceHelper:
     )
 
     @staticmethod
-    def to_dict(utterances: list[Utterance]) -> list[Mapping[str, Any]]:
+    def compute_paragraph_checksum(text: str | list[str]) -> str:
+        """Compute checksum of given text."""
+        if isinstance(text, str) and PARAGRAPH_MARKER in text:
+            text = text.split(PARAGRAPH_MARKER)
+
+        if isinstance(text, list):
+            text = Utterance.delimiter.join(p for p in text if p != '').strip()
+
+        return UtteranceHelper.compute_checksum(text or "")
+
+    @staticmethod
+    def compute_checksum(text: str) -> str:
+        """Compute checksum of given text."""
+        return hashlib.sha1(text.encode('utf-8')).hexdigest()[:16]
+
+    @staticmethod
+    def to_dict(u: Utterance) -> dict[str, Any]:
+        return {
+            'u_id': u.u_id,
+            'who': u.who,
+            'speaker_note_id': u.speaker_note_id,
+            'prev_id': u.prev_id,
+            'next_id': u.next_id,
+            'annotation': u.tagged_text,
+            'paragraphs': PARAGRAPH_MARKER.join(u.paragraphs),
+            'page_number': u.page_number,
+            'checksum': u.checksum(),
+        }
+
+    @staticmethod
+    def to_dicts(utterances: list[Utterance]) -> list[Mapping[str, Any]]:
         """Convert list of utterances to a list of dicts. Return the list."""
-        return [
-            {
-                'u_id': u.u_id,
-                'who': u.who,
-                'speaker_note_id': u.speaker_note_id,
-                'prev_id': u.prev_id,
-                'next_id': u.next_id,
-                'annotation': u.tagged_text,
-                'paragraphs': PARAGRAPH_MARKER.join(u.paragraphs),
-                'page_number': u.page_number or '',
-                'checksum': u.checksum(),
-            }
-            for u in utterances
-        ]
+        return [UtteranceHelper.to_dict(u) for u in utterances]
 
     @staticmethod
     def to_dataframe(utterances: Union[StringIO, str, list[Utterance]]) -> pd.DataFrame:
@@ -257,7 +237,7 @@ class UtteranceHelper:
             )
             df.drop(columns='checksum')
         else:
-            df: pd.DataFrame = pd.DataFrame(UtteranceHelper.to_dict(utterances)).set_index('u_id')
+            df: pd.DataFrame = pd.DataFrame(UtteranceHelper.to_dicts(utterances)).set_index('u_id')
         return df
 
     @staticmethod
@@ -324,7 +304,7 @@ class UtteranceMixIn:
 
     def to_dict(self) -> list[Mapping[str, Any]]:
         """Convert utterances to list of dict."""
-        return UtteranceHelper.to_dict(self.utterances)
+        return UtteranceHelper.to_dicts(self.utterances)
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert utterances to dataframe"""
@@ -365,7 +345,7 @@ class Speech(UtteranceMixIn):
     who: str
     speech_date: str
     speech_index: int
-    page_number: str
+    page_number: int
 
     utterances: list[Utterance] = field(default_factory=list)
 
@@ -441,7 +421,5 @@ class Protocol(UtteranceMixIn, IProtocol):
 
 class IProtocolParser(abc.ABC):
     @staticmethod
-    def to_protocol(
-        filename: str, segment_skip_size: int, ignore_tags: set[str]  # pylint: disable=unused-argument
-    ) -> IProtocol:
+    def parse(filename: str, ignore_tags: set[str]) -> IProtocol:  # pylint: disable=unused-argument
         ...

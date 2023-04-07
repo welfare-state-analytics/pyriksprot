@@ -178,7 +178,7 @@ class CorpusIndexFactory:
         speaker_notes: dict[str, str] = {}
 
         for document_id, filename in tqdm(enumerate(filenames)):
-            protocol: IProtocol = self.parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
+            protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
             protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
             for u in protocol.utterances:
                 utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_note_id]))

@@ -27,7 +27,7 @@ class ProtocolSegment(IDispatchItem):
     who: str
     id: str
     data: str
-    page_number: str
+    page_number: int
     year: int
     u_id: str
     n_utterances: int = 0
@@ -107,7 +107,7 @@ def to_protocol_segment(
             id=protocol.name,
             u_id=None,
             data=protocol.text,
-            page_number='0',
+            page_number=0,
             n_tokens=0,
             n_utterances=len(protocol.utterances),
             speaker_info=None,

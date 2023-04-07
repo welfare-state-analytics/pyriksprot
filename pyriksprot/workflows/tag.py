@@ -92,7 +92,6 @@ def tag_protocol_xml(
     input_filename: str,
     output_filename: str,
     tagger: ITagger,
-    segment_skip_size: int = 5,
     force: bool = False,
     storage_format: interface.StorageFormat = interface.StorageFormat.JSON,
 ) -> None:
@@ -107,9 +106,7 @@ def tag_protocol_xml(
     try:
         ensure_path(output_filename)
 
-        protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
-            input_filename, segment_skip_size=segment_skip_size
-        )
+        protocol: interface.Protocol = parse.ProtocolMapper.parse(input_filename)
 
         if not protocol.has_text:
             unlink(output_filename)
