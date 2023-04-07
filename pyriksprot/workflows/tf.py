@@ -72,8 +72,8 @@ def compute_term_frequencies(
     multiproc_keep_order: bool = False,
     progress: bool = True,
 ) -> TermFrequencyCounter:
-    """Compute (corpus) term frequency for documents in `source `.
-
+    """Compute (corpus) term frequency for documents in  `source `.
+    Source is an ParlaClarin XML file so TF is never counted on lemmatized text.
     Args:
         source (Union[str, List[str]]): ParlaClarin filename(s), folder, filename patterna
         filename (str): [description]
