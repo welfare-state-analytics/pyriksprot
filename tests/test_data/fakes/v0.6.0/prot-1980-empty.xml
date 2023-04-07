@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8'?>
+<teiCorpus xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Riksdagens protocols 1980</title>
+            </titleStmt>
+            <editionStmt>
+                <edition>0.1.0</edition>
+            </editionStmt>
+            <publicationStmt>
+                <authority>National Library of Sweden and the WESTAC project</authority>
+            </publicationStmt>
+            <sourceDesc>
+                <bibl>
+                    <title>Riksdagens protocols 1980</title>
+                </bibl>
+            </sourceDesc>
+        </fileDesc>
+        <encodingDesc>
+            <editorialDecl>
+                <correction>
+                </correction>
+            </editorialDecl>
+        </encodingDesc>
+    </teiHeader>
+    <TEI>
+        <teiHeader>
+            <fileDesc>
+                <titleStmt>
+                    <title>Protokoll</title>
+                </titleStmt>
+                <publicationStmt>
+                    <authority>N/A</authority>
+                </publicationStmt>
+                <sourceDesc>
+                    <bibl>
+                        <title>Protokoll</title>
+                    </bibl>
+                </sourceDesc>
+            </fileDesc>
+            <encodingDesc>
+                <editorialDecl>
+                    <correction>
+                    </correction>
+                </editorialDecl>
+            </encodingDesc>
+        </teiHeader>
+        <text>
+            <front>
+                <div type="preface">
+                    <head>prot-1980-empty</head>
+                    <docDate when="1980">1980</docDate>
+                </div>
+            </front>
+            <body>
+                <div type="commentSection">
+                    <pb n="-1" facs="https://noop.se" />
+                    <pb n="0" facs="https://noop.se" />
+                    <note xml:id="n1" type="date">
+                        2 Nr 32. Torsdagen den 28 juni 1980 fm.
+                    </note>
+                    <note xml:id="n2">Non nisi eiusmod.</note>
+                    <note xml:id="n3">Excepteur laboris ad aute.</note>
+                    <note xml:id="n4">Aute magna et ipsum.</note>
+                </div>
+            </body>
+        </text>
+    </TEI>
+</teiCorpus>

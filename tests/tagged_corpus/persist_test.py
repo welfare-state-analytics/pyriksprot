@@ -22,7 +22,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 prev_id=None,
                 next_id='i-2',
                 paragraphs=['Hej! Detta är en mening.'],
-                tagged_text="token\tpos\tlemma\nA\ta\tNN",
+                annotation="token\tpos\tlemma\nA\ta\tNN",
                 delimiter='\n',
             )
         ],

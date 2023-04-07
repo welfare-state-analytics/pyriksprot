@@ -12,7 +12,7 @@ from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 @pytest.mark.skip(reason="deprecated")
 def test_convert_to_xml():
     template_name: str = "speeches.xml.jinja"
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(
         jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
     )
 
@@ -28,20 +28,20 @@ def test_convert_to_xml():
 <protocol name="prot-1958-fake" date="1958">
     <speech who="A" speech_id="i-1" speech_date="1958" speech_index="1">
 Hej! Detta är en mening.
-Jag heter Ove.
+Jag heter Olle.
 Vad heter du?
     </speech>
     <speech who="B" speech_id="i-3" speech_date="1958" speech_index="2">
-Jag heter Adam.
+Jag heter Kalle.
     </speech>
     <speech who="B" speech_id="i-4" speech_date="1958" speech_index="3">
-Ove är dum.
+Olle är snäll.
     </speech>
 </protocol>"""
 
     assert result == expected
 
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(
         jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
     )
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='chain')
@@ -54,17 +54,17 @@ Ove är dum.
 Hej! Detta är en mening.
     </speech>
     <speech who="A" speech_id="c02" speech_date="1958" speech_index="2">
-Jag heter Ove.
+Jag heter Olle.
 Vad heter du?
     </speech>
     <speech who="B" speech_id="c03" speech_date="1958" speech_index="3">
-Jag heter Adam.
-Ove är dum.
+Jag heter Kalle.
+Olle är snäll.
     </speech>
 </protocol>"""
     assert result == expected
 
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(
         jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"),
     )
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='who')
@@ -75,12 +75,12 @@ Ove är dum.
 <protocol name="prot-1958-fake" date="1958">
     <speech who="A" speech_id="A" speech_date="1958" speech_index="1">
 Hej! Detta är en mening.
-Jag heter Ove.
+Jag heter Olle.
 Vad heter du?
     </speech>
     <speech who="B" speech_id="B" speech_date="1958" speech_index="2">
-Jag heter Adam.
-Ove är dum.
+Jag heter Kalle.
+Olle är snäll.
     </speech>
 </protocol>"""
     assert result == expected

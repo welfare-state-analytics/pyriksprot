@@ -1,98 +1,89 @@
 from __future__ import annotations
 
-from collections import defaultdict
+import os
+from glob import glob
+from typing import Any
 
+from pyriksprot import interface
 from pyriksprot.corpus import parlaclarin
+from pyriksprot.corpus.parlaclarin.parse import ProtocolMapper
+from pyriksprot.foss import untangle
+from pyriksprot.utility import strip_path_and_extension
 
 
-def _load_protocol(xml_protocol: parlaclarin.XmlUntangleProtocol) -> parlaclarin.XmlUntangleProtocol:
-    return parlaclarin.XmlUntangleProtocol(data=xml_protocol) if isinstance(xml_protocol, str) else xml_protocol
+def _load_protocol(data: str | Any) -> interface.Protocol:
+    return parlaclarin.ProtocolMapper.parse(data)
 
 
-def log_utterance_sequence(xml_protocol: str | parlaclarin.XmlUntangleProtocol, filename: str) -> None:
-
+def get_utterance_sequence(filename: str) -> list[tuple]:
     SPEAKER_NOTE_ID_MISSING: str = "missing"
 
-    xml_protocol = _load_protocol(xml_protocol)
+    xml_protocol = untangle.parse(filename)
 
     if xml_protocol.get_content_root() is None:
-        return
+        return []
 
-    log_data: list[tuple] = []
+    data: list[tuple] = []
 
     speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
     previous_who: str = None
     page_id: int = -1
 
-    for child in xml_protocol.get_content_root().children:
-
-        if child.name == "pb":
+    for element in xml_protocol.get_content_elements():
+        if element.name == "pb":
             page_id += 1
 
-        if child.name == "note":
-            if child['type'] == "speaker":
-                speaker_note_id = child["xml:id"]
+        if element.name == "note":
+            if element['type'] == "speaker":
+                speaker_note_id = element["xml:id"]
                 previous_who: str = None
-                log_data.append((str(page_id), 'speaker-note', speaker_note_id, "", ""))
+                data.append(
+                    (
+                        str(page_id),
+                        'speaker-note',
+                        speaker_note_id,
+                        "",
+                        "",
+                        "",
+                        "",
+                    )
+                )
 
-        if child.name == 'u':
-
-            who: str = child["who"]
+        if element.name == 'u':
+            who: str = element["who"]
 
             if previous_who and previous_who != who:
                 speaker_note_id = SPEAKER_NOTE_ID_MISSING
 
             previous_who: str = who
 
-            log_data.append((str(page_id), 'utterance', child["xml:id"], speaker_note_id, child["who"]))
+            data.append(
+                (
+                    str(page_id),
+                    'utterance',
+                    element["xml:id"],
+                    element["prev"] or "",
+                    element["next"] or "",
+                    speaker_note_id,
+                    element["who"],
+                )
+            )
 
-    with open(filename, "w", encoding="utf-8") as fp:
-        fp.write("page_id;tag;id;speaker_id;who\n")
-        fp.write('\n'.join(";".join(x) for x in log_data))
-
-
-def count_speaker_notes(xml_protocol: str | parlaclarin.XmlUntangleProtocol) -> dict[str, int]:
-
-    SPEAKER_NOTE_ID_MISSING: str = "missing"
-
-    counter: defaultdict = defaultdict()
-    counter.default_factory = int
-
-    xml_protocol = _load_protocol(xml_protocol)
-
-    if xml_protocol.get_content_root() is None:
-        return {}
-
-    speaker_note_id: str = SPEAKER_NOTE_ID_MISSING
-    previous_who: str = None
-
-    for child in xml_protocol.get_content_root().children:
-
-        if child.name == "note":
-            if child['type'] == "speaker":
-                speaker_note_id = child["xml:id"]
-                counter[speaker_note_id] = 0
-                previous_who: str = None
-
-        elif child.name == 'u':
-
-            who: str = child["who"]
-
-            if previous_who and previous_who != who:
-                speaker_note_id = SPEAKER_NOTE_ID_MISSING
-
-            counter[speaker_note_id] += 1
-
-            previous_who: str = who
-
-    return dict(counter)
+    return data
 
 
-def count_utterances(xml_protocol: str | parlaclarin.XmlUntangleProtocol) -> int:
+def log_utterance_sequences(source: str, target: str) -> list[tuple]:
+    filenames = [source] if os.path.isfile(source) else glob(source, recursive=True)
+    with open(target, mode="w", encoding="utf8") as fp:
+        fp.write("document;page_id;tag;id;prev,next,speaker_note_id;who\n")
+        for filename in filenames:
+            data = get_utterance_sequence(filename)
+            fp.write(strip_path_and_extension(filename) + ('\n'.join(";".join(x) for x in data)))
 
-    xml_protocol = _load_protocol(xml_protocol)
 
-    if not xml_protocol.get_content_root():
-        return 0
-
-    return len([tag for tag in xml_protocol.get_content_root().children if tag.name == 'u'])
+def count_utterances(path: str) -> int:
+    data: untangle.Element = untangle.parse(path)
+    count: int = 0
+    for _ in (tag for tag in ProtocolMapper().get_content_elements(data) if tag.name == 'u'):
+        count += 1
+    return count

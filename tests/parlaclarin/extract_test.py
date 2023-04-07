@@ -29,7 +29,7 @@ def test_create_grouping_hashcoder():
         id=u_id,
         u_id=u_id,
         name=u_id,
-        page_number="0",
+        page_number=0,
         data="hej",
         who=person_id,
         year=1955,

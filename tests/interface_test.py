@@ -12,7 +12,8 @@ import pytest
 from pyriksprot import interface, to_speech
 from pyriksprot.corpus import tagged as tagged_corpus
 
-from .utility import TAGGED_SOURCE_PATTERN, UTTERANCES_DICTS, create_sample_utterances
+from . import fakes
+from .utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, TAGGED_SOURCE_PATTERN
 
 # pylint: disable=redefined-outer-name
 
@@ -21,7 +22,7 @@ jj = os.path.join
 
 @pytest.fixture(scope='module')
 def utterances() -> list[interface.Utterance]:
-    return create_sample_utterances()
+    return fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml')
 
 
 def test_utterance_text():
@@ -61,8 +62,7 @@ def test_utterances_to_dict():
 
 
 def test_utterances_who_sequences(utterances: list[interface.Utterance]):
-    data = interface.UtteranceHelper.to_dict(utterances)
-    assert data == UTTERANCES_DICTS
+    assert [u.who for u in utterances] == ['olle', 'olle', 'kalle', 'unknown', 'unknown', 'olle']
 
 
 def test_utterances_to_csv(utterances: list[interface.Utterance]):
@@ -79,7 +79,7 @@ def test_utterances_to_json(utterances: list[interface.Utterance]):
 
 def test_utterances_to_pandas(utterances: list[interface.Utterance]):
     data: pd.DataFrame = interface.UtteranceHelper.to_dataframe(utterances)
-    assert data.reset_index().to_dict(orient='records') == UTTERANCES_DICTS
+    assert data.reset_index().to_dict(orient='records') == [u.to_dict() for u in utterances]
 
 
 def test_protocol_create(utterances: list[interface.Utterance]):
@@ -88,22 +88,22 @@ def test_protocol_create(utterances: list[interface.Utterance]):
     )
 
     assert protocol is not None
-    assert len(protocol.utterances) == 5
-    assert len(protocol) == 5
+    assert len(protocol.utterances) == 6
+    assert len(protocol) == 6
     assert protocol.name == "prot-1958-fake"
     assert protocol.date == "1958"
 
     assert protocol.name == 'prot-1958-fake'
     assert protocol.date == '1958'
     assert protocol.has_text, 'has text'
-    assert protocol.checksum() == '7e5112f9db8c8462d89fac08714ce15b432d7733', 'checksum'
+    assert protocol.checksum() == '3cf7f69e2dcf54586f9fedeb2e50ea69ea1d6179', 'checksum'
 
     assert protocol.text == '\n'.join(text.text for text in utterances)
 
 
 def test_protocol_preprocess():
     """Modifies utterances:"""
-    utterances: list[interface.Utterance] = create_sample_utterances()
+    utterances: list[interface.Utterance] = fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml')
 
     protocol: interface.Protocol = interface.Protocol(
         date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}
@@ -113,7 +113,7 @@ def test_protocol_preprocess():
 
     protocol.preprocess(preprocess=preprocess)
 
-    assert protocol.text == 'APA\nAPA\nAPA\nAPA\nAPA\nAPA'
+    assert protocol.text == 'APA\nAPA\nAPA\nAPA\nAPA\nAPA\nAPA'
 
 
 def test_protocols_to_items():

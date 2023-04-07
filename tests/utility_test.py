@@ -1,15 +1,51 @@
 import os
 from datetime import date
 from pathlib import Path
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import utility as pu
+from pyriksprot.corpus.iterate import ProtocolSegment
+from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
+
+from . import fakes
 
 jj = os.path.join
+
+
+@pytest.mark.parametrize(
+    'document_name,',
+    [
+        'prot-1958-fake',
+        'prot-1960-fake',
+        'prot-1980-empty',
+    ],
+)
+def test_load_fakes(document_name: str):
+    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
+
+    utterances: list[interface.Utterance] = fakes.load_sample_utterances(filename)
+
+    tags: pd.DataFrame = fakes.load_sample_tagged_dataframe(filename)
+
+    assert len(utterances) == 0 or len(tags) > 0
+
+    u_segments: Iterable[ProtocolSegment] = fakes.load_segment_stream(filename, interface.SegmentLevel.Utterance)
+    assert len(list(u_segments)) == len(utterances)
+
+    p_segment: Iterable[ProtocolSegment] = fakes.load_segment_stream(filename, interface.SegmentLevel.Protocol)
+    assert len(utterances) == 0 or len(list(p_segment)) == 1
+
+    who_segments: Iterable[ProtocolSegment] = fakes.load_segment_stream(filename, interface.SegmentLevel.Who)
+    assert len(utterances) == 0 or len(list(who_segments)) > 0
+
+    speeches: Iterable[ProtocolSegment] = fakes.load_segment_stream(filename, interface.SegmentLevel.Speech)
+    assert len(utterances) == 0 or len(list(speeches)) > 0
 
 
 def test_temporary_file():

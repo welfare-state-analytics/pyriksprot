@@ -1,0 +1,7 @@
+u_id;who;prev_id;next_id;paragraphs;page_number;speaker_note_id
+u-1;olle;;u-2;"Hej! Detta är en mening.";0;s-1
+u-2;olle;u-1;;"Jag heter Olle.@#@Vad heter du?";0;s-1
+u-3;kalle;;;"Jag heter Kalle.";0;s-2
+u-4;unknown;;;"Olle är snäll.";0;missing
+u-5;unknown;;;"Han är snäll!";0;missing
+u-6;olle;;;"Nej, Kalle är dum.";1;s-3

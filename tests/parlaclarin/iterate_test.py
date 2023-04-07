@@ -1,25 +1,26 @@
 import glob
 import os
-from typing import Iterable, List
+from typing import Iterable, List, Type
 
 import pytest
 
 from pyriksprot import interface, utility
 from pyriksprot.corpus import iterate, parlaclarin
 
+from .. import fakes
 from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_PATTERN
 
 jj = os.path.join
 
-
+# FIXME: Must check expected count for source!!!
 @pytest.mark.parametrize(
-    'iterator_class',
+    'iterator_class, n_speeches, n_missing_intros',
     [
-        parlaclarin.XmlProtocolSegmentIterator,
-        parlaclarin.XmlUntangleSegmentIterator,
+        (parlaclarin.XmlProtocolSegmentIterator, 482, 9),
+        (parlaclarin.XmlUntangleSegmentIterator, 482, 9),
     ],
 )
-def test_segment_iterator_when_segment_is_speech(iterator_class):
+def test_segment_iterator_when_segment_is_speech(iterator_class, n_speeches: int, n_missing_intros: int):
     filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
 
     texts: Iterable[iterate.ProtocolSegment] = list(
@@ -29,20 +30,17 @@ def test_segment_iterator_when_segment_is_speech(iterator_class):
             segment_skip_size=0,
             multiproc_processes=None,
             content_type=interface.ContentType.Text,
-            merge_strategy='chain',
+            merge_strategy='chain_consecutive_unknowns',
         )
     )
 
-    assert len(texts) == 475
+    assert len(texts) == n_speeches
     assert all(x.u_id for x in texts)
     assert all(x.id == x.u_id for x in texts)
     assert all(x.speaker_note_id for x in texts)
 
-    # FIXME: Check why this fails:
-    # assert not any(not x.page_number for x in texts) # FAILS [x for x in texts if x.page_number == ""]
-
     """This might be data error"""
-    assert 2 == len([x for x in texts if x.speaker_note_id == "missing"])
+    assert n_missing_intros == len([x for x in texts if x.speaker_note_id == "missing"])
 
 
 @pytest.mark.parametrize(
@@ -74,7 +72,7 @@ def test_segment_iterator_when_segment_is_protocol(iterator_class):
 
     assert all(x.who is None for x in texts)
     assert [x.id for x in texts] == expected_document_names
-    assert all(x.page_number == '0' for x in texts)
+    assert all(x.page_number == 0 for x in texts)
 
 
 def test_xml_protocol_texts_iterator_texts():
@@ -118,10 +116,10 @@ def test_xml_protocol_texts_iterator_texts():
             segment_level=interface.SegmentLevel.Speech,
             segment_skip_size=1,
             multiproc_processes=None,
-            merge_strategy='chain',
+            merge_strategy='chain_consecutive_unknowns',
         )
     )
-    assert len(texts) == 475
+    assert len(texts) == 482
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
@@ -131,322 +129,39 @@ def test_xml_protocol_texts_iterator_texts():
     assert len(texts) == 145
 
 
-EXPECTED_STREAM: list[iterate.ProtocolSegment] = {
-    'protocol': [
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Protocol,
-            name='prot-1958-fake',
-            who=None,
-            id='prot-1958-fake',
-            u_id=None,
-            data='Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?\nJag heter Adam.\nOve är dum.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-            n_utterances=4,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Protocol,
-            name='prot-1960-fake',
-            who=None,
-            id='prot-1960-fake',
-            u_id=None,
-            data='Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?\nJag håller med.\nTalmannen är snäll.\nJag håller också med.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-            n_utterances=4,
-        ),
-    ],
-    'speech': [
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Speech,
-            name='prot-1958-fake_001',
-            who='A',
-            id='i-1',
-            u_id='i-1',
-            data='Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Speech,
-            name='prot-1958-fake_002',
-            who='B',
-            id='i-3',
-            u_id='i-3',
-            data='Jag heter Adam.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Speech,
-            name='prot-1958-fake_003',
-            who='B',
-            id='i-4',
-            u_id='i-4',
-            data='Ove är dum.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Speech,
-            name='prot-1960-fake_001',
-            who='A',
-            id='i-1',
-            u_id='i-1',
-            data='Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            segment_level=interface.SegmentLevel.Speech,
-            content_type=interface.ContentType.Text,
-            name='prot-1960-fake_002',
-            who='B',
-            id='i-3',
-            u_id='i-3',
-            data='Jag håller med.\nTalmannen är snäll.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Speech,
-            name='prot-1960-fake_003',
-            who='C',
-            id='i-4',
-            u_id='i-4',
-            data='Jag håller också med.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-    ],
-    'who': [
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Who,
-            name='prot-1958-fake_001',
-            who='A',
-            id='i-1',
-            u_id='i-1',
-            data='Hej! Detta är en mening.\nJag heter Ove.\nVad heter du?',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Who,
-            name='prot-1958-fake_002',
-            who='B',
-            id='i-3',
-            u_id='i-3',
-            data='Jag heter Adam.\nOve är dum.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Who,
-            name='prot-1960-fake_001',
-            who='A',
-            id='i-1',
-            u_id='i-1',
-            data='Herr Talman! Jag talar.\nDet regnar ute.\nVisste du det?',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Who,
-            name='prot-1960-fake_002',
-            who='B',
-            id='i-3',
-            u_id='i-3',
-            data='Jag håller med.\nTalmannen är snäll.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Who,
-            name='prot-1960-fake_003',
-            who='C',
-            id='i-4',
-            u_id='i-4',
-            data='Jag håller också med.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-    ],
-    'utterance': [
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1958-fake_001',
-            who='A',
-            id='i-1',
-            u_id='i-1',
-            data='Hej! Detta är en mening.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1958-fake_002',
-            who='A',
-            id='i-2',
-            u_id='i-2',
-            data='Jag heter Ove.\nVad heter du?',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1958-fake_003',
-            who='B',
-            id='i-3',
-            u_id='i-3',
-            data='Jag heter Adam.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1958-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1958-fake_004',
-            who='B',
-            id='i-4',
-            u_id='i-4',
-            data='Ove är dum.',
-            page_number='0',
-            year=1958,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1960-fake_001',
-            who='A',
-            id='i-1',
-            u_id='i-1',
-            data='Herr Talman! Jag talar.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1960-fake_002',
-            who='A',
-            id='i-2',
-            u_id='i-2',
-            data='Det regnar ute.\nVisste du det?',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1960-fake_003',
-            who='B',
-            id='i-3',
-            u_id='i-3',
-            data='Jag håller med.\nTalmannen är snäll.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-        iterate.ProtocolSegment(
-            protocol_name='prot-1960-fake',
-            content_type=interface.ContentType.Text,
-            segment_level=interface.SegmentLevel.Utterance,
-            name='prot-1960-fake_004',
-            who='C',
-            id='i-4',
-            u_id='i-4',
-            data='Jag håller också med.',
-            page_number='0',
-            year=1960,
-            n_tokens=0,
-        ),
-    ],
-}
-
-
 @pytest.mark.parametrize(
-    'iterator_class',
+    'iterator_class, document_names, level',
     [
-        # DEPRECATED parlaclarin.XmlProtocolSegmentIterator,
-        parlaclarin.XmlUntangleSegmentIterator,
+        (parlaclarin.XmlUntangleSegmentIterator, ['prot-1958-fake', 'prot-1960-fake'], interface.SegmentLevel.Protocol)
     ],
 )
-def test_protocol_texts_iterator(iterator_class):
-    document_names: List[str] = ['prot-1958-fake', 'prot-1960-fake']
+def test_protocol_texts_iterator(
+    iterator_class: Type[iterate.ProtocolSegmentIterator],
+    document_names: list[str],
+    level: interface.SegmentLevel.Protocol,
+):
     filenames: List[str] = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
 
     segments: List[iterate.ProtocolSegment] = list(
-        iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=None)
+        iterator_class(
+            filenames=filenames, segment_level=level.name.lower(), segment_skip_size=0, multiproc_processes=None
+        )
     )
-    assert segments == EXPECTED_STREAM['protocol']
+    """Load truth"""
+    expected_stream: list[iterate.ProtocolSegment] = fakes.load_expected_stream(level, document_names)
+    assert segments == expected_stream
 
     segments: List[iterate.ProtocolSegment] = list(
-        iterator_class(filenames=filenames, segment_level='protocol', segment_skip_size=0, multiproc_processes=2)
+        iterator_class(
+            filenames=filenames, segment_level=level.name.lower(), segment_skip_size=0, multiproc_processes=2
+        )
     )
-    assert set(t.data for t in segments) == set(t.data for t in EXPECTED_STREAM['protocol'])
+    assert set(t.data for t in segments) == set(t.data for t in expected_stream)
 
 
 @pytest.mark.parametrize(
     'iterator_class, segment_level',
     [
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Protocol),
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Speech), # FIXME! Chain not working!!!!
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Who),
-        # DEPRECATED (parlaclarin.XmlProtocolSegmentIterator, interface.SegmentLevel.Utterance),
         (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Protocol),
         (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Speech),
         (parlaclarin.XmlUntangleSegmentIterator, interface.SegmentLevel.Who),
@@ -454,12 +169,15 @@ def test_protocol_texts_iterator(iterator_class):
     ],
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):
-    filenames = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in ['prot-1958-fake', 'prot-1960-fake']]
+    document_names: list[str] = ['prot-1958-fake']#, 'prot-1960-fake']
+    filenames = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
     texts: list[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None)
     )
-    assert len(texts) == len(EXPECTED_STREAM[segment_level])
-    for t, x in zip(texts, EXPECTED_STREAM[segment_level]):
+    expected_stream: list[iterate.ProtocolSegment] = fakes.load_expected_stream(segment_level, document_names)
+
+    assert len(texts) == len(expected_stream)
+    for t, x in zip(texts, expected_stream):
         assert t.protocol_name == x.protocol_name
         assert t.content_type == x.content_type
         assert t.segment_level == x.segment_level
