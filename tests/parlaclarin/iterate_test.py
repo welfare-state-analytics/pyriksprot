@@ -12,6 +12,7 @@ from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_PAT
 
 jj = os.path.join
 
+
 # FIXME: Must check expected count for source!!!
 @pytest.mark.parametrize(
     'iterator_class, n_speeches, n_missing_intros',
@@ -131,9 +132,7 @@ def test_xml_protocol_texts_iterator_texts():
 
 @pytest.mark.parametrize(
     'iterator_class, document_names, level',
-    [
-        (parlaclarin.XmlUntangleSegmentIterator, ['prot-1958-fake', 'prot-1960-fake'], interface.SegmentLevel.Protocol)
-    ],
+    [(parlaclarin.XmlUntangleSegmentIterator, ['prot-1958-fake', 'prot-1960-fake'], interface.SegmentLevel.Protocol)],
 )
 def test_protocol_texts_iterator(
     iterator_class: Type[iterate.ProtocolSegmentIterator],
@@ -169,7 +168,7 @@ def test_protocol_texts_iterator(
     ],
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):
-    document_names: list[str] = ['prot-1958-fake']#, 'prot-1960-fake']
+    document_names: list[str] = ['prot-1958-fake']  # , 'prot-1960-fake']
     filenames = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
     texts: list[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None)

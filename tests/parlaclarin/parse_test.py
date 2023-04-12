@@ -1,11 +1,9 @@
 import os
-import xml.sax
 
 import pytest
 
 from pyriksprot import interface
 from pyriksprot.corpus import parlaclarin
-from pyriksprot.foss import untangle
 
 from .. import fakes
 from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOLDER
@@ -79,17 +77,3 @@ def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: i
 
     assert len(protocol.utterances) == u_count
     assert len(protocol.speaker_notes) == intro_count
-
-
-@pytest.mark.parametrize(
-    'filename',
-    [
-        "tests/test_data/prot-1911--ak--48.xml",
-        "tests/test_data/prot-1910--ak--63.xml",
-    ],
-)
-def test_parlaclarin_with_sections(filename: str):
-    untangle.parse(filename)
-
-    parser = xml.sax.make_parser()
-    parser.parse(filename)

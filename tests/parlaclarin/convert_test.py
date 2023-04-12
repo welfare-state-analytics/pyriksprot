@@ -26,15 +26,15 @@ def test_convert_to_xml():
 
     expected = """<?xml version="1.0" encoding="UTF-8"?>
 <protocol name="prot-1958-fake" date="1958">
-    <speech who="A" speech_id="i-1" speech_date="1958" speech_index="1">
+    <speech who="olle" speech_id="i-1" speech_date="1958" speech_index="1">
 Hej! Detta är en mening.
 Jag heter Olle.
 Vad heter du?
     </speech>
-    <speech who="B" speech_id="i-3" speech_date="1958" speech_index="2">
+    <speech who="kalle" speech_id="i-3" speech_date="1958" speech_index="2">
 Jag heter Kalle.
     </speech>
-    <speech who="B" speech_id="i-4" speech_date="1958" speech_index="3">
+    <speech who="kalle" speech_id="i-4" speech_date="1958" speech_index="3">
 Olle är snäll.
     </speech>
 </protocol>"""
@@ -50,14 +50,14 @@ Olle är snäll.
 
     expected = """<?xml version="1.0" encoding="UTF-8"?>
 <protocol name="prot-1958-fake" date="1958">
-    <speech who="A" speech_id="c01" speech_date="1958" speech_index="1">
+    <speech who="olle" speech_id="c01" speech_date="1958" speech_index="1">
 Hej! Detta är en mening.
     </speech>
-    <speech who="A" speech_id="c02" speech_date="1958" speech_index="2">
+    <speech who="olle" speech_id="c02" speech_date="1958" speech_index="2">
 Jag heter Olle.
 Vad heter du?
     </speech>
-    <speech who="B" speech_id="c03" speech_date="1958" speech_index="3">
+    <speech who="kalle" speech_id="c03" speech_date="1958" speech_index="3">
 Jag heter Kalle.
 Olle är snäll.
     </speech>
@@ -73,12 +73,12 @@ Olle är snäll.
 
     expected = """<?xml version="1.0" encoding="UTF-8"?>
 <protocol name="prot-1958-fake" date="1958">
-    <speech who="A" speech_id="A" speech_date="1958" speech_index="1">
+    <speech who="olle" speech_id="olle" speech_date="1958" speech_index="1">
 Hej! Detta är en mening.
 Jag heter Olle.
 Vad heter du?
     </speech>
-    <speech who="B" speech_id="B" speech_date="1958" speech_index="2">
+    <speech who="kalle" speech_id="kalle" speech_date="1958" speech_index="2">
 Jag heter Kalle.
 Olle är snäll.
     </speech>

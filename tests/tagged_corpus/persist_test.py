@@ -17,7 +17,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
         utterances=[
             interface.Utterance(
                 u_id='i-1',
-                who='A',
+                who='ove',
                 speaker_note_id='a1',
                 prev_id=None,
                 next_id='i-2',

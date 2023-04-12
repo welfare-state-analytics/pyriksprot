@@ -65,21 +65,21 @@
                 </div>
                 <div type="debateSection">
                     <note xml:id="s-1" type="speaker">
-                        Herr A:
+                        Herr Otto:
                     </note>
-                    <u who="A" xml:id="u-1" next="u-2">
+                    <u who="otto" xml:id="u-1" next="u-2">
                         <seg>Herr Talman! Jag talar.</seg>
                     </u>
                     <note xml:id="n-3">Excepteur nulla.</note>
-                    <u who="A" xml:id="u-2" prev="u-1">
+                    <u who="otto" xml:id="u-2" prev="u-1">
                         <seg>Det regnar ute.</seg>
                         <seg>Visste du det?</seg>
                     </u>
                     <note xml:id="n-4">Veniam eiusmod eu.</note>
                     <note xml:id="s-2" type="speaker">
-                        Herr A:
+                        Herr Otto:
                     </note>
-                    <u who="A" xml:id="u-3">
+                    <u who="otto" xml:id="u-3">
                         <seg>Jag är känd.</seg>
                     </u>
                     <note xml:id="s-3" type="speaker">
@@ -95,23 +95,23 @@
                     </u>
                     <note xml:id="n-6">Commodo dolore labore.</note>
                     <note xml:id="s-4" type="speaker">
-                        Herr B:
+                        Herr Ove:
                     </note>
                     <note xml:id="n-7">Exercitation officia.</note>
-                    <u who="B" xml:id="u-6">
+                    <u who="ove" xml:id="u-6">
                         <seg>Jag håller med.</seg>
                         <seg>Talmannen är snäll.</seg>
                     </u>
                     <note xml:id="s-5" type="speaker">
-                        Herr C:
+                        Fru Olga:
                     </note>
-                    <u who="C" xml:id="u-7">
+                    <u who="olga" xml:id="u-7">
                         <seg>Jag håller också med.</seg>
                     </u>
                     <note xml:id="s-6" type="speaker">
-                        Herr A:
+                        Herr Otto:
                     </note>
-                    <u who="A" xml:id="u-8">
+                    <u who="otto" xml:id="u-8">
                         <seg>Jag också!</seg>
                     </u>
                     </div>
