@@ -26,12 +26,12 @@ def utterances() -> list[interface.Utterance]:
 
 
 def test_utterance_text():
-    u: interface.Utterance = interface.Utterance(u_id="A", speaker_note_id="x", who="x", paragraphs=["X", "Y", "C"])
+    u: interface.Utterance = interface.Utterance(u_id="u", speaker_note_id="x", who="x", paragraphs=["X", "Y", "C"])
     assert u.text == '\n'.join(["X", "Y", "C"])
 
 
 def test_utterance_checksumtext():
-    u: interface.Utterance = interface.Utterance(u_id="A", speaker_note_id="x", who="x", paragraphs=["X", "Y", "C"])
+    u: interface.Utterance = interface.Utterance(u_id="u", speaker_note_id="x", who="x", paragraphs=["X", "Y", "C"])
     assert u.checksum() == '6060d006e0494206'
 
 
@@ -43,11 +43,11 @@ def test_utterances_to_dict():
     assert who_sequences == []
 
     utterances: list[interface.Utterance] = [
-        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xa1", who='A'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xa1", who='A'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xb1", who='B'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xb1", who='B'),
-        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xa2", who='A'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xa1", who='otto'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xa1", who='otto'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xb1", who='ove'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xb1", who='ove'),
+        interface.Utterance(u_id=f'{uuid.uuid4()}', speaker_note_id="xa2", who='otto'),
     ]
 
     who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster(utterances)
@@ -56,9 +56,9 @@ def test_utterances_to_dict():
     assert len(who_sequences[0]) == 2
     assert len(who_sequences[1]) == 2
     assert len(who_sequences[2]) == 1
-    assert set(x.who for x in who_sequences[0]) == {'A'}
-    assert set(x.who for x in who_sequences[1]) == {'B'}
-    assert set(x.who for x in who_sequences[2]) == {'A'}
+    assert set(x.who for x in who_sequences[0]) == {'otto'}
+    assert set(x.who for x in who_sequences[1]) == {'ove'}
+    assert set(x.who for x in who_sequences[2]) == {'otto'}
 
 
 def test_utterances_who_sequences(utterances: list[interface.Utterance]):
@@ -103,7 +103,9 @@ def test_protocol_create(utterances: list[interface.Utterance]):
 
 def test_protocol_preprocess():
     """Modifies utterances:"""
-    utterances: list[interface.Utterance] = fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml')
+    utterances: list[interface.Utterance] = fakes.load_sample_utterances(
+        f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml'
+    )
 
     protocol: interface.Protocol = interface.Protocol(
         date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}

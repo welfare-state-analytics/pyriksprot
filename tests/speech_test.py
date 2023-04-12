@@ -5,7 +5,6 @@ import os
 import uuid
 from typing import Type
 
-import pandas as pd
 import pytest
 
 from pyriksprot import interface
@@ -14,6 +13,7 @@ from pyriksprot import utility
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
+from pyriksprot.workflows._extract_speech_ids import extract_speech_ids_by_strategy
 from tests import fakes
 from tests.parlaclarin.utility import count_utterances
 
@@ -46,11 +46,7 @@ def utterances() -> list[interface.Utterance]:
         (ts.MergeByWhoSpeakerNoteIdSequence, 'who_speaker_note_id_sequence'),
     ],
 )
-def test_merge_speech_by_strategy(
-    utterances: list[interface.Utterance],
-    strategy: Type,
-    strategy_name: str
-):
+def test_merge_speech_by_strategy(utterances: list[interface.Utterance], strategy: Type, strategy_name: str):
     document_name: str = "prot-1958-fake"
     year: int = int(document_name.split("-")[1])
 
@@ -209,7 +205,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
         utterances=[
             interface.Utterance(
                 u_id='i-1',
-                who='A',
+                who='alma',
                 speaker_note_id='a1',
                 prev_id=None,
                 next_id='i-2',
@@ -316,21 +312,4 @@ def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_spe
 )
 def test_protocol_to_speeches(protocol_name: str):
     filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
-
-    protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
-    utterances: pd.DataFrame = pd.DataFrame(
-        data=[(x.u_id, x.who, x.next_id, x.prev_id, x.speaker_note_id) for x in protocol.utterances],
-        columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_note_id'],
-    )
-    for merge_strategy in ['who_sequence', 'who_speaker_note_id_sequence', 'speaker_note_id_sequence', 'chain']:
-        merger: ts.IMergeStrategy = ts.MergerFactory.get(merge_strategy)
-
-        items: list[list[interface.Utterance]] = merger.group(protocol.utterances)
-
-        speech_ids = []
-        for i, item in enumerate(items):
-            speech_ids.extend(len(item) * [i])
-
-        utterances[merge_strategy] = speech_ids
-
-    utterances.to_excel(f"utterances_{protocol_name}.xlsx")
+    extract_speech_ids_by_strategy(filename=filename)

@@ -15,18 +15,7 @@ load_dotenv()
 
 
 RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
-ROOT_FOLDER = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG)
-
-RIKSPROT_PARLACLARIN_FOLDER = jj(ROOT_FOLDER, "parlaclarin")
-RIKSPROT_PARLACLARIN_METADATA_FOLDER = jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata")
-RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
 RIKSPROT_PARLACLARIN_FAKE_FOLDER = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}'
-
-TAGGED_SOURCE_FOLDER = jj(ROOT_FOLDER, "tagged_frames")
-TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "prot-*.zip")
-TAGGED_SPEECH_FOLDER = jj(ROOT_FOLDER, "tagged_frames_speeches.feather")
-
-SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, "riksprot_metadata.db")
 
 
 def load_sample_utterances(filename: str) -> list[interface.Utterance]:
@@ -82,7 +71,9 @@ def load_segment_stream(filename: str, level: interface.SegmentLevel) -> Iterabl
     if level in (interface.SegmentLevel.Who, interface.SegmentLevel.Speech):
         """Return grouping as specified in "fake-segments.csv" file"""
         data_frame: pd.DataFrame = load_sample_segments_dataframe(filename, level=level)
-        groups: list[str, dict] = data_frame.groupby('segment_id', sort=False).agg(list).reset_index().to_dict('records')
+        groups: list[str, dict] = (
+            data_frame.groupby('segment_id', sort=False).agg(list).reset_index().to_dict('records')
+        )
 
         for i, group in enumerate(groups):
             segment_id: str = group.get("segment_id")

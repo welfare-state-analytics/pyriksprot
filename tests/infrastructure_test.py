@@ -11,6 +11,8 @@ from pyriksprot.metadata.config import table_url
 from .utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
     RIKSPROT_REPOSITORY_TAG,
+    SAMPLE_METADATA_DATABASE_NAME,
+    TAGGED_SOURCE_FOLDER,
     TEST_DOCUMENTS,
     create_test_corpus_and_metadata,
     create_test_speech_corpus,
@@ -44,17 +46,25 @@ def test_to_folder():
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus():
-    create_test_tagged_frames_corpus()
+    create_test_tagged_frames_corpus(
+        protocols=TEST_DOCUMENTS,
+        source_folder=os.environ["TEST_RIKSPROT_TAGGED_FOLDER"],
+        target_folder=TAGGED_SOURCE_FOLDER,
+    )
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_create_test_corpus_and_metadata():
-    create_test_corpus_and_metadata()
+    create_test_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, documents=TEST_DOCUMENTS)
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
-    create_test_speech_corpus()
+    create_test_speech_corpus(
+        source_folder=TAGGED_SOURCE_FOLDER,
+        tag=RIKSPROT_REPOSITORY_TAG,
+        database_name=SAMPLE_METADATA_DATABASE_NAME,
+    )
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
@@ -63,7 +73,7 @@ def test_setup_test_corpora():
 
 
 def test_gh_tables_data():
-    tag: str = "v0.6.0"
+    tag: str = RIKSPROT_REPOSITORY_TAG
     items: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
     infos: dict[str, dict] = {}
     for item in items:
