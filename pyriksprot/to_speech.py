@@ -23,6 +23,7 @@ class MergeStrategyType(str, Enum):
     speaker_note_id_sequence = 'speaker_note_id_sequence'
     undefined = 'undefined'
 
+
 def to_speeches(
     *, protocol: Protocol, merge_strategy: MergeStrategyType | Type[IMergeStrategy], skip_size: int = 1
 ) -> list[Speech]:

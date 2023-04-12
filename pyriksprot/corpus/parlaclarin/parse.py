@@ -92,7 +92,7 @@ class ProtocolMapper(interface.IProtocolParser):
                         """If other speaker then invalidate speaker intro"""
                         speaker_note = None
 
-                    """A sequence of unknown utterances without PREV linkg shouldm't be assigned previous speaker note"""
+                    """A sequence of unknown utterances without PREV link shouldn't be assigned previous speaker note"""
                     if previous is not first:
                         """If it's not the first, then only assign if prev links to first"""
                         if utterance.prev_id != first.u_id:
