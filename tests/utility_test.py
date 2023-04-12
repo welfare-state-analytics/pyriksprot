@@ -1,5 +1,4 @@
 import os
-from datetime import date
 from pathlib import Path
 from typing import Iterable
 
@@ -94,31 +93,45 @@ def test_repository_tags():
     assert len(tags) > 0
 
 
-def test_complete_datetime_series():
-    df: pd.DataFrame = pd.DataFrame(data={'dt': ['2020', None, '2023-02', '2023-03-24']})
+SAMPLE_DATISH_VALUES: list[str | None] = ['2020', None, '2023-02', '2023-03-24']
+
+
+def _sample_datish_dataframe() -> list[str | None]:
+    return pd.DataFrame(data={'dt': SAMPLE_DATISH_VALUES})
+
+
+def test_fix_incomplete_datetime_series_truncate_inplace():
+    df: pd.DataFrame = _sample_datish_dataframe()
 
     md.fix_incomplete_datetime_series(df, "dt", action="truncate", inplace=True)
 
     assert 'dt0' in df.columns
     assert 'dt_flag' in df.columns
-    df['dt'] = pd.to_datetime(df.dt)
-    assert df.dt0.equals(pd.Series(['2020', None, '2023-02', '2023-03-24']))
-    assert df.dt.fillna(0).equals(pd.Series([date(2020, 1, 1), 0, date(2023, 2, 1), date(2023, 3, 24)]))
+
+    assert df.dt0.equals(pd.Series(SAMPLE_DATISH_VALUES))
     assert df.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))
 
-    df: pd.DataFrame = pd.DataFrame(data={'dt': ['2020', None, '2023-02', '2023-03-24']})
+    expected_values = pd.Series([pd.Timestamp(2020, 1, 1), pd.NaT, pd.Timestamp(2023, 2, 1), pd.Timestamp(2023, 3, 24)])
+
+    assert pd.to_datetime(df.dt).equals(expected_values)
+
+
+def test_fix_incomplete_datetime_series_extend_inplace():
+    df: pd.DataFrame = _sample_datish_dataframe()
     md.fix_incomplete_datetime_series(df, "dt", action="extend", inplace=True)
 
-    assert df.dt0.equals(pd.Series(['2020', None, '2023-02', '2023-03-24']))
+    assert df.dt0.equals(pd.Series(SAMPLE_DATISH_VALUES))
     assert df.dt.equals(pd.Series(['2020-12-31', np.nan, '2023-02-28', '2023-03-24']))
     assert df.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))
 
-    df: pd.DataFrame = pd.DataFrame(data={'dt': ['2020', None, '2023-02', '2023-03-24']})
+
+def test_fix_incomplete_datetime_series_extend_not_inplace():
+    df: pd.DataFrame = _sample_datish_dataframe()
     df2 = md.fix_incomplete_datetime_series(df, "dt", action="extend", inplace=False)
 
     assert 'df0' not in df.columns
     assert 'df_flag' not in df.columns
 
-    assert df2.dt0.equals(pd.Series(['2020', None, '2023-02', '2023-03-24']))
+    assert df2.dt0.equals(pd.Series(SAMPLE_DATISH_VALUES))
     assert df2.dt.equals(pd.Series(["2020-12-31", np.NaN, "2023-02-28", '2023-03-24']))
     assert df2.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))

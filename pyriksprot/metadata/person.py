@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 from dataclasses import dataclass, field, fields
 from functools import cached_property
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -48,20 +49,28 @@ class TimePeriod:
 
     @property
     def start_year(self) -> int:
-        return self.start_date.year if self.start_date else 0
+        return self.start_date.year if self._is_date(self.start_date) else 0
 
     @property
     def end_year(self) -> int:
-        return self.end_date.year if self.end_date else 0
+        return self.end_date.year if self._is_date(self.end_date) else 9999
 
     def covers(self, pit: int | datetime.date) -> bool:
         if isinstance(pit, int):
-            return self.start_year <= pit <= (self.end_year or 9999)
-        return self.start_date <= pit <= (self.end_date or self.end_date is None)
+            return self.start_year <= pit <= self.end_year
+        return self.start_date <= pit <= self.end_date
+
+    @property
+    def is_closed(self) -> bool:
+        return self._is_date(self.start_year) and self._is_date(self.end_year)
 
     @property
     def is_open(self) -> bool:
-        return self.start_year == 0 or self.end_year == 9999
+        return not self.is_closed
+
+    @staticmethod
+    def _is_date(value: Any) -> bool:
+        return value not in [0, 9999, None, np.nan, pd.NaT, pd.NaT]
 
 
 @dataclass(kw_only=True)

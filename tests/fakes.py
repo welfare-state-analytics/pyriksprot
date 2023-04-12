@@ -156,7 +156,7 @@ def load_sample_utterance_data(filename: str) -> list[dict]:
     ).replace({np.nan: None})
     utterances = utterances.merge(tagged_merged, left_on='u_id', right_index=True, how='left')
     utterances['checksum'] = utterances.paragraphs.apply(interface.UtteranceHelper.compute_paragraph_checksum)
-    data: list[dict] = utterances.replace({np.nan: None}).to_dict('record')
+    data: list[dict] = utterances.replace({np.nan: None}).to_dict(orient='records')
     return data
 
 
