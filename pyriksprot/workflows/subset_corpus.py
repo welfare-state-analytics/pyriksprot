@@ -1,4 +1,5 @@
 import os
+import shutil
 from os.path import join as jj
 
 from pyriksprot import corpus as pc
@@ -47,6 +48,8 @@ def subset_corpus_and_metadata(
         folder=metadata_target_folder
     ).load_scripts(folder=scripts_folder)
 
+    shutil.rmtree(path=metadata_folder, ignore_errors=True)
+
 
 def _load_document_filenames(filename):
     """Loads a list of ParlaCLARIN document names from a file"""
@@ -54,4 +57,4 @@ def _load_document_filenames(filename):
         raise FileNotFoundError(filename)
 
     with open(filename, "r", encoding="utf8") as fp:
-        return [x for x in fp.readlines() if x.endswith(".xml")]
+        return [x for x in fp.read().splitlines() if x.endswith(".xml")]
