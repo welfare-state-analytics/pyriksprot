@@ -89,7 +89,7 @@ def convert_protocol(
         template_name (str, optional): Template name (found in resource-folder). Defaults to None.
     """
     set_dehyphenator(data_folder=dehyphen_folder)
-    protocol: interface.Protocol = parse.ProtocolMapper.to_protocol(input_filename, segment_skip_size=5)
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(input_filename)
     content: str = ""
 
     if protocol.has_text:

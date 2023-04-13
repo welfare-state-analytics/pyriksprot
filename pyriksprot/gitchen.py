@@ -14,7 +14,6 @@ ts = datetime.datetime.fromtimestamp
 
 
 class GitInfo:
-
     API_URL: str = "https://api.github.com/repos/welfare-state-analytics/riksdagen-corpus/git"
 
     def __init__(self, source: str):
@@ -41,7 +40,6 @@ class GitInfo:
         return data
 
     def _local_tag_info(self, tag: str) -> dict:
-
         if not tag.startswith("refs/tags"):
             tag = f"refs/tags/{tag}"
 
@@ -62,7 +60,6 @@ class GitInfo:
 
     @staticmethod
     def origin_tag_info(tag: str) -> dict:
-
         if not tag.startswith("refs/tags"):
             tag = f"refs/tags/{tag}"
 
@@ -88,7 +85,6 @@ class GitInfo:
         return data
 
     def tag_info(self, *, tag: str = None, source: Literal['origin', 'workdir'] = 'workdir') -> dict:
-
         if source == 'workdir':
             if tag is None:
                 return self.head

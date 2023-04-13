@@ -12,19 +12,20 @@ relpath = os.path.relpath
 
 
 @click.command()
-@click.argument('documents-source', type=click.STRING, help="File with protocol names to subset")
-@click.argument('target-folder', type=click.STRING, help="Root folder for corpus subset")
-@click.argument('tag', type=click.STRING, help="Corpus version")
+@click.argument('documents', type=click.STRING)  # , help="File with protocol names to subset")
+@click.argument('target-folder', type=click.STRING)  # , help="Root folder for corpus subset")
+@click.argument('tag', type=click.STRING)  # , help="Corpus version")
 @click.option('--scripts-folder', type=click.STRING, help="SQL scripts folder")
 def main(
-    documents_source: list[str] | str = None,
+    documents: list[str] | str = None,
     target_folder: str = None,
     tag: str = None,
     scripts_folder: str = None,
 ):
+    print(locals())
     try:
         subset_corpus_and_metadata(
-            documents=documents_source, target_folder=target_folder, tag=tag, scripts_folder=scripts_folder
+            documents=documents, target_folder=target_folder, tag=tag, scripts_folder=scripts_folder
         )
     except Exception as ex:
         click.echo(ex)
@@ -32,4 +33,11 @@ def main(
 
 
 if __name__ == "__main__":
+    # options = {
+    #     'documents': 'swedeb-sample-protocols.txt',
+    #     'target_folder': 'data/swedeb-samples/',
+    #     'tag': 'v0.6.0',
+    #     'scripts_folder': None,
+    # }
+    # subset_corpus_and_metadata(**options)
     main()

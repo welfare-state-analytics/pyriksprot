@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import abc
-from typing import Iterable, List, Literal, Union
+from typing import Any, Iterable
 
 from loguru import logger
 
@@ -14,203 +13,126 @@ XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 # pylint: disable=too-many-statements
 
 
-class XmlProtocol(abc.ABC):
-    def __init__(self, data: str, segment_skip_size: int = 0, delimiter: str = '\n'):
-
-        self.data: str = data
-        self.segment_skip_size: bool = segment_skip_size
-        self.delimiter: str = delimiter
-
-        self.iterator: Iterable[interface.Utterance] = self.create_iterator()
-        self.utterances: List[interface.Utterance] = self.create_utterances()
-
-        self.date = self.get_date()
-        self.name = self.get_name()
-
-    @abc.abstractmethod
-    def create_iterator(self) -> Iterable[interface.Utterance]:
-        return []
-
-    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
-        """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
-        if which != "filename":
-            return int(self.date[:4])
-        return int(self.name.split("-")[1][:4])
-
-    @abc.abstractmethod
-    def create_utterances(self) -> List[interface.Utterance]:
-        ...
-
-    @abc.abstractmethod
-    def get_name(self) -> str:
-        ...
-
-    @abc.abstractmethod
-    def get_date(self) -> str:
-        ...
-
-    @abc.abstractmethod
-    def get_speaker_notes(self) -> dict[str, str]:
-        ...
-
-    def __len__(self):
-        return len(self.utterances)
-
-    @property
-    def text(self) -> str:
-        """Return sequence of XML_Utterances."""
-        return self.delimiter.join(x.text for x in self.utterances)
-
-    @property
-    def has_text(self) -> bool:
-        """Return sequence of XML_Utterances."""
-        return any(x.text != '' for x in self.utterances)
-
-
-class XmlUntangleProtocol(XmlProtocol):
-    """Wraps the XML representation of a single ParlaClarin document (protocol)"""
-
-    def __init__(
-        self,
-        data: Union[str, untangle.Element],
-        segment_skip_size: int = 0,
-        delimiter: str = '\n',
-        ignore_tags: set[str] | str = "teiHeader",
-    ):
-
-        ignore_tags: set[str] = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
-
-        data: untangle.Element = (
-            data if isinstance(data, untangle.Element) else untangle.parse(data, ignore_tags=ignore_tags)
-        )
-        self.speaker_notes: dict[str, str] = {}
-
-        super().__init__(data, segment_skip_size, delimiter)
-
-    def create_iterator(self) -> Iterable[interface.Utterance]:
-        return []
-
-    def create_utterances(self) -> List[interface.Utterance]:
-
-        utterances: List[interface.Utterance] = []
-        page_number: int = -1
-
-        parent: untangle.Element = self.get_content_root()
-        if parent is None:
-            return utterances
-
-        speaker_note_id: str = interface.MISSING_SPEAKER_NOTE_ID
-        previous_who: str = None
-
-        for child in parent.children:
-
-            if child.name == 'pb':
-                page_number += 1
-
-            elif child.name == "note":
-
-                if child['type'] == "speaker":
-                    speaker_note_id = child["xml:id"]
-
-                    if not speaker_note_id:
-                        raise ValueError("no xml:id in speaker's note tag")
-
-                    self.speaker_notes[speaker_note_id] = " ".join(child.cdata.split())
-
-                    previous_who: str = None
-
-            elif child.name == 'u':
-
-                who: str = child.get_attribute('who')
-
-                if previous_who and previous_who != who:
-                    speaker_note_id = interface.MISSING_SPEAKER_NOTE_ID
-
-                previous_who: str = who
-
-                utterances.append(
-                    UtteranceMapper.create(
-                        element=child,
-                        page_number=str(page_number),
-                        speaker_note_id=speaker_note_id,
-                    )
-                )
-
-        return utterances
-
-    def get_date(self) -> str:
+class ProtocolMapper(interface.IProtocolParser):
+    @staticmethod
+    def get_date(data: untangle.Element) -> str:
         try:
-            docDate = self.data.teiCorpus.TEI.text.front.div.docDate
+            docDate = data.teiCorpus.TEI.text.front.div.docDate
             return docDate[0]['when'] if isinstance(docDate, list) else docDate['when']
         except (AttributeError, KeyError):
             return None
 
-    def get_name(self) -> str:
+    @staticmethod
+    def get_name(data: untangle.Element) -> str:
         """Protocol name"""
         try:
-            return self.data.teiCorpus.TEI.text.front.div.head.cdata
+            return data.teiCorpus.TEI.text.front.div.head.cdata
         except (AttributeError, KeyError):
             return None
 
-    def get_content_root(self) -> untangle.Element:
+    @staticmethod
+    def get_content_sections(data: untangle.Element) -> list[untangle.Element]:
         try:
-            return self.data.teiCorpus.TEI.text.body.div
+            sections: Any = data.teiCorpus.TEI.text.body.children
+            if not isinstance(sections, (list, tuple)):
+                return [sections]
+            return sections
         except AttributeError:
-            logger.warning(f'no content (text.body) found in {self.get_name()}')
-        return None
-
-    def get_speaker_notes(self) -> dict[str, str]:
-        return self.speaker_notes
-
-
-class UtteranceMapper:
-    """Wraps a single ParlaClarin XML utterance tag."""
+            logger.warning(f'no content (text.body) found in {data.get_name()}')
+        return []
 
     @staticmethod
-    def create(
-        *,
-        element: untangle.Element,
-        page_number: str,
-        speaker_note_id: str,
-        dedent: bool = True,
-    ) -> interface.Utterance:
-        utterance: interface.Utterance = interface.Utterance(
-            u_id=element.get_attribute('xml:id'),
-            speaker_note_id=speaker_note_id,
-            who=element.get_attribute('who') or "undefined",
-            page_number=page_number,
-            prev_id=element.get_attribute('prev'),
-            next_id=element.get_attribute('next'),
-            paragraphs=UtteranceMapper.to_paragraphs(element, dedent),
-        )
-        return utterance
+    def get_content_elements(data: untangle.Element) -> Iterable[untangle.Element]:
+        for section in ProtocolMapper.get_content_sections(data):
+            for item in section.children:
+                yield item
 
     @staticmethod
-    def to_paragraphs(element: untangle.Element, dedent: bool = True) -> List[str]:
+    def get_data(data: untangle.Element) -> tuple[list[interface.Utterance], dict[str, interface.SpeakerNote]]:
+        """All utterances in sequence"""
+        utterances: list[interface.Utterance] = []
+        """All speaker notes"""
+        speaker_notes: dict[str, interface.SpeakerNote] = {}
+
+        """Current Speaker Note"""
+        speaker_note: interface.SpeakerNote = None
+        page_number: int = -1
+        first: interface.Utterance = None
+        previous: interface.Utterance = None
+
+        for element in ProtocolMapper.get_content_elements(data):
+            if element.name == 'pb':
+                if 'n' in element.attributes:
+                    page_number = int(element.get_attribute('n'))
+                else:
+                    page_number += 1
+
+            elif element.name == "note" and element['type'] == "speaker":
+                speaker_note = interface.SpeakerNote(element["xml:id"], " ".join(element.cdata.split()))
+                speaker_notes[element["xml:id"]] = speaker_note
+                first = None
+                previous = None
+
+            elif element.name == 'u':
+                utterance: interface.Utterance = interface.Utterance(
+                    u_id=element.get_attribute('xml:id'),
+                    who=element.get_attribute('who') or "unknown",
+                    page_number=page_number,
+                    prev_id=element.get_attribute('prev'),
+                    next_id=element.get_attribute('next'),
+                    paragraphs=ProtocolMapper.to_paragraphs(element, dedent=True),
+                )
+
+                if first is None:
+                    first = utterance
+
+                if previous:
+                    """We have seen at least one utterance since last speaker intro"""
+                    if previous.who != utterance.who:
+                        """If other speaker then invalidate speaker intro"""
+                        speaker_note = None
+
+                    """A sequence of unknown utterances without PREV link shouldn't be assigned previous speaker note"""
+                    if previous is not first:
+                        """If it's not the first, then only assign if prev links to first"""
+                        if utterance.prev_id != first.u_id:
+                            speaker_note = None
+
+                utterance.speaker_note_id = (
+                    speaker_note.speaker_note_id if speaker_note is not None else interface.MISSING_SPEAKER_NOTE_ID
+                )
+
+                utterances.append(utterance)
+
+                previous = utterance
+
+        return {'utterances': utterances, 'speaker_notes': speaker_notes}
+
+    @staticmethod
+    def to_paragraphs(element: untangle.Element, dedent: bool = True) -> list[str]:
         texts: Iterable[str] = (p.cdata for p in element.get_elements('seg'))
         if dedent:
             texts = [dedent_text(t) for t in texts]
         return texts
 
-
-class ProtocolMapper:
     @staticmethod
-    def to_protocol(
-        data: Union[str, untangle.Element],
-        segment_skip_size: int = 0,
+    def parse(
+        filename: str | untangle.Element,
         ignore_tags: set[str] | str = "teiHeader",
     ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
-
-        xml_protocol: XmlUntangleProtocol = XmlUntangleProtocol(
-            data=data, segment_skip_size=segment_skip_size, ignore_tags=ignore_tags
+        ignore_tags: set[str] = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
+        data: untangle.Element = (
+            filename if isinstance(filename, untangle.Element) else untangle.parse(filename, ignore_tags=ignore_tags)
         )
 
+        parsed_data: dict = ProtocolMapper.get_data(data)
+
         protocol: interface.Protocol = interface.Protocol(
-            utterances=xml_protocol.utterances,
-            date=xml_protocol.date,
-            name=xml_protocol.name,
-            speaker_notes=xml_protocol.get_speaker_notes(),
+            utterances=parsed_data.get("utterances"),
+            speaker_notes=parsed_data.get("speaker_notes"),
+            date=ProtocolMapper.get_date(data),
+            name=ProtocolMapper.get_name(data),
         )
 
         return protocol

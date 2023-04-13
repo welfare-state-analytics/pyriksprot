@@ -113,7 +113,6 @@ def test_find_dispatch_class():
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
-
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with dispatch.CheckpointPerGroupDispatcher(
@@ -147,7 +146,6 @@ def test_single_feather_per_group_dispatch(
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
-
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with cls(
@@ -174,7 +172,6 @@ def test_single_feather_per_group_dispatch_with_skips(
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
-
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
     with cls(

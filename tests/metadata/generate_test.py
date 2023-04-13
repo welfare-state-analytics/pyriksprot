@@ -9,6 +9,7 @@ import pytest
 import pyriksprot.sql as sql
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
+from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOLDER
 
 jj = os.path.join
 
@@ -23,7 +24,6 @@ def test_list_sql_files():
 
 
 def test_gh_ls():
-
     data: list[dict] = md.gh_ls(
         "welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG
     )
@@ -31,7 +31,6 @@ def test_gh_ls():
 
 
 def test_download_metadata():
-
     data: list[dict] = md.gh_ls(
         "welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG
     )
@@ -42,7 +41,6 @@ def test_download_metadata():
 
 
 def test_get_and_set_db_version():
-
     dummy_db_name: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
     service: md.DatabaseHelper = md.DatabaseHelper(dummy_db_name)
@@ -77,11 +75,10 @@ def test_create_metadata_database():
         md.DatabaseHelper(target_filename).create(tag=None, folder=source_folder, force=True)
 
 
-def test_generate_corpus_indexes():
-    corpus_folder: str = jj("./tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "parlaclarin")
-
+@pytest.mark.parametrize('corpus_folder', [RIKSPROT_PARLACLARIN_FOLDER, RIKSPROT_PARLACLARIN_FAKE_FOLDER])
+def test_generate_corpus_indexes(corpus_folder: str):
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
-    data: dict[str, pd.DataFrame] = factory.generate(corpus_folder=corpus_folder).data
+    data: dict[str, pd.DataFrame] = factory.generate(corpus_folder=corpus_folder, target_folder="tests/output").data
 
     assert data.get('protocols') is not None
     assert data.get('utterances') is not None

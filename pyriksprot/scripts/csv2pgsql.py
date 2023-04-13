@@ -14,7 +14,6 @@ from pyriksprot.metadata.utility import fix_incomplete_datetime_series
 
 
 def csv2pgsql(tag: str):
-
     """Download CSV for version to temporary folder"""
     dotenv.load_dotenv(override=True)
 

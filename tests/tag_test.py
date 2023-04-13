@@ -12,8 +12,8 @@ def test_tag_protocol_xml():
     def tag(text: str, preprocess: bool):  # pylint: disable=unused-argument
         return [
             dict(
-                token=['Ove', 'är', 'dum', '.'],
-                lemma=['ove', 'vara', 'dum', '.'],
+                token=['Olle', 'är', 'snäll', '.'],
+                lemma=['Olle', 'vara', 'snäll', '.'],
                 pos=['PM', 'VB', 'ADJ', 'MAD'],
                 xpos=['PM', 'VB', 'ADJ', 'MAD'],
                 num_tokens=3,

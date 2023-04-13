@@ -9,7 +9,6 @@ TAG = "vx.y.z"
 
 
 def main(target_type: dispatch.TargetTypeKey, source_folder: str):
-
     workflows.extract_corpus_tags(
         source_folder=source_folder,
         metadata_filename=f"/data/westac/riksdagen_corpus_data/metadata/riksprot_metadata.{TAG}.db",

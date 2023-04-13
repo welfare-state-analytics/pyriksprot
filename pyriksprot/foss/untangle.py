@@ -136,7 +136,6 @@ class Handler(handler.ContentHandler):
         self.ignore_tags: Set[str] = set(ignore_tags or [])
 
     def startElement(self, name: str, attrs: Mapping[str, str]) -> None:
-
         if name in self.ignore_tags:
             return
 
@@ -153,7 +152,6 @@ class Handler(handler.ContentHandler):
         self.elements.append(element)
 
     def endElement(self, name: str) -> None:
-
         if name in self.ignore_tags:
             return
 

@@ -31,7 +31,6 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
     source_index: corpus_index.CorpusSourceIndex,
     protocol_segments: List[iterate.ProtocolSegment],
 ):
-
     """Load source protocols to simplify tests"""
     protocols: List[interface.Protocol] = list(tagged.load_protocols(source=TAGGED_SOURCE_FOLDER))
 

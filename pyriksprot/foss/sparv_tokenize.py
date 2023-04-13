@@ -170,12 +170,10 @@ sparv_better_tokenizer = None
 
 
 class ModelNotFoundError(Exception):
-
     ...
 
 
 def default_tokenize(text: str) -> List[str]:
-
     global sparv_better_tokenizer
 
     sparv_better_tokenizer = sparv_better_tokenizer or BetterWordTokenizer(

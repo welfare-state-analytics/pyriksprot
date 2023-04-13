@@ -1,7 +1,6 @@
 import sqlite3
 from dataclasses import asdict
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -180,7 +179,6 @@ def test_overload_by_person(person_index: md.PersonIndex):
 
 
 def test_swap_rows(person_index: md.PersonIndex):
-
     Q5556026_pid = index_of_person_id(person_index.persons, 'Q5556026')
     Q5556026_pid = index_of_person_id(person_index.persons, 'Q5556026')
 
@@ -194,7 +192,6 @@ def test_swap_rows(person_index: md.PersonIndex):
 
 
 def test_person_party_at():
-
     person: md.Person = dummy()
     person.alt_parties = [
         md.PersonParty(party_id=8, start_date=1950, end_date=1952),
@@ -237,11 +234,11 @@ def test_speaker_info_service(person_index: md.PersonIndex):
     assert len(person.alt_parties) == 9
     assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
-    assert set(a.end_year for a in person.alt_parties) == {np.nan, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
+    assert set(a.end_year for a in person.alt_parties) == {9999, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
     assert person.party_at(1950) == 0
     assert person.party_at(1994) == 7
     assert person.party_at(2000) == 7
-    assert person.party_at(2010) == 0
+    assert person.party_at(2010) == 10
 
 
 @pytest.mark.skip("No unknown in test data")
@@ -273,7 +270,6 @@ def test_unknown(person_index: md.PersonIndex):
 
 @pytest.mark.skip("infra test")
 def test_load_speaker_index2():
-
     database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
     speech_index_filename: str = (
         "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"

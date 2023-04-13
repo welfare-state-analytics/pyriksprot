@@ -7,6 +7,7 @@ import pytest
 from pyriksprot import interface, utility, workflows
 from pyriksprot.corpus import parlaclarin
 
+from .. import fakes
 from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_PATTERN
 
 jj = os.path.join
@@ -21,7 +22,6 @@ TEST_PARLACLARIN_XML_FILES = [
 
 @pytest.mark.parametrize('texts', ["a a b c c d e f a e", ["a a b c c", "d e f a e"]])
 def test_word_frequency_counter(texts):
-
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
 
     counter.ingest(texts)
@@ -36,10 +36,9 @@ def test_word_frequency_counter(texts):
 
 @pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
-
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
-    protocol: interface.Protocol = parlaclarin.ProtocolMapper.to_protocol(filename)
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename)
 
     counter.ingest(texts)
 
@@ -48,7 +47,6 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
 
 @pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
 def test_persist_word_frequencies(filename: List[str]):
-
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
 
@@ -66,33 +64,16 @@ def test_persist_word_frequencies(filename: List[str]):
 
 
 @pytest.mark.parametrize(
-    'document_name,expected_frequencies',
+    'document_name,',
     [
-        (
-            'prot-1958-fake',
-            {
-                'hej': 1,
-                '!': 1,
-                'detta': 1,
-                'är': 2,
-                'en': 1,
-                'mening': 1,
-                '.': 4,
-                'jag': 2,
-                'heter': 3,
-                'ove': 2,
-                'vad': 1,
-                'du': 1,
-                '?': 1,
-                'adam': 1,
-                'dum': 1,
-            },
-        )
+        'prot-1958-fake',
+        'prot-1960-fake',
+        'prot-1980-empty',
     ],
 )
-def test_compute_word_frequencies(document_name: str, expected_frequencies: dict):
+def test_compute_word_frequencies(document_name: str):
     filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
-
+    expected_frequencies: dict[str, int] = fakes.sample_compute_expected_counts(filename, kind='token', lowercase=True)
     with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
         counts: parlaclarin.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],

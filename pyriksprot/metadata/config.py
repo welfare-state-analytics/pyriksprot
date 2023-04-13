@@ -1,6 +1,7 @@
 from functools import cached_property
 from os.path import isfile, join
 from typing import Callable, Iterable, Literal
+from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
@@ -11,15 +12,13 @@ from ..utility import probe_filename, revdict
 
 
 def input_unknown_url(tag: str = "main"):
-    return (
-        f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/input/matching/unknowns.csv"
-    )
+    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{quote(tag)}/input/matching/unknowns.csv"
 
 
 def table_url(tablename: str, tag: str = "main") -> str:
     if tablename == "unknowns":
         return input_unknown_url(tag)
-    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{tag}/corpus/metadata/{tablename}.csv"
+    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{quote(tag)}/corpus/metadata/{quote(tag)}.csv"
 
 
 PARTY_COLORS = [

@@ -28,7 +28,6 @@ def source_index() -> csi.CorpusSourceIndex:
 
 @pytest.fixture
 def xml_source_index() -> csi.CorpusSourceIndex:
-
     items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
         source_folder=RIKSPROT_PARLACLARIN_FOLDER,
         source_pattern='**/prot-*.xml',

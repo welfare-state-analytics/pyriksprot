@@ -28,9 +28,7 @@ def store_protocol(
     """Store tagged protocol in `output_filename`, with metadata."""
 
     if output_filename.endswith("zip"):
-
         with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as fp:
-
             metadata: dict = dict(name=protocol.name, date=protocol.date, checksum=checksum)
             fp.writestr(METADATA_FILENAME, json.dumps(metadata, indent=4))
 
@@ -51,7 +49,6 @@ def store_protocol(
             # fp.writestr('document_index.csv', document_index.to_csv(sep='\t', header=True))
 
     else:
-
         raise ValueError("Only Zip store currently implemented")
 
 
@@ -94,13 +91,11 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
         return None
 
     with zipfile.ZipFile(filename, 'r') as fp:
-
         basename: str = metadata['name']
 
         filenames: List[str] = [f.filename for f in fp.filelist]
 
         for ext in PROTOCOL_LOADERS:
-
             stored_filename: str = f"{basename}.{ext}"
 
             if not stored_filename in filenames:
@@ -115,7 +110,6 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
 
 
 def load_protocols(source: str | List, file_pattern: str = 'prot-*.zip') -> Iterable[interface.Protocol]:
-
     return (p for p in (load_protocol(filename) for filename in glob_protocols(source, file_pattern)) if p is not None)
 
 

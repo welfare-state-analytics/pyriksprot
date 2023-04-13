@@ -85,7 +85,6 @@ def slim_table_types(
     defaults: dict[str, Any] = None,
     types: dict[str, Any] = None,
 ) -> None:
-
     """Slims types and sets default value for NaN entries"""
 
     if isinstance(tables, pd.DataFrame):
@@ -95,7 +94,6 @@ def slim_table_types(
     types: dict[str, Any] = COLUMN_TYPES if types is None else types
 
     for table in tables:
-
         for column_name, value in defaults.items():
             if column_name in table.columns:
                 table[column_name].fillna(value, inplace=True)

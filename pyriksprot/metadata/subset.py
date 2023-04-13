@@ -38,7 +38,6 @@ def subset_to_folder(parser: IProtocolParser, protocols_source_folder: str, sour
     config: MetadataTableConfigs = MetadataTableConfigs()
 
     for tablename in config.tablesnames0:
-
         source_name: str = jj(source_folder, f"{tablename}.csv")
         target_name: str = jj(target_folder, f"{tablename}.csv")
 

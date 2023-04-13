@@ -17,12 +17,12 @@ def test_store_protocols(storage_format: interface.StorageFormat):
         utterances=[
             interface.Utterance(
                 u_id='i-1',
-                who='A',
+                who='ove',
                 speaker_note_id='a1',
                 prev_id=None,
                 next_id='i-2',
                 paragraphs=['Hej! Detta är en mening.'],
-                tagged_text="token\tpos\tlemma\nA\ta\tNN",
+                annotation="token\tpos\tlemma\nA\ta\tNN",
                 delimiter='\n',
             )
         ],
@@ -56,7 +56,6 @@ def test_store_protocols(storage_format: interface.StorageFormat):
 
 
 def test_to_csv():
-
     tagged_documents: list[tag.TaggedDocument] = [
         {
             'lemma': ['hej', '!', 'detta', 'vara', 'en', 'test', '!'],

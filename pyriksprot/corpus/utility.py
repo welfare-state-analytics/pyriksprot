@@ -2,6 +2,7 @@ import os
 import shutil
 from os.path import expanduser
 from os.path import join as jj
+from urllib.parse import quote as q
 from urllib.request import urlretrieve
 
 from loguru import logger
@@ -17,9 +18,7 @@ def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
 
 
 def _protocol_uri(filename: str, subfolder: str, tag: str) -> str:
-    return (
-        f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{tag}/corpus/protocols/{subfolder}/{filename}"
-    )
+    return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{q(tag)}/corpus/protocols/{q(subfolder)}/{q(filename)}"
 
 
 def download_protocols(*, filenames: list[str], target_folder: str, create_subfolder: bool, tag: str) -> None:

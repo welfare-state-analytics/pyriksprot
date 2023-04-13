@@ -27,7 +27,6 @@ class ConformBaseSpecification:
         return set(self.left_tables.keys()) | set(self.right_tables.keys()) - self.ignore_tables
 
     def is_satisfied(self, **_) -> bool:
-
         for tablename in self.all_tablenames:
             try:
                 if tablename not in self.left_tables:

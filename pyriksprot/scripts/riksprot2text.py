@@ -59,7 +59,6 @@ def main(
     force: bool = False,
 ):
     try:
-
         arguments: dict = update_arguments_from_options_file(
             arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)
         )
@@ -74,7 +73,6 @@ def main(
 
 
 if __name__ == "__main__":
-
     main()
 
     # from click.testing import CliRunner

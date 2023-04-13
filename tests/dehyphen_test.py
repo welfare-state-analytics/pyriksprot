@@ -25,7 +25,6 @@ DEHYPHEN_FOLDER = './tests/output'
 
 
 def test_merge_paragraphs():
-
     text = "Detta är en \n\nmening"
     result = merge_paragraphs(text, ParagraphMergeStrategy.DoNotMerge)
     assert result == text
@@ -46,7 +45,6 @@ def test_merge_paragraphs():
 
 
 def test_create_dehyphenator_service_fails_if_no_word_frequency_file():
-
     if os.path.isfile(WORD_FREQUENCY_FILENAME):
         os.remove(WORD_FREQUENCY_FILENAME)
 
@@ -57,7 +55,6 @@ def test_create_dehyphenator_service_fails_if_no_word_frequency_file():
 
 def test_dehyphenator_service_flush_creates_expected_files():
     with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
-
         dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
             data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
         )
@@ -74,9 +71,7 @@ def test_dehyphenator_service_flush_creates_expected_files():
 
 
 def test_dehyphenator_service_can_load_flushed_data():
-
     with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
-
         dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
             data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
         )
@@ -111,7 +106,6 @@ def test_find_dashed_words():
 
 
 def test_dehyphenator_service_dehyphen():
-
     dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})
 
     text = "Detta mening har inget bindestreck."
@@ -135,7 +129,6 @@ def test_dehyphenator_service_dehyphen():
 
 
 def test_dehyphenator_service_dehyphen_by_frequency():
-
     dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})
 
     text = "Detta är ett binde-\nstreck. "

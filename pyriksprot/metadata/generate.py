@@ -10,7 +10,7 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.interface import IProtocol, IProtocolParser
+from pyriksprot.interface import IProtocol, IProtocolParser, SpeakerNote
 
 from ..sql import sql_file_paths
 from ..utility import ensure_path, probe_filename, reset_file
@@ -72,7 +72,6 @@ class DatabaseHelper:
         return self
 
     def reset(self, tag: str, force: bool) -> DatabaseHelper:
-
         ensure_path(self.filename)
         reset_file(self.filename, force=force)
 
@@ -100,7 +99,6 @@ class DatabaseHelper:
         return self
 
     def load_base_tables(self, configs: cfg.MetadataTableConfigs, folder: str) -> DatabaseHelper:
-
         tag: str = self.get_tag()
 
         with self:
@@ -127,7 +125,6 @@ class DatabaseHelper:
         filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths()
 
         with self:
-
             for filename in filenames:
                 logger.info(f"loading script: {os.path.split(filename)[1]}")
                 with open(filename, "r", encoding="utf-8") as fp:
@@ -166,24 +163,24 @@ class CorpusIndexFactory:
         self.parser = parser
         self.data: dict[str, pd.DataFrame]
 
-    def generate(self, corpus_folder: str, target_folder: str = None) -> CorpusIndexFactory:
-
+    def generate(self, corpus_folder: str, target_folder: str) -> CorpusIndexFactory:
+        if os.path.isdir(jj(corpus_folder, "protocols")):
+            corpus_folder = jj(corpus_folder, "protocols")
         logger.info("Generating utterance, protocol and speaker notes indices.")
         logger.info(f"  source: {corpus_folder}")
         logger.info(f"  target: {target_folder}")
 
-        filenames = glob(jj(corpus_folder, "protocols", "**/*.xml"), recursive=True)
+        filenames = glob(jj(corpus_folder, "**/*.xml"), recursive=True)
 
         return self.collect(filenames).store(target_folder)
 
     def collect(self, filenames) -> CorpusIndexFactory:
-
         utterance_data: list[tuple] = []
         protocol_data: list[tuple[int, str]] = []
-        speaker_notes: dict[str, str] = {}
+        speaker_notes: dict[str, SpeakerNote] = {}
 
         for document_id, filename in tqdm(enumerate(filenames)):
-            protocol: IProtocol = self.parser.to_protocol(filename, segment_skip_size=0, ignore_tags={"teiHeader"})
+            protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
             protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
             for u in protocol.utterances:
                 utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_note_id]))
@@ -196,17 +193,16 @@ class CorpusIndexFactory:
             "utterances": pd.DataFrame(
                 data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_note_id']
             ).set_index("u_id"),
-            "speaker_notes": pd.DataFrame(speaker_notes.items(), columns=['speaker_note_id', 'speaker_note']).set_index(
-                'speaker_note_id'
-            ),
+            "speaker_notes": pd.DataFrame(
+                ((x.speaker_note_id, x.speaker_note) for x in speaker_notes.values()),
+                columns=['speaker_note_id', 'speaker_note'],
+            ).set_index('speaker_note_id'),
         }
 
         return self
 
     def store(self, target_folder: str) -> CorpusIndexFactory:
-
         if target_folder:
-
             os.makedirs(target_folder, exist_ok=True)
 
             for tablename, df in self.data.items():

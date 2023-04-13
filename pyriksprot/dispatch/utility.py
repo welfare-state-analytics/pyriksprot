@@ -68,9 +68,7 @@ def truncate_year_to_category(year: int, temporal_key: TemporalKey) -> int:
 
 
 def to_temporal_category(temporal_key: str | TemporalKey | dict, year: int, default_value: str) -> str:
-
     if isinstance(temporal_key, (TemporalKey, str, type(None))):
-
         if temporal_key == TemporalKey.Year:
             return str(year)
 
@@ -94,7 +92,6 @@ def to_temporal_category(temporal_key: str | TemporalKey | dict, year: int, defa
 
 
 def decode_protocol_segment_filename(lookups: md.Codecs, speech: iterate.ProtocolSegment, naming_keys: list[str]):
-
     basename, extension = splitext(speech.filename)
 
     suffix: str = ""
