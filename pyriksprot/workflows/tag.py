@@ -4,8 +4,8 @@ import abc
 import itertools
 from functools import reduce
 from glob import glob
-from os.path import getmtime, isfile, join
-from typing import Any, Callable, List, Mapping, Union
+from os.path import dirname, getmtime, isfile, join, split
+from typing import Any, Callable, List, Mapping, Type, Union
 
 from loguru import logger
 from tqdm import tqdm
@@ -19,6 +19,15 @@ from ..utility import ensure_path, strip_path_and_extension, touch, unlink
 METADATA_FILENAME: str = 'metadata.json'
 
 TaggedDocument = Mapping[str, List[str]]
+
+
+class ITaggerFactory(abc.ABC):
+
+    identifier: str = "undefined"
+
+    @abc.abstractmethod
+    def create(self) -> "ITagger":
+        ...
 
 
 class ITagger(abc.ABC):
@@ -73,6 +82,22 @@ class ITagger(abc.ABC):
         """Transform `text` with preprocessors."""
         text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
         return text
+
+
+class TaggerRegistry:
+    """Simple tagger cache since somee taggers are expensive to setup"""
+
+    instances: Mapping[Type[ITagger], ITagger] = {}
+
+    @staticmethod
+    def get(factory: "ITaggerFactory") -> ITagger:
+        if isinstance(factory, ITagger):
+            return factory
+
+        if factory.identifier not in TaggerRegistry.instances:
+            TaggerRegistry.instances[factory.identifier] = factory.create()
+
+        return TaggerRegistry.instances[factory.identifier]
 
 
 def tag_protocol(tagger: ITagger, protocol: interface.Protocol, preprocess=False) -> interface.Protocol:
@@ -135,14 +160,21 @@ def tag_protocol_xml(
         raise
 
 
-def tag_protocols(tagger: ITagger, source_folder: str, target_folder: str, force: bool):
+def tag_protocols(
+    tagger: ITagger,
+    source_folder: str,
+    target_folder: str,
+    force: bool,
+    recursive: bool = False,
+):
     """Tags protocols in `source_folder`. Stores result in `target_folder`.
     Note: not used by Snakemake workflow (used by tag CLI script)
     """
 
-    source_files: list[str] = glob(join(source_folder, "prot-*.xml"))
+    source_files: list[str] = glob(join(source_folder, "prot-*.xml"), recursive=recursive)
     for source_file in tqdm(source_files):
-        target_file = join(target_folder, f"{strip_path_and_extension(source_file)}.zip")
+        subfolder: str = split(dirname(source_file))[1] if recursive else ''
+        target_file = join(target_folder, subfolder, f"{strip_path_and_extension(source_file)}.zip")
         if force or expired(target_file, source_file):
             tag_protocol_xml(source_file, target_file, tagger, storage_format="json", force=force)
         else:
