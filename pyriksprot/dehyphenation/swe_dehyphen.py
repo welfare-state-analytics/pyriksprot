@@ -11,10 +11,10 @@ This source code is heavily influenced by the source code found at https://gitla
 License: https://gitlab.com/Julipan/swedish-de-hyphenator/-/blob/master/LICENSE
 
 """
-from os.path import isfile, join
 import re
 from dataclasses import dataclass, field
 from enum import IntEnum
+from os.path import isfile, join
 from typing import Callable
 
 from .utility import load_dict, load_token_set, store_dict, store_token_set
@@ -89,7 +89,6 @@ class SwedishDehyphenator:
     word_frequencies_filename: str = field(default=WORD_FREQUENCIES_NAME)
 
     def __post_init__(self) -> "SwedishDehyphenator":
-
         if not isinstance(self.word_frequencies, (dict, type(None))):
             self.word_frequencies_filename: str = self.resolve_word_frequencies_filename()
             self.word_frequencies = load_dict(self.word_frequencies_filename)

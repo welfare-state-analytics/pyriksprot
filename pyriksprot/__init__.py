@@ -39,4 +39,12 @@ from .utility import (
     unlink,
 )
 from .workflows import compute_term_frequencies, extract_corpus_tags, extract_corpus_text
-from .workflows.tag import ITagger, TaggerRegistry, ITaggerFactory, TaggedDocument, tag_protocol, tag_protocol_xml, tag_protocols
+from .workflows.tag import (
+    ITagger,
+    ITaggerFactory,
+    TaggedDocument,
+    TaggerRegistry,
+    tag_protocol,
+    tag_protocol_xml,
+    tag_protocols,
+)

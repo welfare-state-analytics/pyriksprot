@@ -22,7 +22,6 @@ TaggedDocument = Mapping[str, List[str]]
 
 
 class ITaggerFactory(abc.ABC):
-
     identifier: str = "undefined"
 
     @abc.abstractmethod
