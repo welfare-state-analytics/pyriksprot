@@ -20,7 +20,7 @@ nj = os.path.normpath
 os.makedirs(jj("tests", "output"), exist_ok=True)
 
 
-WORD_FREQUENCY_FILENAME = './tests/output/riksdagen-corpus-term-frequencies.pkl'
+WORD_FREQUENCY_FILENAME = './tests/output/word-frequencies.pkl'
 DEHYPHEN_FOLDER = './tests/output'
 
 
