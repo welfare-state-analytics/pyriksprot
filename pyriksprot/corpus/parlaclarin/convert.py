@@ -79,7 +79,7 @@ def convert_protocol(
     output_filename: str = None,
     template_name: str = None,
     merge_strategy: to_speech.MergeStrategyType = to_speech.MergeStrategyType.who_speaker_note_id_sequence,
-    dehyphen_folder: str = None,
+    dehyphen_datadir: str = None,
 ):
     """Convert protocol in `input_filename' using template `template_name`. Store result in `output_filename`.
 
@@ -88,7 +88,7 @@ def convert_protocol(
         output_filename (str, optional): Target file. Defaults to None.
         template_name (str, optional): Template name (found in resource-folder). Defaults to None.
     """
-    set_dehyphenator(data_folder=dehyphen_folder)
+    set_dehyphenator(data_folder=dehyphen_datadir)
     protocol: interface.Protocol = parse.ProtocolMapper.parse(input_filename)
     content: str = ""
 

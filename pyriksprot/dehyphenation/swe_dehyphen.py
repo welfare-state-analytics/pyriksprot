@@ -11,7 +11,7 @@ This source code is heavily influenced by the source code found at https://gitla
 License: https://gitlab.com/Julipan/swedish-de-hyphenator/-/blob/master/LICENSE
 
 """
-import os
+from os.path import isfile, join
 import re
 from dataclasses import dataclass, field
 from enum import IntEnum
@@ -22,7 +22,7 @@ from .utility import load_dict, load_token_set, store_dict, store_token_set
 PARAGRAPH_MARKER = '##PARAGRAPH##'
 
 # pylint: disable=too-many-arguments
-jj = os.path.join
+jj = join
 
 
 class WhitelistReason(IntEnum):
@@ -69,12 +69,15 @@ class ParagraphMergeStrategy(IntEnum):
     MergeAll = 2
 
 
+WORD_FREQUENCIES_NAME: str = 'word-frequencies.pkl'
+
+
 @dataclass
 class SwedishDehyphenator:
     """Dehyphens Swedish text"""
 
     data_folder: str
-    word_frequencies: dict[str, int]
+    word_frequencies: dict[str, int] | str
 
     # Internal data
     whitelist: set[str] = field(default_factory=set)
@@ -83,16 +86,35 @@ class SwedishDehyphenator:
 
     paragraph_merge_strategy: ParagraphMergeStrategy = 0
 
-    def __post_init__(self) -> "SwedishDehyphenator":
-        if self.word_frequencies is None:
-            self.word_frequencies = os.path.join(self.data_folder, 'riksdagen-corpus-term-frequencies.pkl')
+    word_frequencies_filename: str = field(default=WORD_FREQUENCIES_NAME)
 
-        if isinstance(self.word_frequencies, str):
-            if not os.path.isfile(self.word_frequencies):
-                raise FileNotFoundError(self.word_frequencies)
-            self.word_frequencies = load_dict(self.word_frequencies)
+    def __post_init__(self) -> "SwedishDehyphenator":
+
+        if not isinstance(self.word_frequencies, (dict, type(None))):
+            self.word_frequencies_filename: str = self.resolve_word_frequencies_filename()
+            self.word_frequencies = load_dict(self.word_frequencies_filename)
 
         self.load()
+
+    def resolve_word_frequencies_filename(self) -> str:
+        if not isinstance(self.word_frequencies, str):
+            if not isfile(self.word_frequencies_filename):
+                return jj(self.data_folder, self.word_frequencies_filename)
+            return self.word_frequencies_filename
+
+        if isfile(self.word_frequencies):
+            return self.word_frequencies
+
+        if isfile(jj(self.data_folder, self.word_frequencies)):
+            return jj(self.data_folder, self.word_frequencies)
+
+        if isfile(jj(self.data_folder, self.word_frequencies_filename)):
+            return jj(self.data_folder, self.word_frequencies_filename)
+
+        if isfile(self.word_frequencies_filename):
+            return self.word_frequencies_filename
+
+        raise FileNotFoundError(f"expected TF file {self.word_frequencies} not found")
 
     @property
     def whitelist_filename(self) -> str:
@@ -212,7 +234,7 @@ class SwedishDehyphenator:
 
     @staticmethod
     def create_dehypen(data_folder: str, word_frequencies: str | dict = None) -> Callable[[str], str]:
-        """Create a dehypen service. Return wrapped dehypen function."""
+        """Create a dehyphen service. Return wrapped dehyphen function."""
         dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
             data_folder=data_folder, word_frequencies=word_frequencies
         )
