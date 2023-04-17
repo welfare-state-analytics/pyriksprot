@@ -69,6 +69,30 @@ def test_temporary_file():
     assert not Path(filename).is_file(), "file exists"
 
 
+def test_dotget():
+    assert pu.dotget({}, "apa", None) is None
+    assert pu.dotget({}, "apa", "olle") == "olle"
+    assert pu.dotget({}, "apa.olle", "olle") == "olle"
+    assert pu.dotget({'olle': 99}, "olle") == 99
+    assert pu.dotget({'olle': 99}, "olle.olle") is None
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.olle") is None
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.erik") == 98
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, ["olle.kalle"]) == 99
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, ["erik", "olle.kalle"]) == 99
+
+    assert pu.dget({}, "apa", default=None) is None
+    assert pu.dget({}, "apa", default="olle") == "olle"
+    assert pu.dget({}, "apa.olle", default="olle") == "olle"
+    assert pu.dget({'olle': 99}, "olle") == 99
+    assert pu.dget({'olle': 99}, "olle.olle") is None
+    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.olle") is None
+    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.erik") == 98
+    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
+    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
+    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "erik", "olle.kalle") == 99
+
+
 def test_dedent():
     assert pu.dedent("") == ""
     assert pu.dedent("apa\napa") == "apa\napa"

@@ -12,6 +12,8 @@ from .utility import (
     compose,
     dedent,
     deprecated,
+    dget,
+    dotget,
     ensure_path,
     flatten,
     hasattr_path,
@@ -37,4 +39,4 @@ from .utility import (
     unlink,
 )
 from .workflows import compute_term_frequencies, extract_corpus_tags, extract_corpus_text
-from .workflows.tag import ITagger, TaggedDocument, tag_protocol, tag_protocol_xml, tag_protocols
+from .workflows.tag import ITagger, TaggerRegistry, ITaggerFactory, TaggedDocument, tag_protocol, tag_protocol_xml, tag_protocols

@@ -48,6 +48,32 @@ class dotdict(dict):
     __delattr__ = dict.__delitem__
 
 
+def dotget(data: dict, path: str | list[str], default: Any = None) -> Any:
+    if path is None or not data:
+        return default
+
+    ps: list[str] = path if isinstance(path, (list, tuple)) else [path]
+
+    d = None
+
+    for p in ps:
+        d = data
+        for attr in p.split('.'):
+            d: dict = d.get(attr) if isinstance(d, dict) else None
+
+            if d is None:
+                break
+
+        if d is not None:
+            return d
+
+    return d or default
+
+
+def dget(data: dict, *paths: list[str], default: Any = None) -> Any:
+    return dotget(data, paths, default)
+
+
 def sync_delta_names(
     source_folder: str, source_extension: str, target_folder: str, target_extension: str, delete: bool = False
 ) -> Set(str):
