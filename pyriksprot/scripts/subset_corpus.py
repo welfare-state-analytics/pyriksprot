@@ -37,7 +37,6 @@ if __name__ == "__main__":
     #     'documents': 'swedeb-sample-protocols.txt',
     #     'target_folder': 'data/swedeb-samples/',
     #     'tag': 'v0.6.0',
-    #     'scripts_folder': None,
     # }
     # subset_corpus_and_metadata(**options)
     main()
