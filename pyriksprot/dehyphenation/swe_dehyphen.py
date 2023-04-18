@@ -17,6 +17,8 @@ from enum import IntEnum
 from os.path import isfile, join
 from typing import Callable
 
+from loguru import logger
+
 from .utility import load_dict, load_token_set, store_dict, store_token_set
 
 PARAGRAPH_MARKER = '##PARAGRAPH##'
@@ -234,6 +236,7 @@ class SwedishDehyphenator:
     @staticmethod
     def create_dehypen(data_folder: str, word_frequencies: str | dict = None) -> Callable[[str], str]:
         """Create a dehyphen service. Return wrapped dehyphen function."""
+        logger.info(f"dehyphen path: {data_folder}")
         dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
             data_folder=data_folder, word_frequencies=word_frequencies
         )
