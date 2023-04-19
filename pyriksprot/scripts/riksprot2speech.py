@@ -73,14 +73,13 @@ if __name__ == "__main__":
     # result = runner.invoke(
     #     main,
     #     [
-    #         '/data/westac/riksdagen_corpus_data/tagged_frames',
-    #         '/data/westac/riksdagen_corpus_data/tagged-speech-corpus.feather',
-    #         '--target-type',
-    #         'feather',
-    #         # '--compression-type',
-    #         # 'LZMA',
-    #         '--processes',
-    #         1,
+    #         '--options-filename',
+    #         'data/swedeb-data/dataset-01/opts/tagged-speeches/tagged_frames_speeches_lemma.feather.yml',
+    #         '--force',
+    #         'data/swedeb-data/dataset-01/v0.6.0/tagged_frames',
+    #         'data/swedeb-data/dataset-01/v0.6.0/riksprot_metadata.db',
+    #         'data/swedeb-data/dataset-01/v0.6.0/speeches/tagged_frames_speeches_lemma.feather'
+
     #     ],
     # )
     # print(result.output)

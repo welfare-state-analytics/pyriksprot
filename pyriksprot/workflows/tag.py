@@ -170,7 +170,7 @@ def tag_protocols(
     Note: not used by Snakemake workflow (used by tag CLI script)
     """
 
-    source_files: list[str] = glob(join(source_folder, "prot-*.xml"), recursive=recursive)
+    source_files: list[str] = glob(join(source_folder, "**/prot-*.xml"), recursive=recursive)
     for source_file in tqdm(source_files):
         subfolder: str = split(dirname(source_file))[1] if recursive else ''
         target_file = join(target_folder, subfolder, f"{strip_path_and_extension(source_file)}.zip")

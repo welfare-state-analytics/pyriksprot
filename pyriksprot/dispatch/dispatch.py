@@ -502,7 +502,7 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
 
     def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
         tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
-        fg = self.token2id.get  # lambda t: self.token2id[t]
+        fg = lambda t: self.token2id[t]  # pylint: disable=unnecessary-lambda-assignment
         pg = self.pos_schema.pos_to_id.get  # pylint: disable=unnecessary-lambda-assignment
 
         if not self.skip_text:
