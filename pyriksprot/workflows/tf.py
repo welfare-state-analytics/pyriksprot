@@ -92,7 +92,7 @@ def compute_term_frequencies(
                 if os.path.isfile(source):
                     filenames = [source]
                 elif os.path.isdir(source):
-                    filenames = glob(os.path.join(source, "*.xml"))
+                    filenames = glob(os.path.join(source, "**", "*.xml"), recursive=True)
                 else:
                     filenames = glob(source)
             elif isinstance(source, list):
