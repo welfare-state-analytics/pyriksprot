@@ -79,7 +79,7 @@ class SwedishDehyphenator:
     """Dehyphens Swedish text"""
 
     data_folder: str
-    word_frequencies: dict[str, int] | str
+    word_frequencies: dict[str, int] | str = None
 
     # Internal data
     whitelist: set[str] = field(default_factory=set)

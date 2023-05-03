@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import abc
-import itertools
 from functools import reduce
 from glob import glob
 from os.path import dirname, getmtime, isfile, join, split
@@ -62,17 +61,12 @@ class ITagger(abc.ABC):
     @staticmethod
     def to_csv(tagged_document: TaggedDocument, sep='\t') -> str:
         """Converts a TaggedDocument to a TSV string"""
-
-        tokens, lemmas, pos, xpos = (
-            tagged_document['token'],
-            tagged_document['lemma'],
-            tagged_document['pos'],
-            tagged_document['xpos'],
-        )
-        csv_str = '\n'.join(
-            itertools.chain(
-                [f"token{sep}lemma{sep}pos{sep}xpos"],
-                (f"{tokens[i]}{sep}{lemmas[i]}{sep}{pos[i]}{sep}{xpos[i]}" for i in range(0, len(tokens))),
+        columns: list[str] = [c for c in ['token', 'lemma', 'pos', 'xpos', 'sentence_id'] if c in tagged_document]
+        csv_str: str = (
+            sep.join(columns)
+            + '\n'
+            + '\n'.join(
+                sep.join(str(tagged_document[c][i]) for c in columns) for i in range(0, len(tagged_document['token']))
             )
         )
         return csv_str

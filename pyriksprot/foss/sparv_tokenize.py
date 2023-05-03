@@ -22,22 +22,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# NOTE: Temporarily inlined code from Sparv v4.0.0.
+# NOTE: A large part of this code is based on Sparv v4.0.0.
 # Sparv dependency is made optional (lacks Stanza v1.6 support which has improved performance)
 
+import abc
+import pickle
 import re
 from os.path import dirname
 from os.path import join as jj
-from typing import List
+from typing import Any, Iterable, Type
+
+import nltk
 
 # pylint: disable=no-else-continue, attribute-defined-outside-init consider-using-f-string
 
-MODEL_FILENAME: str = jj(dirname(__file__), "bettertokenizer.sv")
-SALDO_TOKENS_FILENAME: str = jj(dirname(__file__), "bettertokenizer.sv.saldo-tokens")
+RESOURCES_FOLDER: str = jj(dirname(__file__), "resources")
+MODEL_FILENAME: str = jj(RESOURCES_FOLDER, "bettertokenizer.sv")
+SALDO_TOKENS_FILENAME: str = jj(RESOURCES_FOLDER, "bettertokenizer.sv.saldo-tokens")
+SENTENCER_MODEL_FILENAME: str = jj(RESOURCES_FOLDER, "punkt-nltk-svenska.pickle")
+
+
+class ISegmenter(abc.ABC):
+    @classmethod
+    @property
+    def default_args(cls) -> dict[str, Any]:
+        return {}
+
+    @classmethod
+    def create(cls, **args) -> "ISegmenter":
+        return cls(**(cls.default_args | args))
+
+    @abc.abstractmethod
+    def tokenize(self, s: str) -> list[str | list[str]]:
+        return []
+
+    @abc.abstractmethod
+    def span_tokenize(self, s) -> list[tuple[int, int]]:
+        return []
 
 
 # This class belongs to sparv-pipeline (temporarily copied out)
-class BetterWordTokenizer:
+class BetterWordTokenizer(ISegmenter):
     """A word tokenizer based on the PunktWordTokenizer code.
 
     Heavily modified to add support for custom regular expressions, wordlists, and external configuration files.
@@ -69,7 +94,7 @@ class BetterWordTokenizer:
 
     re_punctuated_token = re.compile(r"\w.*\.$", re.UNICODE)
 
-    def __init__(self, model, token_list=None):
+    def __init__(self, model, token_list=None, **args):  # pylint: disable=unused-argument
         """Parse configuration file (model) and token_list (if supplied)."""
         self.case_sensitive = False
         self.patterns = {"misc": [], "tokens": []}
@@ -165,21 +190,60 @@ class BetterWordTokenizer:
             yield begin, begin + len(w)
             begin += len(w)
 
+    def tokenize(self, s: str) -> Iterable[str]:
+        for x, y in self.span_tokenize(s):
+            yield s[x:y]
 
-sparv_better_tokenizer = None
+    @classmethod
+    @property
+    def default_args(cls) -> dict[str, Any]:
+        return dict(model=MODEL_FILENAME, token_list=SALDO_TOKENS_FILENAME)
+
+
+class BetterSentenceTokenizer(ISegmenter):
+    def __init__(self, model_path: str = SENTENCER_MODEL_FILENAME):
+        with open(model_path, "rb") as fp:
+            train_text = pickle.load(fp, encoding="UTF-8")
+            self.segmenter = nltk.PunktSentenceTokenizer(train_text)
+
+    def span_tokenize(self, s: str) -> Iterable[tuple[int, int]]:
+        for a, b in self.segmenter.span_tokenize(s):
+            if s[a:b].strip():
+                yield (a, b)
+
+    def tokenize(self, s: str) -> Iterable[str]:
+        for a, b in self.span_tokenize(s):
+            yield s[a:b]
+
+
+class SegmenterRepository:
+    _instances: dict[Type, ISegmenter] = {}
+
+    @staticmethod
+    def get(seg_cls: Type[ISegmenter], **args) -> ISegmenter:
+        if seg_cls not in SegmenterRepository._instances:
+            SegmenterRepository._instances[seg_cls] = seg_cls.create(**args)
+        return SegmenterRepository._instances[seg_cls]
+
+    @staticmethod
+    def tokenizer():
+        return SegmenterRepository.get(BetterWordTokenizer)
+
+    @staticmethod
+    def sentenizer():
+        return SegmenterRepository.get(BetterSentenceTokenizer)
 
 
 class ModelNotFoundError(Exception):
     ...
 
 
-def default_tokenize(text: str) -> List[str]:
-    global sparv_better_tokenizer
+def default_tokenize(text: str, sentenize: bool = False) -> list[str]:
+    tokenize = SegmenterRepository.tokenizer().tokenize
+    if sentenize:
+        return list(tokenize(s) for s in SegmenterRepository.sentenizer().tokenize(text))
+    return tokenize(text)
 
-    sparv_better_tokenizer = sparv_better_tokenizer or BetterWordTokenizer(
-        model=MODEL_FILENAME, token_list=SALDO_TOKENS_FILENAME
-    )
 
-    span_tokens = list(sparv_better_tokenizer.span_tokenize(text))
-    tokens = [text[x:y] for x, y in span_tokens]
-    return tokens
+def default_sentenize(text: str) -> list[str]:
+    return SegmenterRepository.sentenizer().tokenize(text)
