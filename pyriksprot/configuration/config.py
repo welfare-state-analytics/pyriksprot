@@ -166,7 +166,7 @@ class Config:
         return Config(data=data, context=context, filename=source if Config.is_config_path(source) else None)
 
     @staticmethod
-    def is_config_path(source)-> bool:
+    def is_config_path(source) -> bool:
         if not isinstance(source, str):
             return False
         return source.endswith(".yaml") or source.endswith(".yml") or pathvalidate.is_valid_filepath(source)

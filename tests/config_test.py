@@ -1,6 +1,17 @@
+#     assert x.target.folder == "tests/output/tagged_frames"
+#     assert x.target.extension == "zip"
+import os
 from dataclasses import dataclass
+from os.path import join as jj
+from os.path import normpath as nj
+from pathlib import Path
 
+import pytest
+
+from pyriksprot import ITagger, ITaggerFactory, configuration
 from pyriksprot.configuration import ConfigValue, configure_context
+from pyriksprot.utility import temporary_file
+from pyriksprot.workflows import tag
 
 
 def inject_config(fn_or_cls):
@@ -79,17 +90,7 @@ def test_decorator():
 #     configure_context("test", "tests/test_data/config.yml")
 #     x = foox()
 
-#     assert x.target.folder == "tests/output/tagged_frames"
-#     assert x.target.extension == "zip"
-import os
-from os.path import join as jj
-from os.path import normpath as nj
-from pathlib import Path
 
-import pytest
-from pyriksprot import ITagger, ITaggerFactory, configuration
-from pyriksprot.utility import temporary_file
-from pyriksprot.workflows import tag
 
 TEST_DATA_FOLDER = "tests/output/data"
 TEST_TAG = "v0.9.9"

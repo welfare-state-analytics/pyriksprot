@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields
 import functools
-from inspect import isclass
 import inspect
+from dataclasses import dataclass, field, fields
+from inspect import isclass
 from typing import Any, Callable, Generic, Type, TypeVar
 
 from ..utility import dget
