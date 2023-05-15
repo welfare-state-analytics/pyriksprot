@@ -91,7 +91,6 @@ def test_decorator():
 #     x = foox()
 
 
-
 TEST_DATA_FOLDER = "tests/output/data"
 TEST_TAG = "v0.9.9"
 
