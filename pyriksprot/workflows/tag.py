@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-import itertools
+import importlib
 from functools import reduce
 from glob import glob
 from os.path import dirname, getmtime, isfile, join, split
@@ -14,6 +14,8 @@ from pyriksprot.corpus.parlaclarin import parse
 from pyriksprot.corpus.tagged import persist
 
 from .. import interface
+from .. import preprocess as pp
+from ..configuration import ConfigValue, inject_config
 from ..utility import ensure_path, strip_path_and_extension, touch, unlink
 
 METADATA_FILENAME: str = 'metadata.json'
@@ -31,7 +33,7 @@ class ITaggerFactory(abc.ABC):
 
 class ITagger(abc.ABC):
     def __init__(self, preprocessors: Callable[[str], str] = None):
-        self.preprocessors: Callable[[str], str] = preprocessors or []
+        self.preprocessors: Callable[[str], str] = self.resolve_preprocessors(preprocessors)
 
     def tag(self, text: Union[str, List[str]], preprocess: bool = True) -> List[TaggedDocument]:
         """Tag text. Return dict if lists."""
@@ -62,17 +64,12 @@ class ITagger(abc.ABC):
     @staticmethod
     def to_csv(tagged_document: TaggedDocument, sep='\t') -> str:
         """Converts a TaggedDocument to a TSV string"""
-
-        tokens, lemmas, pos, xpos = (
-            tagged_document['token'],
-            tagged_document['lemma'],
-            tagged_document['pos'],
-            tagged_document['xpos'],
-        )
-        csv_str = '\n'.join(
-            itertools.chain(
-                [f"token{sep}lemma{sep}pos{sep}xpos"],
-                (f"{tokens[i]}{sep}{lemmas[i]}{sep}{pos[i]}{sep}{xpos[i]}" for i in range(0, len(tokens))),
+        columns: list[str] = [c for c in ['token', 'lemma', 'pos', 'xpos', 'sentence_id'] if c in tagged_document]
+        csv_str: str = (
+            sep.join(columns)
+            + '\n'
+            + '\n'.join(
+                sep.join(str(tagged_document[c][i]) for c in columns) for i in range(0, len(tagged_document['token']))
             )
         )
         return csv_str
@@ -81,6 +78,39 @@ class ITagger(abc.ABC):
         """Transform `text` with preprocessors."""
         text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
         return text
+
+    def resolve_preprocessors(self, preprocessors: str | list[Callable[[str], str] | str]):
+        if isinstance(preprocessors, str):
+            preprocessors = preprocessors.split(",")
+
+        if not any(isinstance(p, str) for p in preprocessors):
+            return preprocessors
+
+        self.is_satisfied(preprocessors)
+
+        return [pp.Registry.items.get(p) if isinstance(p, str) else p for p in preprocessors]
+
+    def is_satisfied(self, preprocessors: str | list[Callable[[str], str] | str]) -> bool:
+        keys: list[str] = [p for p in preprocessors if isinstance(p, str)]
+        unknown_keys: list[str] = [p for p in keys if not p in pp.Registry.items]
+        if unknown_keys:
+            raise ValueError(f"unknown preprocessor: {', '.join(unknown_keys)}")
+        return True
+
+
+class TaggerProvider:
+    @inject_config
+    @staticmethod
+    def tagger_factory(
+        module_name: str | ConfigValue = ConfigValue(key="tagger:module"),
+    ) -> ITaggerFactory:
+        if module_name is None:
+            return None
+        tagger_module = importlib.import_module(module_name)
+        abstract_factory = getattr(tagger_module, "tagger_factory")
+        if abstract_factory is None:
+            raise ValueError(f"Module {module_name} does not implement `tagger_factory`.")
+        return abstract_factory()
 
 
 class TaggerRegistry:

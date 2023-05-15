@@ -38,7 +38,7 @@ def norm_join(a: str, *paths: str):
 
 
 class dotdict(dict):
-    """dot.notation access to dictionary attributes"""
+    """dot.notation access to  dictionary attributes"""
 
     def __getattr__(self, *args):
         value = self.get(*args)
@@ -48,7 +48,7 @@ class dotdict(dict):
     __delattr__ = dict.__delitem__
 
 
-def dotget(data: dict, path: str | list[str], default: Any = None) -> Any:
+def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
     if path is None or not data:
         return default
 
@@ -57,12 +57,7 @@ def dotget(data: dict, path: str | list[str], default: Any = None) -> Any:
     d = None
 
     for p in ps:
-        d = data
-        for attr in p.split('.'):
-            d: dict = d.get(attr) if isinstance(d, dict) else None
-
-            if d is None:
-                break
+        d = dotget(data, p)
 
         if d is not None:
             return d
@@ -70,8 +65,39 @@ def dotget(data: dict, path: str | list[str], default: Any = None) -> Any:
     return d or default
 
 
-def dget(data: dict, *paths: list[str], default: Any = None) -> Any:
-    return dotget(data, paths, default)
+def dotexists(data: dict, *paths: list[str]) -> bool:
+    for path in paths:
+        if dotget(data, path, default="@@") != "@@":
+            return True
+    return False
+
+
+def dotexpand(path: str) -> list[str]:
+    """Expands paths with ',' and ':'."""
+    paths = []
+    for p in path.replace(' ', '').split(','):
+        if not p:
+            continue
+        if ':' in p:
+            paths.extend([p.replace(":", "."), p.replace(":", "_")])
+        else:
+            paths.append(p)
+    return paths
+
+
+def dotget(data: dict, path: str, default: Any = None) -> Any:
+    """Gets element from dict. Path can be x.y.y or x_y_y or x:y:y.
+    if path is x:y:y then element is search using borh x.y.y or x_y_y."""
+
+    for key in dotexpand(path):
+        d: dict = data
+        for attr in key.split('.'):
+            d: dict = d.get(attr) if isinstance(d, dict) else None
+            if d is None:
+                break
+        if d is not None:
+            return d
+    return default
 
 
 def sync_delta_names(
@@ -335,11 +361,6 @@ def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
     return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)
 
 
-def dedent(text: str) -> str:
-    """Remove whitespaces before and after newlines"""
-    return '\n'.join(x.strip() for x in text.split('\n'))
-
-
 def is_empty(filename: str) -> bool:
     """Check if file is empty."""
     return os.path.exists(filename) and os.stat(filename).st_size == 0
@@ -433,3 +454,28 @@ def revdict(d: dict) -> dict:
 
 def props(cls: Type) -> list[str]:
     return [i for i in cls.__dict__.keys() if i[:1] != '_']
+
+
+# def register(registry: dict | Type[Any], key: str = None):
+#     if not isinstance(registry, dict):
+#         if not hasattr(registry, "registry"):
+#             registry.registry = {}
+#             registry = registry.registry
+
+#     def registrar(func):
+#         registry[key or func.__name__] = func
+#         return func
+
+#     return registrar
+
+
+# class Registry:
+#     items: dict = {}
+
+#     @classmethod
+#     def register(cls, args):
+#         def decorator(fn):
+#             cls.items[fn.__name__] = args
+#             return fn
+
+#         return decorator

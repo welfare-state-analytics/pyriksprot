@@ -8,8 +8,10 @@ import pytest
 
 from pyriksprot import interface
 from pyriksprot import metadata as md
+from pyriksprot import preprocess as pr
 from pyriksprot import utility as pu
 from pyriksprot.corpus.iterate import ProtocolSegment
+from pyriksprot.utility import dotexpand
 from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 
 from . import fakes
@@ -69,36 +71,46 @@ def test_temporary_file():
     assert not Path(filename).is_file(), "file exists"
 
 
-def test_dotget():
-    assert pu.dotget({}, "apa", None) is None
-    assert pu.dotget({}, "apa", "olle") == "olle"
-    assert pu.dotget({}, "apa.olle", "olle") == "olle"
-    assert pu.dotget({'olle': 99}, "olle") == 99
-    assert pu.dotget({'olle': 99}, "olle.olle") is None
-    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.olle") is None
-    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.erik") == 98
-    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
-    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, ["olle.kalle"]) == 99
-    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, ["erik", "olle.kalle"]) == 99
+def test_dotexpand():
+    assert not dotexpand("")
+    assert dotexpand("a") == ["a"]
+    assert dotexpand("a.b") == ["a.b"]
+    assert dotexpand("a.b,c.d") == ["a.b", "c.d"]
+    assert dotexpand("a:b,c.d") == ["a.b", "a_b", "c.d"]
+    assert dotexpand("a:b, c.d") == ["a.b", "a_b", "c.d"]
 
-    assert pu.dget({}, "apa", default=None) is None
+
+def test_dotget():
+    assert pu.dget({}, "apa", None) is None
     assert pu.dget({}, "apa", default="olle") == "olle"
     assert pu.dget({}, "apa.olle", default="olle") == "olle"
+    assert pu.dget({}, "apa:olle", default="olle") == "olle"
     assert pu.dget({'olle': 99}, "olle") == 99
     assert pu.dget({'olle': 99}, "olle.olle") is None
     assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.olle") is None
     assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.erik") == 98
     assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
-    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
     assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "erik", "olle.kalle") == 99
+    assert pu.dget({'olle': {'kalle': 99, 'erik': 98}}, "olle:kalle") == 99
+    assert pu.dget({'olle_kalle': 99, 'erik': 98}, "olle:kalle") == 99
+
+    assert pu.dotget({}, "apa", default=None) is None
+    assert pu.dotget({}, "apa", default="olle") == "olle"
+    assert pu.dotget({}, "apa.olle", default="olle") == "olle"
+    assert pu.dotget({'olle': 99}, "olle") == 99
+    assert pu.dotget({'olle': 99}, "olle.olle") is None
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.olle") is None
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.erik") == 98
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
+    assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle:kalle") == 99
 
 
 def test_dedent():
-    assert pu.dedent("") == ""
-    assert pu.dedent("apa\napa") == "apa\napa"
-    assert pu.dedent("apa\n\napa\n") == "apa\n\napa\n"
-    assert pu.dedent("apa\n\n  apa\n") == "apa\n\napa\n"
-    assert pu.dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
+    assert pr.dedent("") == ""
+    assert pr.dedent("apa\napa") == "apa\napa"
+    assert pr.dedent("apa\n\napa\n") == "apa\n\napa\n"
+    assert pr.dedent("apa\n\n  apa\n") == "apa\n\napa\n"
+    assert pr.dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
 
 
 def test_probe_filename():

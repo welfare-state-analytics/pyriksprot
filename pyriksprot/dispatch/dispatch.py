@@ -18,7 +18,7 @@ from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.dispatch.item import DispatchItem
 from pyriksprot.dispatch.utility import decode_protocol_segment_filename, to_temporal_category
 from pyriksprot.foss.pos_tags import PoS_Tag_Scheme, PoS_TAGS_SCHEMES
-from pyriksprot.foss.sparv_tokenize import default_tokenize
+from pyriksprot.foss.sparv_tokenize import SegmenterRepository
 from pyriksprot.foss.stopwords import STOPWORDS
 from pyriksprot.metadata import Codecs
 
@@ -286,7 +286,7 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
         raise ValueError(f"{type(self).__name__}: item has no protocol segments")
 
     def _dispatch_index_item(self, item: IDispatchItem) -> None:
-        tokens: list[str] = default_tokenize(item.text)
+        tokens: list[str] = SegmenterRepository.default_tokenize(item.text)
         tokens = [t for t in tokens if len(t) > 1 or t not in string.punctuation]
         item.n_tokens = len(tokens)
         return super()._dispatch_index_item(item)

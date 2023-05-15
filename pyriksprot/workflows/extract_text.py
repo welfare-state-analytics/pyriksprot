@@ -9,7 +9,7 @@ from pyriksprot.corpus.parlaclarin import iterate
 
 from .. import dehyphenation, interface
 from .. import metadata as md
-from .. import utility
+from .. import preprocess as pp
 from ..corpus import corpus_index
 from ..dispatch import dispatch, merge
 
@@ -70,7 +70,7 @@ def extract_corpus_text(
 
     def preprocess(item: ProtocolSegment) -> None:
         if dedent:
-            item.data = utility.dedent(item.data)
+            item.data = pp.dedent(item.data)
 
         if dehypenator:
             item.data = dehypenator(item.data)  # pylint: disable=not-callable

@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 
 from tqdm.auto import tqdm
 
-from pyriksprot.foss.sparv_tokenize import default_tokenize
+from pyriksprot.foss.sparv_tokenize import SegmenterRepository
 
 from .iterate import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
 
@@ -23,7 +23,7 @@ class TermFrequencyCounter:
             do_lower_case (bool, optional): [description]. Defaults to True.
         """
 
-        self._tokenize: Callable[[Any], List[str]] = tokenizer or default_tokenize
+        self._tokenize: Callable[[Any], List[str]] = tokenizer or SegmenterRepository.create_tokenize(False, False)
         self._do_lower_case: bool = do_lower_case
         self._progress: bool = progress
 
