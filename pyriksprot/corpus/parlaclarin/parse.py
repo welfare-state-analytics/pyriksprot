@@ -6,7 +6,7 @@ from loguru import logger
 
 from pyriksprot import interface
 from pyriksprot.foss import untangle
-from pyriksprot.utility import dedent as dedent_text
+from pyriksprot.preprocess import dedent as dedent_text
 
 XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 

@@ -8,36 +8,13 @@ from click import echo
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 
 from pyriksprot import to_speech
-from pyriksprot.dehyphenation import SwedishDehyphenator
-from pyriksprot.foss.sparv_tokenize import default_tokenize
-from pyriksprot.utility import dedent, strip_paths
+from pyriksprot.preprocess import dedent, dehyphen
+from pyriksprot.utility import strip_paths
 
 from . import parse
 
 if TYPE_CHECKING:
     from .. import interface
-
-__dehyphenator: SwedishDehyphenator = None
-
-
-def get_dehyphenator() -> SwedishDehyphenator:
-    return __dehyphenator
-
-
-def set_dehyphenator(data_folder: str) -> SwedishDehyphenator:
-    global __dehyphenator
-    __dehyphenator = SwedishDehyphenator(data_folder=data_folder, word_frequencies=None)
-
-
-def dehyphen(text: str) -> str:
-    """Remove hyphens from `text`."""
-    dehyphenated_text = get_dehyphenator().dehyphen_text(text)
-    return dehyphenated_text
-
-
-def pretokenize(text: str) -> str:
-    """Tokenize `text`, then join resulting tokens."""
-    return ' '.join(default_tokenize(text))
 
 
 JINJA_ENV = Environment(
@@ -79,7 +56,6 @@ def convert_protocol(
     output_filename: str = None,
     template_name: str = None,
     merge_strategy: to_speech.MergeStrategyType = to_speech.MergeStrategyType.who_speaker_note_id_sequence,
-    dehyphen_datadir: str = None,
 ):
     """Convert protocol in `input_filename' using template `template_name`. Store result in `output_filename`.
 
@@ -88,7 +64,6 @@ def convert_protocol(
         output_filename (str, optional): Target file. Defaults to None.
         template_name (str, optional): Template name (found in resource-folder). Defaults to None.
     """
-    set_dehyphenator(data_folder=dehyphen_datadir)
     protocol: interface.Protocol = parse.ProtocolMapper.parse(input_filename)
     content: str = ""
 

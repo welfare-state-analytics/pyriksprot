@@ -19,6 +19,7 @@ from typing import Callable
 
 from loguru import logger
 
+from ..configuration import ConfigValue, inject_config
 from .utility import load_dict, load_token_set, store_dict, store_token_set
 
 PARAGRAPH_MARKER = '##PARAGRAPH##'
@@ -74,12 +75,15 @@ class ParagraphMergeStrategy(IntEnum):
 WORD_FREQUENCIES_NAME: str = 'word-frequencies.pkl'
 
 
+@inject_config
 @dataclass
 class SwedishDehyphenator:
     """Dehyphens Swedish text"""
 
-    data_folder: str
-    word_frequencies: dict[str, int] | str = None
+    data_folder: str | ConfigValue = ConfigValue.create_field(key="dehyphen:folder", default="/data")
+    word_frequencies: dict[str, int] | str | ConfigValue = ConfigValue.create_field(
+        key="dehyphen:tf_filename,tf_filename", default=None
+    )
 
     # Internal data
     whitelist: set[str] = field(default_factory=set)
