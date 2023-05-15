@@ -28,9 +28,10 @@ SOFTWARE.
 import abc
 import pickle
 import re
+from functools import cache, cached_property
 from os.path import dirname
 from os.path import join as jj
-from typing import Any, Iterable, Type
+from typing import Any, Callable, Iterable, Type
 
 import nltk
 
@@ -59,6 +60,11 @@ class ISegmenter(abc.ABC):
     @abc.abstractmethod
     def span_tokenize(self, s) -> list[tuple[int, int]]:
         return []
+
+    def tokenize2(self, s: str) -> Iterable[tuple[str, int, int]]:
+        return [(s[x:y], x, y) for x, y in self.span_tokenize(s)]
+        # for x, y in self.span_tokenize(s):
+        #     yield s[x:y], x, y
 
 
 # This class belongs to sparv-pipeline (temporarily copied out)
@@ -182,7 +188,7 @@ class BetterWordTokenizer(ISegmenter):
 
         return words
 
-    def span_tokenize(self, s):
+    def span_tokenize(self, s: str) -> Iterable[tuple[int, int]]:
         """Tokenize s."""
         begin = 0
         for w in self.word_tokenize(s):
@@ -216,34 +222,117 @@ class BetterSentenceTokenizer(ISegmenter):
             yield s[a:b]
 
 
-class SegmenterRepository:
-    _instances: dict[Type, ISegmenter] = {}
+class BetterWordSentenceTokenizer(ISegmenter):
+    def __init__(self, sentenize: bool = False) -> None:
+        self.sentenize = sentenize
 
-    @staticmethod
-    def get(seg_cls: Type[ISegmenter], **args) -> ISegmenter:
-        if seg_cls not in SegmenterRepository._instances:
-            SegmenterRepository._instances[seg_cls] = seg_cls.create(**args)
-        return SegmenterRepository._instances[seg_cls]
-
-    @staticmethod
-    def tokenizer():
+    @cached_property
+    def tokenizer(self) -> ISegmenter:
         return SegmenterRepository.get(BetterWordTokenizer)
 
-    @staticmethod
-    def sentenizer():
+    @cached_property
+    def sentenizer(self):
         return SegmenterRepository.get(BetterSentenceTokenizer)
+
+    @cached_property
+    def _tokenize(self) -> Callable[[str], list[str | list[str]]]:
+        return self.create_tokenize(self.sentenize, False)
+
+    @cached_property
+    def _span_tokenize(self) -> Callable[[str], list[str | list[str]]]:
+        return self.create_tokenize(self.sentenize, True)
+
+    def tokenize(self, s: str) -> list[str | list[str]]:
+        return self._tokenize(s)
+
+    def span_tokenize(self, s: str) -> list[tuple[int, int] | list[tuple[int, int]]]:
+        return self._span_tokenize(s)
+
+    def tokenize2(self, s: str) -> Iterable[tuple[str, int, int]]:
+        if not self.sentenize:
+            return [(s[x:y], x, y) for x, y in self.tokenizer.span_tokenize(s)]
+        return [[(t[x:y], x, y) for x, y in self.tokenizer.span_tokenize(t)] for t in self.sentenizer.tokenize(s)]
+
+    def create_tokenize(
+        self, sentenize: bool = False, return_spans: bool = False
+    ) -> Callable[[str], list[str | list[str] | tuple[str, int, int] | list[tuple[str, int, int]]]]:
+        """Creates a tokenize functions for given args."""
+        tokenize = self.tokenizer.tokenize if not return_spans else self.tokenizer.span_tokenize
+
+        if not sentenize:
+            return tokenize
+
+        sentenize = self.sentenizer.tokenize
+        return lambda t: list(list(tokenize(s)) for s in sentenize(t))
+
+
+class SegmenterRepository:
+    @staticmethod
+    @cache
+    def get(seg_cls: Type[ISegmenter], **args) -> ISegmenter:
+        return seg_cls.create(**args)
+
+    @staticmethod
+    def tokenizer(**args) -> ISegmenter:
+        return SegmenterRepository.get(BetterWordTokenizer, **args)
+
+    @staticmethod
+    def sentenizer(**args):
+        return SegmenterRepository.get(BetterSentenceTokenizer, **args)
+
+    @staticmethod
+    def word_sentence_tokenizer(sentenize: bool = False) -> ISegmenter:
+        return SegmenterRepository.get(BetterWordSentenceTokenizer, sentenize=sentenize)
+
+    @staticmethod
+    def create_tokenize(
+        sentenize: bool = False, return_spans: bool = False
+    ) -> Callable[[str], list[str | list[str] | tuple[str, int, int] | list[tuple[str, int, int]]]]:
+        """Creates a tokenize functions for given args."""
+        tokenizer: ISegmenter = SegmenterRepository.tokenizer()
+        tokenize = tokenizer.tokenize if not return_spans else tokenizer.tokenize2
+
+        if not sentenize:
+            return tokenize
+
+        sentenizer = SegmenterRepository.sentenizer()
+        sentenize = sentenizer.tokenize
+        return lambda t: list(list(tokenize(s)) for s in sentenize(t))
+
+    @staticmethod
+    def default_tokenize(
+        text: str, sentenize: bool = False, return_spans: bool = False
+    ) -> list[str | list[str] | tuple[str, int, int] | list[tuple[str, int, int]]]:
+        """Split `text` into tokens. Returns tokens.
+
+        Args:
+            text (str): Text to be tokenized.
+            sentenize (bool, optional): Return a list of tokens for each sentence. Defaults to False.
+            return_spans (bool, optional): Also return start/end index for each token. Defaults to False.
+
+        Returns:
+            list[str]: list of tokens when sentenize and return_spans is False
+            list[list[str]]: list of lists of tokens when sentenize is True and return_spans is False
+            list[tuple[str, int, int]]: list token-span-tuples when sentenize is False and return_spans is True
+            list[list[tuple[str, int, int]] : list of lists of token-span-tuples when sentenize is True and return_spans is True
+        """
+
+        tokenize = (
+            SegmenterRepository.tokenizer().tokenize if not return_spans else SegmenterRepository.tokenizer().tokenize2
+        )
+        if sentenize:
+            return list(tokenize(s) for s in SegmenterRepository.sentenizer().tokenize(text))
+        return tokenize(text)
+
+    @staticmethod
+    def default_sentenize(text: str) -> list[str]:
+        return SegmenterRepository.sentenizer().tokenize(text)
 
 
 class ModelNotFoundError(Exception):
     ...
 
 
-def default_tokenize(text: str, sentenize: bool = False) -> list[str]:
-    tokenize = SegmenterRepository.tokenizer().tokenize
-    if sentenize:
-        return list(tokenize(s) for s in SegmenterRepository.sentenizer().tokenize(text))
-    return tokenize(text)
-
-
-def default_sentenize(text: str) -> list[str]:
-    return SegmenterRepository.sentenizer().tokenize(text)
+create_tokenize = SegmenterRepository.create_tokenize
+default_tokenize = SegmenterRepository.tokenizer().tokenize
+default_sentenize = SegmenterRepository.default_sentenize
