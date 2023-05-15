@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 from functools import cached_property
 from inspect import isclass
-from os.path import abspath, isdir, isfile, join, normpath
+from os.path import abspath, isdir, join, normpath
 from pathlib import Path
 from typing import Any, Type, TypeVar
 
