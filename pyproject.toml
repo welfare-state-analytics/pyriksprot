@@ -37,6 +37,8 @@ pygit2 = "^1.11.1"
 sqlalchemy = "^2.0.6"
 psycopg2-binary = "^2.9.5"
 nltk = "^3.8.1"
+dynaconf = "^3.1.12"
+pathvalidate = "^2.5.2"
 
 [tool.poetry.dev-dependencies]
 black = "*"
