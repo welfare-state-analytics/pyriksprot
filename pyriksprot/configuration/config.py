@@ -94,10 +94,19 @@ class Config:
     def source(self) -> SourceConfig:
         return SourceConfig(
             repository_folder=nj(
-                dget(self.data, "repository:folder", default=nj(self.data_folder, "riksdagen-corpus"))
+                dget(
+                    self.data,
+                    "repository:folder",
+                    "source.repository:folder",
+                    default=nj(self.data_folder, "riksdagen-corpus"),
+                )
             ),
             repository_tag=dget(
-                self.data, "tag", "repository.tag", "repository_tag", default=os.environ.get("RIKSPROT_REPOSITORY_TAG")
+                self.data,
+                "tag",
+                "repository:tag",
+                "source.repository:tag",
+                default=os.environ.get("RIKSPROT_REPOSITORY_TAG"),
             ),
         )
 
@@ -111,9 +120,9 @@ class Config:
     @cached_property
     def extract(self) -> ExtractConfig:
         return ExtractConfig(
-            folder=nj(dget(self.data, "export:folder")),
-            template=dget(self.data, "export:template"),
-            extension=dget(self.data, "export:extension"),
+            folder=nj(dget(self.data, "export:folder", "extract:folder")),
+            template=dget(self.data, "export:template", "extract:template"),
+            extension=dget(self.data, "export:extension", "extract:extension"),
         )
 
     @cached_property

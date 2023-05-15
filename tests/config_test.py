@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from os.path import join as jj
 from os.path import normpath as nj
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -96,9 +97,12 @@ TEST_TAG = "v0.9.9"
 
 SIMPLE_YAML_STR1: str = f"""
 root_folder: {TEST_DATA_FOLDER}
+source:
+    folder: /data/riksdagen-corpus/corpus/protocols
+    repository_tag: {TEST_TAG}
+    repository_folder: /data/riksdagen-corpus
+    repository_url: https://github.com/welfare-state-analytics/riksdagen-corpus.git
 target_folder: {TEST_DATA_FOLDER}/tagged_frames
-repository_folder: /data/riksdagen-corpus
-repository_tag: {TEST_TAG}
 export_folder: /data/exports
 export_template: /data/templates/speeches.cdata.xml
 export_extension: xml
@@ -106,10 +110,12 @@ export_extension: xml
 
 SIMPLE_YAML_STR2: str = f"""
 root_folder: {TEST_DATA_FOLDER}
+source:
+    folder: /data/riksdagen-corpus/corpus/protocols
+    repository_folder: /data/riksdagen-corpus
+    repository_tag: {TEST_TAG}
+    repository_url: https://github.com/welfare-state-analytics/riksdagen-corpus.git
 target_folder: {TEST_DATA_FOLDER}/tagged_frames
-repository:
-  folder: /data/riksdagen-corpus
-  tag: {TEST_TAG}
 export:
   folder: /data/exports
   template: /data/templates/speeches.cdata.xml
@@ -161,9 +167,9 @@ def test_load_yaml_str(yaml_str: str):
         else config.get("source:repository_folder")
     )
 
-    assert config.get("extract:folder") == "/data/exports"
-    assert config.get("extract:template") == "/data/templates/speeches.cdata.xml"
-    assert config.get("extract:extension") == "xml"
+    assert config.get("export:folder") == "/data/exports"
+    assert config.get("export:template") == "/data/templates/speeches.cdata.xml"
+    assert config.get("export:extension") == "xml"
 
     assert config.dehyphen.folder == nj(data_folder)
     assert config.dehyphen.tf_filename == jj(data_folder, "word-frequencies.pkl")
@@ -195,7 +201,10 @@ dehyphen:
     assert config.get("tagger:use_gpu") is False
     assert config.get("dehyphen:folder") == "tests/output"
 
-    factory: ITaggerFactory = tag.TaggerProvider.tagger_factory(module_name=config.get("tagger:module", default=None))
+    with mock.patch("importlib.import_module", return_value=mock.MagicMock()):
+        factory: ITaggerFactory = tag.TaggerProvider.tagger_factory(
+            module_name=config.get("tagger:module", default=None)
+        )
 
     assert factory is not None
 
