@@ -43,6 +43,7 @@ from .workflows.tag import (
     ITaggerFactory,
     TaggedDocument,
     TaggerRegistry,
+    TaggerProvider,
     tag_protocol,
     tag_protocol_xml,
     tag_protocols,
