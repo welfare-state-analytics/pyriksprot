@@ -79,7 +79,7 @@ class ITagger(abc.ABC):
         text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
         return text
 
-    def resolve_preprocessors(self, preprocessors: str | list[Callable[[str], str] | str]):
+    def resolve_preprocessors(self, preprocessors: str | list[Callable[[str], str] | str]) -> list[Callable[[str], str]]:
         if isinstance(preprocessors, str):
             preprocessors = preprocessors.split(",")
 
