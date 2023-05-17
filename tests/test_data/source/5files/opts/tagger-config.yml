@@ -1,0 +1,17 @@
+root_folder: .
+source:
+  folder: ./v0.6.0/parlaclarin/protocols
+  tag: v0.6.0
+dehyphen:
+  folder: ./v0.6.0/dehyphen_datadir
+  tf_filename: ./v0.6.0/dehyphen_datadir/word-frequencies.pkl
+tagger:
+  module: pyriksprot_tagger.taggers.stanza_tagger
+  stanza_datadir: /data/sparv/models/stanza
+  preprocessors: "dedent,dehyphen,strip,pretokenize"
+  lang: "sv"
+  processors: "tokenize,lemma,pos"
+  tokenize_pretokenized: true
+  tokenize_no_ssplit: true
+  use_gpu: true
+  num_threads: 1
