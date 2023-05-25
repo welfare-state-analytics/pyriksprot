@@ -12,16 +12,17 @@ jj = os.path.join
 
 
 def test_ccc():
-
     corpora: Corpora = Corpora(registry_path="/usr/local/share/cwb/registry/")
 
-    corpus = Corpus(
-        corpus_name="RIKSPROT_V060_TEST",
-        registry_path="/usr/local/share/cwb/registry/"
+    corpus = Corpus(corpus_name="RIKSPROT_V060_TEST", registry_path="/usr/local/share/cwb/registry/")
+    dump = corpus.query(
+        '[lemma="Sverige"]',
+        context_left=5,
+        context_right=5,
     )
-    dump = corpus.query('[lemma="Sverige"]',  context_left=5, context_right=5,)
     dump.concordance()
     pass
+
 
 def test_protocol_to_vrt():
     filename: str = "tests/test_data/source/5files/v0.6.0/tagged_frames/199192/prot-199192--127.zip"

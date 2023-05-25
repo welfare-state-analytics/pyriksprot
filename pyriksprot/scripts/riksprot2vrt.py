@@ -6,7 +6,7 @@ from os.path import join as jj
 
 import click
 
-from pyriksprot.workflows.export_vrt import export_vrt, VrtExportBatch
+from pyriksprot.workflows.export_vrt import VrtExportBatch, export_vrt
 
 
 @click.command()
@@ -62,7 +62,7 @@ def main(
         if len(batches) == 0:
             click.echo("No batches found. Aborting.")
             sys.exit(1)
-            
+
         os.makedirs(os.path.dirname(batches[0].target), exist_ok=True)
         existing_targets: list[str] = [b.target for b in batches if os.path.exists(b.target)]
         if existing_targets:

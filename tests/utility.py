@@ -196,4 +196,3 @@ def create_test_speech_corpus(*, source_folder: str, tag: str, database_name: st
             compress_type=dispatch.CompressType(compress_type),
             merge_strategy=merge_strategy,
         )
-

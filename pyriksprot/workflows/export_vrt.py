@@ -9,6 +9,7 @@ from .. import interface
 
 VrtExportBatch = namedtuple('VrtExportBatch', 'title source target')
 
+
 def export_batch(batch: VrtExportBatch, tags, tag: str, date: str):
     """Export a batch of protocols to VRT format."""
     protocols: interface.Protocol = load_protocols(batch.source)

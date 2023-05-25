@@ -126,7 +126,7 @@ def glob_protocols(source: str, pattern: str = None, strip_path: bool = False):
         filenames = glob.glob(path, recursive=True)
     elif isinstance(source, list):
         filenames = source
-            
+
     filenames: list[str] = (
         glob.glob(jj(source, pattern), recursive=True)
         if isinstance(source, str)
