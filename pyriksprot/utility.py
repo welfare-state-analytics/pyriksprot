@@ -13,13 +13,11 @@ import os
 import pathlib
 import re
 import shutil
-import sys
 import tempfile
 import time
 import unicodedata
 import warnings
 import zlib
-from io import StringIO, TextIOWrapper
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
