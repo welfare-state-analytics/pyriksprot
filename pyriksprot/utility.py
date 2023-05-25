@@ -13,11 +13,13 @@ import os
 import pathlib
 import re
 import shutil
+import sys
 import tempfile
 import time
 import unicodedata
 import warnings
 import zlib
+from io import StringIO, TextIOWrapper
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
@@ -454,6 +456,31 @@ def revdict(d: dict) -> dict:
 
 def props(cls: Type) -> list[str]:
     return [i for i in cls.__dict__.keys() if i[:1] != '_']
+
+
+XML_ESCAPES = str.maketrans(
+    {
+        "<": "&lt;",
+        ">": "&gt;",
+        "&": "&amp;",
+        "'": "&apos;",
+        '"': "&quot;",
+    }
+)
+
+
+def xml_escape(txt: str) -> str:
+    return txt.translate(XML_ESCAPES)
+
+
+def xml_unescape(txt: str) -> str:
+    return (
+        txt.replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
+        .replace("&apos;", "'")
+        .replace("&quot;", '"')
+    )
 
 
 # def register(registry: dict | Type[Any], key: str = None):

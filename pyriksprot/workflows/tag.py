@@ -19,6 +19,7 @@ from ..configuration import ConfigValue, inject_config
 from ..utility import ensure_path, strip_path_and_extension, touch, unlink
 
 METADATA_FILENAME: str = 'metadata.json'
+TAGGED_COLUMNS: list[str] = ['token', 'lemma', 'pos', 'xpos', 'sentence_id']
 
 TaggedDocument = Mapping[str, List[str]]
 
@@ -64,7 +65,7 @@ class ITagger(abc.ABC):
     @staticmethod
     def to_csv(tagged_document: TaggedDocument, sep='\t') -> str:
         """Converts a TaggedDocument to a TSV string"""
-        columns: list[str] = [c for c in ['token', 'lemma', 'pos', 'xpos', 'sentence_id'] if c in tagged_document]
+        columns: list[str] = [c for c in TAGGED_COLUMNS if c in tagged_document]
         csv_str: str = (
             sep.join(columns)
             + '\n'
@@ -79,7 +80,9 @@ class ITagger(abc.ABC):
         text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
         return text
 
-    def resolve_preprocessors(self, preprocessors: str | list[Callable[[str], str] | str]) -> list[Callable[[str], str]]:
+    def resolve_preprocessors(
+        self, preprocessors: str | list[Callable[[str], str] | str]
+    ) -> list[Callable[[str], str]]:
         if isinstance(preprocessors, str):
             preprocessors = preprocessors.split(",")
 

@@ -36,14 +36,15 @@ from .utility import (
     touch,
     ts_data_path,
     unlink,
+    xml_escape,
 )
 from .workflows import compute_term_frequencies, extract_corpus_tags, extract_corpus_text
 from .workflows.tag import (
     ITagger,
     ITaggerFactory,
     TaggedDocument,
-    TaggerRegistry,
     TaggerProvider,
+    TaggerRegistry,
     tag_protocol,
     tag_protocol_xml,
     tag_protocols,

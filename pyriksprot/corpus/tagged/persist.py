@@ -109,13 +109,26 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
             return protocol
 
 
-def load_protocols(source: str | List, file_pattern: str = 'prot-*.zip') -> Iterable[interface.Protocol]:
-    return (p for p in (load_protocol(filename) for filename in glob_protocols(source, file_pattern)) if p is not None)
+def load_protocols(source: str | list[str], pattern: str = 'prot-*.zip') -> Iterable[interface.Protocol]:
+    """Loads all protocols in `source` folder, matching `file_pattern`"""
+    filenames: list[str] = glob_protocols(source, pattern)
+    for p in (load_protocol(filename) for filename in filenames):
+        if p is None:
+            continue
+        yield p
 
 
-def glob_protocols(source: str, file_pattern: str, strip_path: bool = False):
-    filenames: List[str] = (
-        glob.glob(os.path.join(source, file_pattern), recursive=True)
+def glob_protocols(source: str, pattern: str = None, strip_path: bool = False):
+    """Glob for protocols in `source` folder, matching `file_pattern`"""
+    filenames: list[str] = []
+    if isinstance(source, str):
+        path: str = jj(source, pattern) if pattern else source
+        filenames = glob.glob(path, recursive=True)
+    elif isinstance(source, list):
+        filenames = source
+            
+    filenames: list[str] = (
+        glob.glob(jj(source, pattern), recursive=True)
         if isinstance(source, str)
         else source
         if isinstance(source, list)
@@ -127,6 +140,7 @@ def glob_protocols(source: str, file_pattern: str, strip_path: bool = False):
 
 
 def validate_checksum(filename: str, checksum: str) -> bool:
+    """Validate that computed checksum of a protocol matches `checksum`."""
     if not os.path.isfile(filename):
         return False
     metadata: dict = load_metadata(filename)

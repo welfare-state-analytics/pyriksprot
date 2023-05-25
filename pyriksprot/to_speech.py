@@ -5,11 +5,14 @@ import inspect
 from collections import defaultdict
 from enum import Enum
 from itertools import groupby
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 from loguru import logger
 
-from .interface import Protocol, Speech, Utterance
+from .interface import Speech
+
+if TYPE_CHECKING:
+    from .interface import Protocol, Utterance
 
 # pylint: disable=too-many-arguments, no-member
 
