@@ -275,17 +275,19 @@ def test_load_protocols_from_folder():
     'protocol_name,merge_strategy,expected_speech_count',
     [
         ('prot-1955--ak--22', 'who_sequence', 160),
-        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 163),
-        ('prot-1955--ak--22', 'speaker_note_id_sequence', 163),
-        ('prot-1955--ak--22', 'chain', 163),
+        ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 167),
+        ('prot-1955--ak--22', 'speaker_note_id_sequence', 167),
+        ('prot-1955--ak--22', 'chain', 186),
         ('prot-199192--127', 'who_sequence', 248),
-        ('prot-199192--127', 'who_speaker_note_id_sequence', 248),
-        ('prot-199192--127', 'speaker_note_id_sequence', 248),
-        ('prot-199192--127', 'chain', 248),
+        ('prot-199192--127', 'who_speaker_note_id_sequence', 251),
+        ('prot-199192--127', 'speaker_note_id_sequence', 251),
+        ('prot-199192--127', 'chain', 291),
     ],
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):
-    filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
+
+    subfolder: str = protocol_name.split('-')[1]
+    filename: str = jj(TAGGED_SOURCE_FOLDER, subfolder, f'{protocol_name}.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
 

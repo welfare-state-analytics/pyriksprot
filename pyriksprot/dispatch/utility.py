@@ -42,7 +42,7 @@ def create_grouping_hashcoder(
             # **take(item.speaker_info.asdict(), grouping_keys),
             # **take(source_item.to_dict(), grouping_keys),
             # **take(item.to_dict(), grouping_keys),
-            **probe(item.speaker_info.term_of_office, grouping_keys),
+            **(probe(item.speaker_info.term_of_office, grouping_keys) if item.speaker_info else {}),
             **probe(item.speaker_info, grouping_keys),
             **probe(source_item, grouping_keys),
             **probe(item, grouping_keys),

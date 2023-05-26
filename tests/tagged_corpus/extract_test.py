@@ -18,7 +18,7 @@ from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER, sampl
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_glob_protocols():
     corpus_source: str = TAGGED_SOURCE_FOLDER
-    filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, pattern='prot-*.zip', strip_path=True)
+    filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip', strip_path=True)
     assert len(filenames) == 6
     """Empty files should be included"""
     assert 'prot-1955--ak--22.zip' in filenames
@@ -38,7 +38,7 @@ def test_create_source_index_for_tagged_corpus():
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols():
     corpus_source: str = TAGGED_SOURCE_FOLDER
-    filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, pattern='prot-*.zip')
+    filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip')
 
     protocol_iter: Iterable[interface.Protocol] = tagged_corpus.load_protocols(corpus_source)
     protocols = list(protocol_iter)

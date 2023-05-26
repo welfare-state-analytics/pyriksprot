@@ -109,7 +109,7 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
             return protocol
 
 
-def load_protocols(source: str | list[str], pattern: str = 'prot-*.zip') -> Iterable[interface.Protocol]:
+def load_protocols(source: str | list[str], pattern: str = '**/prot-*.zip') -> Iterable[interface.Protocol]:
     """Loads all protocols in `source` folder, matching `file_pattern`"""
     filenames: list[str] = glob_protocols(source, pattern)
     for p in (load_protocol(filename) for filename in filenames):
