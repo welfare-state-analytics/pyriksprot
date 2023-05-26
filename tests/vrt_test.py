@@ -6,7 +6,7 @@ from ccc import Corpus
 
 from pyriksprot import interface, utility
 from pyriksprot.corpus.tagged import load_protocol, load_protocols
-from pyriksprot.workflows.export_vrt import export_vrt, VrtExportBatch
+from pyriksprot.workflows.export_vrt import VrtExportBatch, export_vrt
 
 jj = os.path.join
 

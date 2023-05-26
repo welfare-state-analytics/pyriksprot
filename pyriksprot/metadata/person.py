@@ -56,7 +56,7 @@ class TimePeriod:
         return self.end_date.year if self._is_date(self.end_date) else 9999
 
     def covers(self, pit: int | datetime.date) -> bool:
-        if isinstance(pit, int):
+        if isinstance(pit, (int, np.integer)):
             return self.start_year <= pit <= self.end_year
         return self.start_date <= pit <= self.end_date
 

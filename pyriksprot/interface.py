@@ -504,7 +504,12 @@ class Protocol(UtteranceMixIn, IProtocol):
 
     @classmethod
     def to_vrts(
-        cls, protocols: list["Protocol"], *tags: tuple[str], output: None | str = None, outer_tag: str = None, **outer_tag_attribs
+        cls,
+        protocols: list["Protocol"],
+        *tags: tuple[str],
+        output: None | str = None,
+        outer_tag: str = None,
+        **outer_tag_attribs,
     ) -> str:
         """Export multiple protocols to VRT format with optional structural tags."""
 

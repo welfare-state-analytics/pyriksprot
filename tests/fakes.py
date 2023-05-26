@@ -1,5 +1,6 @@
 import io
-from os.path import join as jj, dirname, splitext, split
+from os.path import join as jj
+from os.path import split, splitext
 from typing import Iterable, Literal
 
 import numpy as np
@@ -10,7 +11,7 @@ from pyriksprot import interface
 from pyriksprot import utility as pu
 from pyriksprot.corpus import iterate
 
-from .utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER
+from .utility import RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER, RIKSPROT_PARLACLARIN_FAKE_FOLDER
 
 load_dotenv()
 
