@@ -1,6 +1,5 @@
 import io
-import os
-from os.path import join as jj
+from os.path import join as jj, dirname, splitext, split
 from typing import Iterable, Literal
 
 import numpy as np
@@ -11,11 +10,9 @@ from pyriksprot import interface
 from pyriksprot import utility as pu
 from pyriksprot.corpus import iterate
 
+from .utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER
+
 load_dotenv()
-
-
-RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
-RIKSPROT_PARLACLARIN_FAKE_FOLDER = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}'
 
 
 def load_sample_utterances(filename: str) -> list[interface.Utterance]:
@@ -127,32 +124,34 @@ def load_speech_stream(filename: str, strategy: str) -> Iterable[interface.Speec
         )
 
 
-def _sample_filename(filename: str, suffix: str, extension: str = "csv") -> str:
-    if filename.endswith(f'{suffix}.{extension}'):
-        return filename
-    return pu.replace_extension(pu.path_add_suffix(filename, f'-{suffix}'), f'.{extension}')
+def _expected_sample_filename(path: str, suffix: str, extension: str = "csv") -> str:
+    if path.endswith(f'{suffix}.{extension}'):
+        return path
+
+    basename, _ = splitext(split(path)[1])
+    return jj(RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER, f'{basename}-{suffix}.{extension}')
 
 
-def sample_tagged_filename(filename: str) -> str:
-    return _sample_filename(filename, "tagged")
+def expected_tagged_sample_filename(filename: str) -> str:
+    return _expected_sample_filename(filename, "tagged")
 
 
-def sample_utterance_filename(filename: str) -> str:
-    return _sample_filename(filename, "utterances")
+def expected_utterance_sample_filename(filename: str) -> str:
+    return _expected_sample_filename(filename, "utterances")
 
 
-def sample_segments_filename(filename: str) -> str:
-    return _sample_filename(filename, "segments")
+def expected_segments_sample_filename(filename: str) -> str:
+    return _expected_sample_filename(filename, "segments")
 
 
-def sample_speeches_filename(filename: str) -> str:
-    return _sample_filename(filename, "merge-speeches")
+def expected_speeches_sample_filename(filename: str) -> str:
+    return _expected_sample_filename(filename, "merge-speeches")
 
 
 def load_sample_utterance_data(filename: str) -> list[dict]:
     tagged_merged: pd.DataFrame = load_sample_tagged_data(filename)
     utterances: pd.DataFrame = pd.read_csv(
-        sample_utterance_filename(filename), sep=";", quotechar='"', na_values=''
+        expected_utterance_sample_filename(filename), sep=";", quotechar='"', na_values=''
     ).replace({np.nan: None})
     utterances = utterances.merge(tagged_merged, left_on='u_id', right_index=True, how='left')
     utterances['checksum'] = utterances.paragraphs.apply(interface.UtteranceHelper.compute_paragraph_checksum)
@@ -161,7 +160,7 @@ def load_sample_utterance_data(filename: str) -> list[dict]:
 
 
 def load_sample_tagged_data(filename: str) -> pd.DataFrame:
-    tagged: pd.DataFrame = pd.read_csv(sample_tagged_filename(filename), sep=";", quotechar='"', na_values='')
+    tagged: pd.DataFrame = pd.read_csv(expected_tagged_sample_filename(filename), sep=";", quotechar='"', na_values='')
     tagged['annotated'] = tagged.token + '\t' + tagged.lemma + '\t' + tagged.pos
     tagged_merged = tagged[['u_id', 'annotated']].groupby(['u_id'], sort=False).agg('\n'.join)
     tagged_merged['annotated'] = 'token\tlemma\tpos\n' + tagged_merged.annotated
@@ -201,7 +200,7 @@ def _load_sample_utterance_groupings(
 ) -> pd.DataFrame:
     """Loads utterance groups from fake file and returns df[[group_id_name, u_id]] for given group type"""
     data_frame: pd.DataFrame = pd.read_csv(
-        _sample_filename(filename, suffix), sep=";", quotechar='"', na_values=''
+        _expected_sample_filename(filename, suffix), sep=";", quotechar='"', na_values=''
     ).replace({np.nan: ''})
     data_frame = data_frame[data_frame[group_name] == group][[group_id_name, 'u_id']]
     return data_frame

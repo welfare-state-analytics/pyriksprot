@@ -22,7 +22,7 @@ jj = os.path.join
 
 @pytest.fixture(scope='module')
 def utterances() -> list[interface.Utterance]:
-    return fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml')
+    return fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/parlaclarin/prot-1958-fake.xml')
 
 
 def test_utterance_text():

@@ -132,10 +132,6 @@ strict_optional = false
 warn_no_return = false
 python_version = 3.8
 
-[build-system]
-requires = ["setuptools", "poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.pyright]
 include = ["pyriksprot", "tests"]
 exclude = [
@@ -157,3 +153,8 @@ reportOptionalSubscript = false
 reportOptionalMemberAccess = false
 reportOptionalCall = false
 pythonVersion = "3.11"
+
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+

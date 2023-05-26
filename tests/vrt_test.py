@@ -6,7 +6,7 @@ from ccc import Corpus
 
 from pyriksprot import interface, utility
 from pyriksprot.corpus.tagged import load_protocol, load_protocols
-from pyriksprot.workflows.export_vrt import export_vrt
+from pyriksprot.workflows.export_vrt import export_vrt, VrtExportBatch
 
 jj = os.path.join
 
@@ -146,7 +146,7 @@ def test_protocols_to_vrt():
         "protocol",
         "speech",
         "utterance",
-        tag="corpus",
+        outer_tag="corpus",
         title="test-corpus",
         date="2020-01-01",
     )
@@ -165,7 +165,7 @@ def test_protocols_to_vrt():
         "speech",
         "utterance",
         output="tests/output/test_corpus.vrt",
-        tag="corpus",
+        outer_tag="corpus",
         title="test-corpus",
         date="2020-01-01",
     )
@@ -180,7 +180,7 @@ def test_protocols_to_vrt():
         "speech",
         "utterance",
         output="tests/output/test_corpus.vrt.gz",
-        tag="corpus",
+        outer_tag="corpus",
         title="test-corpus",
         date="2020-01-01",
     )
@@ -204,15 +204,9 @@ def test_to_cwb():
     ],
 )
 def test_export_folder_batches(target: str | None, tags, processes):
-    folder: str = 'tests/test_data/source/v0.6.0/tagged_frames'
-    batches: list[tuple[str, str]] = [("batch-#1", folder, target)]
-    export_vrt(
-        batches,
-        *tags,
-        tag='corpus',
-        date='2020-01-01',
-        processes=processes,
-    )
+    folder: str = 'tests/test_data/fakes/v0.6.0/tagged_frames'
+    batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
+    export_vrt(batches, *tags, processes=processes)
 
 
 # @pytest.mark.parametrize(
