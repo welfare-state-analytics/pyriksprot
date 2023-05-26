@@ -84,7 +84,10 @@ def sample_metadata_exists():
 
 
 def sample_tagged_frames_corpus_exists():
-    return all(isfile(jj(TAGGED_SOURCE_FOLDER, f"{x}.zip")) for x in TEST_DOCUMENTS)
+    return all(
+        isfile(jj(TAGGED_SOURCE_FOLDER, f"{x}.zip")) or jj(TAGGED_SOURCE_FOLDER, f"{x.split('-')[1]}/{x}.zip")
+        for x in TEST_DOCUMENTS
+    )
 
 
 def sample_tagged_speech_corpus_exists():
@@ -148,7 +151,7 @@ def create_test_tagged_frames_corpus(
         target_filename: str = jj(target_folder, filename)
 
         if not isfile(source_filename):
-            logger.warning(f"test data: test file {name} not found")
+            logger.warning(f"test data: {source_filename} not found (unable to copy tagged test protocols)")
             continue
 
         shutil.copy(src=source_filename, dst=target_filename)
