@@ -456,6 +456,31 @@ def props(cls: Type) -> list[str]:
     return [i for i in cls.__dict__.keys() if i[:1] != '_']
 
 
+XML_ESCAPES = str.maketrans(
+    {
+        "<": "&lt;",
+        ">": "&gt;",
+        "&": "&amp;",
+        "'": "&apos;",
+        '"': "&quot;",
+    }
+)
+
+
+def xml_escape(txt: str) -> str:
+    return txt.translate(XML_ESCAPES)
+
+
+def xml_unescape(txt: str) -> str:
+    return (
+        txt.replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
+        .replace("&apos;", "'")
+        .replace("&quot;", '"')
+    )
+
+
 # def register(registry: dict | Type[Any], key: str = None):
 #     if not isinstance(registry, dict):
 #         if not hasattr(registry, "registry"):

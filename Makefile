@@ -65,7 +65,6 @@ metadata-database-deploy:
 # Sub-recepis follows
 ########################################################################################################
 
-
 verify-metadata-filenames:
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py filenames $(CORPUS_METADATA_FOLDER)
 
@@ -151,7 +150,40 @@ test-data-corpus-config:
 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test corpus.yml copied."
 
 ########################################################################################################
-# ENTRYPOINT: Recipe that creates default speech coprus for current tag
+# CWB recipes
+########################################################################################################
+
+vrt-test-data:
+	@PYTHONPATH=. poetry run riksprot2vrt --folder-batches tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/tagged_frames/ \
+		tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/vrt/ -t protocol -t speech --batch-tag year
+
+CWB_TARGET_FOLDER=`pwd`/tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/cwb
+CWB_REGISTRY_ENTRY := riksprot_$(subst .,,$(RIKSPROT_REPOSITORY_TAG))_test
+CWB_CORPUS_NAME := $(shell X="${CWB_REGISTRY_ENTRY}"; echo $${X^^})
+
+cwb-make-exists = $(if $(shell which cwb-make 2> /dev/null),true,false)
+
+.PHONY: cwb
+cwb-test-data:
+	@rm -rf $(CWB_TARGET_FOLDER) && mkdir -p $(CWB_TARGET_FOLDER)
+	@cwb-encode -d $(CWB_TARGET_FOLDER) -s -x -B -c utf8 \
+		-F `pwd`/tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)/vrt \
+		-R /usr/local/share/cwb/registry/$(CWB_REGISTRY_ENTRY) \
+		-P lemma -P pos -P xpos \
+		-S year:0+title+date \
+		-S protocol:0+title+date \
+		-S speech:0+id+page+title+who+date
+	@if [ "$(cwb-make-exists)" == "true" ]; then \
+		cwb-make -V $(CWB_CORPUS_NAME); \
+	else \
+		echo "info: cwb-make not found, skipping corpus creation"; \
+		echo "info: run 'sudo cpan install CWB' to install the CWB/Perl toolkit"
+	fi
+	@cwb-describe-corpus $(CWB_CORPUS_NAME)
+
+
+########################################################################################################
+# ENTRYPOINT: Recipe that creates default speech corpus for current tag
 ########################################################################################################
 ACTUAL_TAG:=$(RIKSPROT_REPOSITORY_TAG)
 .PHONY: extract-speeches-to-feather
@@ -169,28 +201,3 @@ extract-speeches-to-feather:
 			 	$(RIKSPROT_DATA_FOLDER)/metadata/riksprot_metadata.$(ACTUAL_TAG).db \
 				 $(RIKSPROT_DATA_FOLDER)/tagged_frames_$(ACTUAL_TAG)_speeches.feather
 
-
-
-########################################################################################################
-# PURGATORY
-########################################################################################################
-
-# .PHONY: test-metadata-database
-# test-metadata-database:
-# 	@poetry run python -c 'import tests.utility; tests.utility.create_subset_metadata_to_folder()'
-# 	@echo "Setup of sample metadata database completed!"
-
-# test-create-speech-corpora:
-# 	@poetry run python -c 'import tests.utility; tests.utility.setup_sample_speech_corpora()'
-# 	@echo "Setup of sample Parla-CLARIN corpus and tagged corpus completed!"
-
-
-# .PHONY: metadata-speaker-notes-index
-# RIKSPROT_XML_PATTERN=$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/protocols/*/*.xml
-# SPEAKER_NOTE_TARGET=metadata/data/speaker_notes.csv
-# metadata-speaker-notes-index:
-# 	@echo "speaker_hash;speaker_note" > $(SPEAKER_NOTE_TARGET)
-# 	@xmlstarlet sel -N x="http://www.tei-c.org/ns/1.0" -t -m "//x:note[@type='speaker']" \
-# 		-v "concat(@n,';','\"',normalize-space(translate(text(),';','')),'\"')" -nl \
-# 			$(RIKSPROT_XML_PATTERN) | sort | uniq >> $(SPEAKER_NOTE_TARGET)
-# 	@gzip ./metadata/data/$(SPEAKER_NOTE_TARGET)

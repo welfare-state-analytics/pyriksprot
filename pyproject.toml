@@ -39,6 +39,7 @@ psycopg2-binary = "^2.9.5"
 nltk = "^3.8.1"
 dynaconf = "^3.1.12"
 pathvalidate = "^2.5.2"
+cwb-ccc = "^0.11.8"
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -58,6 +59,7 @@ pytest-codeblocks = "*"
 [tool.poetry.scripts]
 riksprot2any = "pyriksprot.scripts.riksprot2any:main"
 riksprot2tfs = "pyriksprot.scripts.riksprot2tfs:main"
+riksprot2vrt = "pyriksprot.scripts.riksprot2vrt:main"
 riksprot2text = "pyriksprot.scripts.riksprot2text:main"
 riksprot2speech = "pyriksprot.scripts.riksprot2speech:main"
 riksprot2speech_text = "pyriksprot.scripts.riksprot2speech_text:main"
@@ -130,10 +132,6 @@ strict_optional = false
 warn_no_return = false
 python_version = 3.8
 
-[build-system]
-requires = ["setuptools", "poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.pyright]
 include = ["pyriksprot", "tests"]
 exclude = [
@@ -155,3 +153,8 @@ reportOptionalSubscript = false
 reportOptionalMemberAccess = false
 reportOptionalCall = false
 pythonVersion = "3.11"
+
+[build-system]
+requires = ["setuptools", "poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
