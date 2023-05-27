@@ -1,5 +1,3 @@
-#     assert x.target.folder == "tests/output/tagged_frames"
-#     assert x.target.extension == "zip"
 import os
 from dataclasses import dataclass
 from os.path import join as jj

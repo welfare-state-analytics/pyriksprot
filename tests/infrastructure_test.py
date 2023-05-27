@@ -46,9 +46,11 @@ def test_to_folder():
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus():
+    data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
+    riksprot_tagged_folder: str = jj(data_folder, RIKSPROT_REPOSITORY_TAG, 'tagged_frames')
     create_test_tagged_frames_corpus(
         protocols=TEST_DOCUMENTS,
-        source_folder=os.environ["TEST_RIKSPROT_TAGGED_FOLDER"],
+        source_folder=riksprot_tagged_folder,
         target_folder=TAGGED_SOURCE_FOLDER,
     )
 
