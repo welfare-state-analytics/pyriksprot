@@ -5,6 +5,7 @@ Batteries (tagger) not included.
 ## Overview
 
 This package is intended to cover the following use cases:
+  
 
 ### Extract "text documents" from the Parla-CLARIN XML files
 
@@ -229,7 +230,3 @@ for item in items:
     print(item.who, len(item.text))
 
 ```
-
-## Python API - Iterate protocols as domain entities
-
-## CLI riksprot2tags:  Extract aggregated part-of-speech tagged corpus
