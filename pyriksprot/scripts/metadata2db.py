@@ -105,7 +105,7 @@ def setup_logs(log_folder: str = "./metadata/logs"):
     os.makedirs(log_folder, exist_ok=True)
 
     logger.remove(0)
-    logger.add(join(log_folder, "/{time}_metadata.log"), format="{time:YYYYMMDDHHmmss}", backtrace=True, diagnose=True)
+    logger.add(join(log_folder, "{time:YYYYMMDDHHmmss}_metadata.log"), backtrace=True, diagnose=True)
 
 
 if __name__ == "__main__":
