@@ -89,7 +89,7 @@ metadata-corpus-index:
 		$(METADATA_FOLDER)/utterances.csv \
 		$(METADATA_FOLDER)/speaker_notes.csv
 
-metadata-database: metadata-corpus-index
+metadata-database:
 	@echo "info: generating metadata/$(METADATA_DB_NAME) using source $(METADATA_FOLDER)"
 	@rm -f metadata/$(METADATA_DB_NAME)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database \
@@ -97,8 +97,11 @@ metadata-database: metadata-corpus-index
 		--force \
 		--tag "$(RIKSPROT_REPOSITORY_TAG)" \
 		--load-index \
-		--source-folder $(METADATA_FOLDER) \
-		--scripts-folder ./metadata/sql
+		--source-folder $(METADATA_FOLDER)
+
+# Use this option to load metadata SQL from a specific folder (otherwise read from SQL folder in metadata package)
+# --scripts-folder ./metadata/sql
+
 
 .PHONY: metadata-database-vacuum
 metadata-database-vacuum:
