@@ -18,7 +18,7 @@ def input_unknown_url(tag: str = "main"):
 def table_url(tablename: str, tag: str = "main") -> str:
     if tablename == "unknowns":
         return input_unknown_url(tag)
-    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{quote(tag)}/corpus/metadata/{quote(tag)}.csv"
+    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{quote(tag)}/corpus/metadata/{quote(tablename)}.csv"
 
 
 PARTY_COLORS = [
