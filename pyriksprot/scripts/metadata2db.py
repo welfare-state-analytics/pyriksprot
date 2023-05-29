@@ -1,5 +1,6 @@
+import os
 import sys
-from os.path import dirname
+from os.path import dirname, join
 
 import click
 from loguru import logger
@@ -99,10 +100,21 @@ def create_database(
 
 # type: ignore
 
+
+def setup_logs(log_folder: str = "./metadata/logs"):
+    os.makedirs(log_folder, exist_ok=True)
+
+    logger.remove(0)
+    logger.add(join(log_folder, "/{time}_metadata.log"), format="{time:YYYYMMDDHHmmss}", backtrace=True, diagnose=True)
+
+
 if __name__ == "__main__":
     main.add_command(verify_metadata_filenames, "filenames")
     main.add_command(verify_metadata_columns, "columns")
     main.add_command(create_corpus_indexes, "index")
     main.add_command(create_database, "database")
     main.add_command(download_metadata, "download")
+
+    setup_logs()
+
     main()  # pylint: disable=no-value-for-parameter
