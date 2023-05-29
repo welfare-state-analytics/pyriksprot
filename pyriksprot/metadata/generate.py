@@ -174,6 +174,12 @@ class CorpusIndexFactory:
 
         return self.collect(filenames).store(target_folder)
 
+    def _empty(self) -> pd.DataFrame:
+        """Find and store protocols without any utterance."""
+        protocols: pd.DataFrame = self.data["protocols"]
+        protocol_ids: set[int] = set(self.data["utterances"].document_id.unique())
+        return protocols[~protocols.index.isin(protocol_ids)]
+    
     def collect(self, filenames) -> CorpusIndexFactory:
         utterance_data: list[tuple] = []
         protocol_data: list[tuple[int, str]] = []
@@ -198,6 +204,7 @@ class CorpusIndexFactory:
                 columns=['speaker_note_id', 'speaker_note'],
             ).set_index('speaker_note_id'),
         }
+        self.data['empty_protocols'] = self._empty()
 
         return self
 
