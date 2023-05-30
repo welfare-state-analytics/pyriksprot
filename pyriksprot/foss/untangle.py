@@ -21,8 +21,6 @@ from io import StringIO
 from typing import Container, List, Mapping, Optional, Set
 from xml.sax import handler, make_parser
 
-from numba import jit
-
 
 def is_string(x):
     return isinstance(x, str)
