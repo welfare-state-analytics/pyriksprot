@@ -84,7 +84,7 @@ def test_utterances_to_pandas(utterances: list[interface.Utterance]):
 
 def test_protocol_create(utterances: list[interface.Utterance]):
     protocol: interface.Protocol = interface.Protocol(
-        date="1958", name="prot-1958-fake", utterances=utterances, speaker_notes={}
+        date="1958", name="prot-1958-fake", utterances=utterances, speaker_notes={}, page_references=[]
     )
 
     assert protocol is not None
@@ -108,7 +108,7 @@ def test_protocol_preprocess():
     )
 
     protocol: interface.Protocol = interface.Protocol(
-        date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}
+        date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}, page_references=[]
     )
 
     preprocess: Callable[[str], str] = lambda t: 'APA'

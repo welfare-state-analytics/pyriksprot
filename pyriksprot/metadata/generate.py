@@ -166,9 +166,9 @@ class CorpusIndexFactory:
     def generate(self, corpus_folder: str, target_folder: str) -> CorpusIndexFactory:
         if os.path.isdir(jj(corpus_folder, "protocols")):
             corpus_folder = jj(corpus_folder, "protocols")
-        logger.info("Generating utterance, protocol and speaker notes indices.")
-        logger.info(f"  source: {corpus_folder}")
-        logger.info(f"  target: {target_folder}")
+        logger.info("Corpus index: generating utterance, protocol, speaker notes and page reference indices.")
+        logger.info(f"     Source: {corpus_folder}")
+        logger.info(f"     Target: {target_folder}")
 
         filenames = glob(jj(corpus_folder, "**/*.xml"), recursive=True)
 
@@ -179,30 +179,54 @@ class CorpusIndexFactory:
         protocols: pd.DataFrame = self.data["protocols"]
         protocol_ids: set[int] = set(self.data["utterances"].document_id.unique())
         return protocols[~protocols.index.isin(protocol_ids)]
-    
+
     def collect(self, filenames) -> CorpusIndexFactory:
         utterance_data: list[tuple] = []
+        page_reference_data: list[tuple] = []
         protocol_data: list[tuple[int, str]] = []
         speaker_notes: dict[str, SpeakerNote] = {}
 
         for document_id, filename in tqdm(enumerate(filenames)):
             protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
             protocol_data.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
-            for u in protocol.utterances:
-                utterance_data.append(tuple([document_id, u.u_id, u.who, u.speaker_note_id]))
+            utterance_data.extend(
+                tuple([document_id, u.u_id, u.who, u.speaker_note_id, u.page_number]) for u in protocol.utterances
+            )
+            page_reference_data.extend(
+                tuple([document_id, p.source_id, p.page_number, p.reference]) for p in protocol.page_references
+            )
+
             speaker_notes.update(protocol.get_speaker_notes())
+
+        """Store enough source reference data to reconstruct source urls."""
+        page_references: pd.DataFrame = pd.DataFrame(
+            data=page_reference_data, columns=['document_id', 'source_id', 'page_number', 'reference']
+        ).set_index(['document_id', 'page_number'], drop=True)
+
+        source_references: pd.DataFrame = (
+            page_references[page_references.reference != ""]
+            .reset_index()[['document_id', 'source_id', 'reference']]
+            .copy()
+            .drop_duplicates()
+        ).set_index(['document_id'], drop=True)
+        page_references.drop(columns=['reference'], inplace=True)
+
+        speaker_notes: pd.DataFrame = pd.DataFrame(
+            ((x.speaker_note_id, x.speaker_note) for x in speaker_notes.values()),
+            columns=['speaker_note_id', 'speaker_note'],
+        ).set_index('speaker_note_id')
 
         self.data = {
             "protocols": pd.DataFrame(
                 data=protocol_data, columns=['document_id', 'document_name', 'date', 'year']
             ).set_index("document_id"),
             "utterances": pd.DataFrame(
-                data=utterance_data, columns=['document_id', 'u_id', 'person_id', 'speaker_note_id']
+                data=utterance_data,
+                columns=['document_id', 'u_id', 'person_id', 'speaker_note_id', 'page_number'],
             ).set_index("u_id"),
-            "speaker_notes": pd.DataFrame(
-                ((x.speaker_note_id, x.speaker_note) for x in speaker_notes.values()),
-                columns=['speaker_note_id', 'speaker_note'],
-            ).set_index('speaker_note_id'),
+            "page_references": page_references,
+            'source_references': source_references,
+            "speaker_notes": speaker_notes,
         }
         self.data['empty_protocols'] = self._empty()
 
@@ -213,7 +237,9 @@ class CorpusIndexFactory:
             os.makedirs(target_folder, exist_ok=True)
 
             for tablename, df in self.data.items():
-                filename: str = jj(target_folder, f"{tablename}.csv")
+                filename: str = jj(target_folder, f"{tablename}.csv.gz")
                 df.to_csv(filename, sep="\t")
+
+            logger.info("Corpus index: stored.")
 
         return self

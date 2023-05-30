@@ -55,7 +55,7 @@ def test_merge_speech_by_strategy(utterances: list[interface.Utterance], strateg
     )
 
     protocol: interface.Protocol = interface.Protocol(
-        date=f"{year}", name=document_name, utterances=utterances, speaker_notes={}
+        date=f"{year}", name=document_name, utterances=utterances, speaker_notes={}, page_references=[]
     )
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
 
@@ -148,15 +148,15 @@ Hence it is (for now) commented out.
         ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.chain),
         ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.who_speaker_note_id_sequence),
         ('prot-1933--fk--5.xml', 0, ts.MergeStrategyType.who_sequence),
-        ("prot-1955--ak--22.xml", 186, ts.MergeStrategyType.chain),
+        ("prot-1955--ak--22.xml", 188, ts.MergeStrategyType.chain),
         ("prot-1955--ak--22.xml", 167, ts.MergeStrategyType.chain_consecutive_unknowns),
         ("prot-1955--ak--22.xml", 167, ts.MergeStrategyType.who_speaker_note_id_sequence),
         ("prot-1955--ak--22.xml", 160, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 291, ts.MergeStrategyType.chain),
-        ('prot-199192--127.xml', 251, ts.MergeStrategyType.chain_consecutive_unknowns),
-        ('prot-199192--127.xml', 53, ts.MergeStrategyType.who),
+        ('prot-199192--127.xml', 289, ts.MergeStrategyType.chain),
+        ('prot-199192--127.xml', 250, ts.MergeStrategyType.chain_consecutive_unknowns),
+        ('prot-199192--127.xml', 54, ts.MergeStrategyType.who),
         ('prot-199192--127.xml', 248, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 251, ts.MergeStrategyType.who_speaker_note_id_sequence),
+        ('prot-199192--127.xml', 250, ts.MergeStrategyType.who_speaker_note_id_sequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(filename: str, speech_count: int, strategy: str):
@@ -216,6 +216,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
             )
         ],
         speaker_notes={},
+        page_references=[interface.PageReference(page_number=0, reference="https://foo.se")],
     )
 
     output_filename: str = jj("tests", "output", f"{str(uuid.uuid4())}.zip")
@@ -277,11 +278,11 @@ def test_load_protocols_from_folder():
         ('prot-1955--ak--22', 'who_sequence', 160),
         ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 167),
         ('prot-1955--ak--22', 'speaker_note_id_sequence', 167),
-        ('prot-1955--ak--22', 'chain', 186),
+        ('prot-1955--ak--22', 'chain', 188),
         ('prot-199192--127', 'who_sequence', 248),
-        ('prot-199192--127', 'who_speaker_note_id_sequence', 251),
-        ('prot-199192--127', 'speaker_note_id_sequence', 251),
-        ('prot-199192--127', 'chain', 291),
+        ('prot-199192--127', 'who_speaker_note_id_sequence', 250),
+        ('prot-199192--127', 'speaker_note_id_sequence', 250),
+        ('prot-199192--127', 'chain', 289),
     ],
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):

@@ -24,9 +24,11 @@ def test_store_protocols(storage_format: interface.StorageFormat):
                 paragraphs=['Hej! Detta är en mening.'],
                 annotation="token\tpos\tlemma\nA\ta\tNN",
                 delimiter='\n',
+                page_number=1,
             )
         ],
         speaker_notes={},
+        page_references=[interface.PageReference(page_number=1, reference="https://foo.se")],
     )
 
     output_filename: str = jj("tests", "output", f"{str(uuid4())}.zip")

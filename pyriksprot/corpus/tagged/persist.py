@@ -104,7 +104,11 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
             data_str: str = fp.read(stored_filename).decode('utf-8')
             utterances: List[interface.Utterance] = PROTOCOL_LOADERS.get(ext)(data_str)
 
-            protocol: interface.Protocol = interface.Protocol(utterances=utterances, **metadata, speaker_notes={})
+            # Note: Speaker notes and page references are not stored in the protocol file
+            # These files are instead stored in separate files in the metadata folder
+            protocol: interface.Protocol = interface.Protocol(
+                utterances=utterances, **metadata, speaker_notes={}, page_references=[]
+            )
 
             return protocol
 

@@ -100,6 +100,7 @@ class IProtocol(abc.ABC):
     name: str
     utterances: list[Utterance]
     speaker_notes: dict[str, str]
+    page_references: list[PageReference] = []
 
     @abc.abstractmethod
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
@@ -126,6 +127,13 @@ class IProtocol(abc.ABC):
 class SpeakerNote:
     speaker_note_id: str
     speaker_note: str
+
+
+@dataclass
+class PageReference:
+    source_id: int
+    page_number: int
+    reference: str
 
 
 MISSING_SPEAKER_NOTE: SpeakerNote = SpeakerNote(MISSING_SPEAKER_NOTE_ID, "")
@@ -157,7 +165,7 @@ class Utterance:
         next_id: str = None,
         paragraphs: Union[list[str], str] = None,
         annotation: Optional[str] = None,
-        page_number: Optional[int] = 0,
+        page_number: int = 0,
         speaker_note_id: str = MISSING_SPEAKER_NOTE.speaker_note_id,
         **_,
     ):
@@ -169,7 +177,7 @@ class Utterance:
             [] if not paragraphs else paragraphs if isinstance(paragraphs, list) else paragraphs.split(PARAGRAPH_MARKER)
         )
         self.annotation: Optional[str] = annotation if isinstance(annotation, str) else None
-        self.page_number: Optional[int] = page_number if isinstance(page_number, int) else None
+        self.page_number: int = page_number
         self.speaker_note_id: str = speaker_note_id
 
     @property
@@ -213,9 +221,7 @@ class Utterance:
         vrt_str: str = xml_escape(strip_csv_header(self.annotation))
 
         if 'utterance' in tags:
-            vrt_str = (
-                f'<utterance id="{self.u_id}" page="{self.page_number}" who="{self.who}">\n{vrt_str}</utterance>\n'
-            )
+            vrt_str = f'<utterance id="{self.u_id}" page_number="{self.page_number}" who="{self.who}">\n{vrt_str}</utterance>\n'
 
         return vrt_str
 
@@ -433,7 +439,7 @@ class Speech(UtteranceMixIn):
                 f'title="{self.document_name}" '
                 f'who="{self.who}" '
                 f'date="{self.speech_date}" '
-                f'page="{self.page_number}"'
+                f'page_number="{self.page_number}"'
                 '>\n'
                 f'{vrt_str}\n'
                 '</speech>'
@@ -445,10 +451,19 @@ class Speech(UtteranceMixIn):
 class Protocol(UtteranceMixIn, IProtocol):
     """Entity that represents a ParlaCLARIN document."""
 
-    def __init__(self, date: str, name: str, utterances: list[Utterance], speaker_notes: dict[str, str], **_):
+    def __init__(
+        self,
+        date: str,
+        name: str,
+        utterances: list[Utterance],
+        speaker_notes: dict[str, str],
+        page_references: list[PageReference],
+        **_,
+    ):
         self.date: str = date
         self.name: str = name
         self.utterances: list[Utterance] = utterances
+        self.page_references: list[PageReference] = page_references
         self.speaker_notes: dict[str, str] = speaker_notes or {}
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
