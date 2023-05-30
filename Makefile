@@ -85,9 +85,7 @@ metadata-corpus-index:
 	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index \
 		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus $(METADATA_FOLDER)
-	@gzip $(METADATA_FOLDER)/protocols.csv \
-		$(METADATA_FOLDER)/utterances.csv \
-		$(METADATA_FOLDER)/speaker_notes.csv
+
 
 metadata-database:
 	@echo "info: generating metadata/$(METADATA_DB_NAME) using source $(METADATA_FOLDER)"
