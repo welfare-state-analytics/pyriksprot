@@ -13,13 +13,13 @@ from .utility import (
     RIKSPROT_REPOSITORY_TAG,
     SAMPLE_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
-    TEST_DOCUMENTS,
-    create_test_corpus_and_metadata,
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
+    load_test_documents,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
+    subset_corpus_and_metadata,
 )
 
 jj = os.path.join
@@ -29,7 +29,7 @@ FORCE_RUN_SKIPS = os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 
 @pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
 def test_setup_sample_xml_corpus():
-    protocols: list[str] = TEST_DOCUMENTS
+    protocols: list[str] = load_test_documents()
     target_folder: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols")
     pc.download_protocols(
         filenames=protocols, target_folder=target_folder, create_subfolder=True, tag=RIKSPROT_REPOSITORY_TAG
@@ -49,15 +49,15 @@ def test_setup_sample_tagged_frames_corpus():
     data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
     riksprot_tagged_folder: str = jj(data_folder, RIKSPROT_REPOSITORY_TAG, 'tagged_frames')
     create_test_tagged_frames_corpus(
-        protocols=TEST_DOCUMENTS,
+        protocols=load_test_documents(),
         source_folder=riksprot_tagged_folder,
         target_folder=TAGGED_SOURCE_FOLDER,
     )
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_create_test_corpus_and_metadata():
-    create_test_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, documents=TEST_DOCUMENTS)
+def test_subset_corpus_and_metadata():
+    subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, documents=load_test_documents())
 
 
 @pytest.mark.skip(reason="Test infrastructure test")

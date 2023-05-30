@@ -1,6 +1,7 @@
+import functools
 import os
 import shutil
-from os.path import isfile
+from os.path import isdir, isfile
 from os.path import join as jj
 
 import pandas as pd
@@ -34,14 +35,10 @@ TAGGED_SPEECH_FOLDER = jj(ROOT_FOLDER, "tagged_frames_speeches.feather")
 
 SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, "riksprot_metadata.db")
 
-TEST_DOCUMENTS = [
-    "prot-1933--fk--5",
-    "prot-1955--ak--22",
-    "prot-197879--14",
-    "prot-199596--35",
-    'prot-199192--127',
-    'prot-199192--21',
-]
+
+@functools.lru_cache(maxsize=1)
+def load_test_documents():
+    return open('tests/test_data/test_documents.txt').read().splitlines()
 
 
 def generate_merged_speech_test_data(protocol_name: str):
@@ -74,7 +71,7 @@ def generate_merged_speech_test_data(protocol_name: str):
 
 def sample_parlaclarin_corpus_exists():
     return all(
-        isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in TEST_DOCUMENTS
+        isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in load_test_documents()
     )
 
 
@@ -86,51 +83,36 @@ def sample_metadata_exists():
 def sample_tagged_frames_corpus_exists():
     return all(
         isfile(jj(TAGGED_SOURCE_FOLDER, f"{x}.zip")) or jj(TAGGED_SOURCE_FOLDER, f"{x.split('-')[1]}/{x}.zip")
-        for x in TEST_DOCUMENTS
+        for x in load_test_documents()
     )
 
 
 def sample_tagged_speech_corpus_exists():
-    return all(isfile(jj(TAGGED_SPEECH_FOLDER, f"{x}.zip")) for x in TEST_DOCUMENTS)
+    return all(isfile(jj(TAGGED_SPEECH_FOLDER, f"{x}.zip")) for x in load_test_documents())
 
 
 def ensure_test_corpora_exist(force: bool = False):
     if force or not sample_metadata_exists():
-        create_test_corpus_and_metadata(
+        subset_corpus_and_metadata(
             tag=RIKSPROT_REPOSITORY_TAG,
-            documents=TEST_DOCUMENTS,
+            documents=load_test_documents(),
         )
 
     if force or not sample_tagged_frames_corpus_exists():
         data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
         riksprot_tagged_folder: str = jj(data_folder, RIKSPROT_REPOSITORY_TAG, 'tagged_frames')
         create_test_tagged_frames_corpus(
-            protocols=TEST_DOCUMENTS,
+            protocols=load_test_documents(),
             source_folder=riksprot_tagged_folder,
             target_folder=TAGGED_SOURCE_FOLDER,
         )
 
-    if force or not sample_tagged_speech_corpus_exists:
+    if force or not sample_tagged_speech_corpus_exists():
         create_test_speech_corpus(
             source_folder=TAGGED_SOURCE_FOLDER,
             tag=RIKSPROT_REPOSITORY_TAG,
             database_name=SAMPLE_METADATA_DATABASE_NAME,
         )
-
-
-def create_test_corpus_and_metadata(
-    *,
-    tag: str,
-    documents: list[str],
-    target_folder: str = "tests/test_data/source/",
-):
-    """Creates a subsetted corpus for given documents"""
-    subset_corpus_and_metadata(
-        documents=documents,
-        target_folder=target_folder,
-        tag=tag,
-        scripts_folder=None,
-    )
 
 
 def create_test_tagged_frames_corpus(
@@ -142,6 +124,10 @@ def create_test_tagged_frames_corpus(
     logger.info("Creating sample tagged frames corpus")
     logger.info(f"  source: {source_folder}")
     logger.info(f"  target: {target_folder}")
+
+    if not isdir(source_folder):
+        logger.warning(f"test data: {source_folder} not found (unable to copy tagged test protocols)")
+        return
 
     shutil.rmtree(target_folder, ignore_errors=True)
     os.makedirs(target_folder, exist_ok=True)
