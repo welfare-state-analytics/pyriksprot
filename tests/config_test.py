@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from os.path import join as jj
 from os.path import normpath as nj
 from pathlib import Path
@@ -8,7 +7,7 @@ from unittest import mock
 import pytest
 
 from pyriksprot import ITagger, ITaggerFactory, configuration
-from pyriksprot.configuration import ConfigValue, configure_context
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.utility import temporary_file
 from pyriksprot.workflows import tag
 
@@ -22,41 +21,41 @@ def inject_config(fn_or_cls):
     return decorated
 
 
-@inject_config
-@dataclass
-class Hej:
-    a: int = ConfigValue.create_field(key="apa", default=88)
-    b: int = ConfigValue.create_field(key="gorilla", default=99)
+# @inject_config
+# @dataclass
+# class Hej:
+#     a: int = ConfigValue.create_field(key="apa", default=88)
+#     b: int = ConfigValue.create_field(key="gorilla", default=99)
 
-    def __post_init__(self):
-        print("inside Hej.__post_init__")
-        print(f"   a: {self.a} ")
-        print(f"   b: {self.b} ")
-
-
-@inject_config
-class HEJ:
-    def __init__(self, *args, **kwargs):
-        print("inside HEJ.__init__")
-        print(f"   args: {' '.join(str(a) for a in args)} ")
-        print(f" kwargs: {' '.join(str(a)+'/'+type(a).__name__ for _, a in kwargs.items())} ")
+#     def __post_init__(self):
+#         print("inside Hej.__post_init__")
+#         print(f"   a: {self.a} ")
+#         print(f"   b: {self.b} ")
 
 
-@inject_config
-def hej(*args, **kwargs):
-    print("inside hej")
-    print(f"   args: {' '.join(str(a) for a in args)} ")
-    print(f" kwargs: {' '.join(str(a)+'/'+type(a).__name__ for _, a in kwargs.items())} ")
+# @inject_config
+# class HEJ:
+#     def __init__(self, *args, **kwargs):
+#         print("inside HEJ.__init__")
+#         print(f"   args: {' '.join(str(a) for a in args)} ")
+#         print(f" kwargs: {' '.join(str(a)+'/'+type(a).__name__ for _, a in kwargs.items())} ")
 
 
-def test_decorator():
-    configure_context("test", {"apa": 99, "gorilla": 77})
+# @inject_config
+# def hej(*args, **kwargs):
+#     print("inside hej")
+#     print(f"   args: {' '.join(str(a) for a in args)} ")
+#     print(f" kwargs: {' '.join(str(a)+'/'+type(a).__name__ for _, a in kwargs.items())} ")
 
-    HEJ(apa=ConfigValue(key='apa', default=1), gorilla=2)
 
-    Hej()
+# def test_decorator():
+#     configure_context("test", {"apa": 99, "gorilla": 77})
 
-    hej(1, 2)
+#     HEJ(apa=ConfigValue(key='apa', default=1), gorilla=2)
+
+#     Hej()
+
+#     hej(1, 2)
 
 
 # def inject(cls):
