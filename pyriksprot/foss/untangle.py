@@ -135,7 +135,6 @@ class Handler(handler.ContentHandler):
         self.elements: List[Element] = []
         self.ignore_tags: Set[str] = set(ignore_tags or [])
 
-    @jit(nopython=True)
     def startElement(self, name: str, attrs: Mapping[str, str]) -> None:
         if name in self.ignore_tags:
             return
@@ -163,7 +162,6 @@ class Handler(handler.ContentHandler):
         self.elements[-1].cdatas.append(content)
 
 
-@jit(nopython=True)
 def parse(filename: str, ignore_tags: Container[str] = None, **parser_features) -> Element:
     """
     Interprets the given string as a filename, URL or XML data string,
