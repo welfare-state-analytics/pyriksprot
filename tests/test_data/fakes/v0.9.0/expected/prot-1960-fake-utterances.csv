@@ -1,0 +1,9 @@
+u_id;who;prev_id;next_id;paragraphs;page_number;speaker_note_id
+u-1;otto;;u-2;"Herr Talman! Jag talar.";0;s-1
+u-2;otto;u-1;;"Det regnar ute.@#@Visste du det?";0;s-1
+u-3;otto;u-1;;"Jag är känd.";0;s-2
+u-4;unknown;;;"Ingen vet vem jag är.";1;s-3
+u-5;unknown;;;"Jag är okänd.";1;missing
+u-6;ove;;;"Jag håller med.@#@Talmannen är snäll.";1;s-4
+u-7;olga;;;"Jag håller också med.";1;s-5
+u-8;otto;;;"Jag också!";1;s-6
