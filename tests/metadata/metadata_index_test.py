@@ -107,6 +107,7 @@ def test_person_index(person_index: md.PersonIndex):
         == sorted(person.terms_of_office, key=lambda x: x.start_year)
         == sorted(
             [
+                # Q5556026,1983-05-31,1985-09-30,,ledamot
                 md.TermOfOffice(
                     office_type_id=1,
                     sub_office_type_id=0,
@@ -115,6 +116,7 @@ def test_person_index(person_index: md.PersonIndex):
                     start_flag="D",
                     end_flag="D",
                 ),
+                # Q5556026,1985-09-30,1988-10-03,Fyrstadskretsen,ledamot
                 md.TermOfOffice(
                     office_type_id=1,
                     sub_office_type_id=0,
@@ -123,6 +125,7 @@ def test_person_index(person_index: md.PersonIndex):
                     start_flag="D",
                     end_flag="D",
                 ),
+                # Q5556026,1988-10-03,1991-09-30,Fyrstadskretsen,ledamot
                 md.TermOfOffice(
                     office_type_id=1,
                     sub_office_type_id=0,
@@ -131,6 +134,7 @@ def test_person_index(person_index: md.PersonIndex):
                     start_flag="D",
                     end_flag="D",
                 ),
+                # Q5556026,1991-09-30,1994-10-03,Fyrstadskretsen,ledamot
                 md.TermOfOffice(
                     office_type_id=1,
                     sub_office_type_id=0,
@@ -139,6 +143,7 @@ def test_person_index(person_index: md.PersonIndex):
                     start_flag="D",
                     end_flag="D",
                 ),
+                # Q5556026,1994-10-03,1998-10-05,Malmö kommuns valkrets,ledamot
                 md.TermOfOffice(
                     office_type_id=1,
                     sub_office_type_id=0,
@@ -147,10 +152,20 @@ def test_person_index(person_index: md.PersonIndex):
                     start_flag="D",
                     end_flag="D",
                 ),
+                # Q5556026,1998-10-05,2001-10-29,Malmö kommuns valkrets,ledamot
                 md.TermOfOffice(
                     office_type_id=1,
                     sub_office_type_id=0,
                     start_date="1998-10-05",
+                    end_date="2001-10-29",
+                    start_flag="D",
+                    end_flag="D",
+                ),
+                # Q5556026,2001-10-30,2002-09-30,Malmö kommuns valkrets,ledamot
+                md.TermOfOffice(
+                    office_type_id=1,
+                    sub_office_type_id=0,
+                    start_date="2001-10-30",
                     end_date="2002-09-30",
                     start_flag="D",
                     end_flag="D",

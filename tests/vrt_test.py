@@ -69,7 +69,7 @@ def test_fake_protocols_to_vrt():
     vrt_str = protocol.to_vrt('protocol', 'speech')
 
     expected_vrt_str = """<protocol title="prot-1958-fake" date="1958">
-<speech id="u-1" title="prot-1958-fake_001" who="olle" date="1958" page="0">
+<speech id="u-1" title="prot-1958-fake_001" who="olle" date="1958" page_number="0">
 Hej	hej	IN	IN
 !	!	MID	MID
 Detta	detta	PN	PN.NEU.SIN.DEF.SUB+OBJ
@@ -86,13 +86,13 @@ heter	heta	VB	VB.PRS.AKT
 du	du	PN	PN.UTR.SIN.DEF.SUB
 ?	?	MAD	MAD
 </speech>
-<speech id="u-3" title="prot-1958-fake_002" who="kalle" date="1958" page="0">
+<speech id="u-3" title="prot-1958-fake_002" who="kalle" date="1958" page_number="0">
 Jag	jag	PN	PN.UTR.SIN.DEF.SUB
 heter	heta	VB	VB.PRS.AKT
 Kalle	Kalle	PM	PM.NOM
 .	.	MAD	MAD
 </speech>
-<speech id="u-4" title="prot-1958-fake_003" who="unknown" date="1958" page="0">
+<speech id="u-4" title="prot-1958-fake_003" who="unknown" date="1958" page_number="0">
 Olle	Olle	PM	PM.NOM
 är	vara	VB	VB.PRS.AKT
 snäll	snäll	JJ	JJ.POS.UTR.SIN.IND.NOM
@@ -102,7 +102,7 @@ Han	han	PN	PN.UTR.SIN.DEF.SUB
 snäll	snäll	JJ	JJ.POS.UTR.SIN.IND.NOM
 !	!	MAD	MAD
 </speech>
-<speech id="u-6" title="prot-1958-fake_004" who="olle" date="1958" page="1">
+<speech id="u-6" title="prot-1958-fake_004" who="olle" date="1958" page_number="1">
 Nej	nej	IN	IN
 ,	,	MID	MID
 Kalle	Kalle	PM	PM.NOM
