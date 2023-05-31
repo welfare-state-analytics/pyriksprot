@@ -20,20 +20,20 @@ load_dotenv()
 
 
 RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
-ROOT_FOLDER = jj("tests/test_data/source/", RIKSPROT_REPOSITORY_TAG)
+ROOT_FOLDER = "tests/test_data/source/"
 
-RIKSPROT_PARLACLARIN_FOLDER = jj(ROOT_FOLDER, "parlaclarin")
+RIKSPROT_PARLACLARIN_FOLDER = jj(ROOT_FOLDER, RIKSPROT_REPOSITORY_TAG, "parlaclarin")
 RIKSPROT_PARLACLARIN_METADATA_FOLDER = jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata")
 RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
 
 RIKSPROT_PARLACLARIN_FAKE_FOLDER = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/parlaclarin/protocols/'
 RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/expected'
 
-TAGGED_SOURCE_FOLDER = jj(ROOT_FOLDER, "tagged_frames")
+TAGGED_SOURCE_FOLDER = jj(ROOT_FOLDER, RIKSPROT_REPOSITORY_TAG, "tagged_frames")
 TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "**/prot-*.zip")
-TAGGED_SPEECH_FOLDER = jj(ROOT_FOLDER, "tagged_frames_speeches.feather")
+TAGGED_SPEECH_FOLDER = jj(ROOT_FOLDER, RIKSPROT_REPOSITORY_TAG, "tagged_frames_speeches.feather")
 
-SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, "riksprot_metadata.db")
+SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, RIKSPROT_REPOSITORY_TAG, "riksprot_metadata.db")
 
 
 @functools.lru_cache(maxsize=1)
@@ -94,8 +94,10 @@ def sample_tagged_speech_corpus_exists():
 def ensure_test_corpora_exist(force: bool = False):
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
-            tag=RIKSPROT_REPOSITORY_TAG,
             documents=load_test_documents(),
+            tag=RIKSPROT_REPOSITORY_TAG,
+            target_folder=ROOT_FOLDER,
+            force=force,
         )
 
     if force or not sample_tagged_frames_corpus_exists():

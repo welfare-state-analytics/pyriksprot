@@ -7,6 +7,7 @@ from loguru import logger
 
 from tests.utility import (
     RIKSPROT_REPOSITORY_TAG,
+    ROOT_FOLDER,
     SAMPLE_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
     create_test_speech_corpus,
@@ -44,7 +45,7 @@ def generate_corpus_and_metadata(force: bool = False):
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
-        subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, documents=load_test_documents())
+        subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, target_folder=ROOT_FOLDER, documents=load_test_documents())
 
     except ValueError as ex:
         logger.error(ex)

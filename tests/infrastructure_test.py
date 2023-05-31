@@ -11,6 +11,7 @@ from pyriksprot.metadata.config import table_url
 from .utility import (
     RIKSPROT_PARLACLARIN_FOLDER,
     RIKSPROT_REPOSITORY_TAG,
+    ROOT_FOLDER,
     SAMPLE_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
     create_test_speech_corpus,
@@ -57,7 +58,7 @@ def test_setup_sample_tagged_frames_corpus():
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_subset_corpus_and_metadata():
-    subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, documents=load_test_documents())
+    subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, target_folder=ROOT_FOLDER, documents=load_test_documents())
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
