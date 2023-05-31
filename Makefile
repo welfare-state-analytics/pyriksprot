@@ -124,19 +124,31 @@ metadata-dump-schema:
 ########################################################################################################
 # ENTRYPOINT: Main recipe that creates sample test data for current tag
 ########################################################################################################
-.PHONY: test-data test-data-clear test-data-corpora test-data-corpus-config test-data-bundle
-test-data: test-data-clear test-data-corpora test-data-corpus-config test-data-bundle
+
+test-data: test-data-clear test-create-complete-testdata test-data-corpus-config test-data-bundle
 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test data refreshed!"
 
 test-data-clear:
-	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test data cleared."
 	@rm -rf tests/test_data/source/$(RIKSPROT_REPOSITORY_TAG)
+	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test data cleared."
 
-test-data-corpora:
-	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
-	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test Parla-CLARIN corpus created."
-	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test tagged frames corpus created (if existed)."
-	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test subsetted metadata database created."
+test-create-complete-testdata:
+	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py corpus-and-metadata --force
+
+test-corpus-and-metadata:
+	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py corpus-and-metadata --force
+
+test-tagged-frames:
+	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py tagged-frames --force
+
+tagged-speech-corpora:
+	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py tagged-speech-corpora --force
+
+# test-data-corpora:
+# 	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
+# 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test Parla-CLARIN corpus created."
+# 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test tagged frames corpus created (if existed)."
+# 	@echo "info: $(RIKSPROT_REPOSITORY_TAG) test subsetted metadata database created."
 
 TEST_BUNDLE_DATA_NAME=tests/test_data/dists/riksprot_sample_testdata.$(RIKSPROT_REPOSITORY_TAG).tar.gz
 
