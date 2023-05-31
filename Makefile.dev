@@ -37,13 +37,6 @@ tidy-to-git: guard-clean-working-repository tidy
 		@git push
 	fi
 
-doc:
-	@poetry run pdoc pyriksprot
-
-doc3:
-	@poetry run pdoc --html --force --output-dir docs pyriksprot
-	@poetry run mv docs/pyriksprot/* docs
-	@poetry run rmdir docs/pyriksprot
 
 test: output-dir
 	@poetry run pytest $(PYTEST_ARGS) tests
@@ -65,6 +58,16 @@ profile-tagging:
 	@mkdir -p ./profile-reports
 	@poetry run python -m pyinstrument -r html -o ./.profile-reports/$(RUN_TIMESTAMP)_tagging-pyinstrument.html ./tests/profile_tagging.py
 
+
+.PHONY: doc
+doc:
+	@mkdir -p docs/doc
+	@poetry run pdoc -o ./docs/doc -d google $(PACKAGE_FOLDER)
+	
+doc3:
+	@poetry run pdoc --html --force --output-dir docs pyriksprot
+	@poetry run mv docs/pyriksprot/* docs
+	@poetry run rmdir docs/pyriksprot
 
 .ONESHELL: profile-extract-text
 profile-extract-text:
