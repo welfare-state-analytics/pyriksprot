@@ -38,7 +38,7 @@ SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, RIKSPROT_REPOSITORY_TAG, "rikspr
 
 @functools.lru_cache(maxsize=1)
 def load_test_documents():
-    return open('tests/test_data/test_documents.txt').read().splitlines()
+    return open('tests/test_data/test_documents.txt', encoding="utf-8").read().splitlines()
 
 
 def generate_merged_speech_test_data(protocol_name: str):

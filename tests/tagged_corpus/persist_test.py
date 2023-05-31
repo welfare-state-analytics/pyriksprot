@@ -28,7 +28,7 @@ def test_store_protocols(storage_format: interface.StorageFormat):
             )
         ],
         speaker_notes={},
-        page_references=[interface.PageReference(page_number=1, reference="https://foo.se")],
+        page_references=[interface.PageReference(source_id=1, page_number=1, reference="")],
     )
 
     output_filename: str = jj("tests", "output", f"{str(uuid4())}.zip")

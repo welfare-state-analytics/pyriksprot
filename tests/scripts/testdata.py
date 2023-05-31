@@ -45,7 +45,9 @@ def generate_corpus_and_metadata(force: bool = False):
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
-        subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, target_folder=ROOT_FOLDER, documents=load_test_documents())
+        subset_corpus_and_metadata(
+            tag=RIKSPROT_REPOSITORY_TAG, target_folder=ROOT_FOLDER, documents=load_test_documents()
+        )
 
     except ValueError as ex:
         logger.error(ex)
