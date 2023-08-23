@@ -2,7 +2,7 @@ import functools
 import os
 import shutil
 from glob import glob
-from os.path import basename, isdir, isfile
+from os.path import basename, getsize, isdir, isfile
 from os.path import join as jj
 from os.path import splitext
 
@@ -39,7 +39,7 @@ SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, RIKSPROT_REPOSITORY_TAG, "rikspr
 
 
 @functools.lru_cache(maxsize=1)
-def load_test_documents():
+def load_test_documents() -> list[str]:
     return open('tests/test_data/test_documents.txt', encoding="utf-8").read().splitlines()
 
 
@@ -90,10 +90,23 @@ def sample_tagged_frames_corpus_exists():
 
 
 def sample_tagged_speech_corpus_exists():
+    """Checks if the test data contains a complete tagged speech corpus. Empty files are ignored."""
+
+    def isfile_and_non_empty(filename: str) -> bool:
+        return isfile(filename) and getsize(filename) > 0
+
+    def non_empty_tagged_frames_document_names() -> list[str]:
+        return [
+            x
+            for x in load_test_documents()
+            if isfile_and_non_empty(jj(TAGGED_SOURCE_FOLDER, f"{x.split('-')[1]}/{x}.zip"))
+        ]
+
+    expected_files: set[str] = set(non_empty_tagged_frames_document_names())
     document_names: set[str] = set(
         [splitext(basename(p))[0] for p in glob(jj(TAGGED_SPEECH_FOLDER, '**', 'prot-*.*'), recursive=True)]
     )
-    return document_names == set(load_test_documents())
+    return document_names == expected_files
 
 
 def ensure_test_corpora_exist(force: bool = False):
