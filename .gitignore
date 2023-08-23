@@ -153,3 +153,4 @@ logs
 metadata/**/*.db
 *.jar
 *.session.sql
+docs
