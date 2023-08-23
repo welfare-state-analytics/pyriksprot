@@ -68,6 +68,11 @@ subset-corpus = "pyriksprot.scripts.subset_corpus:main"
 speech-index = "pyriksprot.scripts.speech_index:main"
 metadata2db = "pyriksprot.scripts.metadata2db:main"
 
+[tool.poetry.group.dev.dependencies]
+sphinx = "^7.0.1"
+pydata-sphinx-theme = "^0.13.3"
+recommonmark = "^0.7.1"
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = ["-rfE", "-q", "-s"]
