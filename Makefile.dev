@@ -60,14 +60,18 @@ profile-tagging:
 
 
 .PHONY: doc
-doc:
+pdoc:
 	@mkdir -p docs/doc
 	@poetry run pdoc -o ./docs/doc -d google $(PACKAGE_FOLDER)
-	
-doc3:
+
+pdoc3:
 	@poetry run pdoc --html --force --output-dir docs pyriksprot
 	@poetry run mv docs/pyriksprot/* docs
 	@poetry run rmdir docs/pyriksprot
+
+sphinx_doc:
+	@echo
+	@sphinx-apidoc -o docs/sphinx pyriksprot
 
 .ONESHELL: profile-extract-text
 profile-extract-text:
