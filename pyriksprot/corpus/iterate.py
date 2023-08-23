@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ProtocolSegment(IDispatchItem):
-    """Container for a subset of utterances within a single protocol"""
+    """Container for a subset of utterances within a single protocol."""
 
     protocol_name: str
     name: str
@@ -44,7 +44,7 @@ class ProtocolSegment(IDispatchItem):
         return compress(self.data)
 
     def to_dict(self):
-        """These properties ends up in resulting document index."""
+        """These properties ends up in the resulting document index."""
         return {
             'u_id': self.u_id,
             'year': self.year,
@@ -96,6 +96,7 @@ class ProtocolSegment(IDispatchItem):
 def to_protocol_segment(
     *, protocol: Protocol, content_type: ContentType, which_year: Literal["filename", "date"] = "filename", **_
 ) -> list[ProtocolSegment]:
+    """Split protocol to a single segment."""
     return [
         ProtocolSegment(
             protocol_name=protocol.name,

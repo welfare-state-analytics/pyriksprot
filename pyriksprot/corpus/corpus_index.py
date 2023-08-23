@@ -20,6 +20,7 @@ Creates a recursive index of files in a source folder that match given pattern.
 
 @dataclass
 class ICorpusSourceItem:
+    """A CorpusSourceItem without metadata"""
     path: str
     filename: str = None
     name: str = None
@@ -47,6 +48,7 @@ class ICorpusSourceItem:
 
 @dataclass
 class TaggedCorpusSourceItem(ICorpusSourceItem):
+    """A CorpusSourceItem with metadata"""
     metadata: dict | None = None
     # actual_year: int = None
 
@@ -64,6 +66,7 @@ class TaggedCorpusSourceItem(ICorpusSourceItem):
 
 @dataclass
 class CorpusSourceIndex:
+    """Index of files in a source folder"""
     def __init__(self, source_items: list[ICorpusSourceItem]):
         self.source_items: list[ICorpusSourceItem] = source_items
         self.lookup: dict = {x.name: x for x in self.source_items}
@@ -81,6 +84,7 @@ class CorpusSourceIndex:
     def load(
         *, source_folder: str, source_pattern: str, years: Optional[str | Set[int]] = None, skip_empty: bool = True
     ) -> "CorpusSourceIndex":
+        """Loads a CorpusSourceIndex from a folder with files matching a pattern"""
         if not isdir(source_folder):
             raise ValueError(f"folder {source_folder} not found")
 
@@ -104,27 +108,33 @@ class CorpusSourceIndex:
 
     @staticmethod
     def create(path: str) -> ICorpusSourceItem:
+        """Creates a CorpusSourceItem given a path"""
         if path.endswith("zip"):
             return TaggedCorpusSourceItem(path)
         return ICorpusSourceItem(path)
 
     @property
     def filenames(self) -> List[str]:
+        """Returns a list of filenames in the index"""
         return sorted([x.filename for x in self.source_items])
 
     @property
     def paths(self) -> List[str]:
+        """Returns a list of paths to files in the index"""
         return sorted([x.path for x in self.source_items])
 
     def to_pandas(self) -> pd.DataFrame:
+        """Returns a pandas DataFrame with columns path, filename, name, subfolder, year"""
         df: pd.DataFrame = pd.DataFrame(data=[x.to_dict() for x in self.source_items])
         return df
 
     def to_csv(self, filename: str = None) -> Optional[str]:
+        """Writes a CSV file with columns path, filename, name, subfolder, year"""
         return self.to_pandas().to_csv(filename, sep='\t', index=None)
 
     @staticmethod
     def read_csv(filename: str) -> "CorpusSourceIndex":
+        """Reads a CSV file with columns path, filename, name, subfolder, year"""
         df: pd.DataFrame = pd.read_csv(filename, sep="\t", index_col=None)
         source_items: list[ICorpusSourceItem] = [ICorpusSourceItem(**d) for d in df.to_dict('records')]
         source_index: CorpusSourceIndex = CorpusSourceIndex(source_items)
