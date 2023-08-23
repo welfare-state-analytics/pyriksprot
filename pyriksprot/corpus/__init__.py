@@ -2,4 +2,4 @@
 
 from . import parlaclarin, tagged
 from .iterate import ProtocolSegment, ProtocolSegmentIterator
-from .utility import download_protocols, copy_protocols
+from .utility import copy_protocols, download_protocols

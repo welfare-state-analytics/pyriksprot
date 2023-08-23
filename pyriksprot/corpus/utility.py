@@ -8,7 +8,7 @@ from urllib.request import urlretrieve
 
 from loguru import logger
 
-from ..utility import ensure_path, ensure_folder, replace_extension, reset_folder
+from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder
 
 
 def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
@@ -30,10 +30,9 @@ def download_protocols(*, filenames: list[str], target_folder: str, create_subfo
     logger.info(f"downloading protocols from branch {tag}.")
 
     for filename in filenames:
-
         if '*' in filename:
             raise ValueError(f"wildcards not allowed in filename: {filename}")
-        
+
         protocol_year: str = filename.split('-')[1]
         target_name: str = replace_extension(filename, 'xml')
         _download_to_folder(
@@ -43,7 +42,9 @@ def download_protocols(*, filenames: list[str], target_folder: str, create_subfo
         )
 
 
-def copy_protocols(*, source_folder: str, filenames: list[str], target_folder: str, create_subfolder: bool=True) -> None:
+def copy_protocols(
+    *, source_folder: str, filenames: list[str], target_folder: str, create_subfolder: bool = True
+) -> None:
     """Downloads protocols, used when subsetting corpus from folder. Accepts wildcards."""
 
     if not os.path.isdir(source_folder):
@@ -66,4 +67,3 @@ def copy_protocols(*, source_folder: str, filenames: list[str], target_folder: s
             target_sub_folder: str = target_folder if not create_subfolder else jj(target_folder, protocol_year)
             ensure_folder(target_sub_folder)
             shutil.copy(path, jj(target_sub_folder, target_name))
-

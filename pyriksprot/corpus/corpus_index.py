@@ -21,6 +21,7 @@ Creates a recursive index of files in a source folder that match given pattern.
 @dataclass
 class ICorpusSourceItem:
     """A CorpusSourceItem without metadata"""
+
     path: str
     filename: str = None
     name: str = None
@@ -49,6 +50,7 @@ class ICorpusSourceItem:
 @dataclass
 class TaggedCorpusSourceItem(ICorpusSourceItem):
     """A CorpusSourceItem with metadata"""
+
     metadata: dict | None = None
     # actual_year: int = None
 
@@ -67,6 +69,7 @@ class TaggedCorpusSourceItem(ICorpusSourceItem):
 @dataclass
 class CorpusSourceIndex:
     """Index of files in a source folder"""
+
     def __init__(self, source_items: list[ICorpusSourceItem]):
         self.source_items: list[ICorpusSourceItem] = source_items
         self.lookup: dict = {x.name: x for x in self.source_items}
