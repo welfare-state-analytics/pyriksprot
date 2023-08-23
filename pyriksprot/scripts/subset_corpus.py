@@ -16,16 +16,22 @@ relpath = os.path.relpath
 @click.argument('target-folder', type=click.STRING)  # , help="Root folder for corpus subset")
 @click.argument('tag', type=click.STRING)  # , help="Corpus version")
 @click.option('--scripts-folder', type=click.STRING, help="SQL scripts folder")
+@click.option('--source-folder', type=click.STRING, help="Copy from source folder instead of downloading")
 def main(
     documents: list[str] | str = None,
     target_folder: str = None,
     tag: str = None,
     scripts_folder: str = None,
+    source_folder: str = None,
 ):
     print(locals())
     try:
         subset_corpus_and_metadata(
-            documents=documents, target_folder=target_folder, tag=tag, scripts_folder=scripts_folder
+            source_folder=source_folder,
+            documents=documents,
+            target_folder=target_folder,
+            tag=tag,
+            scripts_folder=scripts_folder,
         )
     except Exception as ex:
         click.echo(ex)

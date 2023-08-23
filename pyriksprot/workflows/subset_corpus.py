@@ -10,6 +10,7 @@ from pyriksprot.utility import reset_folder
 
 def subset_corpus_and_metadata(
     documents: list[str] | str = None,
+    source_folder: str = None,
     target_folder: str = None,
     tag: str = None,
     scripts_folder: str = None,
@@ -31,7 +32,17 @@ def subset_corpus_and_metadata(
         documents: list[str] = _load_document_filenames(documents)
 
     md.gh_dl_metadata_extra(folder=metadata_folder, tag=tag, force=True)
-    pc.download_protocols(filenames=documents, target_folder=protocols_target_folder, create_subfolder=True, tag=tag)
+
+    if source_folder is None:
+        pc.download_protocols(
+            filenames=documents, target_folder=protocols_target_folder, create_subfolder=True, tag=tag
+        )
+    else:
+        pc.copy_protocols(
+            source_folder=source_folder,
+            filenames=documents,
+            target_folder=protocols_target_folder,
+        )
 
     md.subset_to_folder(
         ProtocolMapper,

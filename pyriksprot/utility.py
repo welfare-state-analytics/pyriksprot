@@ -265,6 +265,12 @@ def ensure_path(path: str) -> str:
     return path
 
 
+def ensure_folder(path: str) -> str:
+    if not os.path.isdir(path):
+        os.makedirs(path, exist_ok=True)
+    return path
+
+
 def reset_folder(folder: str, force: bool = False) -> str:
     if os.path.isdir(folder) and not force:
         raise FileExistsError(folder)
