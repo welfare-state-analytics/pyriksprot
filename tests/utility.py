@@ -103,9 +103,9 @@ def sample_tagged_speech_corpus_exists():
         ]
 
     expected_files: set[str] = set(non_empty_tagged_frames_document_names())
-    document_names: set[str] = set(
-        [splitext(basename(p))[0] for p in glob(jj(TAGGED_SPEECH_FOLDER, '**', 'prot-*.*'), recursive=True)]
-    )
+    document_names: set[str] = {
+        splitext(basename(p))[0] for p in glob(jj(TAGGED_SPEECH_FOLDER, '**', 'prot-*.*'), recursive=True)
+    }
     return document_names == expected_files
 
 
