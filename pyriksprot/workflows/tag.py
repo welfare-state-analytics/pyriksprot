@@ -5,7 +5,7 @@ import importlib
 from functools import reduce
 from glob import glob
 from os.path import dirname, getmtime, isfile, join, split
-from typing import Any, Callable, List, Mapping, Type, Union
+from typing import Any, Mapping, Protocol, Type, Union
 
 from loguru import logger
 from tqdm import tqdm
@@ -21,7 +21,7 @@ from ..utility import ensure_path, strip_path_and_extension, touch, unlink
 METADATA_FILENAME: str = 'metadata.json'
 TAGGED_COLUMNS: list[str] = ['token', 'lemma', 'pos', 'xpos', 'sentence_id']
 
-TaggedDocument = Mapping[str, List[str]]
+TaggedDocument = Mapping[str, list[str]]
 
 
 class ITaggerFactory(abc.ABC):
@@ -32,11 +32,16 @@ class ITaggerFactory(abc.ABC):
         ...
 
 
-class ITagger(abc.ABC):
-    def __init__(self, preprocessors: Callable[[str], str] = None):
-        self.preprocessors: Callable[[str], str] = self.resolve_preprocessors(preprocessors)
+class Processor(Protocol):
+    def __call__(self, text: str) -> str:
+        ...
 
-    def tag(self, text: Union[str, List[str]], preprocess: bool = True) -> List[TaggedDocument]:
+
+class ITagger(abc.ABC):
+    def __init__(self, preprocessors: Processor = None):
+        self.preprocessors: Processor = ProcessorResolver.resolve_preprocessors(preprocessors)
+
+    def tag(self, text: Union[str, list[str]], preprocess: bool = True) -> list[TaggedDocument]:
         """Tag text. Return dict if lists."""
         if isinstance(text, str):
             text = [text]
@@ -48,14 +53,14 @@ class ITagger(abc.ABC):
             return []
 
         if preprocess:
-            text: List[str] = [self.preprocess(d) for d in text]
+            text: list[str] = [self.preprocess(d) for d in text]
 
         tagged_documents = self._tag(text)
 
         return tagged_documents
 
     @abc.abstractmethod
-    def _tag(self, text: Union[str, List[str]]) -> List[TaggedDocument]:
+    def _tag(self, text: Union[str, list[str]]) -> list[TaggedDocument]:
         ...
 
     @abc.abstractmethod
@@ -65,13 +70,19 @@ class ITagger(abc.ABC):
     @staticmethod
     def to_csv(tagged_document: TaggedDocument, sep='\t') -> str:
         """Converts a TaggedDocument to a TSV string"""
+
+        word_count: int = len(tagged_document['token'])
+
         columns: list[str] = [c for c in TAGGED_COLUMNS if c in tagged_document]
+
+        if word_count > 0:
+            ### ignore empty columns with no data
+            columns = [x for x in columns if len(tagged_document[x]) == word_count]
+
         csv_str: str = (
             sep.join(columns)
             + '\n'
-            + '\n'.join(
-                sep.join(str(tagged_document[c][i]) for c in columns) for i in range(0, len(tagged_document['token']))
-            )
+            + '\n'.join(sep.join(str(tagged_document[c][i]) for c in columns) for i in range(0, word_count))
         )
         return csv_str
 
@@ -80,20 +91,22 @@ class ITagger(abc.ABC):
         text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
         return text
 
-    def resolve_preprocessors(
-        self, preprocessors: str | list[Callable[[str], str] | str]
-    ) -> list[Callable[[str], str]]:
+
+class ProcessorResolver:
+    @staticmethod
+    def resolve_preprocessors(preprocessors: str | list[Processor | str]) -> list[Processor]:
         if isinstance(preprocessors, str):
             preprocessors = preprocessors.split(",")
 
         if not any(isinstance(p, str) for p in preprocessors):
             return preprocessors
 
-        self.is_satisfied(preprocessors)
+        ProcessorResolver.is_satisfied(preprocessors)
 
         return [pp.Registry.items.get(p) if isinstance(p, str) else p for p in preprocessors]
 
-    def is_satisfied(self, preprocessors: str | list[Callable[[str], str] | str]) -> bool:
+    @staticmethod
+    def is_satisfied(preprocessors: str | list[Processor | str]) -> bool:
         keys: list[str] = [p for p in preprocessors if isinstance(p, str)]
         unknown_keys: list[str] = [p for p in keys if not p in pp.Registry.items]
         if unknown_keys:
@@ -117,7 +130,7 @@ class TaggerProvider:
 
 
 class TaggerRegistry:
-    """Simple tagger cache since somee taggers are expensive to setup"""
+    """Simple tagger cache since some taggers are expensive to setup"""
 
     instances: Mapping[Type[ITagger], ITagger] = {}
 
@@ -135,7 +148,7 @@ class TaggerRegistry:
 def tag_protocol(tagger: ITagger, protocol: interface.Protocol, preprocess=False) -> interface.Protocol:
     texts = [u.text for u in protocol.utterances]
 
-    documents: List[TaggedDocument] = tagger.tag(texts, preprocess=preprocess)
+    documents: list[TaggedDocument] = tagger.tag(texts, preprocess=preprocess)
 
     for i, document in enumerate(documents):
         protocol.utterances[i].annotation = tagger.to_csv(document)
