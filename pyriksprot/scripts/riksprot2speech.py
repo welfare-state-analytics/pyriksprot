@@ -76,9 +76,9 @@ if __name__ == "__main__":
     #         '--options-filename',
     #         'data/swedeb-data/dataset-01/opts/tagged-speeches/tagged_frames_speeches_lemma.feather.yml',
     #         '--force',
-    #         'data/swedeb-data/dataset-01/v0.6.0/tagged_frames',
-    #         'data/swedeb-data/dataset-01/v0.6.0/riksprot_metadata.db',
-    #         'data/swedeb-data/dataset-01/v0.6.0/speeches/tagged_frames_speeches_lemma.feather'
+    #         'data/swedeb-data/dataset-01/v0.X.0/tagged_frames',
+    #         'data/swedeb-data/dataset-01/v0.X.0/riksprot_metadata.db',
+    #         'data/swedeb-data/dataset-01/v0.X.0/speeches/tagged_frames_speeches_lemma.feather'
 
     #     ],
     # )

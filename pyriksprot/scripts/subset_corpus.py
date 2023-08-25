@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # options = {
     #     'documents': 'swedeb-sample-protocols.txt',
     #     'target_folder': 'data/swedeb-samples/',
-    #     'tag': 'v0.6.0',
+    #     'tag': 'v0.X.0',
     # }
     # subset_corpus_and_metadata(**options)
     main()

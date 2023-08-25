@@ -1,7 +1,7 @@
 root_folder: tests/output/work_folder
 target_folder: tests/output/tagged_frames
 repository_folder: tests/output/work_folder/riksdagen-corpus
-repository_tag: v0.6.0
+repository_tag: v0.9.0
 tagger:
   module: pyriksprot_tagger.taggers.stanza_tagger
   stanza_datadir: null

@@ -8,6 +8,8 @@ from pyriksprot import interface, utility
 from pyriksprot.corpus.tagged import load_protocol, load_protocols
 from pyriksprot.workflows.export_vrt import VrtExportBatch, export_vrt
 
+from .utility import RIKSPROT_REPOSITORY_TAG
+
 jj = os.path.join
 
 
@@ -24,7 +26,7 @@ def test_ccc():
 
 
 def test_protocol_to_vrt():
-    filename: str = "tests/test_data/source/5files/v0.6.0/tagged_frames/199192/prot-199192--127.zip"
+    filename: str = f"tests/test_data/source/5files/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/199192/prot-199192--127.zip"
 
     protocol: interface.Protocol = load_protocol(filename)
 
@@ -45,7 +47,7 @@ def test_protocol_to_vrt():
 
 
 def test_fake_protocols_to_vrt():
-    filename: str = 'tests/test_data/fakes/v0.6.0/tagged_frames/prot-1958-fake.zip'
+    filename: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/prot-1958-fake.zip'
 
     protocol: interface.Protocol = load_protocol(filename)
     tagged_str: str = protocol.tagged_text
@@ -127,7 +129,7 @@ dum	dum	JJ	JJ.POS.UTR.SIN.IND.NOM
 
 
 def test_protocols_to_vrt():
-    folder: str = 'tests/test_data/fakes/v0.6.0/tagged_frames'
+    folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
 
     protocols: interface.Protocol = load_protocols(folder)
 
@@ -204,26 +206,8 @@ def test_to_cwb():
     ],
 )
 def test_export_folder_batches(target: str | None, tags, processes):
-    folder: str = 'tests/test_data/fakes/v0.6.0/tagged_frames'
+    folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
     batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
     export_vrt(batches, *tags, processes=processes)
 
-
-# @pytest.mark.parametrize(
-#     'folder, expected',
-#     [
-#         ('tests/test_data/source/v0.6.0', 6),
-#         ('tests/test_data/source/v0.6.0/parlaclarin/protocols', 6),
-#         ('tests/test_data/source/v0.6.0/parlaclarin/protocols/199596', 1),
-#         ('./tests/test_data/source/v0.6.0/parlaclarin/protocols/199596', 1)
-#     ],
-# )
-# def test_glob(folder, expected):
-#     import glob
-#     import pathlib
-
-#     assert len(glob.glob(os.path.join(folder, '**', '*.xml'), recursive=True)) == expected
-#     assert len(list(pathlib.Path(folder).glob('**/*.xml'))) == expected
-#     assert len(list(pathlib.Path(folder).rglob('*.xml'))) == expected
-#     assert len(list(pathlib.Path(folder).rglob('**/*.xml'))) == expected
-#     assert len(list(pathlib.Path(folder).glob('**/*.xml'))) == expected
+    pass
