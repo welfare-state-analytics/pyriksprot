@@ -501,20 +501,25 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
         self.pos_schema: PoS_Tag_Scheme = PoS_TAGS_SCHEMES.SUC
 
     def create_tagged_frame(self, item: IDispatchItem) -> pd.DataFrame:
-        tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
-        fg = lambda t: self.token2id[t]  # pylint: disable=unnecessary-lambda-assignment
-        pg = self.pos_schema.pos_to_id.get  # pylint: disable=unnecessary-lambda-assignment
+        try:
+            tagged_frame: pd.DataFrame = super().create_tagged_frame(item)
+            fg = lambda t: self.token2id[t]  # pylint: disable=unnecessary-lambda-assignment
+            pg = self.pos_schema.pos_to_id.get  # pylint: disable=unnecessary-lambda-assignment
 
-        if not self.skip_text:
-            tagged_frame['token_id'] = tagged_frame.token.apply(fg)
+            if not self.skip_text:
+                tagged_frame['token_id'] = tagged_frame.token.apply(fg)
 
-        if not self.skip_lemma:
-            tagged_frame['lemma_id'] = tagged_frame.lemma.apply(fg)
+            if not self.skip_lemma:
+                tagged_frame['lemma_id'] = tagged_frame.lemma.apply(fg)
 
-        tagged_frame['pos_id'] = tagged_frame.pos.apply(pg).astype(np.int8)
-        tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
-        return tagged_frame
+            tagged_frame['pos_id'] = tagged_frame.pos.apply(pg).fillna(0).astype(np.int8)
+            tagged_frame.drop(columns=['lemma', 'token', 'pos'], inplace=True, errors='ignore')
+            return tagged_frame
+        except Exception as ex:
+            logger.error(f"create_tagged_frame: {ex}")
+            logger.error(f" filename: {item.filename}")
 
+            raise ex
     def dispatch_index(self) -> None:
         super().dispatch_index()
         self.dispatch_vocabulary()
