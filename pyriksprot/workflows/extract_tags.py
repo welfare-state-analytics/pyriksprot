@@ -43,6 +43,7 @@ def extract_corpus_tags(
     skip_stopwords: bool = False,
     lowercase: bool = True,
     progress: bool = True,
+    source_pattern: str = '**/prot-*.zip',
 ) -> None:
     """Group extracted protocol blocks by `temporal_key` and attribute `group_keys`.
 
@@ -100,7 +101,7 @@ def extract_corpus_tags(
     lookups: md.Codecs = md.Codecs().load(metadata_filename)
 
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
-        source_folder=source_folder, source_pattern='**/prot-*.zip', years=years
+        source_folder=source_folder, source_pattern=source_pattern, years=years
     )
     # logger.info("loading parliamentary metadata...")
 
