@@ -73,13 +73,7 @@ def main(
             for target in existing_targets:
                 os.remove(target)
 
-        export_vrt(
-            batches,
-            *structural_tags,
-            tag=batch_tag,
-            date=batch_date,
-            processes=processes,
-        )
+        export_vrt(batches, *structural_tags, tag=batch_tag, date=batch_date, processes=processes)
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)
