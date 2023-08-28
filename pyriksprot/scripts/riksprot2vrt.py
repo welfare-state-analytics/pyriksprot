@@ -31,7 +31,7 @@ def export_yearly_folders(
 ):
     """Export protocols to VRT format."""
     try:
-        attribs = {'year': lambda x: int(basename(x)[:4]), 'title': lambda x: basename(x)}
+        attribs = {'year': lambda x: int(basename(x)[:4]), 'title': basename}
         batches: list[VrtExportBatch] = create_yearly_folder_batches(
             source_folder, target_folder, batch_tag=batch_tag, **attribs
         )
@@ -77,4 +77,4 @@ def create_yearly_folder_batches(
 
 
 if __name__ == "__main__":
-    export_yearly_folders()
+    export_yearly_folders()  # pylint: disable=no-value-for-parameter

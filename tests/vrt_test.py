@@ -13,7 +13,7 @@ jj = os.path.join
 
 
 def test_protocol_to_vrt():
-    filename: str = f"tests/test_data/source/5files/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/199192/prot-199192--127.zip"
+    filename: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/prot-1958-fake.zip'
 
     protocol: interface.Protocol = load_protocol(filename)
 
@@ -195,22 +195,3 @@ def test_export_vrt(target: str | None, tags, processes):
     export_vrt(batches, *tags, processes=processes)
 
     assert target == "-" or os.path.exists(target)
-
-
-# APA
-
-
-def test_batch(
-    batches: list[VrtExportBatch],
-    *tags: tuple[str],
-    processes: int = 1,
-) -> None:
-    """Export protocols to VRT format.
-    Args:
-        batches (list[tuple]): Protocols to export.
-        tags (*str): Structural elements to write to VRT.
-        # FIXME: Add support for root_tag and root_attribs
-        tag (str): Root tag to use in VRT.
-        date (str): Root tag attribute `date` to use in VRT.
-        processes (int): Number of processes to use.
-    """
