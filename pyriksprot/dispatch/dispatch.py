@@ -520,6 +520,7 @@ class IdTaggedFramePerGroupDispatcher(TaggedFramePerGroupDispatcher):
             logger.error(f" filename: {item.filename}")
 
             raise ex
+
     def dispatch_index(self) -> None:
         super().dispatch_index()
         self.dispatch_vocabulary()
