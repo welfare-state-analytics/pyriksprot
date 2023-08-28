@@ -2,7 +2,6 @@ import gzip
 import os
 
 import pytest
-from ccc import Corpus
 
 from pyriksprot import interface, utility
 from pyriksprot.corpus.tagged import load_protocol, load_protocols
@@ -11,18 +10,6 @@ from pyriksprot.workflows.export_vrt import VrtExportBatch, export_vrt
 from .utility import RIKSPROT_REPOSITORY_TAG
 
 jj = os.path.join
-
-
-def test_ccc():
-    # corpora: Corpora = Corpora(registry_path="/usr/local/share/cwb/registry/")
-    corpus = Corpus(corpus_name="RIKSPROT_V060_TEST", registry_path="/usr/local/share/cwb/registry/")
-    dump = corpus.query(
-        '[lemma="Sverige"]',
-        context_left=5,
-        context_right=5,
-    )
-    df = dump.concordance()
-    assert df is not None
 
 
 def test_protocol_to_vrt():
@@ -128,7 +115,7 @@ dum	dum	JJ	JJ.POS.UTR.SIN.IND.NOM
         vrt_str = protocol.to_vrt('sentence')
 
 
-def test_protocols_to_vrt():
+def test_protocols_to_vrts():
     folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
 
     protocols: interface.Protocol = load_protocols(folder)
@@ -148,6 +135,7 @@ def test_protocols_to_vrt():
         "protocol",
         "speech",
         "utterance",
+        output=None,
         outer_tag="corpus",
         title="test-corpus",
         date="2020-01-01",
@@ -192,10 +180,6 @@ def test_protocols_to_vrt():
         assert vrt_str_file == vrt_str
 
 
-def test_to_cwb():
-    pass
-
-
 @pytest.mark.parametrize(
     'target,tags,processes',
     [
@@ -205,9 +189,28 @@ def test_to_cwb():
         ('tests/output/fakes.vrt.gz', [], 1),
     ],
 )
-def test_export_folder_batches(target: str | None, tags, processes):
+def test_export_vrt(target: str | None, tags, processes):
     folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
     batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
     export_vrt(batches, *tags, processes=processes)
 
-    pass
+    assert target == "-" or os.path.exists(target)
+
+
+# APA
+
+
+def test_batch(
+    batches: list[VrtExportBatch],
+    *tags: tuple[str],
+    processes: int = 1,
+) -> None:
+    """Export protocols to VRT format.
+    Args:
+        batches (list[tuple]): Protocols to export.
+        tags (*str): Structural elements to write to VRT.
+        # FIXME: Add support for root_tag and root_attribs
+        tag (str): Root tag to use in VRT.
+        date (str): Root tag attribute `date` to use in VRT.
+        processes (int): Number of processes to use.
+    """
