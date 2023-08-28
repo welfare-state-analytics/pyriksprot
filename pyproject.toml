@@ -60,7 +60,7 @@ pdoc = "^13.1.1"
 [tool.poetry.scripts]
 riksprot2any = "pyriksprot.scripts.riksprot2any:main"
 riksprot2tfs = "pyriksprot.scripts.riksprot2tfs:main"
-riksprot2vrt = "pyriksprot.scripts.riksprot2vrt:main"
+riksprot2vrt = "pyriksprot.scripts.riksprot2vrt:export_yearly_folders"
 riksprot2text = "pyriksprot.scripts.riksprot2text:main"
 riksprot2speech = "pyriksprot.scripts.riksprot2speech:main"
 riksprot2speech_text = "pyriksprot.scripts.riksprot2speech_text:main"
