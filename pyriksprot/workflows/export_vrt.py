@@ -10,24 +10,21 @@ from .. import interface
 VrtExportBatch = namedtuple('VrtExportBatch', 'source target tag attribs')
 
 
-def export_batch(batch: VrtExportBatch, tags: tuple[str]):
+def export_batch(batch: VrtExportBatch, tags: tuple[str]) -> None:
     """Export a batch of protocols to VRT format."""
     if isinstance(batch.source, tuple):
         batch = VrtExportBatch(*batch)
-    protocols: interface.Protocol = load_protocols(batch.source)
-    interface.Protocol.to_vrts(protocols, *tags, output=batch.target, outer_tag=batch.tag, **batch.attribs)
+    interface.Protocol.to_vrts(
+        load_protocols(batch.source), *tags, output=batch.target, outer_tag=batch.tag, **batch.attribs
+    )
 
 
-def multi_export_batch(args):
+def multi_export_batch(args) -> None:
     """Export a batch of protocols to VRT format."""
-    return export_batch(*args)
+    export_batch(*args)
 
 
-def export_vrt(
-    batches: list[VrtExportBatch],
-    *tags: tuple[str],
-    processes: int = 1,
-) -> None:
+def export_vrt(batches: list[VrtExportBatch], *tags: tuple[str], processes: int = 1) -> None:
     """Export protocols to VRT format.
     Args:
         batches (list[tuple]): Protocols to export.
