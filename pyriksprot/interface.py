@@ -525,12 +525,14 @@ class Protocol(UtteranceMixIn, IProtocol):
         output: None | str = None,
         outer_tag: str = None,
         **outer_tag_attribs,
-    ) -> str:
-        """Export multiple protocols to VRT format with optional structural tags."""
+    ) -> None | str:
+        """Export multiple protocols to VRT format with optional structural tags.
+        Return VRT string if output is None, otherwise write to file and return None."""
 
         if isinstance(output, str) and output.endswith("zip"):
+            """Write each protocol to a separate file in a zip archive"""
             if outer_tag:
-                raise ValueError("Cannot write to zip file with outer tag")
+                raise ValueError("Cannot write outer tag when target is a single zip file with many protocols")
 
             with zipfile.ZipFile(output, 'w') as zink:
                 for p in protocols:
@@ -541,8 +543,7 @@ class Protocol(UtteranceMixIn, IProtocol):
             if outer_tag:
                 zink.write(_xml_start_tag(outer_tag, **outer_tag_attribs) + '\n')
             for p in protocols:
-                zink.write(p.to_vrt(*tags))
-                zink.write('\n')
+                zink.write(f"{p.to_vrt(*tags)}\n")
             if outer_tag:
                 zink.write(f'</{outer_tag}>')
             if isinstance(zink, StringIO):
