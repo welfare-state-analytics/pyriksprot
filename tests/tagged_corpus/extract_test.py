@@ -1,7 +1,9 @@
+import glob
 import os
+import shutil
 import uuid
-from os.path import isdir, isfile, join
-from typing import Iterable, List
+from os.path import basename, isdir, isfile, join
+from typing import Iterable
 
 import pandas as pd
 import pytest
@@ -9,16 +11,74 @@ import pytest
 from pyriksprot import CorpusSourceIndex, interface, to_speech, workflows
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.dispatch import dispatch
+from pyriksprot.utility import touch
 
 from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER, sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name,no-member
 
 
+def remove_intermediate_subfolders(source_folder):
+    """Removes folders in source folder having an extra level of subfolders with the same name."""
+    folders: list[str] = [folder for folder in glob.glob(join(source_folder, "*"), recursive=False) if isdir(folder)]
+    for folder in folders:
+        subfolder = join(folder, basename(folder))
+        if isdir(subfolder):
+            for filename in glob.glob(join(subfolder, "*"), recursive=False):
+                shutil.move(filename, folder)
+            os.rmdir(subfolder)
+
+
+def test_remove_intermediate_subfolders():
+    # source_folder: str = "/data/riksdagen_corpus_data/v0.9.0/tagged_frames"
+    source_folder: str = f"./tests/output/{str(uuid.uuid4())[:8]}"
+    shutil.rmtree(source_folder, ignore_errors=True)
+
+    os.makedirs(source_folder, exist_ok=True)
+
+    os.makedirs(f"{source_folder}/A/A", exist_ok=True)
+
+    touch(f"{source_folder}/x-1")
+
+    touch(f"{source_folder}/A/A/a-1")
+    touch(f"{source_folder}/A/A/a-2")
+    touch(f"{source_folder}/A/a-3")
+
+    os.makedirs(f"{source_folder}/B/B", exist_ok=True)
+    touch(f"{source_folder}/B/B/b-1")
+
+    os.makedirs(f"{source_folder}/C/D", exist_ok=True)
+    touch(f"{source_folder}/C/D/d-1")
+
+    remove_intermediate_subfolders(source_folder)
+
+    assert isfile(f"{source_folder}/x-1")
+
+    assert isdir(f"{source_folder}/A")
+    assert isfile(f"{source_folder}/A/a-1")
+    assert isfile(f"{source_folder}/A/a-2")
+    assert isfile(f"{source_folder}/A/a-3")
+    assert not isdir(f"{source_folder}/A/A")
+
+    assert isdir(f"{source_folder}/B")
+    assert isfile(f"{source_folder}/B/b-1")
+    assert not isdir(f"{source_folder}/B/B")
+
+    assert isdir(f"{source_folder}/C/D")
+    assert isfile(f"{source_folder}/C/D/d-1")
+
+    shutil.rmtree(source_folder, ignore_errors=True)
+
+
+def test_fix_extra_subfolders():
+    source_folder: str = "/data/riksdagen_corpus_data/v0.9.0/tagged_frames"
+    remove_intermediate_subfolders(source_folder)
+
+
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_glob_protocols():
     corpus_source: str = TAGGED_SOURCE_FOLDER
-    filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip', strip_path=True)
+    filenames: list[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip', strip_path=True)
     assert len(filenames) == 6
     """Empty files should be included"""
     assert 'prot-1955--ak--22.zip' in filenames
@@ -38,7 +98,7 @@ def test_create_source_index_for_tagged_corpus():
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols():
     corpus_source: str = TAGGED_SOURCE_FOLDER
-    filenames: List[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip')
+    filenames: list[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip')
 
     protocol_iter: Iterable[interface.Protocol] = tagged_corpus.load_protocols(corpus_source)
     protocols = list(protocol_iter)

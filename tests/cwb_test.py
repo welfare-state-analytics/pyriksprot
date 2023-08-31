@@ -1,5 +1,5 @@
-from ccc import Corpus
 import pandas as pd
+from ccc import Corpus
 
 
 def test_to_cwb():
@@ -9,7 +9,6 @@ def test_to_cwb():
 def test_ccc():
     # corpora: Corpora = Corpora(registry_path="/usr/local/share/cwb/registry/")
     corpus: Corpus = Corpus(corpus_name="RIKSPROT_V090_TEST", registry_path="/usr/local/share/cwb/registry/")
-
 
     subcorpus = corpus.query(
         '[lemma="information"]',

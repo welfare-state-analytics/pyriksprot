@@ -202,6 +202,24 @@ class SpeakerInfo:
             'sub_office_type_id': np.int8,
         }
 
+    @staticmethod
+    def empty():
+        return SpeakerInfo(
+            speech_id='',
+            person_id='',
+            name="unknown",
+            gender_id=0,
+            party_id=0,
+            term_of_office=TermOfOffice(
+                office_type_id=0,
+                sub_office_type_id=0,
+                start_date=0,
+                end_date=0,
+                start_flag="X",
+                end_flag="X",
+            ),
+        )
+
 
 def swap_rows(df: pd.DataFrame, i: int, j: int):
     row_i, row_j = df.iloc[i].copy(), df.iloc[j].copy()

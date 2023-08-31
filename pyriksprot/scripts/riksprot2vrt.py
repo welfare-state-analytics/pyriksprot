@@ -5,7 +5,8 @@ from os.path import basename, dirname, exists, isdir, join
 
 import click
 
-from pyriksprot.workflows.export_vrt import VrtExportBatch, export_vrt
+from pyriksprot.metadata import SpeakerInfoService
+from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch
 
 
 @click.command()
@@ -18,6 +19,8 @@ from pyriksprot.workflows.export_vrt import VrtExportBatch, export_vrt
     multiple=True,
     help="Structural elements to include in the VRT.",
 )
+@click.option('--metadata-filename', '-m', type=str, required=True, help="Metadata database filename.")
+@click.option('--merge-strategy', type=str, default="chain_consecutive_unknowns", help="Speech merge strategy.")
 @click.option('--processes', type=int, default=1, help="Number of processes to use.")
 @click.option('--force', is_flag=True, default=False, help="Force overwrite of existing files")
 @click.option('--batch-tag', '-t', type=str, multiple=False, required=False, default='year', help="Batch tag.")
@@ -26,6 +29,8 @@ def export_yearly_folders(
     target_folder: str,
     batch_tag: str = 'year',
     structural_tag: str = None,
+    metadata_filename: str = None,
+    merge_strategy: str = "chain_consecutive_unknowns",
     processes: int = 1,
     force: bool = False,
 ):
@@ -53,8 +58,9 @@ def export_yearly_folders(
 
             for target in existing_targets:
                 remove(target)
-
-        export_vrt(batches, *structural_tag, processes=processes)
+        speaker_service: SpeakerInfoService = SpeakerInfoService(metadata_filename)
+        exporter: VrtBatchExporter = VrtBatchExporter(speaker_service, merge_strategy=merge_strategy)
+        exporter.export(batches, *structural_tag, processes=processes)
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)
