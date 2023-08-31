@@ -212,7 +212,7 @@ def test_protocols_to_vrts(export_service: VrtExportService):
 
 
 @pytest.mark.parametrize(
-    'target,tags,processes',
+    'target,tags',
     [
         ('-', ('protocol', 'speech', 'utterance')),
         ('tests/output/fakes.vrt', ('protocol',)),
