@@ -9,7 +9,7 @@ from pyriksprot import metadata as md
 from pyriksprot import utility
 from pyriksprot.corpus.tagged import load_protocol, load_protocols
 from pyriksprot.metadata import SpeakerInfo, SpeakerInfoService
-from pyriksprot.workflows.export_vrt import VrtExportBatch, VrtExportService
+from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch, VrtExportService
 
 from .utility import RIKSPROT_REPOSITORY_TAG
 
@@ -220,9 +220,10 @@ def test_protocols_to_vrts(export_service: VrtExportService):
         ('tests/output/fakes.vrt.gz', []),
     ],
 )
-def test_export_vrt(target: str | None, tags, export_service: VrtExportService):
+def test_export_vrt(target: str | None, tags, speaker_service: VrtExportService):
+    exporter = VrtBatchExporter(speaker_service=speaker_service)
     folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
     batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
-    export_service.export_vrt(batches, *tags)
+    exporter.export(batches, *tags)
 
     assert target == "-" or os.path.exists(target)
