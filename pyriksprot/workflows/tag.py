@@ -4,7 +4,7 @@ import abc
 import importlib
 from functools import reduce
 from glob import glob
-from os.path import dirname, getmtime, isfile, join, split
+from os.path import basename, dirname, getmtime, isfile, join, split
 from typing import Any, Mapping, Protocol, Type, Union
 
 from loguru import logger
@@ -220,6 +220,9 @@ def tag_protocols(
     source_files: list[str] = glob(join(source_folder, pattern), recursive=recursive)
     for source_file in tqdm(source_files):
         subfolder: str = split(dirname(source_file))[1] if recursive else ''
+        if subfolder == basename(target_folder):
+            """Avoid creating subfolder if same name as target folder"""
+            subfolder = ''
         target_file = join(target_folder, subfolder, f"{strip_path_and_extension(source_file)}.zip")
         if force or expired(target_file, source_file):
             tag_protocol_xml(source_file, target_file, tagger, storage_format="json", force=force)

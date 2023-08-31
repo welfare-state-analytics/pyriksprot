@@ -3,21 +3,17 @@ from __future__ import annotations
 import abc
 import contextlib
 import csv
-import functools
-import gzip
 import hashlib
 import re
-import sys
-import zipfile
 from dataclasses import dataclass, field
 from enum import Enum
-from io import StringIO, TextIOWrapper
+from io import StringIO
 from typing import Any, Callable, Literal, Mapping, Optional, Union
 
 import pandas as pd
 from pandas.io import json
 
-from .utility import flatten, merge_csv_strings, strip_csv_header, strip_extensions, xml_escape
+from .utility import flatten, merge_csv_strings, strip_extensions
 
 # pylint: disable=too-many-arguments, no-member
 
@@ -139,18 +135,6 @@ class PageReference:
 MISSING_SPEAKER_NOTE: SpeakerNote = SpeakerNote(MISSING_SPEAKER_NOTE_ID, "")
 
 
-def vrt_exporter(func):
-    @functools.wraps(func)
-    def exporter(self, *tags, **kwargs):
-        keys: set[str] = {e.value for e in SegmentLevel}
-        if any(tag not in keys for tag in tags):
-            raise ValueError(f"Unknown tag: {tags}")
-
-        return func(self, *tags, **kwargs)
-
-    return exporter
-
-
 class Utterance:
     """Represents an utterance in the ParlaClarin XML file"""
 
@@ -206,24 +190,6 @@ class Utterance:
 
     def to_dict(self) -> dict:
         return UtteranceHelper.to_dict(self)
-
-    @vrt_exporter
-    def to_vrt(self, *tags: tuple[str]) -> str:
-        if not tags:
-            return xml_escape(strip_csv_header(self.annotation))
-
-        if 'sentence' in tags or 'paragraph' in tags:
-            # TODO: Tagged data frames must contain sentence/paragraph markers
-            # 1) Frame has a sentence/paragraph id column
-            # 2) Or sentence or paragraph markers are included in the tagged text on separate lines
-            raise NotImplementedError("Export to VRT with sentence/paragraph structural tags is not implemented yet.")
-
-        vrt_str: str = xml_escape(strip_csv_header(self.annotation))
-
-        if 'utterance' in tags:
-            vrt_str = f'<utterance id="{self.u_id}" page_number="{self.page_number}" who="{self.who}">\n{vrt_str}</utterance>\n'
-
-        return vrt_str
 
 
 class UtteranceHelper:
@@ -427,25 +393,9 @@ class Speech(UtteranceMixIn):
         self.utterances.append(item)
         return self
 
-    @vrt_exporter
-    def to_vrt(self, *tags: tuple[str]) -> str:
-        if tags is None:
-            return xml_escape(strip_csv_header(self.tagged_text))
-        vrt_str: str = '\n'.join(u.to_vrt(*tags) for u in self.utterances)
-        if 'speech' in tags:
-            vrt_str: str = (
-                '<speech '
-                f'id="{self.speech_id}" '
-                f'title="{self.document_name}" '
-                f'who="{self.who}" '
-                f'date="{self.speech_date}" '
-                f'page_number="{self.page_number}"'
-                '>\n'
-                f'{vrt_str}\n'
-                '</speech>'
-            )
-
-        return vrt_str
+    def get_year(self) -> int:
+        """Return year of speech."""
+        return int(self.speech_date[:4])
 
 
 class Protocol(UtteranceMixIn, IProtocol):
@@ -494,77 +444,6 @@ class Protocol(UtteranceMixIn, IProtocol):
 
     def get_speaker_notes(self) -> dict[str, str]:
         return self.speaker_notes
-
-    @vrt_exporter
-    def to_vrt(self, *tags: tuple[str], merge_strategy: str = "chain_consecutive_unknowns") -> str:
-        """Export protocol to VRT format with optional structural tags."""
-
-        """Local import do avoid circular dependency"""
-        from . import to_speech as mu  # pylint: disable=import-outside-toplevel
-
-        if tags is None:
-            return xml_escape(strip_csv_header(self.tagged_text))
-
-        vrt_str: str = ''
-        if 'speech' in tags:
-            speeches: list[Speech] = mu.to_speeches(protocol=self, merge_strategy=merge_strategy)
-            vrt_str: str = '\n'.join(s.to_vrt(*tags) for s in speeches)
-        else:
-            vrt_str: str = '\n'.join(u.to_vrt(*tags) for u in self.utterances)
-
-        if 'protocol' in tags:
-            vrt_str: str = f'<protocol title="{self.name}" date="{self.date}">\n{vrt_str}\n</protocol>'
-
-        return vrt_str
-
-    @classmethod
-    def to_vrts(
-        cls,
-        protocols: list["Protocol"],
-        *tags: tuple[str],
-        output: None | str = None,
-        outer_tag: str = None,
-        **outer_tag_attribs,
-    ) -> None | str:
-        """Export multiple protocols to VRT format with optional structural tags.
-        Return VRT string if output is None, otherwise write to file and return None."""
-
-        if isinstance(output, str) and output.endswith("zip"):
-            """Write each protocol to a separate file in a zip archive"""
-            if outer_tag:
-                raise ValueError("Cannot write outer tag when target is a single zip file with many protocols")
-
-            with zipfile.ZipFile(output, 'w') as zink:
-                for p in protocols:
-                    zink.writestr(f"{p.name}.vrt", p.to_vrt(*tags))
-                return None
-
-        with _open_output(output) as zink:
-            if outer_tag:
-                zink.write(_xml_start_tag(outer_tag, **outer_tag_attribs) + '\n')
-            for p in protocols:
-                zink.write(f"{p.to_vrt(*tags)}\n")
-            if outer_tag:
-                zink.write(f'</{outer_tag}>')
-            if isinstance(zink, StringIO):
-                return zink.getvalue()
-            return None
-
-
-def _open_output(output: str) -> TextIOWrapper:
-    if output == '-':
-        return contextlib.nullcontext(sys.stdout)
-    if output is None:
-        return StringIO('', newline='')
-    if output.endswith('.gz'):
-        return gzip.open(output, 'wt', encoding="utf8")
-    return open(output, 'w', encoding="utf8")
-
-
-def _xml_start_tag(tag: str, **attribs) -> str:
-    """Generate XML open tag with optional attributes."""
-    attrib_str: str = " ".join((f"{k}=\"{v}\"" for k, v in attribs.items()))
-    return f"<{tag} {attrib_str}>"
 
 
 class IProtocolParser(abc.ABC):

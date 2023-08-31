@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass, field, fields
-from functools import cached_property
+from functools import cached_property, lru_cache
 from typing import Any
 
 import numpy as np
@@ -98,7 +98,7 @@ class Person:
 
     terms_of_office: list[TermOfOffice] = field(default_factory=list)
 
-    """Alt. parties: only used of person has multiple parties"""
+    """Alt. parties: only used if person has multiple parties"""
     alt_parties: list[PersonParty] = field(default_factory=list)
 
     @property
@@ -128,7 +128,7 @@ class Person:
                         party_id = x.party_id
 
         if len(candidates) > 1:
-            logger.warning(f"{self.name}: {self.person_id} has multiple parties covering same point-in-time {pit}")
+            Person.log_duplicates(self.name, self.person_id, pit)
 
         return party_id
 
@@ -156,6 +156,12 @@ class Person:
     @staticmethod
     def attributes() -> list[str]:
         return [f.name for f in fields(Person)]
+
+    @lru_cache(maxsize=1000)
+    @staticmethod
+    def log_duplicates(name: str, person_id: str, pit: int | str) -> tuple:
+        logger.warning(f"{name}: {person_id} has multiple parties covering same point-in-time {pit}")
+        return (name, person_id, pit)
 
 
 @dataclass(kw_only=True)
@@ -201,6 +207,24 @@ class SpeakerInfo:
             'office_type_id': np.int8,
             'sub_office_type_id': np.int8,
         }
+
+    @staticmethod
+    def empty():
+        return SpeakerInfo(
+            speech_id='',
+            person_id='',
+            name="unknown",
+            gender_id=0,
+            party_id=0,
+            term_of_office=TermOfOffice(
+                office_type_id=0,
+                sub_office_type_id=0,
+                start_date=0,
+                end_date=0,
+                start_flag="X",
+                end_flag="X",
+            ),
+        )
 
 
 def swap_rows(df: pd.DataFrame, i: int, j: int):

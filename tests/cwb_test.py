@@ -1,3 +1,4 @@
+import pandas as pd
 from ccc import Corpus
 
 
@@ -7,11 +8,16 @@ def test_to_cwb():
 
 def test_ccc():
     # corpora: Corpora = Corpora(registry_path="/usr/local/share/cwb/registry/")
-    corpus = Corpus(corpus_name="RIKSPROT_V060_TEST", registry_path="/usr/local/share/cwb/registry/")
-    dump = corpus.query(
-        '[lemma="Sverige"]',
+    corpus: Corpus = Corpus(corpus_name="RIKSPROT_V090_TEST", registry_path="/usr/local/share/cwb/registry/")
+
+    subcorpus = corpus.query(
+        '[lemma="information"]',
         context_left=5,
         context_right=5,
     )
-    df = dump.concordance()
-    assert df is not None
+
+    data: pd.DataFrame = subcorpus.concordance()
+    assert data is not None
+
+    data = subcorpus.collocates()
+    assert data is not None
