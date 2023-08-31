@@ -35,35 +35,35 @@ def export_yearly_folders(
     force: bool = False,
 ):
     """Export protocols to VRT format."""
-    try:
-        attribs = {'year': lambda x: int(basename(x)[:4]), 'title': basename}
-        batches: list[VrtExportBatch] = create_yearly_folder_batches(
-            source_folder, target_folder, batch_tag=batch_tag, **attribs
-        )
+    # try:
+    attribs = {'year': lambda x: int(basename(x)[:4]), 'title': basename}
+    batches: list[VrtExportBatch] = create_yearly_folder_batches(
+        source_folder, target_folder, batch_tag=batch_tag, **attribs
+    )
 
-        if any(not exists(b.source) for b in batches):
-            click.echo("Source folder does not exist. Aborting.")
-            sys.exit(1)
-
-        if len(batches) == 0:
-            click.echo("No batches found. Aborting.")
-            sys.exit(1)
-
-        makedirs(dirname(batches[0].target), exist_ok=True)
-        existing_targets: list[str] = [b.target for b in batches if exists(b.target)]
-        if existing_targets:
-            if not force:
-                click.echo(f"Target(s) {existing_targets} already exists. Aborting.")
-                sys.exit(1)
-
-            for target in existing_targets:
-                remove(target)
-        speaker_service: SpeakerInfoService = SpeakerInfoService(metadata_filename)
-        exporter: VrtBatchExporter = VrtBatchExporter(speaker_service, merge_strategy=merge_strategy)
-        exporter.export(batches, *structural_tag, processes=processes)
-    except Exception as ex:
-        click.echo(ex)
+    if any(not exists(b.source) for b in batches):
+        click.echo("Source folder does not exist. Aborting.")
         sys.exit(1)
+
+    if len(batches) == 0:
+        click.echo("No batches found. Aborting.")
+        sys.exit(1)
+
+    makedirs(dirname(batches[0].target), exist_ok=True)
+    existing_targets: list[str] = [b.target for b in batches if exists(b.target)]
+    if existing_targets:
+        if not force:
+            click.echo(f"Target(s) {existing_targets} already exists. Aborting.")
+            sys.exit(1)
+
+        for target in existing_targets:
+            remove(target)
+    speaker_service: SpeakerInfoService = SpeakerInfoService(metadata_filename)
+    exporter: VrtBatchExporter = VrtBatchExporter(speaker_service, merge_strategy=merge_strategy, processes=processes)
+    exporter.export(batches, *structural_tag)
+    # except Exception as ex:
+    #    click.echo(ex)
+    #    sys.exit(1)
 
 
 def create_yearly_folder_batches(

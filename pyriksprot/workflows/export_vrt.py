@@ -85,7 +85,7 @@ class VrtExportService:
             return xml_escape(strip_csv_header(speech.tagged_text))
 
         speaker_info: SpeakerInfo = self.speaker_service.get_speaker_info(
-            speech.speech_id, speech.who, speech.get_year()
+            u_id=speech.speech_id, person_id=speech.who, year=speech.get_year()
         )
 
         if speaker_info is None:
@@ -196,25 +196,26 @@ class VrtBatchExporter:
         self.opts: dict = opts
 
     @overload
-    def export(self, data: tuple, tags: tuple[str]) -> None:
+    def export(self, data: tuple, *tags: tuple[str]) -> None:
         ...
 
     @overload
-    def export(self, data: VrtExportBatch, tags: tuple[str]) -> None:
+    def export(self, data: VrtExportBatch, *tags: tuple[str]) -> None:
         ...
 
     @overload
     def export(self, data: list[VrtExportBatch], *tags: tuple[str]) -> None:
         ...
 
-    def export(self, data: tuple | VrtExportBatch | list[VrtExportBatch], tags: tuple[str]) -> None:
+    def export(self, data: tuple | VrtExportBatch | list[VrtExportBatch], *tags: tuple[str]) -> None:
         if isinstance(data, tuple):
-            self.export(VrtExportBatch(*data), tags=tags)
-        if isinstance(data, VrtExportBatch):
-            self._export_vrt_batch(data, tags=tags)
-        if isinstance(data, list):
+            self.export(VrtExportBatch(*data), *tags)
+        elif isinstance(data, VrtExportBatch):
+            self._export_vrt_batch(data, *tags)
+        elif isinstance(data, list):
             self._export_vrt_batches(data, *tags)
-        raise TypeError(f"Unknown data type: {type(data)}")
+        else:
+            raise TypeError(f"Unknown data type: {type(data)}")
 
     def _export_vrt_batch(self, batch: VrtExportBatch, tags: tuple[str]) -> None:
         """Export a batch of protocols to VRT format."""
