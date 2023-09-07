@@ -39,7 +39,6 @@ psycopg2-binary = "^2.9.5"
 nltk = "^3.8.1"
 dynaconf = "^3.1.12"
 pathvalidate = "^2.5.2"
-cwb-ccc = "^0.11.8"
 
 [tool.poetry.dev-dependencies]
 black = "*"
