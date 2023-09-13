@@ -4,6 +4,7 @@ import sqlite3
 from contextlib import nullcontext
 from dataclasses import dataclass
 from functools import cached_property
+from os.path import isfile
 from typing import Callable, Literal, Mapping
 
 import pandas as pd
@@ -44,6 +45,9 @@ class Codecs:
         self.extra_codecs: list[Codec] = []
 
     def load(self, source: str | sqlite3.Connection | dict) -> Codecs:
+        if not isfile(source):
+            raise FileNotFoundError(f"File not found: {source}")
+
         with sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source) as db:
             tables: dict[str, pd.DataFrame] = mdu.load_tables(CODE_TABLES, db=db)
             for table_name, table in tables.items():
