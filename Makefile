@@ -38,7 +38,7 @@ else
 endif
 
 .PHONY: full
-full: metadata speech-index extract-speech-corpus deploy-to-global
+full: metadata term-frequencies speech-corpus deploy-to-global
 	@echo "info: $(VERSION) metadata and test-data has been refreshed!"
 
 ########################################################################################################
@@ -53,6 +53,13 @@ metadata: funkis metadata-download metadata-corpus-index metadata-database metad
 
 MERGE_STRATEGY=chain
 SPEECH_INDEX_TARGET_NAME=$(LOCAL_METADATA_FOLDER)/speech_index.$(MERGE_STRATEGY).$(VERSION).csv.gz
+
+.PHONY: term-frequencies
+term-frequencies:
+	@echo "info: computing term frequencies for $(VERSION)"
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2tfs.py \
+		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/protocols \
+		$(LOCAL_METADATA_FOLDER)/term-frequencies.pkl
 
 speech-index:
 	@echo "info: creating speech index for $(VERSION)"
@@ -72,10 +79,9 @@ speech-index:
 	@cp -f $(SPEECH_INDEX_TARGET_NAME) $(TAGGED_FRAMES_FOLDER)/
 
 
-
 ACTUAL_TAG:=$(VERSION)
-.PHONY: extract-speech-corpus
-extract-speech-corpus: funkis
+.PHONY: speech-corpus
+speech-corpus: funkis speech-index
 	@echo "info: extracting speeches in $(SPEACH_CORPUS_FORMAT) format"
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech.py \
 		--compress-type $(SPEACH_CORPUS_FORMAT) \
@@ -186,15 +192,12 @@ metadata-dump-schema:
 # ENTRYPOINT: Main recipe that creates sample test data for current tag
 ########################################################################################################
 
-test-data: test-data-clear test-create-complete-testdata test-data-corpus-config test-data-bundle
+test-data: test-data-clear test-corpus-and-metadata test-tagged-frames test-speech-corpora test-corpus-config test-data-bundle
 	@echo "info: $(VERSION) test data refreshed!"
 
 test-data-clear:
 	@rm -rf tests/test_data/source/$(VERSION)
 	@echo "info: $(VERSION) test data cleared."
-
-test-create-complete-testdata:
-	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py corpus-and-metadata --force
 
 test-corpus-and-metadata:
 	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py corpus-and-metadata --force
@@ -202,7 +205,7 @@ test-corpus-and-metadata:
 test-tagged-frames:
 	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py tagged-frames --force
 
-tagged-speech-corpora:
+test-speech-corpora:
 	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py tagged-speech-corpora --force
 
 # test-data-corpora:
@@ -219,7 +222,7 @@ test-data-bundle:
 	@tar --strip-components=2 -cz -f $(TEST_BUNDLE_DATA_NAME) tests/test_data/source/$(VERSION)
 	@echo "info: $(VERSION) created test data bundle $(TEST_BUNDLE_DATA_NAME)!"
 
-test-data-corpus-config:
+test-corpus-config:
 	@cp tests/test_data/source/corpus.yml tests/test_data/source/$(VERSION)/
 	@echo "info: $(VERSION) test corpus.yml copied."
 
