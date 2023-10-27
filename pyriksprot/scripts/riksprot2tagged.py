@@ -97,7 +97,7 @@ if __name__ == "__main__":
     #     main,
     #     [
     #         '--options-filename',
-    #         'sample_opts/riksprot2tagged_year_who.yml'
+    #         'resources/riksprot2tagged_year_who.yml'
     #     ],
     # )
     # print(result.output)

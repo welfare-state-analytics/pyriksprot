@@ -113,56 +113,49 @@ class MergeByChain(IMergeStrategy):
     def group_utterances_by_chain(
         utterances: list[Utterance], merge_consecutive_unknowns: bool
     ) -> list[list[Utterance]]:
-        """Split utterances based on prev/next pointers. Return list of lists."""
+        """Group utterances based on prev/next pointers. Return list of lists."""
         speeches: list[list[Utterance]] = []
         speech: list[Utterance] = []
-        start_of_speech: bool = None
+        is_start_of_speech: bool = None
 
         for _, u in enumerate(utterances or []):
             """Rules:
-            - attrib `next` --> start of new speech with consecutive utterances
-            - attrib `prev` --> utterance is belongs to same speech as previous utterance
-            - if neither `prev` or `next` are set, then utterance is the entire speech
-            - attribs `prev` and `next` are never both set
+            no prev & no next => utterance is entire speech (i.e. is start and end of speech)
+            no prev & next    => utterance is start of speech
+            prev & next       => utterance is continuation of speech
+            prev & no next    => utterance is end of speech
             """
 
-            if bool(u.prev_id) and bool(u.next_id):
-                raise ValueError(f"logic error: {u.u_id} has both prev/next attrbutes set")
-
             is_part_of_chain: bool = bool(u.prev_id) or bool(u.next_id)
-            is_unknown_continuation: bool = (
+            
+            is_unknown_continuation: bool = not is_part_of_chain and (
                 bool(speech)
                 and u.who == "unknown" == speech[-1].who
                 and u.speaker_note_id == speech[-1].speaker_note_id
-            )
+            ) and merge_consecutive_unknowns
 
-            start_of_speech: bool = (
-                True
-                if bool(u.next_id)
-                else not is_unknown_continuation
-                if not is_part_of_chain
-                else not bool(speech) and bool(u.prev_id)
-            )
+            is_start_of_speech: bool = not bool(u.prev_id) and not is_unknown_continuation
 
-            if not start_of_speech:
-                if is_unknown_continuation:
-                    if not merge_consecutive_unknowns:
-                        start_of_speech = True
+            if is_start_of_speech:
 
-            if start_of_speech:
-                if bool(u.prev_id) and not bool(speech):
-                    logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
+                if bool(speech) and bool(speech[-1].next_id):
+                    logger.warning(f"logic error: {u.u_id} is start of speech but previous utterance has a next attribute")
 
                 speech = [u]
                 speeches.append(speech)
 
             else:
                 if bool(speech):
-                    if bool(u.prev_id) and speech[0].u_id != u.prev_id:
+
+                    if bool(u.prev_id) and speech[-1].u_id != u.prev_id:
                         logger.warning(f"u[{u.u_id}]: current prev_id differs from first u.u_id '{speech[0].u_id}'")
 
                     if speech[0].who != u.who:
                         raise ValueError(f"u[{u.u_id}]: multiple who ids in current speech '{speech[0].who}'")
+                    
+                if not bool(speech) and bool(u.prev_id):
+                    logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
+
 
                 speech.append(u)
 

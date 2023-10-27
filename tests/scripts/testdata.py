@@ -1,6 +1,7 @@
 import os
 import sys
 from os.path import join
+from dotenv import load_dotenv
 
 import click
 from loguru import logger
@@ -148,6 +149,8 @@ def generate_tagged_speech_corpora(force: bool = False):
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
     main.add_command(generate_complete_sample_data, "complete")
     main.add_command(generate_corpus_and_metadata, "corpus-and-metadata")
     main.add_command(generate_tagged_frames, "tagged-frames")

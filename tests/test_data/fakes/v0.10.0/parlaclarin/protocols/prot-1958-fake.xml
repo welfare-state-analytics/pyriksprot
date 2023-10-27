@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<teiCorpus xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Riksdagens protocols 1958</title>
+            </titleStmt>
+            <editionStmt>
+                <edition>0.1.0</edition>
+            </editionStmt>
+            <publicationStmt>
+                <authority>National Library of Sweden and the WESTAC project</authority>
+            </publicationStmt>
+            <sourceDesc>
+                <bibl>
+                    <title>Riksdagens protocols 1958</title>
+                </bibl>
+            </sourceDesc>
+        </fileDesc>
+        <encodingDesc>
+            <editorialDecl>
+                <correction>
+                </correction>
+            </editorialDecl>
+        </encodingDesc>
+    </teiHeader>
+    <TEI>
+        <teiHeader>
+            <fileDesc>
+                <titleStmt>
+                    <title>Protokoll</title>
+                </titleStmt>
+                <publicationStmt>
+                    <authority>N/A</authority>
+                </publicationStmt>
+                <sourceDesc>
+                    <bibl>
+                        <title>Protokoll</title>
+                    </bibl>
+                </sourceDesc>
+            </fileDesc>
+            <encodingDesc>
+                <editorialDecl>
+                    <correction>
+                        <p>No correction of source texts was performed.</p>
+                    </correction>
+                </editorialDecl>
+            </encodingDesc>
+        </teiHeader>
+        <text>
+            <front>
+                <div type="preface">
+                    <head>prot-1958-fake</head>
+                    <docDate when="1958">1958</docDate>
+                </div>
+            </front>
+            <body>
+                <div type="commentSection">
+                    <pb n="-1" facs="https://noop.se/foo--00.jp2/_view" />
+                    <pb n="0" facs="https://noop.se/foo--00.jp2/_view" />
+                    <note xml:id="n-1" type="date">
+                        Ut irure et nostrud nisi cupidatat.
+                    </note>
+                    <note xml:id="n-2">
+                        Consectetur Lorem dolor voluptate nulla.
+                    </note>
+                    <note xml:id="n-3">Deserunt veniam.</note>
+                </div>
+                <div type="debateSection">
+                    <note xml:id="s-1" type="speaker">
+                        Herr Olle:
+                    </note>
+                    <u who="olle" xml:id="u-1" next="u-2">
+                        <seg>Hej! Detta är en mening.</seg>
+                    </u>
+                    <note xml:id="n-4">Ullamco fugiat.</note>
+                    <u who="olle" xml:id="u-2" prev="u-1">
+                        <seg>Jag heter Olle.</seg>
+                        <seg>Vad heter du?</seg>
+                    </u>
+                    <note xml:id="n-5">Eiusmod proident.</note>
+                    <note xml:id="s-2" type="speaker">
+                        Herr Kalle:
+                    </note>
+                    <u who="kalle" xml:id="u-3">
+                        <seg>Jag heter Kalle.</seg>
+                    </u>
+                    <note xml:id="n-6">Id velit deserunt.</note>
+                    <u who="unknown" xml:id="u-4">
+                        <seg>Olle är snäll.</seg>
+                    </u>
+                    <u who="unknown" xml:id="u-5">
+                        <seg>Han är snäll!</seg>
+                    </u>
+                    <pb n="1" facs="https://noop.se/foo--01.jp2/_view" />
+                    <note xml:id="s-3" type="speaker">
+                        Herr Olle:
+                    </note>
+                    <u who="olle" xml:id="u-6">
+                        <seg>Nej, Kalle är dum.</seg>
+                    </u>
+                </div>
+            </body>
+        </text>
+    </TEI>
+</teiCorpus>
