@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='utf-8'?>
+<teiCorpus xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Riksdagens protocols 1960</title>
+            </titleStmt>
+            <editionStmt>
+                <edition>0.1.0</edition>
+            </editionStmt>
+            <publicationStmt>
+                <authority>National Library of Sweden and the WESTAC project</authority>
+            </publicationStmt>
+            <sourceDesc>
+                <bibl>
+                    <title>Riksdagens protocols 1960</title>
+                </bibl>
+            </sourceDesc>
+        </fileDesc>
+        <encodingDesc>
+            <editorialDecl>
+                <correction>
+                </correction>
+            </editorialDecl>
+        </encodingDesc>
+    </teiHeader>
+    <TEI>
+        <teiHeader>
+            <fileDesc>
+                <titleStmt>
+                    <title>Protokoll</title>
+                </titleStmt>
+                <publicationStmt>
+                    <authority>N/A</authority>
+                </publicationStmt>
+                <sourceDesc>
+                    <bibl>
+                        <title>Protokoll</title>
+                    </bibl>
+                </sourceDesc>
+            </fileDesc>
+            <encodingDesc>
+                <editorialDecl>
+                    <correction>
+                        <p>No correction of source texts was performed.</p>
+                    </correction>
+                </editorialDecl>
+            </encodingDesc>
+        </teiHeader>
+        <text>
+            <front>
+                <div type="preface">
+                    <head>prot-1960-fake</head>
+                    <docDate when="1960">1960</docDate>
+                </div>
+            </front>
+            <body>
+                <div type="commentSection">
+                    <pb n="-1" facs="https://noop.se/foo--00.jp2/_view" />
+                    <pb n="0" facs="https://noop.se/foo--00.jp2/_view" />
+                    <note xml:id="n-1" type="date">
+                        2 Nr 32. Torsdagen den 28 juni 1960 fm.
+                    </note>
+                    <note xml:id="n-2">Dolor sunt deserunt.</note>
+                </div>
+                <div type="debateSection">
+                    <note xml:id="s-1" type="speaker">
+                        Herr Otto:
+                    </note>
+                    <u who="otto" xml:id="u-1" next="u-2">
+                        <seg>Herr Talman! Jag talar.</seg>
+                    </u>
+                    <note xml:id="n-3">Excepteur nulla.</note>
+                    <u who="otto" xml:id="u-2" prev="u-1">
+                        <seg>Det regnar ute.</seg>
+                        <seg>Visste du det?</seg>
+                    </u>
+                    <note xml:id="n-4">Veniam eiusmod eu.</note>
+                    <note xml:id="s-2" type="speaker">
+                        Herr Otto:
+                    </note>
+                    <u who="otto" xml:id="u-3">
+                        <seg>Jag är känd.</seg>
+                    </u>
+                    <note xml:id="s-3" type="speaker">
+                        Herr X:
+                    </note>
+                    <note xml:id="n-5">Consectetur nostrud.</note>
+                    <pb n="1" facs="https://noop.se/foo--01.jp2/_view" />
+                    <u who="unknown" xml:id="u-4">
+                        <seg>Ingen vet vem jag är.</seg>
+                    </u>
+                    <u who="unknown" xml:id="u-5">
+                        <seg>Jag är okänd.</seg>
+                    </u>
+                    <note xml:id="n-6">Commodo dolore labore.</note>
+                    <note xml:id="s-4" type="speaker">
+                        Herr Ove:
+                    </note>
+                    <note xml:id="n-7">Exercitation officia.</note>
+                    <u who="ove" xml:id="u-6">
+                        <seg>Jag håller med.</seg>
+                        <seg>Talmannen är snäll.</seg>
+                    </u>
+                    <note xml:id="s-5" type="speaker">
+                        Fru Olga:
+                    </note>
+                    <u who="olga" xml:id="u-7">
+                        <seg>Jag håller också med.</seg>
+                    </u>
+                    <note xml:id="s-6" type="speaker">
+                        Herr Otto:
+                    </note>
+                    <u who="otto" xml:id="u-8">
+                        <seg>Jag också!</seg>
+                    </u>
+                    </div>
+            </body>
+        </text>
+    </TEI>
+</teiCorpus>

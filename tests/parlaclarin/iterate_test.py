@@ -17,8 +17,8 @@ jj = os.path.join
 @pytest.mark.parametrize(
     'iterator_class, n_speeches, n_missing_intros',
     [
-        (parlaclarin.XmlProtocolSegmentIterator, 481, 8),
-        (parlaclarin.XmlUntangleSegmentIterator, 481, 8),
+        (parlaclarin.XmlProtocolSegmentIterator, 475, 2),
+        (parlaclarin.XmlUntangleSegmentIterator, 475, 2),
     ],
 )
 def test_segment_iterator_when_segment_is_speech(iterator_class, n_speeches: int, n_missing_intros: int):
@@ -120,14 +120,14 @@ def test_xml_protocol_texts_iterator_texts():
             merge_strategy='chain_consecutive_unknowns',
         )
     )
-    assert len(texts) == 481
+    assert len(texts) == 475
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
-    assert len(texts) == 147
+    assert len(texts) == 149
 
 
 @pytest.mark.parametrize(

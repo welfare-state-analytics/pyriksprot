@@ -37,18 +37,20 @@ def main(
     )
     arguments['merge_strategy'] = to_speech.MergeStrategyType(arguments['merge_strategy'])
 
+    arguments = {
+        **arguments,
+        **dict(
+            segment_skip_size=1,
+            years=None,
+            content_type="tagged_frame",
+            segment_level=interface.SegmentLevel.Speech,
+            multiproc_keep_order=True,
+            multiproc_chunksize=10,
+        ),
+    }
+    # print(arguments)
     try:
-        extract_speech_index(
-            **arguments,
-            **dict(
-                segment_skip_size=1,
-                years=None,
-                content_type="tagged_frame",
-                segment_level=interface.SegmentLevel.Speech,
-                multiproc_keep_order=True,
-                multiproc_chunksize=10,
-            ),
-        )
+        extract_speech_index(**arguments)
     except Exception as ex:
         click.echo(ex)
         sys.exit(1)
@@ -57,22 +59,20 @@ def main(
 if __name__ == "__main__":
     main()
 
-    # tag: str = "v0.4.6"
+    # tag: str = "v0.10.0"
     # data_folder: str = "/data/riksdagen_corpus_data"
 
     # arguments = {
-    #     'source_folder': f'{data_folder}/tagged_frames_{tag}',
-    #     'target_name': f'speech_index.{tag}.csv.gz',
-    #     'database_filename': f'{data_folder}/metadata/riksprot_metadata.{tag}.db',
-    #     'merge_strategy': 'chain',
+    #     'source_folder': '/data/riksdagen_corpus_data/v0.10.0/tagged_frames',
+    #     'target_name': './metadata/data/v0.10.0/speech_index.chain.v0.10.0.csv.gz',
+    #     'database_filename': './metadata/riksprot_metadata.v0.10.0.db',
+    #     'merge_strategy': to_speech.MergeStrategyType.chain,
     #     'multiproc_processes': None,
-    #     'segment_skip_size': 0,
+    #     'segment_skip_size': 1,
     #     'years': None,
-    #     'content_type': "tagged_frame",
+    #     'content_type': 'tagged_frame',
     #     'segment_level': interface.SegmentLevel.Speech,
     #     'multiproc_keep_order': True,
     #     'multiproc_chunksize': 10,
     # }
     # extract_speech_index(**arguments)
-
-    # poetry run python pyriksprot/scripts/speech_index.py /data/riksdagen_corpus_data/tagged_frames_v0.4.6 speech_index.v0.4.6.csv.gz /data/riksdagen_corpus_data/metadata/data/v0.4.6/riksprot_metadata.v0.4.6.db
