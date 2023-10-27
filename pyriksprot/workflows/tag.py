@@ -216,18 +216,21 @@ def tag_protocols(
     """Tags protocols in `source_folder`. Stores result in `target_folder`.
     Note: not used by Snakemake workflow (used by tag CLI script)
     """
-
     source_files: list[str] = glob(join(source_folder, pattern), recursive=recursive)
     for source_file in tqdm(source_files):
-        subfolder: str = split(dirname(source_file))[1] if recursive else ''
-        if subfolder == basename(target_folder):
-            """Avoid creating subfolder if same name as target folder"""
-            subfolder = ''
-        target_file = join(target_folder, subfolder, f"{strip_path_and_extension(source_file)}.zip")
+        target_file: str = resolve_target_filename(source_file, target_folder, recursive)
         if force or expired(target_file, source_file):
             tag_protocol_xml(source_file, target_file, tagger, storage_format="json", force=force)
         else:
             touch(target_file)
+
+
+def resolve_target_filename(source_file: str, target_folder: str, recursive: bool) -> str:
+    """Add subfolder to target folder if recursive and not already included in target folder"""
+    filename: str = f"{strip_path_and_extension(source_file)}.zip"
+    if recursive and split(target_folder)[1] != split(dirname(source_file))[1]:
+        return join(target_folder, split(dirname(source_file))[1], filename)
+    return join(target_folder, filename)
 
 
 def expired(filename: str, expiry_instance: float | str) -> bool:
