@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 from dataclasses import dataclass, field, fields
 from functools import cached_property, lru_cache
+from os.path import isfile
 from typing import Any
 
 import numpy as np
@@ -251,6 +252,9 @@ class PersonIndex:
         }
 
     def load(self) -> PersonIndex:
+        if not isfile(self.database_filename):
+            raise FileNotFoundError(f"File not found: {self.database_filename}")
+
         self.data: dict[str, str] = generate.DatabaseHelper(self.database_filename).load_data_tables(self._table_infos)
         """ ensure `unknown` has pid = 0 """
         if self.persons.loc[0]['person_id'] != 'unknown':
