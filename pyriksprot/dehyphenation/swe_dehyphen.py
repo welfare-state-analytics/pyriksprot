@@ -84,42 +84,38 @@ class SwedishDehyphenator:
     word_frequencies: dict[str, int] | str | ConfigValue = ConfigValue.create_field(
         key="dehyphen:tf_filename,tf_filename", default=None
     )
+    paragraph_merge_strategy: ParagraphMergeStrategy = 0
 
     # Internal data
     whitelist: set[str] = field(default_factory=set)
     whitelist_log: dict[str, int] = field(default_factory=dict)
     unresolved: set[str] = field(default_factory=set)
-
-    paragraph_merge_strategy: ParagraphMergeStrategy = 0
-
-    word_frequencies_filename: str = field(default=WORD_FREQUENCIES_NAME)
+    filename: str = field(init=False, default=WORD_FREQUENCIES_NAME)
 
     def __post_init__(self) -> "SwedishDehyphenator":
-        if not isinstance(self.word_frequencies, (dict, type(None))):
-            self.word_frequencies_filename: str = self.resolve_word_frequencies_filename()
-            self.word_frequencies = load_dict(self.word_frequencies_filename)
+        self.data_folder = self.data_folder or "."
 
-        self.load()
+        if isinstance(self.word_frequencies, dict):
+            self.filename = jj(self.data_folder, self.filename)
+        else:
+            if isinstance(self.word_frequencies, str):
+                self.filename = self.word_frequencies
+                self.word_frequencies = None
 
-    def resolve_word_frequencies_filename(self) -> str:
-        if not isinstance(self.word_frequencies, str):
-            if not isfile(self.word_frequencies_filename):
-                return jj(self.data_folder, self.word_frequencies_filename)
-            return self.word_frequencies_filename
+            self.filename: str = self.probe_word_frequencies_filename()
 
-        if isfile(self.word_frequencies):
-            return self.word_frequencies
+            self.word_frequencies = load_dict(self.filename)
 
-        if isfile(jj(self.data_folder, self.word_frequencies)):
-            return jj(self.data_folder, self.word_frequencies)
+        self.load_state()
 
-        if isfile(jj(self.data_folder, self.word_frequencies_filename)):
-            return jj(self.data_folder, self.word_frequencies_filename)
+    def probe_word_frequencies_filename(self) -> str:
+        if isfile(self.filename):
+            return self.filename
 
-        if isfile(self.word_frequencies_filename):
-            return self.word_frequencies_filename
+        if isfile(jj(self.data_folder, self.filename)):
+            return jj(self.data_folder, self.filename)
 
-        raise FileNotFoundError(f"expected TF file {self.word_frequencies} not found")
+        raise FileNotFoundError(f"expected TF file {self.filename} not found")
 
     @property
     def whitelist_filename(self) -> str:
@@ -232,7 +228,7 @@ class SwedishDehyphenator:
         store_token_set(self.unresolved, self.unresolved_filename)
         store_dict(self.whitelist_log, self.whitelist_log_filename)
 
-    def load(self) -> None:
+    def load_state(self) -> None:
         self.whitelist = load_token_set(self.whitelist_filename)
         self.whitelist_log = load_dict(self.whitelist_log_filename)
         self.unresolved = load_token_set(self.unresolved_filename)

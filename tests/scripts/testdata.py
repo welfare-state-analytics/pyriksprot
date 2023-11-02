@@ -1,9 +1,9 @@
 import os
 import sys
 from os.path import join
-from dotenv import load_dotenv
 
 import click
+from dotenv import load_dotenv
 from loguru import logger
 
 from tests.utility import (

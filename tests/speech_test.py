@@ -286,7 +286,6 @@ def test_load_protocols_from_folder():
     ],
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):
-
     # Find file in test data folder (might be in subfolder)
     filename: str = glob.glob(jj(TAGGED_SOURCE_FOLDER, "**", f'{protocol_name}.zip'), recursive=True)[0]
 

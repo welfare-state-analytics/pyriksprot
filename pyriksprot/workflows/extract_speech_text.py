@@ -34,7 +34,7 @@ def extract_speech_texts(
     multiproc_chunksize: int = 100,
     dedent: bool = True,
     dehyphen: bool = False,
-    data_path: str = '.',
+    dehyphen_folder: str = '.',
     compress_type: sd.CompressType = sd.CompressType.Zip,
     **_,
 ) -> None:
@@ -60,7 +60,7 @@ def extract_speech_texts(
         multiproc_chunksize (int, optional): Chunksize to use per process during iterate. Defaults to 100.
         dedent (bool, optional): Dedent text. Defaults to True.
         dehyphen (bool, optional): Dehyphen text. Defaults to False.
-        data_path (str, optional): Path to model data (used by dedent/dehyphen). Defaults to '.'.
+        dehyphen_folder (str, optional): Path to model data (used by dedent/dehyphen). Defaults to '.'.
         compress_type (CompressType, optional): Target file compression type. Defaults to CompressType.zip.
     """
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
@@ -69,8 +69,13 @@ def extract_speech_texts(
     lookups: md.Codecs = md.Codecs().load(metadata_filename)
 
     dehypenator: dehyphenation.SwedishDehyphenator = (
-        dehyphenation.SwedishDehyphenator(data_folder=data_path, word_frequencies=None) if dehyphen else None
+        dehyphenation.SwedishDehyphenator(data_folder=dehyphen_folder, word_frequencies=None) if dehyphen else None
     )
+
+    if dehyphen:
+        if not dehypenator.word_frequencies:
+            raise ValueError("dehyphenation requires word frequencies (frequency file empty or not specified)")
+
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
 
     def preprocess(item: ProtocolSegment) -> None:
@@ -78,7 +83,7 @@ def extract_speech_texts(
             item.data = pp.dedent(item.data)
 
         if dehypenator:
-            item.data = dehypenator(item.data)  # pylint: disable=not-callable
+            item.data = dehypenator.dehyphen_text(item.data)  # pylint: disable=not-callable
 
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
 

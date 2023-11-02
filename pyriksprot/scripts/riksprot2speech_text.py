@@ -40,6 +40,7 @@ Extract speech texts from a ParlaCLARIN corpus.
 @option2('--dedent')
 @option2('--dehyphen')
 @option2('--force')
+@option2('--dehyphen-folder')
 def main(
     options_filename: str = None,
     source_folder: str = None,
@@ -57,6 +58,7 @@ def main(
     dedent: bool = False,
     dehyphen: bool = False,
     force: bool = False,
+    dehyphen_folder: str = '.',
 ):
     """Extracts `speeches` from a Parla-CLARIN XML corpus.  Speeches are (optionally) stored in subfolders."""
     try:
@@ -76,37 +78,22 @@ def main(
 if __name__ == "__main__":
     main()
 
-    # from click.testing import CliRunner
-
-    # # source_folder: str = "/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/"
-    # # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
-
-    # source_folder: str = "tests/test_data/source/v0.4.6/parlaclarin/protocols/"
-    # metadata_filename: str = "tests/test_data/source/v0.4.6/riksprot_metadata.db"
-
-    # source_folder: str = "tests/test_data/tmp/"
-    # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
-
-    # runner = CliRunner()
-    # result = runner.invoke(
-    #     main,
-    #     [
-    #         "--multiproc-processes",
-    #         "1",
-    #         "--compress-type",
-    #         "zip",
-    #         "--multiproc-keep-order",
-    #         "--temporal-key",
-    #         "decade",
-    #         "--group-key",
-    #         "gender_id",
-    #         "--group-key",
-    #         "party_id",
-    #         "--force",
-    #         source_folder,
-    #         metadata_filename,
-    #         "apa.zip",
-    #     ],
-    # )
-
-    # print(result.output)
+    # args: dict = {
+    #     'source_folder': '/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols',
+    #     'metadata_filename': './metadata/riksprot_metadata.v0.10.0.db',
+    #     'target_name': '/data/riksdagen_corpus_data/v0.10.0/plain_text_speeches.zip',
+    #     'target_type': 'single-id-tagged-frame-per-group',
+    #     'compress_type': dispatch.CompressType.Zip,
+    #     'subfolder_key': None,
+    #     'merge_strategy': 'chain',
+    #     'years': None,
+    #     'skip_size': 1,
+    #     'multiproc_processes': 1,
+    #     'multiproc_keep_order': False,
+    #     'dedent': True,
+    #     'dehyphen': True,
+    #     'force': True,
+    #     'dehyphen_folder': './metadata/data/v0.10.0',
+    #     'naming_keys': (),
+    # }
+    # extract_speech_text.extract_speech_texts(**args)

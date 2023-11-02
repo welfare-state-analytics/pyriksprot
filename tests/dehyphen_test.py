@@ -30,27 +30,17 @@ def test_merge_paragraphs():
     assert result == text
 
 
-# @pytest.mark.slow
-# def test_dehyphen_service():
-
-#     service = FlairDehyphenService(lang="sv")
-
-#     expected_text = "Detta är en\nenkel text.\n\nDen har tre paragrafer.\n\nDetta är den tredje paragrafen."
-#     dehyphened_text = service.dehyphen_text(expected_text, merge_paragraphs=False)
-#     assert dehyphened_text == expected_text
-
-#     text = "Detta är en\nenkel text.\n\nDen har tre paragrafer.\n   \t\n\n   \nDetta är den tredje paragrafen."
-#     dehyphened_text = service.dehyphen_text(text, merge_paragraphs=False)
-#     assert dehyphened_text == expected_text
-
-
-def test_create_dehyphenator_service_fails_if_no_word_frequency_file():
+def test_create_dehyphenator_service_fails_if_file_not_found():
     if os.path.isfile(WORD_FREQUENCY_FILENAME):
         os.remove(WORD_FREQUENCY_FILENAME)
 
     with pytest.raises(FileNotFoundError):
         with patch('pyriksprot.dehyphenation.swe_dehyphen.SwedishDehyphenator', return_value=Mock()) as _:
             _ = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME)
+
+
+def test_create_dehyphenator_service_succeeds_if_word_frequences_is_set():
+    _ = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={})
 
 
 def test_dehyphenator_service_flush_creates_expected_files():
