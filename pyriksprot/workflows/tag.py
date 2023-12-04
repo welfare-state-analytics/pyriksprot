@@ -4,7 +4,7 @@ import abc
 import importlib
 from functools import reduce
 from glob import glob
-from os.path import basename, dirname, getmtime, isfile, join, split
+from os.path import dirname, getmtime, isfile, join, split
 from typing import Any, Mapping, Protocol, Type, Union
 
 from loguru import logger

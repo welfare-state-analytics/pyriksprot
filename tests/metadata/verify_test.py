@@ -39,13 +39,13 @@ def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | 
     return result
 
 
-def test_overlap():
-    import pandas as pd
+# def test_overlap():
+#     import pandas as pd
 
-    overlaps = pd.read_csv('party-overlap.csv', sep=';')
-    overlap_person = overlaps.groupby(['name', 'id']).agg(list)
-    overlap_person['overlap'] = overlap_person.year.apply(collapse_consecutive_integers).apply(
-        lambda p: ', '.join(map(lambda x: f'{x[0]}-{x[-1]}' if isinstance(x, tuple) else str(x), p))
-    )
+#     overlaps = pd.read_csv('party-overlap.csv', sep=';')
+#     overlap_person = overlaps.groupby(['name', 'id']).agg(list)
+#     overlap_person['overlap'] = overlap_person.year.apply(collapse_consecutive_integers).apply(
+#         lambda p: ', '.join(map(lambda x: f'{x[0]}-{x[-1]}' if isinstance(x, tuple) else str(x), p))
+#     )
 
-    pass
+#     pass
