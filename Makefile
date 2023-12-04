@@ -21,10 +21,10 @@ GLOBAL_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/metadata
 SPEACH_CORPUS_FORMAT=feather
 
 LOCAL_METADATA_DATABASE=./metadata/$(METADATA_DATABASE_NAME)
-GLOBAL_METADATA_DATABASE=$(GLOBAL_METADATA_FOLDER)/$(METADATA_DATABASE_NAME)
+GLOBAL_METADATA_DATABASE=$(GLOBAL_METADATA_FOLDER)/$(VERSION)/$(METADATA_DATABASE_NAME)
 
 TAGGED_FRAMES_FOLDER=$(RIKSPROT_DATA_FOLDER)/$(VERSION)/tagged_frames
-TAGGED_FRAMES_SPEECHES_FOLDER=$(RIKSPROT_DATA_FOLDER)/$(VERSION)/tagged_frames_speeches.$(SPEACH_CORPUS_FORMAT)
+LEMMA_VRT_SPEECHES_FOLDER=$(RIKSPROT_DATA_FOLDER)/$(VERSION)/lemma_vrt_speeches.$(SPEACH_CORPUS_FORMAT)
 
 CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describe --tags)"
 
@@ -38,7 +38,7 @@ else
 endif
 
 .PHONY: full
-full: metadata term-frequencies speech-corpus deploy-to-global
+full: metadata word-frequencies lemma-vrt-speech-corpus deploy-to-global
 	@echo "info: $(VERSION) metadata and test-data has been refreshed!"
 
 ########################################################################################################
@@ -54,12 +54,12 @@ metadata: funkis metadata-download metadata-corpus-index metadata-database metad
 MERGE_STRATEGY=chain
 SPEECH_INDEX_TARGET_NAME=$(LOCAL_METADATA_FOLDER)/speech_index.$(MERGE_STRATEGY).$(VERSION).csv.gz
 
-.PHONY: term-frequencies
-term-frequencies:
-	@echo "info: computing term frequencies for $(VERSION)"
+.PHONY: word-frequencies
+word-frequencies:
+	@echo "info: computing word frequencies for $(VERSION)"
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2tfs.py \
 		$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/protocols \
-		$(LOCAL_METADATA_FOLDER)/term-frequencies.pkl
+		$(LOCAL_METADATA_FOLDER)/word-frequencies.pkl
 
 speech-index:
 	@echo "info: creating speech index for $(VERSION)"
@@ -67,7 +67,7 @@ speech-index:
 	@echo "       Source metadata: " $(LOCAL_METADATA_DATABASE)
 	@echo "   Target speech index: " $(SPEECH_INDEX_TARGET_NAME)
 	@if [ ! -f "$(LOCAL_METADATA_DATABASE)" ]; then \
-		echo "error: global metadata file $(LOCAL_METADATA_DATABASE) does not exist"; \
+		echo "error: metadata file $(LOCAL_METADATA_DATABASE) does not exist"; \
 		exit 1; \
 	fi
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/speech_index.py \
@@ -75,53 +75,96 @@ speech-index:
 		$(TAGGED_FRAMES_FOLDER) \
 			$(SPEECH_INDEX_TARGET_NAME) \
 				$(LOCAL_METADATA_DATABASE)
+	@echo "info: done creating speech index for $(VERSION)"
 	@cp -f $(SPEECH_INDEX_TARGET_NAME) $(GLOBAL_METADATA_FOLDER)/
 	@cp -f $(SPEECH_INDEX_TARGET_NAME) $(TAGGED_FRAMES_FOLDER)/
 
 
-ACTUAL_TAG:=$(VERSION)
-.PHONY: speech-corpus
-speech-corpus: funkis speech-index
-	@echo "info: extracting speeches in $(SPEACH_CORPUS_FORMAT) format"
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech.py \
-		--compress-type $(SPEACH_CORPUS_FORMAT) \
-		--merge-strategy chain \
-	 	--target-type single-id-tagged-frame-per-group \
-		--skip-stopwords  \
-		--skip-text \
-		--lowercase \
-		--skip-puncts \
-		--force \
-		 	$(TAGGED_FRAMES_FOLDER) \
-			 	$(GLOBAL_METADATA_DATABASE) \
-					$(TAGGED_FRAMES_SPEECHES_FOLDER)
-	@cp -f $(SPEECH_INDEX_TARGET_NAME) $(TAGGED_FRAMES_SPEECHES_FOLDER)/
-	@cp -f resources/default_speech_corpus_config.yml $(TAGGED_FRAMES_SPEECHES_FOLDER)/config.yml
+.PHONY: vrt-speech-corpora
+vrt-speech-corpora:
+	@for tok in "all" "lemma" "text"; do \
+		skip_option=""; \
+		target_name="vrt_speeches.$(SPEACH_CORPUS_FORMAT)" ; \
+		if [ "$${tok}" == "lemma" ]; then \
+			skip_option="--skip-text"; \
+			target_name="$${tok}_$${target_name}"; \
+		elif [ "$${tok}" == "text" ]; then \
+			skip_option="--skip-lemma"; \
+			target_name="$${tok}_$${target_name}"; \
+		fi; \
+		echo "info: extracting VRT $${tok} speeches in $(SPEACH_CORPUS_FORMAT) format"; \
+		echo "info: $${target_name}"; \
+		echo awk "{gsub(CORPUS_FOLDER, $(RIKSPROT_DATA_FOLDER)/$(VERSION)/corpus/$${target_name})}1" ./resources/speech_corpus.yml; \
+	done
 
+
+# 		PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech.py \
+# 			--compress-type $(SPEACH_CORPUS_FORMAT) \
+# 			--merge-strategy chain \
+# 			--target-type single-id-tagged-frame-per-group \
+# 			$${skip_option} \
+# 			--lowercase \
+# 			--skip-puncts \
+# 			--force \
+# 				$(TAGGED_FRAMES_FOLDER) \
+# 					$(LOCAL_METADATA_DATABASE) \
+# 						$(RIKSPROT_DATA_FOLDER)/$(VERSION)/corpus/$${target_name} ; \
+#  ./resources/speech_corpus.yml > $(RIKSPROT_DATA_FOLDER)/$(VERSION)/corpus/$${target_name}/corpus.yml ; \
+
+plain-text-speech-corpus: funkis
+	@echo "info: extracting speeches in $(SPEACH_CORPUS_FORMAT) format"
+	@echo "Script(s): pyriksprot.scripts.riksprot2speech_text:main"
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech_text.py \
+		--target-type single-id-tagged-frame-per-group \
+		--compress-type zip \
+		--merge-strategy chain \
+		--skip-size 1 \
+		--multiproc-processes 1 \
+		--dedent \
+		--dehyphen \
+		--dehyphen-folder $(LOCAL_METADATA_FOLDER) \
+		--force \
+			$(RIKSPROT_DATA_FOLDER)/riksdagen-corpus/corpus/protocols \
+				$(LOCAL_METADATA_DATABASE) \
+					$(RIKSPROT_DATA_FOLDER)/$(VERSION)/corpus/plain_text_speeches.zip
 
 .PHONY: deploy-to-global
 deploy-to-global: funkis
-	@echo "info: Deloying to global folder $(GLOBAL_METADATA_FOLDER)/$(VERSION)" \
-		&& rm -rf $(GLOBAL_METADATA_FOLDER)/$(VERSION) \
-		&& mkdir -p $(GLOBAL_METADATA_FOLDER)/$(VERSION) \
-		&& cp -r $(LOCAL_METADATA_FOLDER) $(GLOBAL_METADATA_FOLDER) \
-		&& cp -f $(LOCAL_METADATA_DATABASE) $(GLOBAL_METADATA_DATABASE)
-
+	@echo "info: deploying to global folder $(GLOBAL_METADATA_FOLDER)/$(VERSION)"
+	@printf "  %50s => %s\n" "$(LOCAL_METADATA_FOLDER)" "$(GLOBAL_METADATA_FOLDER)"
+	@printf "  %50s => %s\n" "$(LOCAL_METADATA_DATABASE)" "$(GLOBAL_METADATA_DATABASE)"
+	@printf "  %50s => %s\n" "$(GLOBAL_METADATA_DATABASE)" "$(GLOBAL_METADATA_FOLDER)/$(METADATA_DATABASE_NAME) (link)"
+	@printf "  %50s => %s\n" "$(LOCAL_METADATA_FOLDER)/word-frequencies.pkl" "$(GLOBAL_METADATA_FOLDER)/$(VERSION)/word-frequencies.pkl"
+	@cp -r $(LOCAL_METADATA_FOLDER) $(GLOBAL_METADATA_FOLDER)  \
+	   && cp -f $(LOCAL_METADATA_DATABASE) $(GLOBAL_METADATA_DATABASE) \
+	   && rm -f $(GLOBAL_METADATA_FOLDER)/$(METADATA_DATABASE_NAME) \
+	   && ln -s $(GLOBAL_METADATA_DATABASE) $(GLOBAL_METADATA_FOLDER)/$(METADATA_DATABASE_NAME) \
+	   && if [ -f "$(LOCAL_METADATA_FOLDER)/word-frequencies.pkl" ]; then \
+		      cp -f $(LOCAL_METADATA_FOLDER)/word-frequencies.pkl $(GLOBAL_METADATA_FOLDER)/$(VERSION)/word-frequencies.pkl; \
+	      fi ;
+	
 .PHONY: deploy-to-remote
 .ONESHELL:
-deploy-to-remote: funkis
-	@remote_folder=$(RIKSPROT_DATA_FOLDER)/$(VERSION) ; \
-	folder_exists=$$(ssh $(USER)@$(REMOTE_HOST) 'test -d $${remote_folder}3/ && echo yes') ; \
-	if [ "$${folder_exists}" == "yes" ]; then \
-		echo "error: remote folder exists $(USER)@$(REMOTE_HOST):$${remote_folder} already exists. Please remove." ; \
-		exit 64 ; \
-	fi ;
+deploy-metadata-to-remote: funkis
+	@printf "%s\n" "info: deploying to $(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_FOLDER)"
+	@printf "  %50s => %s\n" "$(LOCAL_METADATA_FOLDER)" "$(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_FOLDER)"
+	@printf "  %50s => %s\n" "$(LOCAL_METADATA_DATABASE)" "$(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_DATABASE)"
+	# @scp -r $(LOCAL_METADATA_FOLDER) $(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_FOLDER)/
+	# @scp $(LOCAL_METADATA_DATABASE) $(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_DATABASE)
+	@echo ssh $(USER)@$(REMOTE_HOST) 'ln -s $(GLOBAL_METADATA_DATABASE) $(GLOBAL_METADATA_FOLDER)/$(METADATA_DATABASE_NAME)' "
+	@echo ssh $(USER)@$(REMOTE_HOST) 'ln -s $(GLOBAL_METADATA_FOLDER)/$(VERSION)/word-frequencies.pkl $(RIKSPROT_DATA_FOLDER)/word-frequencies.pkl' "
 
-	# echo "info: deploying to $(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_FOLDER)" \
-	# 	&& scp -r $(LOCAL_METADATA_FOLDER) $(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_FOLDER)/ \
-	# 	&& scp -f $(LOCAL_METADATA_DATABASE) $(USER)@$(REMOTE_HOST):$(GLOBAL_METADATA_DATABASE)/ \
-	# 	&& scp -r $(RIKSPROT_DATA_FOLDER)/$(VERSION) $(USER)@$(REMOTE_HOST):$(TAGGED_FRAMES_SPEECHES_FOLDER)/$(RIKSPROT_DATA_FOLDER)/; \
-	# @echo "done!"
+deploy-data-to-remote:
+	@printf "  %50s => %s\n" "$(RIKSPROT_DATA_FOLDER)/$(VERSION)" "$(USER)@$(REMOTE_HOST):$(RIKSPROT_DATA_FOLDER)/$(VERSION)"
+	@folder_exists=`ssh $(USER)@$(REMOTE_HOST) 'test -d $(RIKSPROT_DATA_FOLDER)/$(VERSION) && echo yes'` ; \
+		if [ "$${folder_exists}" == "yes" ]; then \
+	 		echo "error: remote folder exists $(USER)@$(REMOTE_HOST):$(RIKSPROT_DATA_FOLDER)/$(VERSION) already exists. Please remove." ; \
+	 		exit 64 ; \
+	 	fi ;
+	@tar cf $(RIKSPROT_DATA_FOLDER)/$(VERSION).tar $(RIKSPROT_DATA_FOLDER)
+	@scp $(RIKSPROT_DATA_FOLDER)/$(VERSION).tar $(USER)@$(REMOTE_HOST):$(RIKSPROT_DATA_FOLDER)/
+	@rm -f $(RIKSPROT_DATA_FOLDER)/$(VERSION).tar
+	@echo "info: unpack $(RIKSPROT_DATA_FOLDER)/$(VERSION).tar on recieving end"
 
 apaas:
 	@echo rsync -av --exclude 'mallet' --exclude 'gensim.model*' --exclude 'train_*z' --exclude $(RIKSPROT_DATA_FOLDER)/$(VERSION) $(USER)@$(REMOTE_HOST):$(RIKSPROT_DATA_FOLDER)/; 
