@@ -1,6 +1,6 @@
 from pyriksprot.metadata import verify
 
-from ..utility import RIKSPROT_REPOSITORY_TAG, ensure_test_corpora_exist
+from ..utility import RIKSPROT_REPOSITORY_TAG
 
 SAMPLE_METADATA = f"./tests/test_data/source/{RIKSPROT_REPOSITORY_TAG}/parlaclarin/metadata"
 
