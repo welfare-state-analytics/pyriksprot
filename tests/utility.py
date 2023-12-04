@@ -93,14 +93,14 @@ def sample_tagged_speech_corpus_exists():
     """Checks if the test data contains a complete tagged speech corpus. Empty files are ignored."""
 
     def isfile_and_non_empty(filename: str) -> bool:
-        return isfile(filename) and getsize(filename) > 0
+        """Check if file exists in soruce folder, or in sub-folder, and is non-empty."""
+        for path in [TAGGED_SOURCE_FOLDER, jj(TAGGED_SOURCE_FOLDER, f"{filename.split('-')[1]}")]:
+            if isfile(jj(path, filename)) and getsize(jj(path, filename)) > 0:
+                return True
+        return False
 
     def non_empty_tagged_frames_document_names() -> list[str]:
-        return [
-            x
-            for x in load_test_documents()
-            if isfile_and_non_empty(jj(TAGGED_SOURCE_FOLDER, f"{x.split('-')[1]}/{x}.zip"))
-        ]
+        return [x for x in load_test_documents() if isfile_and_non_empty(f"{x}.zip")]
 
     expected_files: set[str] = set(non_empty_tagged_frames_document_names())
     document_names: set[str] = {

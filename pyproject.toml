@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriksprot"
-version = "2023.8.4"
+version = "2023.12.1"
 description = "Python API for Riksdagens Protokoll"
 authors = ["Roger Mähler <roger.mahler@hotmail.com>"]
 packages = [

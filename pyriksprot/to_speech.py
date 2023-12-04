@@ -127,35 +127,38 @@ class MergeByChain(IMergeStrategy):
             """
 
             is_part_of_chain: bool = bool(u.prev_id) or bool(u.next_id)
-            
-            is_unknown_continuation: bool = not is_part_of_chain and (
-                bool(speech)
-                and u.who == "unknown" == speech[-1].who
-                and u.speaker_note_id == speech[-1].speaker_note_id
-            ) and merge_consecutive_unknowns
+
+            is_unknown_continuation: bool = (
+                not is_part_of_chain
+                and (
+                    bool(speech)
+                    and u.who == "unknown" == speech[-1].who
+                    and u.speaker_note_id == speech[-1].speaker_note_id
+                )
+                and merge_consecutive_unknowns
+            )
 
             is_start_of_speech: bool = not bool(u.prev_id) and not is_unknown_continuation
 
             if is_start_of_speech:
-
                 if bool(speech) and bool(speech[-1].next_id):
-                    logger.warning(f"logic error: {u.u_id} is start of speech but previous utterance has a next attribute")
+                    logger.warning(
+                        f"logic error: {u.u_id} is start of speech but previous utterance has a next attribute"
+                    )
 
                 speech = [u]
                 speeches.append(speech)
 
             else:
                 if bool(speech):
-
                     if bool(u.prev_id) and speech[-1].u_id != u.prev_id:
                         logger.warning(f"u[{u.u_id}]: current prev_id differs from first u.u_id '{speech[0].u_id}'")
 
                     if speech[0].who != u.who:
                         raise ValueError(f"u[{u.u_id}]: multiple who ids in current speech '{speech[0].who}'")
-                    
+
                 if not bool(speech) and bool(u.prev_id):
                     logger.warning(f"logic error: {u.u_id} has prev attribute but no previous utterance")
-
 
                 speech.append(u)
 

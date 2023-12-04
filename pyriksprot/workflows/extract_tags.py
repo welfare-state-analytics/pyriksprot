@@ -155,3 +155,6 @@ def extract_corpus_tags(
     # metadata_index.store(target_name=target_name if isdir(target_name) else dirname(target_name))
 
     logger.info(f"Corpus stored in {target_name}.")
+    logger.info(f"Please copy a corpus config `corpus.yml` to {target_name}.")
+
+    # FIXME: #69 Write corpus config to file to target folder

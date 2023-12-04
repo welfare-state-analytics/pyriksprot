@@ -15,6 +15,8 @@ from pyriksprot.corpus import corpus_index, iterate, tagged
 jj = os.path.join
 relpath = os.path.relpath
 
+# pylint: disable=too-many-arguments
+
 
 def extract_speech_index(
     *,

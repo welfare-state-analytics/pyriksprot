@@ -44,6 +44,7 @@ CLI_OPTIONS = {
     '--subfolder-key': dict(default=None, help='Subfolder sort key', type=click.STRING),
     '--years': dict(default=None, help='Years to include in output', type=click.STRING),
     '--force': dict(default=False, help='Force remove of existing files', is_flag=True),
+    '--dehyphen-folder': dict(default='.', type=str, help='Path to dehypen data folder (word-frequencies etc)'),
 }
 
 
