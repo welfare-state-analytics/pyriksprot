@@ -77,7 +77,7 @@ class ProtocolSegment(IDispatchItem):
             'n_tokens': np.int32,
             'n_utterances': np.int8,
             'speech_index': np.int16,
-            **SpeakerInfo.dtypes(),
+            **SpeakerInfo.dtypes(),  # pylint: disable=used-before-assignment
         }
 
     @property

@@ -47,7 +47,9 @@ class ConfigValue(Generic[T]):
 
     @staticmethod
     def create_field(key: str, default: Any = None, description: str = None) -> Any:
-        return field(default_factory=lambda: ConfigValue(key=key, default=default, description=description).resolve())
+        return field(  # pylint: disable=invalid-field-call
+            default_factory=lambda: ConfigValue(key=key, default=default, description=description).resolve()
+        )
 
 
 class ConfigStore:
