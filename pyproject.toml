@@ -64,6 +64,7 @@ riksprot2text = "pyriksprot.scripts.riksprot2text:main"
 riksprot2speech = "pyriksprot.scripts.riksprot2speech:main"
 riksprot2speech_text = "pyriksprot.scripts.riksprot2speech_text:main"
 subset-corpus = "pyriksprot.scripts.subset_corpus:main"
+subset-vrt-corpus = "pyriksprot.scripts.subset_vrt_corpus:main"
 speech-index = "pyriksprot.scripts.speech_index:main"
 metadata2db = "pyriksprot.scripts.metadata2db:main"
 
