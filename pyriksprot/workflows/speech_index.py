@@ -17,6 +17,7 @@ relpath = os.path.relpath
 
 # pylint: disable=too-many-arguments
 
+
 def extract_speech_index(
     *,
     source_folder: str,
