@@ -218,7 +218,7 @@ RIKSPROT_METADATA_TABLES: dict = {
 #         'u_id': 'text',
 #         'n_utterances': 'int',
 #         'speaker_note_id': 'text',
-#         'speach_index': 'int',
+#         'speech_index': 'int',
 #     },
 # }
 
