@@ -18,13 +18,13 @@ METADATA_DATABASE_NAME=riksprot_metadata.$(VERSION).db
 LOCAL_METADATA_FOLDER=./metadata/data/$(VERSION)
 GLOBAL_METADATA_FOLDER=$(RIKSPROT_DATA_FOLDER)/metadata
 
-SPEACH_CORPUS_FORMAT=feather
+SPEECH_CORPUS_FORMAT=feather
 
 LOCAL_METADATA_DATABASE=./metadata/$(METADATA_DATABASE_NAME)
 GLOBAL_METADATA_DATABASE=$(GLOBAL_METADATA_FOLDER)/$(VERSION)/$(METADATA_DATABASE_NAME)
 
 TAGGED_FRAMES_FOLDER=$(RIKSPROT_DATA_FOLDER)/$(VERSION)/tagged_frames
-LEMMA_VRT_SPEECHES_FOLDER=$(RIKSPROT_DATA_FOLDER)/$(VERSION)/lemma_vrt_speeches.$(SPEACH_CORPUS_FORMAT)
+LEMMA_VRT_SPEECHES_FOLDER=$(RIKSPROT_DATA_FOLDER)/$(VERSION)/lemma_vrt_speeches.$(SPEECH_CORPUS_FORMAT)
 
 CHECKED_OUT_TAG="$(shell git -C $(RIKSPROT_DATA_FOLDER)/riksdagen-corpus describe --tags)"
 
@@ -84,7 +84,7 @@ speech-index:
 vrt-speech-corpora:
 	@for tok in "all" "lemma" "text"; do \
 		skip_option=""; \
-		target_name="vrt_speeches.$(SPEACH_CORPUS_FORMAT)" ; \
+		target_name="vrt_speeches.$(SPEECH_CORPUS_FORMAT)" ; \
 		if [ "$${tok}" == "lemma" ]; then \
 			skip_option="--skip-text"; \
 			target_name="$${tok}_$${target_name}"; \
@@ -92,14 +92,14 @@ vrt-speech-corpora:
 			skip_option="--skip-lemma"; \
 			target_name="$${tok}_$${target_name}"; \
 		fi; \
-		echo "info: extracting VRT $${tok} speeches in $(SPEACH_CORPUS_FORMAT) format"; \
+		echo "info: extracting VRT $${tok} speeches in $(SPEECH_CORPUS_FORMAT) format"; \
 		echo "info: $${target_name}"; \
 		echo awk "{gsub(CORPUS_FOLDER, $(RIKSPROT_DATA_FOLDER)/$(VERSION)/corpus/$${target_name})}1" ./resources/speech_corpus.yml; \
 	done
 
 
 # 		PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech.py \
-# 			--compress-type $(SPEACH_CORPUS_FORMAT) \
+# 			--compress-type $(SPEECH_CORPUS_FORMAT) \
 # 			--merge-strategy chain \
 # 			--target-type single-id-tagged-frame-per-group \
 # 			$${skip_option} \
@@ -112,7 +112,7 @@ vrt-speech-corpora:
 #  ./resources/speech_corpus.yml > $(RIKSPROT_DATA_FOLDER)/$(VERSION)/corpus/$${target_name}/corpus.yml ; \
 
 plain-text-speech-corpus: funkis
-	@echo "info: extracting speeches in $(SPEACH_CORPUS_FORMAT) format"
+	@echo "info: extracting speeches in $(SPEECH_CORPUS_FORMAT) format"
 	@echo "Script(s): pyriksprot.scripts.riksprot2speech_text:main"
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech_text.py \
 		--target-type single-id-tagged-frame-per-group \
@@ -142,7 +142,7 @@ deploy-to-global: funkis
 	   && if [ -f "$(LOCAL_METADATA_FOLDER)/word-frequencies.pkl" ]; then \
 		      cp -f $(LOCAL_METADATA_FOLDER)/word-frequencies.pkl $(GLOBAL_METADATA_FOLDER)/$(VERSION)/word-frequencies.pkl; \
 	      fi ;
-	
+
 .PHONY: deploy-to-remote
 .ONESHELL:
 deploy-metadata-to-remote: funkis
@@ -167,7 +167,7 @@ deploy-data-to-remote:
 	@echo "info: unpack $(RIKSPROT_DATA_FOLDER)/$(VERSION).tar on recieving end"
 
 apaas:
-	@echo rsync -av --exclude 'mallet' --exclude 'gensim.model*' --exclude 'train_*z' --exclude $(RIKSPROT_DATA_FOLDER)/$(VERSION) $(USER)@$(REMOTE_HOST):$(RIKSPROT_DATA_FOLDER)/; 
+	@echo rsync -av --exclude 'mallet' --exclude 'gensim.model*' --exclude 'train_*z' --exclude $(RIKSPROT_DATA_FOLDER)/$(VERSION) $(USER)@$(REMOTE_HOST):$(RIKSPROT_DATA_FOLDER)/;
 
 ########################################################################################################
 # Sub-recepis follows
@@ -290,7 +290,7 @@ cwb-test-data:
 		-F `pwd`/tests/test_data/source/$(VERSION)/vrt \
 		-R /usr/local/share/cwb/registry/$(CWB_REGISTRY_ENTRY) \
 		-P lemma -P pos -P xpos \
-		-S year:0+title+date \
+		-S year:0+year+title \
 		-S protocol:0+title+date \
 		-S speech:0+id+page+title+who+date
 	@if [ "$(cwb-make-exists)" == "true" ]; then \

@@ -1,11 +1,34 @@
 import os
 import shutil
-from os.path import join as jj
+from glob import glob
+from os.path import basename, dirname, exists, join, splitext
+
+from loguru import logger
 
 from pyriksprot import corpus as pc
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.utility import reset_folder
+
+
+def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_folder: str) -> None:
+    """Given a local parlaclarin folder, copy the global VRT (tagged frame) for all protocols that exists in the local parlaclarin folder"""
+
+    for filename in glob(join(local_xml_folder, '**/*.xml'), recursive=True):
+        subfolder: str = basename(dirname(filename))
+
+        global_vrt_filename: str = join(global_vrt_folder, subfolder, f'{splitext(basename(filename))[0]}.zip')
+
+        if not exists(global_vrt_filename):
+            raise Exception(f'subset_vrt_corpus: file {global_vrt_filename} does not exist (cannot proceed)')
+
+        target_vrt_filename: str = join(local_vrt_folder, subfolder, f'{splitext(basename(filename))[0]}.zip')
+
+        os.makedirs(dirname(target_vrt_filename), exist_ok=True)
+
+        shutil.copyfile(global_vrt_filename, target_vrt_filename)
+
+        logger.info(f"copied {filename}")
 
 
 def subset_corpus_and_metadata(
@@ -18,13 +41,13 @@ def subset_corpus_and_metadata(
 ):
     """Subset metadata to folder `target_folder`/tag"""
 
-    root_folder: str = jj(target_folder, tag)
+    root_folder: str = join(target_folder, tag)
 
-    metadata_folder: str = jj(root_folder, "tmp")
-    parlaclarin_folder: str = jj(root_folder, "parlaclarin")
-    metadata_target_folder: str = jj(parlaclarin_folder, "metadata")
-    protocols_target_folder: str = jj(parlaclarin_folder, "protocols")
-    database_name: str = jj(root_folder, "riksprot_metadata.db")
+    metadata_folder: str = join(root_folder, "tmp")
+    parlaclarin_folder: str = join(root_folder, "parlaclarin")
+    metadata_target_folder: str = join(parlaclarin_folder, "metadata")
+    protocols_target_folder: str = join(parlaclarin_folder, "protocols")
+    database_name: str = join(root_folder, "riksprot_metadata.db")
 
     reset_folder(root_folder, force=force)
 
@@ -47,7 +70,7 @@ def subset_corpus_and_metadata(
     md.subset_to_folder(
         ProtocolMapper,
         protocols_source_folder=parlaclarin_folder,
-        source_folder=jj(metadata_folder, tag),
+        source_folder=join(metadata_folder, tag),
         target_folder=metadata_target_folder,
     )
     """Add generated corpus indexes (speeches, utterances)"""

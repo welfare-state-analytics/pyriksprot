@@ -82,7 +82,7 @@ def compute_term_frequencies(
         ValueError: Unsupported source.
 
     Returns:
-        TermFrequencyCounter: Combinded term frequencies for given source(s).
+        TermFrequencyCounter: Combined term frequencies for given source(s).
     """
     try:
         if isinstance(source, XmlUntangleSegmentIterator):
