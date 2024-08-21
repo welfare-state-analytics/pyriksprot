@@ -43,7 +43,7 @@ def verify_metadata_columns(tags: str):
 @click.argument('tag', type=click.STRING)
 @click.argument('target_folder', type=click.STRING)
 def download_metadata(tag: str, target_folder: str):
-    md.gh_dl_metadata_by_config(configs=md.MetadataTableConfigs(), tag=tag, folder=target_folder, force=True)
+    md.gh_dl_metadata_by_config(configs=md.MetadataTableConfigs(tag=tag), tag=tag, folder=target_folder, force=True)
 
 
 @click.command()

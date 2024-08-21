@@ -1,12 +1,11 @@
 from functools import cached_property
+from importlib import import_module
 from os.path import isfile, join
-from typing import Callable, Iterable, Literal
+from typing import Callable, Iterable
 from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
-
-from pyriksprot.metadata.utility import fix_incomplete_datetime_series
 
 from ..utility import probe_filename, revdict
 
@@ -46,162 +45,8 @@ NAME2IDNAME_MAPPING: dict[str, str] = {
 IDNAME2NAME_MAPPING: dict[str, str] = revdict(NAME2IDNAME_MAPPING)
 
 
-def fix_ts_fx(column: str, action: Literal['extend', 'truncate']) -> Callable[[pd.DataFrame], pd.DataFrame]:
-    return lambda df: fix_incomplete_datetime_series(df, column, action, inplace=True)
-
-
-INCOMPLETE_DATE_COLUMNS = {
-    'start': {
-        'fx': fix_ts_fx("start", "truncate"),
-        'columns': {
-            'start0': 'date',
-            'start_flag': 'text',
-        },
-    },
-    'end': {
-        'fx': fix_ts_fx("end", "extend"),
-        'columns': {
-            'end0': 'date',
-            'end_flag': 'text',
-        },
-    },
-    'born': {
-        'fx': fix_ts_fx("born", "truncate"),
-        'columns': {
-            'born0': 'date',
-            'born_flag': 'text',
-        },
-    },
-    'dead': {
-        'fx': fix_ts_fx("dead", "extend"),
-        'columns': {
-            'dead0': 'date',
-            'dead_flag': 'text',
-        },
-    },
-}
-
-RIKSPROT_METADATA_TABLES: dict = {
-    'alias': {
-        # 'alias_id': 'AUTO_INCREMENT'
-        'person_id': 'text references person (person_id) not null',  # compound key
-        'alias': 'text not null',  # compound key
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'government': {
-        'government_id': 'text not null',  # actual primary key
-        'government': 'text primary key not null',
-        'start': 'text',
-        'end': 'text',
-        # ':options:': {'auto_increment': 'government_id'},
-        ':index:': {},
-        ':drop_duplicates:': 'government',
-        ':compute:': [
-            INCOMPLETE_DATE_COLUMNS.get("start"),
-            INCOMPLETE_DATE_COLUMNS.get("end"),
-        ],
-    },
-    'location_specifier': {
-        # 'location_specifier_id': 'AUTO_INCREMENT',
-        'person_id': 'text references person (person_id) not null',
-        'location': 'text',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'member_of_parliament': {
-        # 'member_of_parliament_id': 'AUTO_INCREMENT',
-        'person_id': 'text references person (person_id) not null',
-        'district': 'text',
-        'role': 'text',
-        'start': 'date',
-        'end': 'date',
-        ':rename_column:': {'wiki_id': 'person_id'},
-        ':compute:': [
-            INCOMPLETE_DATE_COLUMNS.get("start"),
-            INCOMPLETE_DATE_COLUMNS.get("end"),
-        ],
-    },
-    'minister': {
-        'person_id': 'text references person (person_id) not null',
-        'government': 'text',
-        'role': 'text',
-        'start': 'date',
-        'end': 'date',
-        ':rename_column:': {'wiki_id': 'person_id'},
-        ':compute:': [
-            INCOMPLETE_DATE_COLUMNS.get("start"),
-            INCOMPLETE_DATE_COLUMNS.get("end"),
-        ],
-    },
-    'name': {
-        'person_id': 'text references person (person_id) not null',
-        'name': 'text not null',
-        'primary_name': 'integer not null',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'party_abbreviation': {
-        'party': 'text primary key not null',
-        'abbreviation': 'text not null',
-        'ocr_correction': 'text',
-    },
-    'party_affiliation': {
-        'person_id': 'text references person (person_id) not null',
-        'start': 'int',
-        'end': 'int',
-        'party': 'text',
-        'party_id': 'text',
-        ':rename_column:': {'wiki_id': 'person_id'},
-        ':compute:': [
-            INCOMPLETE_DATE_COLUMNS.get("start"),
-            INCOMPLETE_DATE_COLUMNS.get("end"),
-        ],
-    },
-    'person': {
-        'person_id': 'text primary key',
-        'born': 'date',
-        'dead': 'date',
-        'gender': 'text',
-        'wiki_id': 'text',
-        'riksdagen_id': 'text',
-        ':drop_duplicates:': 'wiki_id',
-        ':copy_column:': {'person_id': 'wiki_id'},
-        ':compute:': [
-            INCOMPLETE_DATE_COLUMNS.get("born"),
-            INCOMPLETE_DATE_COLUMNS.get("dead"),
-        ],
-    },
-    'speaker': {
-        'person_id': 'text references person (person_id) not null',
-        'role': 'text',
-        'start': 'date',
-        'end': 'date',
-        ':rename_column:': {'wiki_id': 'person_id'},
-        ':compute:': [
-            INCOMPLETE_DATE_COLUMNS.get("start"),
-            INCOMPLETE_DATE_COLUMNS.get("end"),
-        ],
-    },
-    'twitter': {
-        'twitter': 'text',  # primary key',
-        'person_id': 'text references person (person_id) not null',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'name_location_specifier': {
-        # 'name_location_specifier_id': 'AUTO_INCREMENT'
-        'person_id': 'text references person (person_id) not null',  # compound key
-        'alias': 'text',  # compound key
-        'name': 'text not null',
-        ':rename_column:': {'wiki_id': 'person_id'},
-    },
-    'unknowns': {
-        'protocol_id': 'text',  # primary key',
-        'uuid': 'text',
-        'gender': 'text',
-        'party': 'text',
-        'other': 'text',
-        ':url:': input_unknown_url,
-        ':is_extra:': True,
-    },
-}
+# def fix_ts_fx(column: str, action: Literal['extend', 'truncate']) -> Callable[[pd.DataFrame], pd.DataFrame]:
+#     return lambda df: fix_incomplete_datetime_series(df, column, action, inplace=True)
 
 # EXTRA_TABLES = {
 #     'speech_index': {
@@ -355,8 +200,14 @@ class MetadataTableConfig:
 
 
 class MetadataTableConfigs:
-    def __init__(self):
-        self.data = RIKSPROT_METADATA_TABLES
+    def __init__(self, tag: str | None):
+        if tag is not None:
+            raise ValueError("Tag must be defined")
+
+        self.schema_module: dict = import_module(f"metadata.data.{tag}.config")
+
+        self.data = getattr(self.schema_module, "TABLE_DEFINITIONS")
+
         self.definitions = {table: MetadataTableConfig(table, self.data[table]) for table in self.data}
 
     @property

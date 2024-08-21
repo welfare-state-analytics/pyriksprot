@@ -7,7 +7,6 @@ from .config import (
     PARTY_COLOR_BY_ABBREV,
     PARTY_COLOR_BY_ID,
     PARTY_COLORS,
-    RIKSPROT_METADATA_TABLES,
     MetadataTableConfig,
     MetadataTableConfigs,
 )

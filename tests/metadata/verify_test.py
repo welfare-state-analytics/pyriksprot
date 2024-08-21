@@ -6,7 +6,7 @@ SAMPLE_METADATA = f"./tests/test_data/source/{RIKSPROT_REPOSITORY_TAG}/parlaclar
 
 
 def test_config_conforms_to_folder_pecification():
-    verify.ConfigConformsToFolderSpecification(folder=SAMPLE_METADATA).is_satisfied()
+    verify.ConfigConformsToFolderSpecification(tag=RIKSPROT_REPOSITORY_TAG, folder=SAMPLE_METADATA).is_satisfied()
 
 
 def test_config_conforms_to_tags_pecification():

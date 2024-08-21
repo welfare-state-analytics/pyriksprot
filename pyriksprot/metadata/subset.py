@@ -16,7 +16,9 @@ jj = os.path.join
 # pylint: disable=unsubscriptable-object
 
 
-def subset_to_folder(parser: IProtocolParser, protocols_source_folder: str, source_folder: str, target_folder: str):
+def subset_to_folder(
+    parser: IProtocolParser, tag: str, protocols_source_folder: str, source_folder: str, target_folder: str
+):
     """Creates a subset of metadata in source metadata that includes only protocols found in source_folder"""
 
     logger.info("Subsetting metadata database.")
@@ -35,7 +37,7 @@ def subset_to_folder(parser: IProtocolParser, protocols_source_folder: str, sour
 
     logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
 
-    config: MetadataTableConfigs = MetadataTableConfigs()
+    config: MetadataTableConfigs = MetadataTableConfigs(tag)
 
     for tablename in config.tablesnames0:
         source_name: str = jj(source_folder, f"{tablename}.csv")

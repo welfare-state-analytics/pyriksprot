@@ -78,7 +78,7 @@ def sample_parlaclarin_corpus_exists():
 
 
 def sample_metadata_exists():
-    configs: md.MetadataTableConfigs = md.MetadataTableConfigs()
+    configs: md.MetadataTableConfigs = md.MetadataTableConfigs(tag=RIKSPROT_REPOSITORY_TAG)
     return configs.files_exist(jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"))
 
 

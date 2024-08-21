@@ -130,7 +130,7 @@ def test_generate_and_load_corpus_indexes():
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 
 #     service: md.DatabaseHelper = md.DatabaseHelper(database_filename)
-#     configs: MetadataTableConfigs = MetadataTableConfigs()
+#     configs: MetadataTableConfigs = MetadataTableConfigs(tag)
 
 #     service.reset(tag=tag, force=True)
 #     service.create_base_tables(configs)

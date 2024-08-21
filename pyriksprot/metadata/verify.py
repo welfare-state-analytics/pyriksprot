@@ -82,7 +82,7 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
     def __init__(self, tag: str):
         super().__init__()
 
-        self.table_configs: MetadataTableConfigs = MetadataTableConfigs()
+        self.table_configs: MetadataTableConfigs = MetadataTableConfigs(tag)
 
         self.left_key: str = "config"
         self.right_key: str = tag
@@ -96,10 +96,10 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
 class ConfigConformsToFolderSpecification(ConformBaseSpecification):
     """Verifies that current table specification has same files as in specified folder"""
 
-    def __init__(self, folder: str):
+    def __init__(self, tag: str, folder: str):
         super().__init__()
 
-        self.table_configs: MetadataTableConfigs = MetadataTableConfigs()
+        self.table_configs: MetadataTableConfigs = MetadataTableConfigs(tag)
 
         self.left_key: str = "config"
         self.right_key: str = folder

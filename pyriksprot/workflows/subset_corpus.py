@@ -69,6 +69,7 @@ def subset_corpus_and_metadata(
 
     md.subset_to_folder(
         ProtocolMapper,
+        tag=tag,
         protocols_source_folder=parlaclarin_folder,
         source_folder=join(metadata_folder, tag),
         target_folder=metadata_target_folder,

@@ -84,7 +84,7 @@ class DatabaseHelper:
     def create(self, tag: str = None, folder: str = None, force: bool = False):
         logger.info(f"Creating database {self.filename}, using source {tag}/{folder} (tag/folder).")
 
-        configs: cfg.MetadataTableConfigs = cfg.MetadataTableConfigs()
+        configs: cfg.MetadataTableConfigs = cfg.MetadataTableConfigs(tag)
 
         self.reset(tag=tag, force=force)
         self.create_base_tables(configs)
