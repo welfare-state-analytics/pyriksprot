@@ -13,7 +13,7 @@ from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN
 
 jj = os.path.join
 
-RIKSPROT_REPOSITORY_TAG = os.environ["RIKSPROT_REPOSITORY_TAG"]
+CORPUS_VERSION = os.environ["CORPUS_VERSION"]
 
 DUMMY_METADATA_DATABASE_NAME: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
@@ -24,19 +24,15 @@ def test_list_sql_files():
 
 
 def test_gh_ls():
-    data: list[dict] = md.gh_ls(
-        "welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG
-    )
+    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", CORPUS_VERSION)
     assert len(data) > 0
 
 
 def test_download_metadata():
-    data: list[dict] = md.gh_ls(
-        "welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", RIKSPROT_REPOSITORY_TAG
-    )
+    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", CORPUS_VERSION)
     assert len(data) > 0
 
-    filenames: list[str] = md.gh_dl_metadata_extra(folder="./tests/output", tag=RIKSPROT_REPOSITORY_TAG, force=True)
+    filenames: list[str] = md.gh_dl_metadata_extra(folder="./tests/output", tag=CORPUS_VERSION, force=True)
     assert len(filenames) > 0
 
 
@@ -59,7 +55,7 @@ def test_get_and_set_db_version():
 
 
 def test_create_metadata_database():
-    tag: str = RIKSPROT_REPOSITORY_TAG
+    tag: str = CORPUS_VERSION
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
     service: md.DatabaseHelper = md.DatabaseHelper(target_filename)
@@ -93,13 +89,13 @@ def _db_table_exists(database_filename: str, table: str):
 
 
 def test_generate_and_load_corpus_indexes():
-    corpus_folder: str = jj("./tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "parlaclarin")
+    corpus_folder: str = jj("./tests/test_data/source", CORPUS_VERSION, "parlaclarin")
     target_folder: str = f"./tests/output/{str(uuid.uuid4())[:8]}"
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
 
     # Make sure DB exists by creating a version table
     service: md.DatabaseHelper = md.DatabaseHelper(database_filename)
-    service.set_tag(tag=RIKSPROT_REPOSITORY_TAG)
+    service.set_tag(tag=CORPUS_VERSION)
 
     assert _db_table_exists(database_filename=database_filename, table='version')
 
@@ -113,7 +109,7 @@ def test_generate_and_load_corpus_indexes():
 
 # def test_load_scripts():
 
-#     tag: str = RIKSPROT_REPOSITORY_TAG
+#     tag: str = CORPUS_VERSION
 #     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 #     script_folder: str = None
@@ -125,7 +121,7 @@ def test_generate_and_load_corpus_indexes():
 
 # def test_bugg():
 
-#     tag: str = RIKSPROT_REPOSITORY_TAG
+#     tag: str = CORPUS_VERSION
 #     folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 

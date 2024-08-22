@@ -10,14 +10,14 @@ from pyriksprot import metadata as md
 from pyriksprot.corpus import corpus_index as csi
 
 from .utility import (
+    CORPUS_VERSION,
     RIKSPROT_PARLACLARIN_FOLDER,
-    RIKSPROT_REPOSITORY_TAG,
     SAMPLE_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
     ensure_test_corpora_exist,
 )
 
-ensure_test_corpora_exist(tag=RIKSPROT_REPOSITORY_TAG)
+ensure_test_corpora_exist()
 
 
 @pytest.fixture

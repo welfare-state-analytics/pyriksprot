@@ -11,9 +11,9 @@ from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
 
 from ..utility import (
+    CORPUS_VERSION,
     RIKSPROT_PARLACLARIN_FOLDER,
     RIKSPROT_PARLACLARIN_PATTERN,
-    RIKSPROT_REPOSITORY_TAG,
     SAMPLE_METADATA_DATABASE_NAME,
 )
 
@@ -37,10 +37,10 @@ def test_create_grouping_hashcoder():
     )
     # source_item = source_index.lookup.get("prot-1955--ak--22")
     source_item: csi.ICorpusSourceItem = csi.TaggedCorpusSourceItem(
-        path=os.path.join("tests/test_data/source", RIKSPROT_REPOSITORY_TAG, "tagged_frames/prot-1955--ak--22.zip"),
+        path=os.path.join("tests/test_data/source", CORPUS_VERSION, "tagged_frames/prot-1955--ak--22.zip"),
         filename='prot-1955--ak--22.zip',
         name='prot-1955--ak--22',
-        subfolder=RIKSPROT_REPOSITORY_TAG,
+        subfolder=CORPUS_VERSION,
         year=1955,
         metadata={
             'name': 'prot-1955--ak--22',

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from tests.utility import (
-    RIKSPROT_REPOSITORY_TAG,
+    CORPUS_VERSION,
     ROOT_FOLDER,
     SAMPLE_METADATA_DATABASE_NAME,
     TAGGED_SOURCE_FOLDER,
@@ -46,9 +46,7 @@ def generate_corpus_and_metadata(force: bool = False):
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
-        subset_corpus_and_metadata(
-            tag=RIKSPROT_REPOSITORY_TAG, target_folder=ROOT_FOLDER, documents=load_test_documents()
-        )
+        subset_corpus_and_metadata(tag=CORPUS_VERSION, target_folder=ROOT_FOLDER, documents=load_test_documents())
 
     except ValueError as ex:
         logger.error(ex)
@@ -64,7 +62,7 @@ def generate_tagged_frames(force: bool = False):
                 raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
 
         data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
-        riksprot_tagged_folder: str = join(data_folder, RIKSPROT_REPOSITORY_TAG, 'tagged_frames')
+        riksprot_tagged_folder: str = join(data_folder, CORPUS_VERSION, 'tagged_frames')
         create_test_tagged_frames_corpus(
             protocols=load_test_documents(),
             source_folder=riksprot_tagged_folder,
@@ -85,7 +83,7 @@ def generate_tagged_speech_corpora(force: bool = False):
 
         create_test_speech_corpus(
             source_folder=TAGGED_SOURCE_FOLDER,
-            tag=RIKSPROT_REPOSITORY_TAG,
+            tag=CORPUS_VERSION,
             database_name=SAMPLE_METADATA_DATABASE_NAME,
         )
 

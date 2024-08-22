@@ -106,7 +106,7 @@ class Config:
                 "tag",
                 "repository:tag",
                 "source.repository:tag",
-                default=os.environ.get("RIKSPROT_REPOSITORY_TAG"),
+                default=os.environ.get("CORPUS_VERSION"),
             ),
         )
 

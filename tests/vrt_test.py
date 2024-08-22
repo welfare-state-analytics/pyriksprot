@@ -11,7 +11,7 @@ from pyriksprot.corpus.tagged import load_protocol, load_protocols
 from pyriksprot.metadata import SpeakerInfo, SpeakerInfoService
 from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch, VrtExportService
 
-from .utility import RIKSPROT_REPOSITORY_TAG
+from .utility import CORPUS_VERSION
 
 jj = os.path.join
 
@@ -43,7 +43,7 @@ def export_service(speaker_service) -> VrtExportService:
 
 
 def test_protocol_to_vrt(export_service: VrtExportService):
-    filename: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/prot-1958-fake.zip'
+    filename: str = f'tests/test_data/fakes/{CORPUS_VERSION}/tagged_frames/prot-1958-fake.zip'
 
     protocol: interface.Protocol = load_protocol(filename)
 
@@ -64,7 +64,7 @@ def test_protocol_to_vrt(export_service: VrtExportService):
 
 
 def test_fake_protocols_to_vrt(export_service: VrtExportService):
-    filename: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/prot-1958-fake.zip'
+    filename: str = f'tests/test_data/fakes/{CORPUS_VERSION}/tagged_frames/prot-1958-fake.zip'
 
     protocol: interface.Protocol = load_protocol(filename)
     tagged_str: str = protocol.tagged_text
@@ -147,7 +147,7 @@ dum	dum	JJ	JJ.POS.UTR.SIN.IND.NOM
 
 
 def test_protocols_to_vrts(export_service: VrtExportService):
-    folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
+    folder: str = f'tests/test_data/fakes/{CORPUS_VERSION}/tagged_frames'
 
     protocols: interface.Protocol = load_protocols(folder)
 
@@ -222,7 +222,7 @@ def test_protocols_to_vrts(export_service: VrtExportService):
 )
 def test_export_vrt(target: str | None, tags, speaker_service: VrtExportService):
     exporter = VrtBatchExporter(speaker_service=speaker_service)
-    folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
+    folder: str = f'tests/test_data/fakes/{CORPUS_VERSION}/tagged_frames'
     batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
     exporter.export(batches, *tags)
 
