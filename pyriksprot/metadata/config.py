@@ -201,7 +201,7 @@ class MetadataTableConfig:
 
 class MetadataTableConfigs:
     def __init__(self, tag: str | None):
-        if tag is not None:
+        if tag is None:
             raise ValueError("Tag must be defined")
 
         self.schema_module: dict = import_module(f"metadata.data.{tag}.config")
