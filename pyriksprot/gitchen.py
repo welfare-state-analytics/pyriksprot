@@ -14,10 +14,10 @@ ts = datetime.datetime.fromtimestamp
 
 
 class GitInfo:
-    API_URL: str = "https://api.github.com/repos/welfare-state-analytics/riksdagen-corpus/git"
 
-    def __init__(self, source: str):
-        self.repository: pygit2.Repository = pygit2.Repository(source)
+    def __init__(self, organisation: str, repository: str, source_folder: str):
+        self.api_url: str = f"https://api.github.com/repos/{organisation}/{repository}/git"
+        self.repository: pygit2.Repository = pygit2.Repository(source_folder)
 
     @property
     def head(self) -> dict:
@@ -34,8 +34,8 @@ class GitInfo:
             "ref": f"refs/tags/{tag}" if tag else "",
             "sha": sha,
             "sha8": sha[:8],
-            "tag_url": f"{GitInfo.API_URL}/{head_tag.name}" if head_tag is not None else "",
-            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
+            "tag_url": f"{self.api_url}/{head_tag.name}" if head_tag is not None else "",
+            "commit_url": f"{self.api_url}/commits/{sha}",
         }
         return data
 
@@ -53,17 +53,16 @@ class GitInfo:
             "ref": tag_object.name,
             "sha": sha,
             "sha8": sha[:8],
-            "tag_url": f"{GitInfo.API_URL}/{tag}",
-            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
+            "tag_url": f"{self.api_url}/{tag}",
+            "commit_url": f"{self.api_url}/commits/{sha}",
         }
         return data
 
-    @staticmethod
-    def origin_tag_info(tag: str) -> dict:
+    def origin_tag_info(self, tag: str) -> dict:
         if not tag.startswith("refs/tags"):
             tag = f"refs/tags/{tag}"
 
-        tag_url: str = f"{GitInfo.API_URL}/{tag}"
+        tag_url: str = f"{self.api_url}/{tag}"
 
         response: requests.Response = requests.get(tag_url, timeout=10)
         if response.status_code != 200:
@@ -80,7 +79,7 @@ class GitInfo:
             "sha": sha,
             "sha8": sha[:8],
             "tag_url": tag_url,
-            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
+            "commit_url": f"{self.api_url}/commits/{sha}",
         }
         return data
 
