@@ -26,7 +26,7 @@ def csv2pgsql(tag: str):
         fix_incomplete_datetime_series(data['person'], 'born', action='truncate')
         data['government']['end'] = pd.to_datetime(data['government']['end'])
 
-        db: Engine = create_engine('postgresql://humlab_admin:Vua9VagZ@humlabseadserv.srv.its.umu.se/westac')
+        db: Engine = create_engine('apa')
         store_data_frames(data, db)
 
 
