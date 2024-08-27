@@ -10,6 +10,7 @@ import pytest
 from pyriksprot import interface
 from pyriksprot import to_speech as ts
 from pyriksprot import utility
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.foss import untangle
@@ -17,13 +18,7 @@ from pyriksprot.workflows._extract_speech_ids import extract_speech_ids_by_strat
 from tests import fakes
 from tests.parlaclarin.utility import count_utterances
 
-from .utility import (
-    RIKSPROT_PARLACLARIN_FAKE_FOLDER,
-    RIKSPROT_PARLACLARIN_FOLDER,
-    TAGGED_SOURCE_FOLDER,
-    TAGGED_SOURCE_PATTERN,
-    sample_tagged_frames_corpus_exists,
-)
+from .utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name
 
@@ -32,7 +27,8 @@ jj = os.path.join
 
 @pytest.fixture(scope='module')
 def utterances() -> list[interface.Utterance]:
-    return fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml')
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    return fakes.load_sample_utterances(f'{fakes_folder}/prot-1958-fake.xml')
 
 
 @pytest.mark.parametrize(
@@ -49,10 +45,9 @@ def utterances() -> list[interface.Utterance]:
 def test_merge_speech_by_strategy(utterances: list[interface.Utterance], strategy: Type, strategy_name: str):
     document_name: str = "prot-1958-fake"
     year: int = int(document_name.split("-")[1])
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
 
-    utterances: list[interface.Utterance] = fakes.load_sample_utterances(
-        f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/{document_name}.xml'
-    )
+    utterances: list[interface.Utterance] = fakes.load_sample_utterances(f'{fakes_folder}/{document_name}.xml')
 
     protocol: interface.Protocol = interface.Protocol(
         date=f"{year}", name=document_name, utterances=utterances, speaker_notes={}, page_references=[]
@@ -160,9 +155,11 @@ Hence it is (for now) commented out.
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(filename: str, speech_count: int, strategy: str):
+    corpus_folder: str = ConfigStore.config().get("corpus.folder")
+
     document_name: str = utility.strip_path_and_extension(filename)
 
-    xml_path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+    xml_path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(xml_path)
 
@@ -188,7 +185,8 @@ def test_protocol_to_speeches_with_different_strategies(filename: str, speech_co
     ],
 )
 def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
-    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+    corpus_folder: str = ConfigStore.config().get("corpus.folder")
+    path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     data = untangle.parse(path)
 
@@ -252,22 +250,23 @@ def test_load_protocols_with_non_existing_file():
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocol_with_empty_existing_file():
-    protocol: interface.Protocol | None = tagged_corpus.load_protocol(
-        filename=jj(TAGGED_SOURCE_FOLDER, 'prot-1973--21.zip')
-    )
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    protocol: interface.Protocol | None = tagged_corpus.load_protocol(filename=jj(tagged_folder, 'prot-1973--21.zip'))
     assert protocol is None
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols_from_filenames():
-    filenames: list[str] = glob.glob(TAGGED_SOURCE_PATTERN, recursive=True)
+    tagged_pattern: str = ConfigStore.config().get("tagged_frames.pattern")
+    filenames: list[str] = glob.glob(tagged_pattern, recursive=True)
     protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
     assert len(protocols) == 5
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols_from_folder():
-    protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=TAGGED_SOURCE_FOLDER)]
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=tagged_folder)]
     assert len(protocols) == 5
 
 
@@ -287,13 +286,16 @@ def test_load_protocols_from_folder():
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):
     # Find file in test data folder (might be in subfolder)
-    filename: str = glob.glob(jj(TAGGED_SOURCE_FOLDER, "**", f'{protocol_name}.zip'), recursive=True)[0]
+    corpus_folder: str = ConfigStore.config().get("corpus.folder")
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+
+    filename: str = glob.glob(jj(tagged_folder, "**", f'{protocol_name}.zip'), recursive=True)[0]
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
 
     assert protocol is not None
 
-    xml_filename = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", protocol_name.split("-")[1], f"{protocol_name}.xml")
+    xml_filename = jj(corpus_folder, protocol_name.split("-")[1], f"{protocol_name}.xml")
     expected_utterance_count = count_utterances(xml_filename)
 
     assert len(protocol.utterances) == expected_utterance_count
@@ -313,5 +315,6 @@ def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_spe
     'protocol_name', ['prot-199192--21', 'prot-199192--127', 'prot-1933--fk--5', 'prot-1955--ak--22', 'prot-199596--35']
 )
 def test_protocol_to_speeches(protocol_name: str):
-    filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    filename: str = jj(tagged_folder, f'{protocol_name}.zip')
     extract_speech_ids_by_strategy(filename=filename)

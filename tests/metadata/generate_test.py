@@ -1,39 +1,47 @@
 import os
+import pathlib
+import shutil
 import sqlite3
-import uuid
 from contextlib import closing
+import uuid
 
 import pandas as pd
 import pytest
 
 import pyriksprot.sql as sql
 from pyriksprot import metadata as md
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
-from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOLDER
 
 jj = os.path.join
-
-CORPUS_VERSION = os.environ["CORPUS_VERSION"]
 
 DUMMY_METADATA_DATABASE_NAME: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
 
 def test_list_sql_files():
-    data = sql.sql_file_paths()
+    tag: str = ConfigStore.config().get("metadata.version")
+    data = sql.sql_file_paths(tag)
     assert len(data) > 0
 
 
 def test_gh_ls():
-    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", CORPUS_VERSION)
+    tag: str = ConfigStore.config().get("metadata.version")
+
+    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
     assert len(data) > 0
 
 
-def test_download_metadata():
-    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", CORPUS_VERSION)
+def test_download_metadata(tmp_path: pathlib.Path):
+
+    tag: str = ConfigStore.config().get("metadata.version")
+
+    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
     assert len(data) > 0
 
-    filenames: list[str] = md.gh_dl_metadata_extra(folder="./tests/output", tag=CORPUS_VERSION, force=True)
+    filenames: list[str] = md.gh_dl_metadata_extra(folder=tmp_path, tag=tag, force=True)
     assert len(filenames) > 0
+
+    shutil.rmtree(str(tmp_path))
 
 
 def test_get_and_set_db_version():
@@ -55,7 +63,7 @@ def test_get_and_set_db_version():
 
 
 def test_create_metadata_database():
-    tag: str = CORPUS_VERSION
+    tag: str = ConfigStore.config().get("metadata.version")
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
     service: md.DatabaseHelper = md.DatabaseHelper(target_filename)
@@ -71,7 +79,13 @@ def test_create_metadata_database():
         md.DatabaseHelper(target_filename).create(tag=None, folder=source_folder, force=True)
 
 
-@pytest.mark.parametrize('corpus_folder', [RIKSPROT_PARLACLARIN_FOLDER, RIKSPROT_PARLACLARIN_FAKE_FOLDER])
+@pytest.mark.parametrize(
+    'corpus_folder',
+    [
+        ConfigStore.config().get("corpus.folder"),
+        ConfigStore.config().get("fakes.folder"),
+    ],
+)
 def test_generate_corpus_indexes(corpus_folder: str):
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
     data: dict[str, pd.DataFrame] = factory.generate(corpus_folder=corpus_folder, target_folder="tests/output").data
@@ -89,13 +103,14 @@ def _db_table_exists(database_filename: str, table: str):
 
 
 def test_generate_and_load_corpus_indexes():
-    corpus_folder: str = jj("./tests/test_data/source", CORPUS_VERSION, "parlaclarin")
+    version: str = ConfigStore.config().get("metadata.version")
+    corpus_folder: str = jj("./tests/test_data/source", version, "parlaclarin")
     target_folder: str = f"./tests/output/{str(uuid.uuid4())[:8]}"
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
 
     # Make sure DB exists by creating a version table
     service: md.DatabaseHelper = md.DatabaseHelper(database_filename)
-    service.set_tag(tag=CORPUS_VERSION)
+    service.set_tag(tag=version)
 
     assert _db_table_exists(database_filename=database_filename, table='version')
 
@@ -109,7 +124,7 @@ def test_generate_and_load_corpus_indexes():
 
 # def test_load_scripts():
 
-#     tag: str = CORPUS_VERSION
+#     tag: str = ConfigStore().config().get("version")
 #     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 #     script_folder: str = None
@@ -121,7 +136,7 @@ def test_generate_and_load_corpus_indexes():
 
 # def test_bugg():
 
-#     tag: str = CORPUS_VERSION
+#     tag: str = ConfigStore().config().get("version")
 #     folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 

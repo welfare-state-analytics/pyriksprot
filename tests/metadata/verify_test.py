@@ -1,20 +1,21 @@
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.metadata import verify
 
-from ..utility import CORPUS_VERSION
 
-SAMPLE_METADATA = f"./tests/test_data/source/{CORPUS_VERSION}/parlaclarin/metadata"
-
-
-def test_config_conforms_to_folder_pecification():
-    verify.ConfigConformsToFolderSpecification(tag=CORPUS_VERSION, folder=SAMPLE_METADATA).is_satisfied()
+def test_config_conforms_to_folder_specification():
+    tag: str = ConfigStore().config().get("version")
+    folder: str = ConfigStore().config().get("metadata:folder")
+    verify.ConfigConformsToFolderSpecification(tag=tag, folder=folder).is_satisfied()
 
 
-def test_config_conforms_to_tags_pecification():
-    verify.ConfigConformsToTagSpecification(tag=CORPUS_VERSION).is_satisfied()
+def test_config_conforms_to_tags_specification():
+    tag: str = ConfigStore().config().get("version")
+    verify.ConfigConformsToTagSpecification(tag=tag).is_satisfied()
 
 
 def test_tags_conform_specification():
-    verify.TagsConformSpecification(tag1="v0.5.0", tag2=CORPUS_VERSION).is_satisfied()
+    tag: str = ConfigStore().config().get("version")
+    verify.TagsConformSpecification(tag1="v0.5.0", tag2=tag).is_satisfied()
 
 
 def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | int]:

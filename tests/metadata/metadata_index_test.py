@@ -5,9 +5,8 @@ import pandas as pd
 import pytest
 
 from pyriksprot import metadata as md
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
-
-from ..utility import SAMPLE_METADATA_DATABASE_NAME
 
 # pylint: disable=redefined-outer-name
 
@@ -34,7 +33,9 @@ def dummy() -> md.Person:
 
 
 def test_code_lookups():
-    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
+    database: str = ConfigStore.config().get("metadata.database")
+
+    lookups: md.Codecs = md.Codecs().load(database)
     assert lookups
 
     assert lookups.gender2id.get("woman") == 2
@@ -179,7 +180,9 @@ def test_person_index(person_index: md.PersonIndex):
 
 
 def test_overload_by_person(person_index: md.PersonIndex):
-    person_index: md.PersonIndex = md.PersonIndex(SAMPLE_METADATA_DATABASE_NAME).load()
+    database: str = ConfigStore.config().get("metadata.database")
+
+    person_index: md.PersonIndex = md.PersonIndex(database).load()
     person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
     df: pd.DataFrame = pd.DataFrame(data=dict(person_id=person_ids))
     df_overloaded: pd.DataFrame = person_index.overload_by_person(df)
@@ -242,7 +245,8 @@ def test_person_party_at():
 
 
 def test_speaker_info_service(person_index: md.PersonIndex):
-    service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
+    database: str = ConfigStore.config().get("metadata.database")
+    service = md.SpeakerInfoService(database, person_index=person_index)
 
     person: md.Person = service.person_index.get_person('Q5556026')
     assert person.alt_parties
@@ -258,7 +262,8 @@ def test_speaker_info_service(person_index: md.PersonIndex):
 
 @pytest.mark.skip("No unknown in test data")
 def test_unknown(person_index: md.PersonIndex):
-    service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
+    database: str = ConfigStore.config().get("metadata.database")
+    service = md.SpeakerInfoService(database, person_index=person_index)
     person: md.Person = service.person_index.get_person('unknown')
 
     assert person

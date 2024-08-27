@@ -33,10 +33,10 @@ def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_f
 
 def subset_corpus_and_metadata(
     documents: list[str] | str = None,
-    source_folder: str = None,
-    target_folder: str = None,
-    tag: str = None,
-    scripts_folder: str = None,
+    source_folder: str | None = None,
+    target_folder: str | None = None,
+    tag: str | None = None,
+    scripts_folder: str | None = None,
     force: bool = True,
 ):
     """Subset metadata to folder `target_folder`/tag"""

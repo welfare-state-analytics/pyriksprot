@@ -20,9 +20,7 @@ def gh_ls(user: str, repository: str, path: str = "", tag: str = "main") -> list
 
 def gh_tags(folder: str = None) -> list[str]:
     """Returns tags in given local git repository"""
-    repo: pygit2.Repository = pygit2.Repository(
-        path=folder or jj(os.environ.get('RIKSPROT_DATA_FOLDER', '/data/riksdagen_corpus_data'), "riksdagen-corpus")
-    )
+    repo: pygit2.Repository = pygit2.Repository(path=folder or os.environ.get('PYRIKSPROT_CORPUS_FOLDER'))
     rx: re.Pattern = re.compile(r'^refs/tags/v\d+\.\d+\.\d+$')
     tags: list[str] = sorted([r.removeprefix('refs/tags/') for r in repo.references if rx.match(r)])
     return tags

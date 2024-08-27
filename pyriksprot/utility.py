@@ -23,7 +23,7 @@ from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
 from types import ModuleType
-from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
+from typing import Any, Callable, Literal, Sequence, Type, TypeVar
 from urllib.request import urlopen
 
 import requests
@@ -100,9 +100,37 @@ def dotget(data: dict, path: str, default: Any = None) -> Any:
     return default
 
 
+def dotset(data: dict, path: str, value: Any) -> dict:
+    """Sets element in dict using dot notation x.y.z or x_y_z or x:y:z"""
+
+    d: dict = data
+    attrs: list[str] = path.replace(":", ".").split('.')
+    for attr in attrs[:-1]:
+        if not attr:
+            continue
+        d: dict = d.setdefault(attr, {})
+    d[attrs[-1]] = value
+
+    return data
+
+
+def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = True) -> dict[str, str]:
+    """Loads environment variables starting with prefix into."""
+    if data is None:
+        data = {}
+    if not prefix:
+        return data
+    for key, value in os.environ.items():
+        if lower_key:
+            key = key.lower()
+        if key.startswith(prefix.lower()):
+            dotset(data, key[len(prefix) + 1 :], value)
+    return data
+
+
 def sync_delta_names(
     source_folder: str, source_extension: str, target_folder: str, target_extension: str, delete: bool = False
-) -> Set(str):
+) -> set[str]:
     """Returns basenames in targat_folder that doesn't exist in source folder (with respectively extensions)"""
 
     source_names = strip_paths(glob.glob(jj(source_folder, "*", f"*.{source_extension}")))
@@ -123,14 +151,14 @@ def sync_delta_names(
     return delta_names
 
 
-def strip_path_and_extension(filename: str | List[str]) -> str | List[str]:
+def strip_path_and_extension(filename: str | list[str]) -> str | list[str]:
     """Remove path and extension from filename(s). Return list."""
     if isinstance(filename, str):
         return splitext(basename(filename))[0]
     return [splitext(basename(x))[0] for x in filename]
 
 
-def strip_extensions(filename: str | List[str]) -> str | List[str]:
+def strip_extensions(filename: str | list[str]) -> str | list[str]:
     if isinstance(filename, str):
         return splitext(filename)[0]
     return [splitext(x)[0] for x in filename]
@@ -164,7 +192,7 @@ def path_add_sequence(path: str, i: int, j: int = 0) -> str:
     return path_add_suffix(path, f"_{str(i).zfill(j)}")
 
 
-def strip_paths(filenames: str | List[str]) -> str | List[str]:
+def strip_paths(filenames: str | list[str]) -> str | list[str]:
     if isinstance(filenames, str):
         return basename(filenames)
     return [basename(filename) for filename in filenames]
@@ -173,7 +201,7 @@ def strip_paths(filenames: str | List[str]) -> str | List[str]:
 T = TypeVar("T")
 
 
-def flatten(lofl: List[List[T]]) -> List[T]:
+def flatten(lofl: list[list[T]]) -> list[T]:
     """Returns a flat single list out of supplied list of lists."""
 
     return [item for sublist in lofl for item in sublist]
@@ -382,11 +410,11 @@ def strip_csv_header(csv_str: str, sep: str = '\n') -> str:
     return csv_str[idx + 1 :]
 
 
-def merge_csv_strings(csv_strings: List[str], sep: str = '\n') -> str:
+def merge_csv_strings(csv_strings: list[str], sep: str = '\n') -> str:
     """Merge tagged CSV strings into a single tagged CSV string"""
     if len(csv_strings or []) == 0:
         return ''
-    texts: List[str] = [csv_strings[0]]
+    texts: list[str] = [csv_strings[0]]
     for csv_string in csv_strings[1:]:
         text = strip_csv_header(csv_string, sep=sep)
         if text:
@@ -410,7 +438,7 @@ def store_str(filename: str, text: str, compress_type: Literal['csv', 'gzip', 'b
         raise ValueError(f"unknown mode {compress_type}")
 
 
-def find_subclasses(module: ModuleType, parent: Type) -> List[Type]:
+def find_subclasses(module: ModuleType, parent: Type) -> list[Type]:
     return [
         cls
         for _, cls in inspect.getmembers(module)
@@ -423,7 +451,7 @@ def read_yaml(file: Any) -> dict:
     if isinstance(file, str) and any(file.endswith(x) for x in ('.yml', '.yaml')):
         with open(file, "r", encoding='utf-8') as fp:
             return yaml.load(fp, Loader=yaml.FullLoader)
-    data: List[dict] = yaml.load(file, Loader=yaml.FullLoader)
+    data: list[dict] = yaml.load(file, Loader=yaml.FullLoader)
     return {} if len(data) == 0 else data[0]
 
 

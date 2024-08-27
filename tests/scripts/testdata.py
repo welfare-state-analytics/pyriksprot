@@ -3,14 +3,10 @@ import sys
 from os.path import join
 
 import click
-from dotenv import load_dotenv
 from loguru import logger
 
+from pyriksprot.configuration import ConfigStore
 from tests.utility import (
-    CORPUS_VERSION,
-    ROOT_FOLDER,
-    SAMPLE_METADATA_DATABASE_NAME,
-    TAGGED_SOURCE_FOLDER,
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
@@ -24,7 +20,9 @@ from tests.utility import (
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
-def main():
+@click.argument('config-filename', type=str, required=False)
+def main(config_filename):
+    ConfigStore.configure_context(source=config_filename, env_prefix=None)
     pass
 
 
@@ -41,12 +39,14 @@ def generate_complete_sample_data(force: bool):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_corpus_and_metadata(force: bool = False):
+    version: str = ConfigStore.config().get("corpus:version")
+    root_folder: str = ConfigStore.config().get("root_folder")
     try:
         if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
-        subset_corpus_and_metadata(tag=CORPUS_VERSION, target_folder=ROOT_FOLDER, documents=load_test_documents())
+        subset_corpus_and_metadata(tag=version, target_folder=root_folder, documents=load_test_documents())
 
     except ValueError as ex:
         logger.error(ex)
@@ -56,17 +56,19 @@ def generate_corpus_and_metadata(force: bool = False):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_tagged_frames(force: bool = False):
+    version: str = ConfigStore.config().get("corpus:version")
+    tagged_folder: str = ConfigStore.config().get("tagged_frames:folder")
     try:
         if sample_tagged_frames_corpus_exists():
             if not force:
                 raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
 
         data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
-        riksprot_tagged_folder: str = join(data_folder, CORPUS_VERSION, 'tagged_frames')
+        riksprot_tagged_folder: str = join(data_folder, version, 'tagged_frames')
         create_test_tagged_frames_corpus(
             protocols=load_test_documents(),
             source_folder=riksprot_tagged_folder,
-            target_folder=TAGGED_SOURCE_FOLDER,
+            target_folder=tagged_folder,
         )
     except ValueError as ex:
         logger.error(ex)
@@ -76,15 +78,18 @@ def generate_tagged_frames(force: bool = False):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_tagged_speech_corpora(force: bool = False):
+    version: str = ConfigStore.config().get("corpus:version")
+    tagged_folder: str = ConfigStore.config().get("tagged_frames:folder")
+    database: str = ConfigStore.config().get("metadata:database")
     try:
         if sample_tagged_speech_corpus_exists():
             if not force:
                 raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
 
         create_test_speech_corpus(
-            source_folder=TAGGED_SOURCE_FOLDER,
-            tag=CORPUS_VERSION,
-            database_name=SAMPLE_METADATA_DATABASE_NAME,
+            source_folder=tagged_folder,
+            tag=version,
+            database_name=database,
         )
 
     except ValueError as ex:
@@ -147,7 +152,6 @@ def generate_tagged_speech_corpora(force: bool = False):
 
 
 if __name__ == "__main__":
-    load_dotenv()
 
     main.add_command(generate_complete_sample_data, "complete")
     main.add_command(generate_corpus_and_metadata, "corpus-and-metadata")

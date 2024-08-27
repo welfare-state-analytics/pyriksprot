@@ -1,11 +1,15 @@
 from functools import cached_property
 from importlib import import_module
+import json
 from os.path import isfile, join
-from typing import Callable, Iterable
+from pathlib import Path
+from typing import Any, Callable, Iterable, Literal, Sequence
 from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
+
+from .utility import fix_incomplete_datetime_series
 
 from ..utility import probe_filename, revdict
 
@@ -66,6 +70,34 @@ IDNAME2NAME_MAPPING: dict[str, str] = revdict(NAME2IDNAME_MAPPING)
 #         'speech_index': 'int',
 #     },
 # }
+
+
+def fix_ts_config(column: str, action: Literal['extend', 'truncate']) -> dict[str, Any]:
+    """Returns config (dict) for fixing incomplete datetime series"""
+    return {
+        'fx': lambda df: fix_incomplete_datetime_series(df, column, action, inplace=True),
+        'columns': {
+            f'{column}0': 'date',
+            f'{column}_flag': 'text',
+        },
+    }
+
+
+def resolve_fx_by_name(name: str) -> Callable[[Any], Any]:
+
+    if name in globals():
+        return globals()[name]
+
+    if "." in name:
+        module_name, fx_name = name.rsplit(".", 1)
+        module = import_module(module_name)
+        return getattr(module, fx_name)
+
+    raise ValueError(f"Function {name} not found")
+
+
+def resolve_column_config(fx_name: str, *args) -> Callable[[Any], Any]:
+    return resolve_fx_by_name(fx_name)(*args)
 
 
 class MetadataTableConfig:
@@ -200,15 +232,53 @@ class MetadataTableConfig:
 
 
 class MetadataTableConfigs:
+    """Configuration for all tables in metadata"""
+
     def __init__(self, tag: str | None):
+
+        import pyriksprot.sql
+
         if tag is None:
             raise ValueError("Tag must be defined")
 
-        self.schema_module: dict = import_module(f"metadata.data.{tag}.config")
+        sql_folder: Path = pyriksprot.sql.sql_folder(tag)
 
-        self.data = getattr(self.schema_module, "TABLE_DEFINITIONS")
+        if not sql_folder.is_dir():
+            raise FileNotFoundError(f"sql folder for {tag} not found")
 
-        self.definitions = {table: MetadataTableConfig(table, self.data[table]) for table in self.data}
+        if not sql_folder.joinpath("schema.json").is_file():
+            raise FileNotFoundError(f"sql schema.json for {tag} not found")
+
+        with sql_folder.joinpath("schema.json").open() as f:
+            self.data: dict = json.load(f)
+
+        """ Resolve computed columns """
+
+        for table_name in self.data:
+
+            if ':compute:' not in self.data[table_name]:
+                continue
+
+            cfgs: list = []
+            for cfg in self.data[table_name][':compute:']:
+                if isinstance(cfg, dict):
+                    cfgs.append(cfg)
+                elif isinstance(cfg, (list, tuple)):
+                    if len(cfg) == 0 or not isinstance(cfg[0], str):
+                        raise ValueError(
+                            "fx must be a function or a sequence where the first element is a function name and the rest are arguments"
+                        )
+                    cfgs.append(resolve_column_config(cfg[0], *cfg[1:]))
+                else:
+                    raise ValueError(
+                        "fx must be a function or a sequence where the first element is a function name and the rest are arguments"
+                    )
+
+            self.data[table_name][':compute:'] = cfgs
+
+        self.definitions: dict[str, MetadataTableConfig] = {
+            table: MetadataTableConfig(table, self.data[table]) for table in self.data
+        }
 
     @property
     def tablenames(self) -> list[str]:

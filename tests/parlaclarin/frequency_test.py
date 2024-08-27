@@ -1,14 +1,15 @@
-import glob
 import os
+import uuid
 from typing import List
 
 import pytest
 
 from pyriksprot import interface, utility, workflows
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import parlaclarin
+from tests.parlaclarin.utility import get_test_filenames
 
 from .. import fakes
-from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_PATTERN
 
 jj = os.path.join
 
@@ -34,7 +35,7 @@ def test_word_frequency_counter(texts):
     assert counter.frequencies.get('f', None) == 1
 
 
-@pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
+@pytest.mark.parametrize('filename', get_test_filenames())
 def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
@@ -45,7 +46,7 @@ def test_word_frequency_counter_ingest_parla_clarin_files(filename: str):
     assert protocol.has_text == (len(counter.frequencies) > 0)
 
 
-@pytest.mark.parametrize('filename', glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
+@pytest.mark.parametrize('filename', get_test_filenames())
 def test_persist_word_frequencies(filename: List[str]):
     texts = parlaclarin.XmlProtocolSegmentIterator(filenames=[filename], segment_level='protocol')
     counter: parlaclarin.TermFrequencyCounter = parlaclarin.TermFrequencyCounter(progress=False)
@@ -65,16 +66,16 @@ def test_persist_word_frequencies(filename: List[str]):
 
 @pytest.mark.parametrize(
     'document_name,',
-    [
-        'prot-1958-fake',
-        'prot-1960-fake',
-        'prot-1980-empty',
-    ],
+    ['prot-1958-fake', 'prot-1960-fake', 'prot-1980-empty'],
 )
 def test_compute_word_frequencies(document_name: str):
-    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
+    fakes_folder: str = ConfigStore.config().get("fakes:folder")
+    filename: str = jj(fakes_folder, f"{document_name}.xml")
     expected_frequencies: dict[str, int] = fakes.sample_compute_expected_counts(filename, kind='token', lowercase=True)
-    with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
+
+    target_filename: str = jj("tests", "output", f"{str(uuid.uuid4())[:8]}_word_frequencies.pkl")
+
+    with utility.temporary_file(filename=target_filename) as store_name:
         counts: parlaclarin.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],
             filename=store_name,
@@ -84,7 +85,7 @@ def test_compute_word_frequencies(document_name: str):
 
     assert dict(counts.frequencies) == expected_frequencies
 
-    with utility.temporary_file(filename=jj("tests", "output", "test_compute_word_frequencies.pkl")) as store_name:
+    with utility.temporary_file(filename=target_filename) as store_name:
         counts: parlaclarin.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],
             filename=store_name,

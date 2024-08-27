@@ -35,17 +35,6 @@ COLUMN_DEFAULTS = {
 DATE_COLUMNS = ['start_date', 'end_date']
 
 
-def fix_ts_config(column: str, action: Literal['extend', 'truncate']) -> dict[str, Any]:
-    """Returns config (dict) for fixing incomplete datetime series"""
-    return {
-        'fx': lambda df: fix_incomplete_datetime_series(df, column, action, inplace=True),
-        'columns': {
-            f'{column}0': 'date',
-            f'{column}_flag': 'text',
-        },
-    }
-
-
 def read_sql_table(table_name: str, con: Any) -> pd.DataFrame:
     return pd.read_sql(f"select * from {table_name}", con)
 

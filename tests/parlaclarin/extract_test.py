@@ -1,4 +1,3 @@
-import glob
 import os
 import uuid
 from typing import Iterable
@@ -6,19 +5,16 @@ from typing import Iterable
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import workflows
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
 
-from ..utility import (
-    CORPUS_VERSION,
-    RIKSPROT_PARLACLARIN_FOLDER,
-    RIKSPROT_PARLACLARIN_PATTERN,
-    SAMPLE_METADATA_DATABASE_NAME,
-)
+from .utility import get_test_filenames
 
 
 def test_create_grouping_hashcoder():
+    version: str = ConfigStore.config().get("corpus:version")
     protocol_name: str = "prot-1955--ak--22"
     person_id: str = "Q5715273"
     u_id: str = "d68df3cd45d2eec6-0"
@@ -37,10 +33,10 @@ def test_create_grouping_hashcoder():
     )
     # source_item = source_index.lookup.get("prot-1955--ak--22")
     source_item: csi.ICorpusSourceItem = csi.TaggedCorpusSourceItem(
-        path=os.path.join("tests/test_data/source", CORPUS_VERSION, "tagged_frames/prot-1955--ak--22.zip"),
+        path=os.path.join("tests/test_data/source", version, "tagged_frames/prot-1955--ak--22.zip"),
         filename='prot-1955--ak--22.zip',
         name='prot-1955--ak--22',
-        subfolder=CORPUS_VERSION,
+        subfolder=version,
         year=1955,
         metadata={
             'name': 'prot-1955--ak--22',
@@ -94,7 +90,7 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
     def assign_speaker(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker
 
-    filenames: list[str] = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
+    filenames: list[str] = get_test_filenames()
 
     texts: Iterable[iterate.ProtocolSegment] = parlaclarin.XmlUntangleSegmentIterator(
         filenames=filenames,
@@ -124,10 +120,11 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
 
 def test_extract_corpus_text_yearly_grouped_by_party():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
-
+    corpus_folder: str = ConfigStore.config().get("corpus:folder")
+    database: str = ConfigStore.config().get("metadata:database")
     workflows.extract_corpus_text(
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=corpus_folder,
+        metadata_filename=database,
         target_name=target_name,
         target_type='files-in-zip',
         compress_type=dispatch.CompressType.Zip,
@@ -145,10 +142,11 @@ def test_extract_corpus_text_yearly_grouped_by_party():
 # @pytest.mark.xfail
 def test_extract_corpus_with_no_temporal_key():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
-
+    corpus_folder: str = ConfigStore.config().get("corpus:folder")
+    database: str = ConfigStore.config().get("metadata:database")
     workflows.extract_corpus_text(
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=corpus_folder,
+        metadata_filename=database,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -164,10 +162,11 @@ def test_extract_corpus_with_no_temporal_key():
 
 def test_extract_corpus_with_no_matching_protocols():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
-
+    corpus_folder: str = ConfigStore.config().get("corpus:folder")
+    database: str = ConfigStore.config().get("metadata:database")
     workflows.extract_corpus_text(
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=corpus_folder,
+        metadata_filename=database,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -183,10 +182,11 @@ def test_extract_corpus_with_no_matching_protocols():
 
 def test_aggregator_extract_gender_party_no_temporal_key():
     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
-
+    corpus_folder: str = ConfigStore.config().get("corpus:folder")
+    database: str = ConfigStore.config().get("metadata:database")
     workflows.extract_corpus_text(
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=corpus_folder,
+        metadata_filename=database,
         target_name=target_filename,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -208,13 +208,15 @@ def test_aggregator_extract_gender_party_no_temporal_key():
 
 def test_extract_corpus_with_sorted_files():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
+    corpus_folder: str = ConfigStore.config().get("corpus:folder")
+    database: str = ConfigStore.config().get("metadata:database")
 
     def file_namer():
         return None
 
     workflows.extract_corpus_text(
-        source_folder=RIKSPROT_PARLACLARIN_FOLDER,
-        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=corpus_folder,
+        metadata_filename=database,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Speech,

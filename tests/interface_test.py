@@ -10,10 +10,10 @@ import pandas as pd
 import pytest
 
 from pyriksprot import interface, to_speech
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import tagged as tagged_corpus
 
 from . import fakes
-from .utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, TAGGED_SOURCE_PATTERN
 
 # pylint: disable=redefined-outer-name
 
@@ -22,7 +22,8 @@ jj = os.path.join
 
 @pytest.fixture(scope='module')
 def utterances() -> list[interface.Utterance]:
-    return fakes.load_sample_utterances(f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/parlaclarin/prot-1958-fake.xml')
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    return fakes.load_sample_utterances(f'{fakes_folder}/prot-1958-fake.xml')
 
 
 def test_utterance_text():
@@ -103,9 +104,8 @@ def test_protocol_create(utterances: list[interface.Utterance]):
 
 def test_protocol_preprocess():
     """Modifies utterances:"""
-    utterances: list[interface.Utterance] = fakes.load_sample_utterances(
-        f'{RIKSPROT_PARLACLARIN_FAKE_FOLDER}/prot-1958-fake.xml'
-    )
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    utterances: list[interface.Utterance] = fakes.load_sample_utterances(f'{fakes_folder}/prot-1958-fake.xml')
 
     protocol: interface.Protocol = interface.Protocol(
         date="1950", name="prot-1958-fake", utterances=utterances, speaker_notes={}, page_references=[]
@@ -119,7 +119,8 @@ def test_protocol_preprocess():
 
 
 def test_protocols_to_items():
-    filenames: list[str] = glob.glob(TAGGED_SOURCE_PATTERN, recursive=True)
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    filenames: list[str] = glob.glob(tagged_folder, recursive=True)
     protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
     _ = itertools.chain(
         p.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)

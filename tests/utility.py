@@ -7,7 +7,6 @@ from os.path import join as jj
 from os.path import splitext
 
 import pandas as pd
-from dotenv import load_dotenv
 from loguru import logger
 
 from pyriksprot import dispatch, interface
@@ -15,27 +14,43 @@ from pyriksprot import metadata as md
 from pyriksprot import to_speech as ts
 from pyriksprot import utility as pu
 from pyriksprot import workflows
+from pyriksprot.configuration import ConfigValue, inject_config
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.workflows import subset_corpus_and_metadata
 
-load_dotenv('tests/tests.env')
+TEST_CONFIG_YAML: str = """
 
+root_folder: &folder tests/test_data/source/
+data_folder: *folder
+version: &version v0.10.0
 
-CORPUS_VERSION = os.environ["CORPUS_VERSION"]
-ROOT_FOLDER = "tests/test_data/source/"
+corpus:
+  version: *version
+  url: https://github.com/swerik-projects/riksdagen-records
+  folder: !path_join [ *folder, *version, parlaclarin/protocols ]
+  subfolder: 
+  pattern: "**/prot-*.xml"
 
-RIKSPROT_PARLACLARIN_FOLDER = jj(ROOT_FOLDER, CORPUS_VERSION, "parlaclarin")
-RIKSPROT_PARLACLARIN_METADATA_FOLDER = jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata")
-RIKSPROT_PARLACLARIN_PATTERN = jj(RIKSPROT_PARLACLARIN_FOLDER, "**/prot-*.xml")
+fakes:
+  folder: !path_join [ tests/test_data/fakes, *version, parlaclarin/protocols ]
+  expected_folder: !path_join [ tests/test_data/fakes, *version, expected ]
 
-RIKSPROT_PARLACLARIN_FAKE_FOLDER = f'tests/test_data/fakes/{CORPUS_VERSION}/parlaclarin/protocols/'
-RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER = f'tests/test_data/fakes/{CORPUS_VERSION}/expected'
+metadata:
+  version: *version
+  url: https://github.com/swerik-projects/riksdagen-persons
+  folder: !path_join [ *folder, *version, parlaclarin/metadata ]
+  subfolder: 
+  database: !path_join [ *folder, *version, riksprot_metadata.db ]
 
-TAGGED_SOURCE_FOLDER = jj(ROOT_FOLDER, CORPUS_VERSION, "tagged_frames")
-TAGGED_SOURCE_PATTERN = jj(TAGGED_SOURCE_FOLDER, "**/prot-*.zip")
-TAGGED_SPEECH_FOLDER = jj(ROOT_FOLDER, CORPUS_VERSION, "tagged_frames_speeches.feather")
+tagged_frames:
+  folder: &tagged_folder !path_join [ *folder, *version, tagged_frames ]
+  file_pattern: &file_pattern prot-*.zip
+  pattern: !path_join [ *tagged_folder, "**", *file_pattern ]
 
-SAMPLE_METADATA_DATABASE_NAME = jj(ROOT_FOLDER, CORPUS_VERSION, "riksprot_metadata.db")
+tagged_speeches:
+  folder: &speech_folder !path_join [ *folder, *version, tagged_frames_speeches.feather ]
+
+"""
 
 
 @functools.lru_cache(maxsize=1)
@@ -43,10 +58,13 @@ def load_test_documents() -> list[str]:
     return open('tests/test_data/test_documents.txt', encoding="utf-8").read().splitlines()
 
 
-def generate_merged_speech_test_data(protocol_name: str):
-    filename: str = jj(TAGGED_SOURCE_FOLDER, f'{protocol_name}.zip')
+def generate_merged_speech_test_data(protocol_name: str) -> None:
+    tagged_source_folder: str = ConfigValue("tagged_frames:folder").resolve()
+
+    filename: str = jj(tagged_source_folder, f'{protocol_name}.zip')
 
     protocol: interface.Protocol = tagged_corpus.load_protocol(filename=filename)
+
     utterances: pd.DataFrame = pd.DataFrame(
         data=[(x.u_id, x.who, x.next_id, x.prev_id, x.speaker_note_id) for x in protocol.utterances],
         columns=['u_id', 'who', 'next_id', 'prev_id', 'speaker_note_id'],
@@ -71,30 +89,34 @@ def generate_merged_speech_test_data(protocol_name: str):
     utterances.to_excel(f"utterances_{protocol_name}.xlsx")
 
 
-def sample_parlaclarin_corpus_exists():
+def sample_parlaclarin_corpus_exists() -> bool:
+    source_folder: str = ConfigValue("corpus:folder").resolve()
+    return all(isfile(jj(source_folder, x.split('-')[1], f"{x}.xml")) for x in load_test_documents())
+
+
+def sample_metadata_exists() -> bool:
+    source_folder: str = ConfigValue("metadata:folder").resolve()
+    corpus_version: str = ConfigValue("metadata:version").resolve()
+    configs: md.MetadataTableConfigs = md.MetadataTableConfigs(tag=corpus_version)
+    return configs.files_exist(source_folder)
+
+
+def sample_tagged_frames_corpus_exists() -> bool:
+    source_folder: str = ConfigValue("tagged_frames:folder").resolve()
     return all(
-        isfile(jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", x.split('-')[1], f"{x}.xml")) for x in load_test_documents()
-    )
-
-
-def sample_metadata_exists():
-    configs: md.MetadataTableConfigs = md.MetadataTableConfigs(tag=CORPUS_VERSION)
-    return configs.files_exist(jj(RIKSPROT_PARLACLARIN_FOLDER, "metadata"))
-
-
-def sample_tagged_frames_corpus_exists():
-    return all(
-        isfile(jj(TAGGED_SOURCE_FOLDER, f"{x}.zip")) or jj(TAGGED_SOURCE_FOLDER, f"{x.split('-')[1]}/{x}.zip")
+        isfile(jj(source_folder, f"{x}.zip")) or jj(source_folder, f"{x.split('-')[1]}/{x}.zip")
         for x in load_test_documents()
     )
 
 
 def sample_tagged_speech_corpus_exists():
+    tagged_source_folder: str = ConfigValue("tagged_frames:folder").resolve()
+    tagged_speech_folder: str = ConfigValue("tagged_speeches:folder").resolve()
     """Checks if the test data contains a complete tagged speech corpus. Empty files are ignored."""
 
     def isfile_and_non_empty(filename: str) -> bool:
         """Check if file exists in soruce folder, or in sub-folder, and is non-empty."""
-        for path in [TAGGED_SOURCE_FOLDER, jj(TAGGED_SOURCE_FOLDER, f"{filename.split('-')[1]}")]:
+        for path in [tagged_source_folder, jj(tagged_source_folder, f"{filename.split('-')[1]}")]:
             if isfile(jj(path, filename)) and getsize(jj(path, filename)) > 0:
                 return True
         return False
@@ -104,34 +126,38 @@ def sample_tagged_speech_corpus_exists():
 
     expected_files: set[str] = set(non_empty_tagged_frames_document_names())
     document_names: set[str] = {
-        splitext(basename(p))[0] for p in glob(jj(TAGGED_SPEECH_FOLDER, '**', 'prot-*.*'), recursive=True)
+        splitext(basename(p))[0] for p in glob(jj(tagged_speech_folder, '**', 'prot-*.*'), recursive=True)
     }
     return document_names == expected_files
 
 
 def ensure_test_corpora_exist(force: bool = False):
+    corpus_version: str = ConfigValue("corpus:version").resolve()
+    tagged_source_folder: str = ConfigValue("tagged_frames:folder").resolve()
+    root_folder: str = ConfigValue("root_folder").resolve()
+    database: str = ConfigValue("metadata:database").resolve()
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
             documents=load_test_documents(),
-            tag=CORPUS_VERSION,
-            target_folder=ROOT_FOLDER,
+            tag=corpus_version,
+            target_folder=root_folder,
             force=force,
         )
 
     if force or not sample_tagged_frames_corpus_exists():
-        data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
-        riksprot_tagged_folder: str = jj(data_folder, CORPUS_VERSION, 'tagged_frames')
+        data_folder: str = root_folder  # os.environ["RIKSPROT_DATA_FOLDER"]
+        riksprot_tagged_folder: str = jj(data_folder, corpus_version, 'tagged_frames')
         create_test_tagged_frames_corpus(
             protocols=load_test_documents(),
             source_folder=riksprot_tagged_folder,
-            target_folder=TAGGED_SOURCE_FOLDER,
+            target_folder=tagged_source_folder,
         )
 
     if force or not sample_tagged_speech_corpus_exists():
         create_test_speech_corpus(
-            source_folder=TAGGED_SOURCE_FOLDER,
-            tag=CORPUS_VERSION,
-            database_name=SAMPLE_METADATA_DATABASE_NAME,
+            source_folder=tagged_source_folder,
+            tag=corpus_version,
+            database_name=database,
         )
 
 

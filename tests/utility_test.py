@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import Iterable
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -10,9 +11,8 @@ from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import preprocess as pr
 from pyriksprot import utility as pu
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.iterate import ProtocolSegment
-from pyriksprot.utility import dotexpand
-from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 
 from . import fakes
 
@@ -28,7 +28,8 @@ jj = os.path.join
     ],
 )
 def test_load_fakes(document_name: str):
-    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    filename: str = jj(fakes_folder, f"{document_name}.xml")
 
     utterances: list[interface.Utterance] = fakes.load_sample_utterances(filename)
 
@@ -72,12 +73,18 @@ def test_temporary_file():
 
 
 def test_dotexpand():
-    assert not dotexpand("")
-    assert dotexpand("a") == ["a"]
-    assert dotexpand("a.b") == ["a.b"]
-    assert dotexpand("a.b,c.d") == ["a.b", "c.d"]
-    assert dotexpand("a:b,c.d") == ["a.b", "a_b", "c.d"]
-    assert dotexpand("a:b, c.d") == ["a.b", "a_b", "c.d"]
+    assert not pu.dotexpand("")
+    assert pu.dotexpand("a") == ["a"]
+    assert pu.dotexpand("a.b") == ["a.b"]
+    assert pu.dotexpand("a.b,c.d") == ["a.b", "c.d"]
+    assert pu.dotexpand("a:b,c.d") == ["a.b", "a_b", "c.d"]
+    assert pu.dotexpand("a:b, c.d") == ["a.b", "a_b", "c.d"]
+
+
+def test_dotset():
+    d = {}
+    pu.dotset(d, "a.b", 1)
+    assert d == {"a": {"b": 1}}
 
 
 def test_dotget():
@@ -103,6 +110,42 @@ def test_dotget():
     assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.erik") == 98
     assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle.kalle") == 99
     assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle:kalle") == 99
+
+
+@pytest.mark.parametrize(
+    'prefix, mock_env, expected',
+    [
+        (
+            'TEST_PREFIX',
+            {'TEST_PREFIX_KEY1': 'value1', 'TEST_PREFIX_KEY2': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ),
+        (
+            'ABC',
+            {'ABC:KEY1': 'value1', 'ABC:KEY2': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ),
+        (
+            'ABC',
+            {'ABC.KEY1': 'value1', 'ABC.KEY2': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ),
+        (
+            '',
+            {'TEST_PREFIX_KEY1': 'value1', 'TEST_PREFIX_KEY2': 'value2'},
+            {},
+        ),
+        (
+            'TEST_PREFIX',
+            {'OTHER_KEY1': 'value1', 'OTHER_KEY2': 'value2'},
+            {},
+        ),
+    ],
+)
+def test_env2dict(prefix: str, mock_env: dict[str, str], expected: dict[str, str]):
+    with patch.dict(os.environ, mock_env):
+        result: dict[str, str] = pu.env2dict(prefix=prefix)
+        assert result == expected
 
 
 def test_dedent():

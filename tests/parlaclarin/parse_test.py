@@ -3,10 +3,10 @@ import os
 import pytest
 
 from pyriksprot import interface
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus import parlaclarin
 
 from .. import fakes
-from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOLDER
 from .utility import count_utterances
 
 jj = os.path.join
@@ -21,7 +21,8 @@ jj = os.path.join
     ],
 )
 def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str):
-    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{protocol_name}.xml")
+    fakes_folder: ConfigValue = ConfigValue("fakes:folder").resolve()
+    filename: str = jj(fakes_folder, f"{protocol_name}.xml")
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename)
 
     """Load truth"""
@@ -50,7 +51,8 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_nam
     ],
 )
 def test_parlaclarin_n_utterances(filename: str):
-    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+    corpus_folder: ConfigValue = ConfigValue("corpus:folder").resolve()
+    path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(path)
 
@@ -70,8 +72,13 @@ def test_parlaclarin_n_utterances(filename: str):
         ("prot-199596--35.xml", 393, 54),
     ],
 )
-def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: int):
-    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+def test_parlaclarin_n_speaker_notes(
+    filename: str, u_count: int, intro_count: int
+):
+    
+    corpus_folder: ConfigValue = ConfigValue("corpus:folder").resolve()
+    
+    path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(path)
 

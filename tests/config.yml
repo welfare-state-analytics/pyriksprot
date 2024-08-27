@@ -1,0 +1,30 @@
+
+root_folder: &folder tests/test_data/source/
+data_folder: *folder
+version: &version v1.1.0
+
+corpus:
+  version: *version
+  url: https://github.com/swerik-projects/riksdagen-records
+  folder: !path_join [ *folder, *version, parlaclarin/protocols ]
+  subfolder: 
+  pattern: "**/prot-*.xml"
+
+fakes:
+  folder: !path_join [ tests/test_data/fakes, *version, parlaclarin/protocols ]
+  expected_folder: !path_join [ tests/test_data/fakes, *version, expected ]
+
+metadata:
+  version: *version
+  url: https://github.com/swerik-projects/riksdagen-persons
+  folder: !path_join [ *folder, *version, parlaclarin/metadata ]
+  subfolder: 
+  database: !path_join [ *folder, *version, riksprot_metadata.db ]
+
+tagged_frames:
+  folder: &tagged_folder !path_join [ *folder, *version, tagged_frames ]
+  file_pattern: &file_pattern prot-*.zip
+  pattern: !path_join [ *tagged_folder, "**", *file_pattern ]
+
+tagged_speeches:
+  folder: &speech_folder !path_join [ *folder, *version, tagged_frames_speeches.feather ]
