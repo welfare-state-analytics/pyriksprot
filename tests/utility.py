@@ -101,10 +101,10 @@ def sample_metadata_exists() -> bool:
     return configs.files_exist(source_folder)
 
 
-def sample_tagged_frames_corpus_exists() -> bool:
-    source_folder: str = ConfigValue("tagged_frames:folder").resolve()
+def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
+    folder: str = folder or ConfigValue("tagged_frames:folder").resolve()
     return all(
-        isfile(jj(source_folder, f"{x}.zip")) or jj(source_folder, f"{x.split('-')[1]}/{x}.zip")
+        isfile(jj(folder, f"{x}.zip")) or jj(folder, f"{x.split('-')[1]}/{x}.zip")
         for x in load_test_documents()
     )
 
@@ -131,11 +131,17 @@ def sample_tagged_speech_corpus_exists():
     return document_names == expected_files
 
 
-def ensure_test_corpora_exist(force: bool = False):
-    corpus_version: str = ConfigValue("corpus:version").resolve()
-    tagged_source_folder: str = ConfigValue("tagged_frames:folder").resolve()
-    root_folder: str = ConfigValue("root_folder").resolve()
-    database: str = ConfigValue("metadata:database").resolve()
+def ensure_test_corpora_exist(
+    force: bool = False,
+    corpus_version: str = None,
+    tagged_source_folder: str = None,
+    root_folder: str = None,
+    database: str = None,
+):
+    corpus_version: str = corpus_version or ConfigValue("corpus:version").resolve()
+    tagged_source_folder: str = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
+    root_folder: str = root_folder or ConfigValue("root_folder").resolve()
+    database: str = database or ConfigValue("metadata:database").resolve()
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
             documents=load_test_documents(),
@@ -145,7 +151,7 @@ def ensure_test_corpora_exist(force: bool = False):
         )
 
     if force or not sample_tagged_frames_corpus_exists():
-        data_folder: str = root_folder  # os.environ["RIKSPROT_DATA_FOLDER"]
+        data_folder: str = root_folder
         riksprot_tagged_folder: str = jj(data_folder, corpus_version, 'tagged_frames')
         create_test_tagged_frames_corpus(
             protocols=load_test_documents(),

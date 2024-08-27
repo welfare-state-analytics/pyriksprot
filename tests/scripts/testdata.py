@@ -6,6 +6,7 @@ import click
 from loguru import logger
 
 from pyriksprot.configuration import ConfigStore
+from pyriksprot.configuration.inject import ConfigValue
 from tests.utility import (
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
@@ -55,20 +56,19 @@ def generate_corpus_and_metadata(force: bool = False):
 
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
-def generate_tagged_frames(force: bool = False):
-    version: str = ConfigStore.config().get("corpus:version")
-    tagged_folder: str = ConfigStore.config().get("tagged_frames:folder")
+@click.argument('source-folder', type=str, required=True)
+@click.argument('target-folder', type=str, required=False)
+def generate_tagged_frames(force: bool = False, source_folder: str = None, target_folder: str = None):
+    target_folder: str = target_folder or ConfigValue("tagged_frames:folder").resolve()
     try:
-        if sample_tagged_frames_corpus_exists():
+        if sample_tagged_frames_corpus_exists(target_folder):
             if not force:
                 raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
 
-        data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
-        riksprot_tagged_folder: str = join(data_folder, version, 'tagged_frames')
         create_test_tagged_frames_corpus(
             protocols=load_test_documents(),
-            source_folder=riksprot_tagged_folder,
-            target_folder=tagged_folder,
+            source_folder=source_folder,
+            target_folder=target_folder,
         )
     except ValueError as ex:
         logger.error(ex)
@@ -77,17 +77,19 @@ def generate_tagged_frames(force: bool = False):
 
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
-def generate_tagged_speech_corpora(force: bool = False):
-    version: str = ConfigStore.config().get("corpus:version")
-    tagged_folder: str = ConfigStore.config().get("tagged_frames:folder")
-    database: str = ConfigStore.config().get("metadata:database")
+@click.option('--tag', type=click.STRING, help='Corpus version', default=None, required=False)
+@click.option('--database', type=click.STRING, help='Metadata database', default=None, required=False)
+@click.argument('source-folder', type=str, required=False)
+def generate_tagged_speech_corpora(force: bool = False, tag: str = None, database: str=None, source_folder: str = None):
+    version: str = tag or ConfigValue("corpus:version").resolve()
+    database: str = database or ConfigValue("metadata:database").resolve()
     try:
         if sample_tagged_speech_corpus_exists():
             if not force:
                 raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
 
         create_test_speech_corpus(
-            source_folder=tagged_folder,
+            source_folder=source_folder or ConfigValue("tagged_frames:folder").resolve(),
             tag=version,
             database_name=database,
         )
