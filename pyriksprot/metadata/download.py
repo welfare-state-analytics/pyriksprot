@@ -47,6 +47,28 @@ def gh_dl_metadata(
     return infos
 
 
+def gh_dl_metadata_by_config(
+    *, schema: MetadataSchema, tag: str, folder: str, force: bool = False, errors='raise'
+) -> None:
+    """Downloads metadata files based on tables specified in `specifications`"""
+
+    if force:
+        reset_folder(folder, force=True)
+    else:
+        os.makedirs(folder, exist_ok=True)
+
+    for tablename, _ in schema.definitions.items():
+
+        if tablename.startswith(':'):
+            continue
+
+        target_name: str = jj(folder, f"{tablename}.csv")
+
+        url: str = _resolve_url(schema, tag, tablename)
+
+        download_url_to_file(url, target_name, force, errors=errors)
+
+
 def _resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
     """Resolves proper URL to table for tag based on configuration"""
     if tablename not in schema.definitions:
@@ -65,23 +87,3 @@ def _resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
         return url(tag)
 
     return url
-
-
-def gh_dl_metadata_by_config(*, schema: MetadataSchema, tag: str, folder: str, force: bool = False, errors='raise') -> None:
-    """Downloads metadata files based on tables specified in `specifications`"""
-
-    if force:
-        reset_folder(folder, force=True)
-    else:
-        os.makedirs(folder, exist_ok=True)
-
-    for tablename, _ in schema.definitions.items():
-
-        if tablename.startswith(':'):
-            continue
-        
-        target_name: str = jj(folder, f"{tablename}.csv")
-
-        url: str = _resolve_url(schema, tag, tablename)
-
-        download_url_to_file(url, target_name, force, errors=errors)
