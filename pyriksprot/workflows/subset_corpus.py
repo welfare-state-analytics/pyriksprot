@@ -59,7 +59,7 @@ def subset_corpus_and_metadata(
     if isinstance(documents, str):
         documents: list[str] = _load_document_filenames(documents)
 
-    md.gh_dl_metadata_folder()(
+    md.gh_fetch_metadata_folder()(
         target_folder=metadata_folder,
         user=user,
         repository=repository,

@@ -9,7 +9,7 @@ import pandas as pd
 from loguru import logger
 from sqlalchemy import Engine, create_engine
 
-from pyriksprot.metadata import gh_dl_metadata_folder
+from pyriksprot.metadata import gh_fetch_metadata_folder
 from pyriksprot.metadata.utility import fix_incomplete_datetime_series
 
 # FIXME: Deprecated
@@ -21,7 +21,7 @@ def csv2pgsql(github: dict, tag: str):
 
     with tempfile.TemporaryDirectory() as folder:
         logger.info('using temporary directory', folder)
-        gh_dl_metadata_folder(
+        gh_fetch_metadata_folder(
             user=github.get('user'),
             repository=github.get('repository'),
             path=github.get('path'),

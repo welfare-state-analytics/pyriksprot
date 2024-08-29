@@ -1,7 +1,7 @@
 # type: ignore
 
 from .codecs import Codecs
-from .download import gh_dl_metadata, gh_dl_metadata_by_config
+from .download import gh_fetch_metadata_folder, gh_dl_metadata_by_config
 from .generate import CorpusIndexFactory, DatabaseHelper
 from .person import Person, PersonIndex, PersonParty, SpeakerInfo, SpeakerInfoService, TermOfOffice
 from .schema import (

@@ -44,7 +44,7 @@ def test_download_metadata(tmp_path: pathlib.Path):
     data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
 
-    filenames: list[str] = md.gh_dl_metadata_folder(
+    filenames: list[str] = md.gh_fetch_metadata_folder(
         target_folder=tmp_path, user=user, repository=repository, path=path, tag=tag, force=True
     )
     assert len(filenames) > 0
