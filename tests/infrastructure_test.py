@@ -35,13 +35,24 @@ def test_setup_sample_xml_corpus():
 
 
 # @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_to_folder():
+def test_gh_dl_metadata_folder():
     version: str = ConfigStore.config().get("metadata.version")
     target_folder: str = jj('./metadata/data/', version)
     schema: md.MetadataSchema = md.MetadataSchema(version)
     md.gh_dl_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True)
     assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in schema.tablesnames0)
 
+def test_gh_dl_metadata():
+    version: str = ConfigValue("metadata.version").resolve()
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
+
+    target_folder: str = jj('./metadata/data/', version)
+
+    md.gh_dl_metadata_by_ls(folder=target_folder, user=user, repository=repository, path=path, tag=version,  force=True)
+
+    assert True
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus():
@@ -96,7 +107,7 @@ def test_gh_tables_data():
         table, extension = splitext(item.get("name"))
         if not extension.endswith("csv"):
             continue
-        url: str = gh.gh_download_url(
+        url: str = gh.gh_create_url(
             user=cfg.get('user'),
             repository=cfg.get('repository'),
             path=cfg.get('path'),
