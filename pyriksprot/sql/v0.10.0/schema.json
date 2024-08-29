@@ -117,7 +117,7 @@
         "github": {
             "user": "welfare-state-analytics",
             "repository": "riksdagen-corpus",
-            "folder": "corpus/metadata"
+            "path": "corpus/metadata"
         }
     }
 }

@@ -117,7 +117,7 @@
         "github": {
             "user": "swerik-projects",
             "repository": "riksdagen-persons",
-            "folder": "data"
+            "path": "data"
         }
     }
 }

@@ -10,7 +10,7 @@ corpus:
   github:
     user: swerik-projects
     repository: riksdagen-records
-    folder: data
+    path: data
 
 fakes:
   folder: tests/test_data/fakes/v1.1.0/parlaclarin/protocols
@@ -23,7 +23,7 @@ metadata:
   github:
     user: swerik-projects
     repository: riksdagen-persons
-    folder: data
+    path: data
 
 tagged_frames:
   folder: /data/riksdagen_corpus_data/v1.1.0/tagged_frames
