@@ -1,17 +1,19 @@
+import json
 from functools import cached_property
 from importlib import import_module
-import json
 from os.path import isfile, join
 from pathlib import Path
-from typing import Any, Callable, Iterable, Literal, Sequence
+from typing import Any, Callable, Iterable, Literal
 from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
 
-from .utility import fix_incomplete_datetime_series
+import pyriksprot.sql
 
+from .. import gitchen as gh
 from ..utility import probe_filename, revdict
+from .utility import fix_incomplete_datetime_series
 
 
 def input_unknown_url(tag: str = "main"):
@@ -84,7 +86,6 @@ def fix_ts_config(column: str, action: Literal['extend', 'truncate']) -> dict[st
 
 
 def resolve_fx_by_name(name: str) -> Callable[[Any], Any]:
-
     if name in globals():
         return globals()[name]
 
@@ -149,15 +150,6 @@ class MetadataTableConfig:
     def has_url(self) -> bool:
         return ':url:' in self.data
 
-    def resolve_url(self, tag: str) -> str:
-        """Resolves proper URL to table for tag based on configuration"""
-        url = self.url
-        if url is None:
-            return table_url(tablename=self.name, tag=tag)
-        if callable(url):
-            return url(tag)
-        return url
-
     @cached_property
     def url(self) -> str | Callable | None:
         return self.data.get(':url:')
@@ -199,17 +191,17 @@ class MetadataTableConfig:
 
         return table
 
-    def load_table(self, folder: str, tag: str) -> pd.DataFrame:
+    def load_table(self, folder: str | None, tag: str | None, **opts) -> pd.DataFrame:
         """Loads table from specified folder or from url in configuration"""
         if self.has_url and folder is None:
-            return pd.read_csv(self.resolve_url(tag), sep=',')
+            return pd.read_csv(self.url, sep=',')
 
         if isinstance(folder, str):
             url: str = probe_filename(join(folder, f"{self.name}.csv"), ["zip", "csv.gz"])
             return pd.read_csv(url)
 
         if isinstance(tag, str):
-            url: str = table_url(self.name, tag)
+            url: str = gh.gh_download_url(filename=f"{self.name}.csv", tag=tag, **opts)
             return pd.read_csv(url)
 
         raise ValueError("either :url:, folder or branch must be set")
@@ -235,13 +227,10 @@ class MetadataTableConfigs:
     """Configuration for all tables in metadata"""
 
     def __init__(self, tag: str | None):
-
-        import pyriksprot.sql
-
         if tag is None:
             raise ValueError("Tag must be defined")
 
-        sql_folder: Path = pyriksprot.sql.sql_folder(tag)
+        sql_folder: Path = pyriksprot.sql.sql_folder(tag=tag)
 
         if not sql_folder.is_dir():
             raise FileNotFoundError(f"sql folder for {tag} not found")
@@ -252,14 +241,17 @@ class MetadataTableConfigs:
         with sql_folder.joinpath("schema.json").open() as f:
             self.data: dict = json.load(f)
 
+        self.config: dict = {}
+
+        if ':config:' in self.data:
+            self.config = self.data[':config:']
+            self.data.pop(':config:')
+
         """ Resolve computed columns """
 
         for table_name in self.data:
-
-            if ':compute:' not in self.data[table_name]:
-                continue
-
             cfgs: list = []
+
             for cfg in self.data[table_name][':compute:']:
                 if isinstance(cfg, dict):
                     cfgs.append(cfg)
@@ -289,6 +281,35 @@ class MetadataTableConfigs:
     def tablesnames0(self) -> list[str]:
         tables: list[str] = [x for x in self.tablenames if not bool(self.data[x].get(':is_extra:'))]
         return tables
+
+    @property
+    def url_template(self) -> str | None:
+        return self.config.get('url_template')
+
+    def github_user(self) -> str | None:
+        return self.config.get('github', {}).get('user')
+
+    def github_repository(self) -> str | None:
+        return self.config.get('github', {}).get('repository')
+
+    def github_path(self) -> str | None:
+        return self.config.get('github', {}).get('path')
+
+    def resolve_url(self, tag: str, tablename: str) -> str:
+        """Resolves proper URL to table for tag based on configuration"""
+        if tablename not in self.definitions:
+            raise ValueError(f"Table {tablename} not found in configuration")
+
+        url = self[tablename].url
+        if url is None:
+            if self.url_template is None:
+                raise ValueError("No default URL template found in schema configuration (shema.json)")
+            return self.url_template.format(tablename=self.name, tag=tag)
+
+        if callable(url):
+            return url(tag)
+
+        return url
 
     def __getitem__(self, key: str) -> MetadataTableConfig:
         return self.definitions[key]
