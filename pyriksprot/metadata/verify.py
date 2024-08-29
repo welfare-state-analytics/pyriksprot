@@ -5,8 +5,8 @@ import os
 from glob import glob
 
 from ..utility import strip_path_and_extension
-from .config import MetadataTableConfigs
 from .repository import gh_dl_metadata
+from .schema import MetadataTableConfigs
 
 jj = os.path.join
 
@@ -63,14 +63,14 @@ class ConformBaseSpecification:
 class TagsConformSpecification(ConformBaseSpecification):
     """Verifies that tags metadata conform"""
 
-    def __init__(self, tag1: str, tag2: str) -> None:
+    def __init__(self, user: str, repository: str, path: str, tag1: str, tag2: str) -> None:
         super().__init__()
 
         self.left_key: str = tag1
         self.right_key: str = tag2
 
-        tag1_data: dict = gh_dl_metadata(tag=tag1, folder=None)
-        tag2_data: dict = gh_dl_metadata(tag=tag2, folder=None)
+        tag1_data: dict = gh_dl_metadata(user=user, repository=repository, path=path, tag=tag1, target_folder=None)
+        tag2_data: dict = gh_dl_metadata(user=user, repository=repository, path=path, tag=tag2, target_folder=None)
 
         self.left_tables: dict = {n: v['headers'] for n, v in tag1_data.items()}
         self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
@@ -79,7 +79,7 @@ class TagsConformSpecification(ConformBaseSpecification):
 class ConfigConformsToTagSpecification(ConformBaseSpecification):
     """Verifies that current table specification conforms to given tag"""
 
-    def __init__(self, tag: str):
+    def __init__(self, user: str, repository: str, path: str, tag: str):
         super().__init__()
 
         self.table_configs: MetadataTableConfigs = MetadataTableConfigs(tag)
@@ -87,7 +87,7 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
         self.left_key: str = "config"
         self.right_key: str = tag
 
-        tag2_data: dict = gh_dl_metadata(tag=tag, folder=None)
+        tag2_data: dict = gh_dl_metadata(user=user, repository=repository, path=path, tag=tag, target_folder=None)
 
         self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
         self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}

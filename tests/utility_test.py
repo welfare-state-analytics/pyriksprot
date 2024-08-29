@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from pyriksprot import gitchen as gh
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import preprocess as pr
@@ -168,7 +169,8 @@ def test_probe_filename():
 
 
 def test_repository_tags():
-    tags = md.gh_tags()
+    folder: str = ConfigStore.config().get("corpus.folder")
+    tags = gh.gh_tags(folder)
     assert len(tags) > 0
 
 

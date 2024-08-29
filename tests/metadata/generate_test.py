@@ -2,15 +2,16 @@ import os
 import pathlib
 import shutil
 import sqlite3
-from contextlib import closing
 import uuid
+from contextlib import closing
 
 import pandas as pd
 import pytest
 
 import pyriksprot.sql as sql
+from pyriksprot import gitchen as gh
 from pyriksprot import metadata as md
-from pyriksprot.configuration import ConfigStore
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 
 jj = os.path.join
@@ -19,26 +20,37 @@ DUMMY_METADATA_DATABASE_NAME: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
 
 def test_list_sql_files():
-    tag: str = ConfigStore.config().get("metadata.version")
-    data = sql.sql_file_paths(tag)
+    tag: str = ConfigValue("metadata.version").resolve()
+    data = sql.sql_file_paths(tag=tag)
     assert len(data) > 0
 
 
 def test_gh_ls():
-    tag: str = ConfigStore.config().get("metadata.version")
+    tag: str = ConfigValue("metadata.version").resolve()
+    github: str = ConfigValue("metadata.github").resolve()
 
-    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
+    user: str = github.get("user")
+    repository: str = github.get("repository")
+    path: str = github.get("path")
+
+    data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
 
 
 def test_download_metadata(tmp_path: pathlib.Path):
+    tag: str = ConfigValue("metadata.version").resolve()
+    github: str = ConfigValue("metadata.github").resolve()
 
-    tag: str = ConfigStore.config().get("metadata.version")
+    user: str = github.get("user")
+    repository: str = github.get("repository")
+    path: str = github.get("path")
 
-    data: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
+    data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
 
-    filenames: list[str] = md.gh_dl_metadata_extra(folder=tmp_path, tag=tag, force=True)
+    filenames: list[str] = md.gh_dl_metadata(
+        target_folder=tmp_path, user=user, repository=repository, path=path, tag=tag, force=True
+    )
     assert len(filenames) > 0
 
     shutil.rmtree(str(tmp_path))
@@ -63,7 +75,7 @@ def test_get_and_set_db_version():
 
 
 def test_create_metadata_database():
-    tag: str = ConfigStore.config().get("metadata.version")
+    tag: str = ConfigValue("metadata.version").resolve()
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
     service: md.DatabaseHelper = md.DatabaseHelper(target_filename)
@@ -81,10 +93,7 @@ def test_create_metadata_database():
 
 @pytest.mark.parametrize(
     'corpus_folder',
-    [
-        ConfigStore.config().get("corpus.folder"),
-        ConfigStore.config().get("fakes.folder"),
-    ],
+    [ConfigValue("corpus.folder").resolve(), ConfigValue("fakes.folder").resolve()],
 )
 def test_generate_corpus_indexes(corpus_folder: str):
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
@@ -103,7 +112,7 @@ def _db_table_exists(database_filename: str, table: str):
 
 
 def test_generate_and_load_corpus_indexes():
-    version: str = ConfigStore.config().get("metadata.version")
+    version: str = ConfigValue("metadata.version").resolve()
     corpus_folder: str = jj("./tests/test_data/source", version, "parlaclarin")
     target_folder: str = f"./tests/output/{str(uuid.uuid4())[:8]}"
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'

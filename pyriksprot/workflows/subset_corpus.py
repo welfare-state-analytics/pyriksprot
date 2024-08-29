@@ -38,6 +38,7 @@ def subset_corpus_and_metadata(
     tag: str | None = None,
     scripts_folder: str | None = None,
     force: bool = True,
+    **opts,
 ):
     """Subset metadata to folder `target_folder`/tag"""
 
@@ -49,16 +50,33 @@ def subset_corpus_and_metadata(
     protocols_target_folder: str = join(parlaclarin_folder, "protocols")
     database_name: str = join(root_folder, "riksprot_metadata.db")
 
+    user: str = opts.get("user")
+    repository: str = opts.get("repository")
+    path: str = opts.get("path")
+
     reset_folder(root_folder, force=force)
 
     if isinstance(documents, str):
         documents: list[str] = _load_document_filenames(documents)
 
-    md.gh_dl_metadata_extra(folder=metadata_folder, tag=tag, force=True)
+    md.gh_dl_metadata(
+        target_folder=metadata_folder,
+        user=user,
+        repository=repository,
+        path=path,
+        tag=tag,
+        force=True,
+    )
 
     if source_folder is None:
         pc.download_protocols(
-            filenames=documents, target_folder=protocols_target_folder, create_subfolder=True, tag=tag
+            filenames=documents,
+            target_folder=protocols_target_folder,
+            create_subfolder=True,
+            tag=tag,
+            user=user,
+            repository=repository,
+            path=path,
         )
     else:
         pc.copy_protocols(

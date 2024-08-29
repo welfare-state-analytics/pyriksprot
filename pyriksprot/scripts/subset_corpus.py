@@ -5,6 +5,7 @@ import sys
 
 import click
 
+from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.workflows import subset_corpus_and_metadata
 
 jj = os.path.join
@@ -12,26 +13,28 @@ relpath = os.path.relpath
 
 
 @click.command()
+@click.argument('config_filename', type=click.STRING)  # , help="File with protocol names to subset")
 @click.argument('documents', type=click.STRING)  # , help="File with protocol names to subset")
 @click.argument('target-folder', type=click.STRING)  # , help="Root folder for corpus subset")
-@click.argument('tag', type=click.STRING)  # , help="Corpus version")
 @click.option('--scripts-folder', type=click.STRING, help="SQL scripts folder")
 @click.option('--source-folder', type=click.STRING, help="Copy from source folder instead of downloading")
 def main(
+    config_filename: str = None,
     documents: list[str] | str = None,
     target_folder: str = None,
-    tag: str = None,
     scripts_folder: str = None,
     source_folder: str = None,
 ):
     print(locals())
     try:
+        ConfigStore().configure_context(source=config_filename)
         subset_corpus_and_metadata(
             source_folder=source_folder,
             documents=documents,
             target_folder=target_folder,
-            tag=tag,
+            tag=ConfigValue("version").resolve(),
             scripts_folder=scripts_folder,
+            **ConfigValue("metadata.github").resolve(),
         )
     except Exception as ex:
         click.echo(ex)

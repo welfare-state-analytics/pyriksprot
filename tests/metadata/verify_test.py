@@ -1,21 +1,27 @@
-from pyriksprot.configuration import ConfigStore
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.metadata import verify
 
 
 def test_config_conforms_to_folder_specification():
-    tag: str = ConfigStore().config().get("version")
-    folder: str = ConfigStore().config().get("metadata:folder")
+    tag: str = ConfigValue("version").resolve()
+    folder: str = ConfigValue("metadata:folder").resolve()
     verify.ConfigConformsToFolderSpecification(tag=tag, folder=folder).is_satisfied()
 
 
 def test_config_conforms_to_tags_specification():
-    tag: str = ConfigStore().config().get("version")
-    verify.ConfigConformsToTagSpecification(tag=tag).is_satisfied()
+    tag: str = ConfigValue("version").resolve()
+    github: str = ConfigValue("metadata.github").resolve()
+    verify.ConfigConformsToTagSpecification(
+        user=github.get("user"), repository=github.get("repository"), path=github.get("path"), tag=tag
+    ).is_satisfied()
 
 
 def test_tags_conform_specification():
-    tag: str = ConfigStore().config().get("version")
-    verify.TagsConformSpecification(tag1="v0.5.0", tag2=tag).is_satisfied()
+    github: str = ConfigValue("metadata.github").resolve()
+    tag: str = ConfigValue("version").resolve()
+    verify.TagsConformSpecification(
+        user=github.get("user"), repository=github.get("repository"), path=github.get("path"), tag1="v0.5.0", tag2=tag
+    ).is_satisfied()
 
 
 def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | int]:

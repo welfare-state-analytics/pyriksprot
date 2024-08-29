@@ -14,7 +14,7 @@ from pyriksprot import metadata as md
 from pyriksprot import to_speech as ts
 from pyriksprot import utility as pu
 from pyriksprot import workflows
-from pyriksprot.configuration import ConfigValue, inject_config
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.workflows import subset_corpus_and_metadata
 
@@ -104,8 +104,7 @@ def sample_metadata_exists() -> bool:
 def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
     folder: str = folder or ConfigValue("tagged_frames:folder").resolve()
     return all(
-        isfile(jj(folder, f"{x}.zip")) or jj(folder, f"{x.split('-')[1]}/{x}.zip")
-        for x in load_test_documents()
+        isfile(jj(folder, f"{x}.zip")) or jj(folder, f"{x.split('-')[1]}/{x}.zip") for x in load_test_documents()
     )
 
 
@@ -142,12 +141,15 @@ def ensure_test_corpora_exist(
     tagged_source_folder: str = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder: str = root_folder or ConfigValue("root_folder").resolve()
     database: str = database or ConfigValue("metadata:database").resolve()
+    opts: dict = ConfigValue("metadata:github").resolve()
+
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
             documents=load_test_documents(),
             tag=corpus_version,
             target_folder=root_folder,
             force=force,
+            **opts,
         )
 
     if force or not sample_tagged_frames_corpus_exists():

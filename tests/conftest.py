@@ -6,27 +6,30 @@ import pytest
 from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import
 from loguru import logger
 
-from pyriksprot import interface, metadata as md, to_speech
+from pyriksprot import interface
+from pyriksprot import metadata as md
+from pyriksprot import to_speech
 from pyriksprot.configuration import ConfigStore
-from pyriksprot.corpus import corpus_index as csi, iterate
-from pyriksprot.corpus import tagged
-from .utility import ensure_test_corpora_exist
+from pyriksprot.corpus import corpus_index as csi
+from pyriksprot.corpus import iterate, tagged
 from pyriksprot.dispatch import merge as sg
+
+from .utility import ensure_test_corpora_exist
 
 ConfigStore.configure_context(source='tests/config.yml', env_prefix=None)
 
-ensure_test_corpora_exist()
+# pylint: disable=redefined-outer-name
+
+# ensure_test_corpora_exist()
 
 
 @pytest.fixture(scope='session')
 def source_index() -> csi.CorpusSourceIndex:
-    try:
-        tagged_source_folder = ConfigStore.config().get("tagged_frames.folder")
-        return csi.CorpusSourceIndex.load(
-            source_folder=tagged_source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
-        )
-    except:
-        pass
+    tagged_source_folder = ConfigStore.config().get("tagged_frames.folder")
+    return csi.CorpusSourceIndex.load(
+        source_folder=tagged_source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
+    )
+
 
 @pytest.fixture(scope='session')
 def xml_source_index() -> csi.CorpusSourceIndex:
@@ -46,7 +49,7 @@ def person_index() -> md.PersonIndex:
 
 
 @pytest.fixture(scope='session')
-def speaker_service(person_index: md.PersonIndex) -> md.SpeakerInfoService:  # pylint: disable=redefined-outer-name
+def speaker_service(person_index: md.PersonIndex) -> md.SpeakerInfoService:
     sample_metadata_database_name = ConfigStore.config().get("metadata.database")
     return md.SpeakerInfoService(database_filename=sample_metadata_database_name, person_index=person_index)
 
@@ -70,6 +73,7 @@ def tagged_speeches(
     groups = sg.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
     groups = list(groups)
     return groups
+
 
 @pytest.fixture(scope='session')
 def caplog(_caplog):

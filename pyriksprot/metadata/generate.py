@@ -14,7 +14,7 @@ from pyriksprot.interface import IProtocol, IProtocolParser, SpeakerNote
 
 from ..sql import sql_file_paths
 from ..utility import ensure_path, probe_filename, reset_file
-from . import config as cfg
+from . import schema as cfg
 from . import utility
 
 jj = os.path.join
@@ -84,45 +84,48 @@ class DatabaseHelper:
     def create(self, tag: str = None, folder: str = None, force: bool = False):
         logger.info(f"Creating database {self.filename}, using source {tag}/{folder} (tag/folder).")
 
-        configs: cfg.MetadataTableConfigs = cfg.MetadataTableConfigs(tag)
+        schema: cfg.MetadataTableConfigs = cfg.MetadataTableConfigs(tag)
 
         self.reset(tag=tag, force=force)
-        self.create_base_tables(configs)
-        self.load_base_tables(configs, folder)
+        self.create_base_tables(schema)
+        self.load_base_tables(schema, folder)
 
         return self
 
-    def create_base_tables(self, configs: cfg.MetadataTableConfigs) -> DatabaseHelper:
+    def create_base_tables(self, schema: cfg.MetadataTableConfigs) -> DatabaseHelper:
         with self:
-            for _, config in configs.items():
-                self.connection.executescript(config.to_sql_create()).close()
+            for _, table_schema in schema.items():
+                self.connection.executescript(table_schema.to_sql_create()).close()
         return self
 
-    def load_base_tables(self, configs: cfg.MetadataTableConfigs, folder: str) -> DatabaseHelper:
+    def load_base_tables(self, schema: cfg.MetadataTableConfigs, folder: str) -> DatabaseHelper:
         tag: str = self.get_tag()
 
         with self:
-            for _, config in configs.items():
-                self.load_base_table(config, folder, tag)
+            for _, table_schema in schema.items():
+                self.load_base_table(table_schema, folder, tag)
 
         return self
 
-    def load_base_table(self, config: cfg.MetadataTableConfig, folder: str, tag: str) -> DatabaseHelper:
-        logger.info(f"loading table: {config.name}")
-        table: pd.DataFrame = config.load_table(folder, tag)
-        transformed_table: pd.DataFrame = config.transform(table)[config.all_columns]
+    def load_base_table(self, table_schema: cfg.MetadataTableConfig, folder: str, tag: str) -> DatabaseHelper:
+        logger.info(f"loading table: {table_schema.name}")
+        table: pd.DataFrame = table_schema.load_table(folder, tag)
+        transformed_table: pd.DataFrame = table_schema.transform(table)[table_schema.all_columns]
         logger.warning(f"{','.join(transformed_table.columns)}")
         data: np.recarray = transformed_table.to_records(index=False)
-        self.connection.executemany(config.to_sql_insert(), data).close()
+        self.connection.executemany(table_schema.to_sql_insert(), data).close()
         return self
 
-    def load_scripts(self, folder: str = None) -> DatabaseHelper:
+    def load_scripts(self, *, folder: str = None, tag: str = None) -> DatabaseHelper:
         """Loads SQL files from specified folder otherwise loads files in sql module"""
+
+        if not (folder or tag):
+            raise ValueError("Either folder or tag must be specified.")
 
         if folder and not isdir(folder):
             raise FileNotFoundError(folder)
 
-        filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths()
+        filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths(tag=tag)
 
         with self:
             for filename in filenames:

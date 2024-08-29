@@ -6,32 +6,48 @@ import click
 from loguru import logger
 
 from pyriksprot import metadata as md
+from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
 def main():
-    pass
+    ...
 
 
 @click.command()
-@click.argument('source_folder', type=click.STRING)
-def verify_metadata_filenames(source_folder: str):
+@click.argument('config_filename', type=click.STRING)
+@click.option('--tag', type=click.STRING, help='Metadata version', default=None)
+def verify_metadata_filenames(config_filename: str, tag: str = None):
     try:
-        md.ConfigConformsToTagSpecification(source_folder).is_satisfied()
+        ConfigStore().configure_context(source=config_filename)
+
+        user: str = ConfigValue("metadata.github.user").resolve()
+        repository: str = ConfigValue("metadata.github.repository").resolve()
+        path: str = ConfigValue("metadata.github.path").resolve()
+        tag: str = tag or ConfigValue("version").resolve()
+
+        md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
     except ValueError as ex:
         logger.error(ex)
         sys.exit(-1)
 
 
 @click.command()
+@click.argument('config_filename', type=click.STRING)
 @click.argument('tags', nargs=-1, type=click.STRING)
-def verify_metadata_columns(tags: str):
+def verify_metadata_columns(config_filename: str, tags: str):
     try:
+        ConfigStore().configure_context(source=config_filename)
+
+        user: str = ConfigValue("metadata.github.user").resolve()
+        repository: str = ConfigValue("metadata.github.repository").resolve()
+        path: str = ConfigValue("metadata.github.path").resolve()
+
         if len(tags) == 1:
-            md.ConfigConformsToTagSpecification(tags[0]).is_satisfied()
+            md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tags[0]).is_satisfied()
         elif len(tags) == 2:
-            md.TagsConformSpecification(**tags).is_satisfied()
+            md.TagsConformSpecification(user=user, repository=repository, path=path, **tags).is_satisfied()
         else:
             raise ValueError("please specify 1 or 2 tags")
     except ValueError as ex:
@@ -40,10 +56,10 @@ def verify_metadata_columns(tags: str):
 
 
 @click.command()
-@click.argument('tag', type=click.STRING)
+@click.option('--tag', type=click.STRING, help='Metadata version', default=None)
 @click.argument('target_folder', type=click.STRING)
 def download_metadata(tag: str, target_folder: str):
-    md.gh_dl_metadata_by_config(configs=md.MetadataTableConfigs(tag=tag), tag=tag, folder=target_folder, force=True)
+    md.gh_dl_metadata_by_config(schema=md.MetadataTableConfigs(tag=tag), tag=tag, folder=target_folder, force=True)
 
 
 @click.command()
@@ -78,11 +94,7 @@ def create_database(
 ) -> None:
     try:
         service: md.DatabaseHelper = md.DatabaseHelper(target)
-        service.create(
-            tag=tag,
-            folder=source_folder,
-            force=force,
-        )
+        service.create(tag=tag, folder=source_folder, force=force)
 
         if load_index:
             logger.info("loading index...")
@@ -90,7 +102,7 @@ def create_database(
 
         if not skip_scripts:
             logger.info(f"loading scripts from {scripts_folder if scripts_folder else 'sql module'}...")
-            service.load_scripts(folder=scripts_folder)
+            service.load_scripts(folder=scripts_folder, tag=tag)
 
     except Exception as ex:
         logger.error(ex)

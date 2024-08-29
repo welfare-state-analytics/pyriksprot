@@ -1,6 +1,4 @@
-import os
 import sys
-from os.path import join
 
 import click
 from loguru import logger
@@ -24,7 +22,6 @@ from tests.utility import (
 @click.argument('config-filename', type=str, required=False)
 def main(config_filename):
     ConfigStore.configure_context(source=config_filename, env_prefix=None)
-    pass
 
 
 @click.command()
@@ -42,12 +39,13 @@ def generate_complete_sample_data(force: bool):
 def generate_corpus_and_metadata(force: bool = False):
     version: str = ConfigStore.config().get("corpus:version")
     root_folder: str = ConfigStore.config().get("root_folder")
+    opts: dict = ConfigStore.config().get("metadata:github")
     try:
         if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
-        subset_corpus_and_metadata(tag=version, target_folder=root_folder, documents=load_test_documents())
+        subset_corpus_and_metadata(tag=version, target_folder=root_folder, documents=load_test_documents(), **opts)
 
     except ValueError as ex:
         logger.error(ex)
@@ -80,7 +78,9 @@ def generate_tagged_frames(force: bool = False, source_folder: str = None, targe
 @click.option('--tag', type=click.STRING, help='Corpus version', default=None, required=False)
 @click.option('--database', type=click.STRING, help='Metadata database', default=None, required=False)
 @click.argument('source-folder', type=str, required=False)
-def generate_tagged_speech_corpora(force: bool = False, tag: str = None, database: str=None, source_folder: str = None):
+def generate_tagged_speech_corpora(
+    force: bool = False, tag: str = None, database: str = None, source_folder: str = None
+):
     version: str = tag or ConfigValue("corpus:version").resolve()
     database: str = database or ConfigValue("metadata:database").resolve()
     try:
@@ -154,7 +154,6 @@ def generate_tagged_speech_corpora(force: bool = False, tag: str = None, databas
 
 
 if __name__ == "__main__":
-
     main.add_command(generate_complete_sample_data, "complete")
     main.add_command(generate_corpus_and_metadata, "corpus-and-metadata")
     main.add_command(generate_tagged_frames, "tagged-frames")

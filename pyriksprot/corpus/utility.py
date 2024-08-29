@@ -8,6 +8,7 @@ from urllib.request import urlretrieve
 
 from loguru import logger
 
+from .. import gitchen as gh
 from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder
 
 
@@ -18,11 +19,17 @@ def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
     logger.info(f'downloaded: {filename}')
 
 
-def _protocol_uri(filename: str, subfolder: str, tag: str) -> str:
-    return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{q(tag)}/corpus/protocols/{q(subfolder)}/{q(filename)}"
+def _protocol_uri(filename: str, subfolder: str, tag: str, **opts) -> str:
+    return gh.gh_download_url(
+        user=opts.get("user"),
+        repository=opts.get("repository"),
+        path=f'{opts.get("path")}/{q(subfolder)}',
+        filename=q(filename),
+        tag=q(tag),
+    )
 
 
-def download_protocols(*, filenames: list[str], target_folder: str, create_subfolder: bool, tag: str) -> None:
+def download_protocols(*, filenames: list[str], target_folder: str, create_subfolder: bool, tag: str, **opts) -> None:
     """Downloads protocols, used when subsetting corpus. Does not accept wildcards."""
 
     reset_folder(target_folder, force=True)
@@ -39,6 +46,7 @@ def download_protocols(*, filenames: list[str], target_folder: str, create_subfo
             url=_protocol_uri(filename=target_name, subfolder=protocol_year, tag=tag),
             target_folder=target_folder if not create_subfolder else jj(target_folder, protocol_year),
             filename=target_name,
+            **opts,
         )
 
 

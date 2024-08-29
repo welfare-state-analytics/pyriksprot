@@ -72,12 +72,9 @@ def test_parlaclarin_n_utterances(filename: str):
         ("prot-199596--35.xml", 393, 54),
     ],
 )
-def test_parlaclarin_n_speaker_notes(
-    filename: str, u_count: int, intro_count: int
-):
-    
+def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: int):
     corpus_folder: ConfigValue = ConfigValue("corpus:folder").resolve()
-    
+
     path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(path)

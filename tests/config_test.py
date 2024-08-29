@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest import mock
 
 from pyriksprot import ITagger, ITaggerFactory
-from pyriksprot.configuration import Config, ConfigStore, ConfigValue
+from pyriksprot.configuration import Config, ConfigValue
 from pyriksprot.utility import temporary_file
 from pyriksprot.workflows import tag
 
@@ -85,10 +85,9 @@ dehyphen:
     assert config.get("dehyphen:folder") == "tests/output"
 
     with mock.patch("importlib.import_module", return_value=mock.MagicMock()):
-
         # TODO Patch config store
         # ConfigStore.configure_context(source=config)
-        
+
         factory: ITaggerFactory = tag.TaggerProvider.tagger_factory(
             module_name=config.get("tagger:module", default=None)
         )
