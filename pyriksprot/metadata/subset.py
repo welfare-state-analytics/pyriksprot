@@ -8,8 +8,8 @@ import pandas as pd
 from loguru import logger
 
 from ..interface import IProtocolParser
-from .config import MetadataTableConfigs
 from .generate import CorpusIndexFactory
+from .schema import MetadataTableConfigs
 
 jj = os.path.join
 
@@ -37,17 +37,17 @@ def subset_to_folder(
 
     logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
 
-    config: MetadataTableConfigs = MetadataTableConfigs(tag)
+    schema: MetadataTableConfigs = MetadataTableConfigs(tag)
 
-    for tablename in config.tablesnames0:
+    for tablename in schema.tablesnames0:
         source_name: str = jj(source_folder, f"{tablename}.csv")
         target_name: str = jj(target_folder, f"{tablename}.csv")
 
-        if not 'person_id' in config[tablename].columns:
+        if not 'person_id' in schema[tablename].columns:
             shutil.copy(source_name, target_name)
             continue
 
-        id_column: str = config[tablename].resolve_source_column('person_id')
+        id_column: str = schema[tablename].resolve_source_column('person_id')
         copy_csv_subset(source_name, target_name, {id_column: person_ids})
 
     protocol_ids: set[str] = {f"{x}.xml" for x in protocols['document_name']}
