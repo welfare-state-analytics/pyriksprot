@@ -2,19 +2,41 @@ from __future__ import annotations
 
 import datetime
 import os
+import re
 from typing import Literal
 
 import pygit2
 import requests
 from more_itertools import first
 
-from pyriksprot.utility import read_yaml, write_yaml
+from .utility import load_json, read_yaml, write_yaml
 
 ts = datetime.datetime.fromtimestamp
 
 
-class GitInfo:
+def gh_download_url(*, user: str, repository: str, path: str, filename: str, tag: str) -> str:
+    return f"https://raw.githubusercontent.com/{user}/{repository}/{tag}/{path}/{filename}"
 
+
+def gh_repository_url(*, user: str, repository: str) -> str:
+    return f"https://github.com/{user}/{repository}"
+
+
+def gh_ls(user: str, repository: str, path: str = "", tag: str = "main") -> list[dict]:
+    url: str = f"https://api.github.com/repos/{user}/{repository}/contents/{path}?ref={tag}"
+    data: list[dict] = load_json(url)
+    return data
+
+
+def gh_tags(folder: str) -> list[str]:
+    """Returns tags in given local git repository"""
+    repo: pygit2.Repository = pygit2.Repository(path=folder)
+    rx: re.Pattern = re.compile(r'^refs/tags/v\d+\.\d+\.\d+$')
+    tags: list[str] = sorted([r.removeprefix('refs/tags/') for r in repo.references if rx.match(r)])
+    return tags
+
+
+class GitInfo:
     def __init__(self, organisation: str, repository: str, source_folder: str):
         self.api_url: str = f"https://api.github.com/repos/{organisation}/{repository}/git"
         self.repository: pygit2.Repository = pygit2.Repository(source_folder)
