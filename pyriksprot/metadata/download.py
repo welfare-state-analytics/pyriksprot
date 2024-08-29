@@ -2,14 +2,15 @@ import os
 from os.path import isfile
 from os.path import join as jj
 from posixpath import splitext
+from typing import Any
 
 import requests
 from loguru import logger
 
 from pyriksprot.gitchen import gh_download_url, gh_ls
 
-from ..utility import download_url_to_file, reset_folder
-from .schema import MetadataTableConfigs
+from ..utility import dotget, download_url_to_file, reset_folder
+from .schema import MetadataSchema
 
 
 def gh_dl_metadata(
@@ -42,10 +43,33 @@ def gh_dl_metadata(
     return infos
 
 
-def gh_dl_metadata_by_config(*, schema: MetadataTableConfigs, tag: str, folder: str, force: bool = False) -> None:
+def resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
+    """Resolves proper URL to table for tag based on configuration"""
+    if tablename not in schema.definitions:
+        raise ValueError(f"Table {tablename} not found in configuration")
+    url: Any = schema[tablename].url
+    if url is None:
+        return gh_download_url(
+            user=dotget(schema.config, "github.user"),
+            repository=dotget(schema.config, "github.repository"),
+            path=dotget(schema.config, "github.path"),
+            filename=f"{tablename}.csv",
+            tag=tag,
+        )
+
+    if callable(url):
+        return url(tag)
+
+    return url
+
+
+def gh_dl_metadata_by_config(*, schema: MetadataSchema, tag: str, folder: str, force: bool = False) -> None:
     """Downloads metadata files based on tables specified in `specifications`"""
 
-    os.makedirs(folder, exist_ok=True)
+    if force:
+        reset_folder(folder, force=True)
+    else:
+        os.makedirs(folder, exist_ok=True)
 
     for tablename, _ in schema.definitions.items():
         if tablename.startswith(':'):
@@ -56,5 +80,5 @@ def gh_dl_metadata_by_config(*, schema: MetadataTableConfigs, tag: str, folder: 
                 raise ValueError(f"File {target_name} exists, use `force=True` to overwrite")
             os.remove(target_name)
         logger.info(f"downloading {tablename} ({tag}) to {target_name}...")
-        url: str = schema.resolve_url(tablename, tag)
+        url: str = resolve_url(schema, tag, tablename)
         download_url_to_file(url, target_name, force)

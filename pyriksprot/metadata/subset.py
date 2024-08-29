@@ -9,7 +9,7 @@ from loguru import logger
 
 from ..interface import IProtocolParser
 from .generate import CorpusIndexFactory
-from .schema import MetadataTableConfigs
+from .schema import MetadataSchema
 
 jj = os.path.join
 
@@ -37,7 +37,7 @@ def subset_to_folder(
 
     logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
 
-    schema: MetadataTableConfigs = MetadataTableConfigs(tag)
+    schema: MetadataSchema = MetadataSchema(tag)
 
     for tablename in schema.tablesnames0:
         source_name: str = jj(source_folder, f"{tablename}.csv")

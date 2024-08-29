@@ -60,7 +60,7 @@ def verify_metadata_columns(config_filename: str, tags: str):
 @click.option('--tag', type=click.STRING, help='Metadata version', default=None)
 @click.argument('target_folder', type=click.STRING)
 def download_metadata(tag: str, target_folder: str):
-    md.gh_dl_metadata_by_config(schema=md.MetadataTableConfigs(tag=tag), tag=tag, folder=target_folder, force=True)
+    md.gh_dl_metadata_by_config(schema=md.MetadataSchema(tag=tag), tag=tag, folder=target_folder, force=True)
 
 
 @click.command()

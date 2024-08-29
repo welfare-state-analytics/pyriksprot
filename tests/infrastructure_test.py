@@ -38,9 +38,9 @@ def test_setup_sample_xml_corpus():
 def test_to_folder():
     version: str = ConfigStore.config().get("metadata.version")
     target_folder: str = jj('./metadata/data/', version)
-    configs: md.MetadataTableConfigs = md.MetadataTableConfigs(version)
-    md.gh_dl_metadata_by_config(schema=configs, tag=version, folder=target_folder, force=True)
-    assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in configs.tablesnames0)
+    schema: md.MetadataSchema = md.MetadataSchema(version)
+    md.gh_dl_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True)
+    assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in schema.tablesnames0)
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")

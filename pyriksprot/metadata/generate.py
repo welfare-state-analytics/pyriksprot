@@ -84,7 +84,7 @@ class DatabaseHelper:
     def create(self, tag: str = None, folder: str = None, force: bool = False):
         logger.info(f"Creating database {self.filename}, using source {tag}/{folder} (tag/folder).")
 
-        schema: cfg.MetadataTableConfigs = cfg.MetadataTableConfigs(tag)
+        schema: cfg.MetadataSchema = cfg.MetadataSchema(tag)
 
         self.reset(tag=tag, force=force)
         self.create_base_tables(schema)
@@ -92,13 +92,13 @@ class DatabaseHelper:
 
         return self
 
-    def create_base_tables(self, schema: cfg.MetadataTableConfigs) -> DatabaseHelper:
+    def create_base_tables(self, schema: cfg.MetadataSchema) -> DatabaseHelper:
         with self:
             for _, table_schema in schema.items():
                 self.connection.executescript(table_schema.to_sql_create()).close()
         return self
 
-    def load_base_tables(self, schema: cfg.MetadataTableConfigs, folder: str) -> DatabaseHelper:
+    def load_base_tables(self, schema: cfg.MetadataSchema, folder: str) -> DatabaseHelper:
         tag: str = self.get_tag()
 
         with self:
@@ -107,7 +107,7 @@ class DatabaseHelper:
 
         return self
 
-    def load_base_table(self, table_schema: cfg.MetadataTableConfig, folder: str, tag: str) -> DatabaseHelper:
+    def load_base_table(self, table_schema: cfg.MetadataTable, folder: str, tag: str) -> DatabaseHelper:
         logger.info(f"loading table: {table_schema.name}")
         table: pd.DataFrame = table_schema.load_table(folder, tag)
         transformed_table: pd.DataFrame = table_schema.transform(table)[table_schema.all_columns]

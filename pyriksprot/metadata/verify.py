@@ -5,8 +5,8 @@ import os
 from glob import glob
 
 from ..utility import strip_path_and_extension
-from .repository import gh_dl_metadata
-from .schema import MetadataTableConfigs
+from .download import gh_dl_metadata
+from .schema import MetadataSchema
 
 jj = os.path.join
 
@@ -82,7 +82,7 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
     def __init__(self, user: str, repository: str, path: str, tag: str):
         super().__init__()
 
-        self.table_configs: MetadataTableConfigs = MetadataTableConfigs(tag)
+        self.table_configs: MetadataSchema = MetadataSchema(tag)
 
         self.left_key: str = "config"
         self.right_key: str = tag
@@ -99,7 +99,7 @@ class ConfigConformsToFolderSpecification(ConformBaseSpecification):
     def __init__(self, tag: str, folder: str):
         super().__init__()
 
-        self.table_configs: MetadataTableConfigs = MetadataTableConfigs(tag)
+        self.table_configs: MetadataSchema = MetadataSchema(tag)
 
         self.left_key: str = "config"
         self.right_key: str = folder

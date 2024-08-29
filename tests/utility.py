@@ -63,7 +63,7 @@ def sample_parlaclarin_corpus_exists() -> bool:
 def sample_metadata_exists() -> bool:
     source_folder: str = ConfigValue("metadata:folder").resolve()
     corpus_version: str = ConfigValue("metadata:version").resolve()
-    configs: md.MetadataTableConfigs = md.MetadataTableConfigs(tag=corpus_version)
+    configs: md.MetadataSchema = md.MetadataSchema(tag=corpus_version)
     return configs.files_exist(source_folder)
 
 

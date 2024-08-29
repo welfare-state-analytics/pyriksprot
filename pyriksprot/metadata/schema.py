@@ -12,7 +12,7 @@ import pandas as pd
 import pyriksprot.sql
 
 from .. import gitchen as gh
-from ..utility import dotget, probe_filename, revdict
+from ..utility import probe_filename, revdict
 from .utility import fix_incomplete_datetime_series
 
 
@@ -101,7 +101,7 @@ def resolve_column_config(fx_name: str, *args) -> Callable[[Any], Any]:
     return resolve_fx_by_name(fx_name)(*args)
 
 
-class MetadataTableConfig:
+class MetadataTable:
     def __init__(self, name: str, data: dict):
         self.name: str = name
         self.data: dict = data
@@ -229,7 +229,7 @@ class MetadataTableConfig:
         return insert_sql
 
 
-class MetadataTableConfigs:
+class MetadataSchema:
     """Configuration for all tables in metadata"""
 
     def __init__(self, tag: str | None):
@@ -256,6 +256,9 @@ class MetadataTableConfigs:
         """ Resolve computed columns """
 
         for table_name in self.data:
+            if ':compute:' not in self.data[table_name]:
+                continue
+
             cfgs: list = []
 
             for cfg in self.data[table_name][':compute:']:
@@ -274,8 +277,8 @@ class MetadataTableConfigs:
 
             self.data[table_name][':compute:'] = cfgs
 
-        self.definitions: dict[str, MetadataTableConfig] = {
-            table: MetadataTableConfig(table, self.data[table]) for table in self.data
+        self.definitions: dict[str, MetadataTable] = {
+            table: MetadataTable(table, self.data[table]) for table in self.data
         }
 
     @property
@@ -288,32 +291,13 @@ class MetadataTableConfigs:
         tables: list[str] = [x for x in self.tablenames if not bool(self.data[x].get(':is_extra:'))]
         return tables
 
-    def resolve_url(self, tag: str, tablename: str) -> str:
-        """Resolves proper URL to table for tag based on configuration"""
-        if tablename not in self.definitions:
-            raise ValueError(f"Table {tablename} not found in configuration")
-        url: Any = self[tablename].url
-        if url is None:
-            return gh.gh_download_url(
-                user=dotget(self.config, "github.user"),
-                repository=dotget(self.config, "github.repository"),
-                path=dotget(self.config, "github.path"),
-                filename=f"{tablename}.csv",
-                tag=tag,
-            )
-
-        if callable(url):
-            return url(tag)
-
-        return url
-
-    def __getitem__(self, key: str) -> MetadataTableConfig:
+    def __getitem__(self, key: str) -> MetadataTable:
         return self.definitions[key]
 
     def __iter__(self):
         return iter(self.definitions)
 
-    def items(self) -> Iterable[tuple[str, MetadataTableConfig]]:
+    def items(self) -> Iterable[tuple[str, MetadataTable]]:
         return self.definitions.items()
 
     @property
