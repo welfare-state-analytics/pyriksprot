@@ -86,15 +86,14 @@ class ConfigStore:
         env_filename: str | None = None,
         env_prefix: str = None,
     ) -> Self:
-
         if not cls.store.get(context) and not source:
             raise ValueError(f"Config context {context} undefined, cannot initialize")
-    
+
         if isinstance(source, Config):
             return cls._set_config(context=context, cfg=source)
 
         if not source and isinstance(cls.store.get(context), Config):
-                return cls.store.get(context)
+            return cls.store.get(context)
 
         cfg: Config = Config.load(
             source=source or cls.store.get(context),
