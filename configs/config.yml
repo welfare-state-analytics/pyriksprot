@@ -1,0 +1,35 @@
+
+root_folder: &folder /data/riksdagen_corpus_data
+data_folder: *folder
+version: &version v1.1.0
+
+corpus:
+  version: *version
+  folder: /data/riksdagen_corpus_data/riksdagen-records/data
+  pattern: "**/prot-*.xml"
+  github:
+    user: swerik-projects
+    repository: riksdagen-records
+    folder: data
+
+fakes:
+  folder: tests/test_data/fakes/v1.1.0/parlaclarin/protocols
+  expected_folder: tests/test_data/fakes/version/v1.1.0/expected
+
+metadata:
+  version: *version
+  folder: /data/riksdagen_corpus_data/metadata/v1.1.0
+  database: /data/riksdagen_corpus_data/metadata/riksprot_metadata.v1.1.0.db
+  github:
+    user: swerik-projects
+    repository: riksdagen-persons
+    folder: data
+
+tagged_frames:
+  folder: /data/riksdagen_corpus_data/v1.1.0/tagged_frames
+  file_pattern: &file_pattern prot-*.zip
+  pattern: /data/riksdagen_corpus_data/v1.1.0/tagged_frames/**/prot-*.zip
+
+tagged_speeches:
+  folder: &speech_folder /data/riksdagen_corpus_data/v1.1.0/tagged_frames_speeches.feather
+
