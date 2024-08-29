@@ -245,7 +245,7 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
             path.unlink()
 
 
-def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
+def download_url_to_file(url: str, target_name: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'ignore') -> None:
     target_name: str = expanduser(target_name)
 
     if os.path.isfile(target_name):
@@ -258,10 +258,12 @@ def download_url_to_file(url: str, target_name: str, force: bool = False) -> Non
     logger.info(f'downloading: {target_name}')
     with open(target_name, 'w', encoding="utf-8") as fp:
         response: requests.Response = requests.get(url, allow_redirects=True, timeout=10)
-        if response.status_code != 200:
-            raise ValueError(f"Failed to download {url}")
-        data: str = response.content.decode("utf-8")
-        fp.write(data)
+        if response.status_code == 200:
+            data: str = response.content.decode("utf-8")
+            fp.write(data)
+        else:
+            if errors == 'raise':
+                raise ValueError(f"Failed to download {url}")
 
 
 def deprecated(func):
