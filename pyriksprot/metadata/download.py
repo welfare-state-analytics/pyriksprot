@@ -7,16 +7,16 @@ from typing import Any
 import requests
 from loguru import logger
 
-from pyriksprot.gitchen import gh_get_url, gh_ls
+from pyriksprot.gitchen import gh_create_url, gh_ls
 
-from ..utility import dotget, download_url_to_file, reset_folder
+from ..utility import dotget, download_url_to_file, fetch_text_by_url, reset_folder
 from .schema import MetadataSchema
 
 
 def gh_dl_metadata(
-    *, target_folder: str, user: str, repository: str, tag: str, path: str = None, force: bool = False
+    *, target_folder: str, user: str, repository: str, tag: str, path: str = None, force: bool = False, errors='raise'
 ) -> dict[str, dict]:
-    """Returns name, headers and content for each metadata CSV file for given tag. Optionally stores data in folder"""
+    """Returns name, headers and content for each metadata CSV file for given tag. Optionally stores content in folder"""
 
     if target_folder is not None:
         reset_folder(target_folder, force=force)
@@ -29,17 +29,18 @@ def gh_dl_metadata(
         if not extension.endswith("csv"):
             continue
 
-        url: str = gh_get_url(user=user, repository=repository, path=path, filename=f"{table}.csv", tag=tag)
+        target_name: str = None if not target_folder else jj(target_folder, f"{table}.csv")
 
-        download_url_to_file(url, target_name, force)
+        url: str = gh_create_url(user=user, repository=repository, path=path, filename=f"{table}.csv", tag=tag)
 
-        data: str = requests.get(url, timeout=10).content.decode("utf-8")
+        data: str = fetch_text_by_url(url, errors=errors)
+
         headers: list[str] = data.splitlines()[0].split(sep=',')
 
         infos[table] = {'name': table, 'headers': headers, 'content': data}
 
-        if target_folder is not None:
-            with open(jj(target_folder, f"{table}.csv"), 'w', encoding="utf-8") as fp:
+        if target_name is not None:
+            with open(target_name, 'w', encoding="utf-8") as fp:
                 logger.info(f' -> downloaded {item.get("name", "")}')
                 fp.write(data)
 
@@ -52,7 +53,7 @@ def _resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
         raise ValueError(f"Table {tablename} not found in configuration")
     url: Any = schema[tablename].url
     if url is None:
-        return gh_get_url(
+        return gh_create_url(
             user=dotget(schema.config, "github.user"),
             repository=dotget(schema.config, "github.repository"),
             path=dotget(schema.config, "github.path"),
@@ -66,7 +67,7 @@ def _resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
     return url
 
 
-def gh_dl_metadata_by_config(*, schema: MetadataSchema, tag: str, folder: str, force: bool = False) -> None:
+def gh_dl_metadata_by_config(*, schema: MetadataSchema, tag: str, folder: str, force: bool = False, errors='raise') -> None:
     """Downloads metadata files based on tables specified in `specifications`"""
 
     if force:
@@ -80,16 +81,7 @@ def gh_dl_metadata_by_config(*, schema: MetadataSchema, tag: str, folder: str, f
             continue
         
         target_name: str = jj(folder, f"{tablename}.csv")
-        
-        if isfile(target_name):
-
-            if not force:
-                raise ValueError(f"File {target_name} exists, use `force=True` to overwrite")
-            
-            os.remove(target_name)
-
-        logger.info(f"downloading {tablename} ({tag}) to {target_name}...")
 
         url: str = _resolve_url(schema, tag, tablename)
 
-        download_url_to_file(url, target_name, force, errors='raise')
+        download_url_to_file(url, target_name, force, errors=errors)
