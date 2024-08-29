@@ -12,7 +12,7 @@ import pandas as pd
 import pyriksprot.sql
 
 from .. import gitchen as gh
-from ..utility import probe_filename, revdict
+from ..utility import dotget, probe_filename, revdict
 from .utility import fix_incomplete_datetime_series
 
 
@@ -201,7 +201,13 @@ class MetadataTableConfig:
             return pd.read_csv(url)
 
         if isinstance(tag, str):
-            url: str = gh.gh_download_url(filename=f"{self.name}.csv", tag=tag, **opts)
+            url: str = gh.gh_download_url(
+                filename=f"{self.name}.csv",
+                tag=tag,
+                user=opts.get("user"),
+                repository=opts.get("repository"),
+                path=opts.get("path"),
+            )
             return pd.read_csv(url)
 
         raise ValueError("either :url:, folder or branch must be set")
@@ -282,29 +288,19 @@ class MetadataTableConfigs:
         tables: list[str] = [x for x in self.tablenames if not bool(self.data[x].get(':is_extra:'))]
         return tables
 
-    @property
-    def url_template(self) -> str | None:
-        return self.config.get('url_template')
-
-    def github_user(self) -> str | None:
-        return self.config.get('github', {}).get('user')
-
-    def github_repository(self) -> str | None:
-        return self.config.get('github', {}).get('repository')
-
-    def github_path(self) -> str | None:
-        return self.config.get('github', {}).get('path')
-
     def resolve_url(self, tag: str, tablename: str) -> str:
         """Resolves proper URL to table for tag based on configuration"""
         if tablename not in self.definitions:
             raise ValueError(f"Table {tablename} not found in configuration")
-
-        url = self[tablename].url
+        url: Any = self[tablename].url
         if url is None:
-            if self.url_template is None:
-                raise ValueError("No default URL template found in schema configuration (shema.json)")
-            return self.url_template.format(tablename=self.name, tag=tag)
+            return gh.gh_download_url(
+                user=dotget(self.config, "github.user"),
+                repository=dotget(self.config, "github.repository"),
+                path=dotget(self.config, "github.path"),
+                filename=f"{tablename}.csv",
+                tag=tag,
+            )
 
         if callable(url):
             return url(tag)
