@@ -14,7 +14,7 @@ from .utility import load_json, read_yaml, write_yaml
 ts = datetime.datetime.fromtimestamp
 
 
-def gh_download_url(*, user: str, repository: str, path: str, filename: str, tag: str) -> str:
+def gh_get_url(*, user: str, repository: str, path: str, filename: str, tag: str) -> str:
     return f"https://raw.githubusercontent.com/{user}/{repository}/{tag}/{path}/{filename}"
 
 

@@ -201,7 +201,7 @@ class MetadataTable:
             return pd.read_csv(url)
 
         if isinstance(tag, str):
-            url: str = gh.gh_download_url(
+            url: str = gh.gh_get_url(
                 filename=f"{self.name}.csv",
                 tag=tag,
                 user=opts.get("user"),

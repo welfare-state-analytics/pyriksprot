@@ -20,7 +20,7 @@ def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
 
 
 def _protocol_uri(filename: str, subfolder: str, tag: str, **opts) -> str:
-    return gh.gh_download_url(
+    return gh.gh_get_url(
         user=opts.get("user"),
         repository=opts.get("repository"),
         path=f'{opts.get("path")}/{q(subfolder)}',
