@@ -28,6 +28,7 @@ def verify_metadata_filenames(config_filename: str, tag: str = None):
         tag: str = tag or ConfigValue("version").resolve()
 
         md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
+
     except ValueError as ex:
         logger.error(ex)
         sys.exit(-1)

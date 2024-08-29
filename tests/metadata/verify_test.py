@@ -10,18 +10,19 @@ def test_config_conforms_to_folder_specification():
 
 def test_config_conforms_to_tags_specification():
     tag: str = ConfigValue("version").resolve()
-    github: str = ConfigValue("metadata.github").resolve()
-    verify.ConfigConformsToTagSpecification(
-        user=github.get("user"), repository=github.get("repository"), path=github.get("path"), tag=tag
-    ).is_satisfied()
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
+    verify.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
 
 
 def test_tags_conform_specification():
-    github: str = ConfigValue("metadata.github").resolve()
     tag: str = ConfigValue("version").resolve()
-    verify.TagsConformSpecification(
-        user=github.get("user"), repository=github.get("repository"), path=github.get("path"), tag1="v0.5.0", tag2=tag
-    ).is_satisfied()
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
+
+    verify.TagsConformSpecification(user=user, repository=repository, path=path, tag1="v0.5.0", tag2=tag).is_satisfied()
 
 
 def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | int]:

@@ -27,11 +27,9 @@ def test_list_sql_files():
 
 def test_gh_ls():
     tag: str = ConfigValue("metadata.version").resolve()
-    github: str = ConfigValue("metadata.github").resolve()
-
-    user: str = github.get("user")
-    repository: str = github.get("repository")
-    path: str = github.get("path")
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
 
     data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
@@ -39,11 +37,9 @@ def test_gh_ls():
 
 def test_download_metadata(tmp_path: pathlib.Path):
     tag: str = ConfigValue("metadata.version").resolve()
-    github: str = ConfigValue("metadata.github").resolve()
-
-    user: str = github.get("user")
-    repository: str = github.get("repository")
-    path: str = github.get("path")
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
 
     data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
