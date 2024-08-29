@@ -115,9 +115,9 @@
     },
     ":config:" : {
         "github": {
-            "user": "welfare-state-analytics",
-            "repository": "riksdagen-corpus",
-            "folder": "corpus/metadata"
+            "user": "swerik-projects",
+            "repository": "riksdagen-persons",
+            "folder": "data"
         }
     }
 }
