@@ -18,7 +18,6 @@ from .utility import sample_tagged_frames_corpus_exists
 # pylint: disable=unused-variable, redefined-outer-name
 
 
-
 def test_find_dispatchers():
     target_type: dispatch.TargetTypeKey = 'single-id-tagged-frame'
     dispatcher: dispatch.IDispatcher = dispatch.IDispatcher.dispatcher(target_type)
