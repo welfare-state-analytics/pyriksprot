@@ -18,40 +18,6 @@ from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.workflows import subset_corpus_and_metadata
 
-TEST_CONFIG_YAML: str = """
-
-root_folder: &folder tests/test_data/source/
-data_folder: *folder
-version: &version v0.10.0
-
-corpus:
-  version: *version
-  url: https://github.com/swerik-projects/riksdagen-records
-  folder: !path_join [ *folder, *version, parlaclarin/protocols ]
-  subfolder: 
-  pattern: "**/prot-*.xml"
-
-fakes:
-  folder: !path_join [ tests/test_data/fakes, *version, parlaclarin/protocols ]
-  expected_folder: !path_join [ tests/test_data/fakes, *version, expected ]
-
-metadata:
-  version: *version
-  url: https://github.com/swerik-projects/riksdagen-persons
-  folder: !path_join [ *folder, *version, parlaclarin/metadata ]
-  subfolder: 
-  database: !path_join [ *folder, *version, riksprot_metadata.db ]
-
-tagged_frames:
-  folder: &tagged_folder !path_join [ *folder, *version, tagged_frames ]
-  file_pattern: &file_pattern prot-*.zip
-  pattern: !path_join [ *tagged_folder, "**", *file_pattern ]
-
-tagged_speeches:
-  folder: &speech_folder !path_join [ *folder, *version, tagged_frames_speeches.feather ]
-
-"""
-
 
 @functools.lru_cache(maxsize=1)
 def load_test_documents() -> list[str]:
