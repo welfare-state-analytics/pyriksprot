@@ -245,6 +245,15 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
             path.unlink()
 
 
+def fetch_text_by_url(url: str, errors: Literal['raise', 'ignore'] = 'ignore') -> str:
+    response: requests.Response = requests.get(url, allow_redirects=True, timeout=10)
+    if response.status_code == 200:
+        return response.content.decode("utf-8")
+    else:
+        if errors == 'raise':
+            raise ValueError(f"Failed to download {url}")
+    return ""
+
 def download_url_to_file(url: str, target_name: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'ignore') -> None:
     target_name: str = expanduser(target_name)
 
@@ -257,13 +266,7 @@ def download_url_to_file(url: str, target_name: str, force: bool = False, errors
 
     logger.info(f'downloading: {target_name}')
     with open(target_name, 'w', encoding="utf-8") as fp:
-        response: requests.Response = requests.get(url, allow_redirects=True, timeout=10)
-        if response.status_code == 200:
-            data: str = response.content.decode("utf-8")
-            fp.write(data)
-        else:
-            if errors == 'raise':
-                raise ValueError(f"Failed to download {url}")
+        fp.write(fetch_text_by_url(url, errors=errors))
 
 
 def deprecated(func):
