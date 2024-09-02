@@ -18,7 +18,6 @@ def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
     urlretrieve(url, target_filename)
     logger.info(f'downloaded: {filename}')
 
-
 def _protocol_uri(filename: str, subfolder: str, tag: str, **opts) -> str:
     return gh.gh_create_url(
         user=opts.get("user"),
@@ -43,7 +42,7 @@ def download_protocols(*, filenames: list[str], target_folder: str, create_subfo
         protocol_year: str = filename.split('-')[1]
         target_name: str = replace_extension(filename, 'xml')
         _download_to_folder(
-            url=_protocol_uri(filename=target_name, subfolder=protocol_year, tag=tag),
+            url=_protocol_uri(filename=target_name, subfolder=protocol_year, tag=tag, **opts),
             target_folder=target_folder if not create_subfolder else jj(target_folder, protocol_year),
             filename=target_name,
             **opts,
