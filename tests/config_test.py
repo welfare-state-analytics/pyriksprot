@@ -132,15 +132,19 @@ version: &version v0.x.y
 
 corpus:
   version: *version
-  url: https://github.com/swerik-projects/riksdagen-records
   folder: !path_join [ *folder, riksdagen-records ]
-  subfolder: data
+  github:
+    user: swerik-project
+    repository: riksdagen-records
+    path: data
 
 metadata:
   version: *version
-  url: https://github.com/swerik-projects/riksdagen-persons
   folder: !path_join [ *folder, riksdagen-persons ]
-  subfolder: data
+  github:
+    user: swerik-project
+    repository: riksdagen-persons
+    path: data
 
 """
 
@@ -154,3 +158,4 @@ metadata:
     assert config.get("corpus:folder") == "/data/riksdagen_corpus_data/riksdagen-records"
     assert config.get("metadata:version") == "v0.x.y"
     assert config.get("metadata:folder") == "/data/riksdagen_corpus_data/riksdagen-persons"
+    assert config.get("metadata:github:user") == "swerik-project"

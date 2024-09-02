@@ -37,15 +37,23 @@ def generate_complete_sample_data(force: bool):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_corpus_and_metadata(force: bool = False):
-    version: str = ConfigStore.config().get("corpus:version")
-    root_folder: str = ConfigStore.config().get("root_folder")
-    opts: dict = ConfigStore.config().get("metadata:github")
+    version: str = ConfigValue("corpus:version").resolve()
+    root_folder: str = ConfigValue("root_folder").resolve()
+    gh_metadata_opts: dict = ConfigValue("metadata:github").resolve()
+    gh_records_opts: dict = ConfigValue("corpus:github").resolve()
+
     try:
         if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
-        subset_corpus_and_metadata(tag=version, target_folder=root_folder, documents=load_test_documents(), **opts)
+        subset_corpus_and_metadata(
+            tag=version,
+            target_folder=root_folder,
+            documents=load_test_documents(),
+            gh_metadata_opts=gh_metadata_opts,
+            gh_records_opts=gh_records_opts,
+        )
 
     except ValueError as ex:
         logger.error(ex)
@@ -122,7 +130,7 @@ def generate_tagged_speech_corpora(
 #     skip_scripts: bool = False,
 # ) -> None:
 #     try:
-#         service: md.DatabaseHelper = md.DatabaseHelper(target)
+#         service: md.GenerateService = md.GenerateService(target)
 #         service.create(
 #             tag=tag,
 #             folder=source_folder,

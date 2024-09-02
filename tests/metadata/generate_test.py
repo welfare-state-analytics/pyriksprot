@@ -1,9 +1,7 @@
 import os
 import pathlib
 import shutil
-import sqlite3
 import uuid
-from contextlib import closing
 
 import pandas as pd
 import pytest
@@ -13,6 +11,9 @@ from pyriksprot import gitchen as gh
 from pyriksprot import metadata as md
 from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
+from pyriksprot.metadata import database
+from pyriksprot.metadata.schema import MetadataSchema
+from tests.utility import ensure_test_corpora_exist
 
 jj = os.path.join
 
@@ -35,7 +36,7 @@ def test_gh_ls():
     assert len(data) > 0
 
 
-def test_download_metadata(tmp_path: pathlib.Path):
+def test_gh_fetch_metadata_folder(tmp_path: pathlib.Path):
     tag: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()
     repository: str = ConfigValue("metadata.github.repository").resolve()
@@ -55,26 +56,28 @@ def test_download_metadata(tmp_path: pathlib.Path):
 def test_get_and_set_db_version():
     dummy_db_name: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
-    service: md.DatabaseHelper = md.DatabaseHelper(dummy_db_name)
+    service: md.GenerateService = md.GenerateService(filename=dummy_db_name)
 
     tag: str = "kurt"
-    service.set_tag(tag=tag)
-    stored_tag: str = service.get_tag()
+    service.db.version = tag
+    stored_tag: str = service.db.version
     assert tag == stored_tag
     service.verify_tag(tag=tag)
 
     tag: str = "olle"
-    service.set_tag(tag=tag)
-    stored_tag: str = service.get_tag()
+    service.db.version = tag
+    stored_tag: str = service.db.version
     assert tag == stored_tag
     assert tag == stored_tag
 
 
 def test_create_metadata_database():
+    ensure_test_corpora_exist(force=True)
+
     tag: str = ConfigValue("metadata.version").resolve()
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
-    service: md.DatabaseHelper = md.DatabaseHelper(target_filename)
+    service: md.GenerateService = md.GenerateService(filename=target_filename)
     service.create(tag=tag, folder=source_folder, force=True)
 
     assert os.path.isfile(target_filename)
@@ -84,7 +87,40 @@ def test_create_metadata_database():
     os.remove(target_filename)
 
     with pytest.raises(ValueError):
-        md.DatabaseHelper(target_filename).create(tag=None, folder=source_folder, force=True)
+        md.GenerateService(filename=target_filename).create(tag=None, folder=source_folder, force=True)
+
+
+def store_sql_script(tag: str) -> str:
+    script: str = '\n\n'.join(
+        database.SqlCompiler().to_create(tablename, cfg.all_columns_specs, cfg.constraints)
+        for tablename, cfg in MetadataSchema(tag).items()
+    )
+    pathlib.Path(f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.sql").write_text(
+        script, encoding='utf-8'
+    )
+    return script
+
+
+def test_create_metadata_database_DEVELOP():
+    tag: str = "v1.1.0"
+
+    # store_sql_script(tag)
+
+    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
+    source_folder: str = f"./metadata/data/{tag}"
+    service: md.GenerateService = md.GenerateService(filename=target_filename)
+    service.create(tag=tag, folder=source_folder, force=True)
+
+    assert os.path.isfile(target_filename)
+
+    service.verify_tag(tag=tag)
+
+    service.execute_sql_scripts(folder=None, tag=tag)
+
+    os.remove(target_filename)
+
+    with pytest.raises(ValueError):
+        md.GenerateService(filename=target_filename).create(tag=None, folder=source_folder, force=True)
 
 
 @pytest.mark.parametrize(
@@ -101,10 +137,8 @@ def test_generate_corpus_indexes(corpus_folder: str):
 
 
 def _db_table_exists(database_filename: str, table: str):
-    with closing(sqlite3.connect(database_filename)) as db:
-        with closing(db.cursor()) as cursor:
-            cursor.execute(f"select count(name) from sqlite_master where type='table' and name='{table}'")
-            return cursor.fetchone()[0] == 1
+    with database.DefaultDatabaseType(filename=database_filename) as db:
+        return db.fetch_scalar(f"select count(name) from sqlite_master where type='table' and name='{table}'") == 1
 
 
 def test_generate_and_load_corpus_indexes():
@@ -114,14 +148,14 @@ def test_generate_and_load_corpus_indexes():
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
 
     # Make sure DB exists by creating a version table
-    service: md.DatabaseHelper = md.DatabaseHelper(database_filename)
-    service.set_tag(tag=version)
+    service: md.GenerateService = md.GenerateService(filename=database_filename)
+    service.db.version = version
 
     assert _db_table_exists(database_filename=database_filename, table='version')
 
     md.CorpusIndexFactory(ProtocolMapper).generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
-    service.load_corpus_indexes(folder=target_folder)
+    service.upload_corpus_indexes(folder=target_folder)
 
     for tablename in ["protocols", "utterances", "speaker_notes"]:
         assert _db_table_exists(database_filename=database_filename, table=tablename)
@@ -129,11 +163,11 @@ def test_generate_and_load_corpus_indexes():
 
 # def test_load_scripts():
 
-#     tag: str = ConfigStore().config().get("version")
+#     tag: str = ConfigValue("version").resolve()
 #     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 #     script_folder: str = None
-#     service: md.DatabaseHelper = md.DatabaseHelper(database_filename)
+#     service: md.GenerateService = md.GenerateService(database_filename)
 #     service.create(tag=tag, folder=source_folder, force=True)
 #     # service.load_corpus_indexes(folder=source_folder)
 #     # service.load_scripts(folder=script_folder)
@@ -145,7 +179,7 @@ def test_generate_and_load_corpus_indexes():
 #     folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 
-#     service: md.DatabaseHelper = md.DatabaseHelper(database_filename)
+#     service: md.GenerateService = md.GenerateService(database_filename)
 #     configs: MetadataSchema = MetadataSchema(tag)
 
 #     service.reset(tag=tag, force=True)

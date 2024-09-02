@@ -7,7 +7,6 @@ import requests
 from pyriksprot import corpus as pc
 from pyriksprot import gitchen as gh
 from pyriksprot import metadata as md
-from pyriksprot.configuration import ConfigStore
 from pyriksprot.configuration.inject import ConfigValue
 
 from .utility import (
@@ -28,21 +27,22 @@ FORCE_RUN_SKIPS = False  # os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 @pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
 def test_setup_sample_xml_corpus():
     protocols: list[str] = load_test_documents()
-    target_folder: str = ConfigStore.config().get("corpus.folder")
-    version: str = ConfigStore.config().get("corpus.version")
-    opts: dict = ConfigStore.config().get("corpus.github")
+    target_folder: str = ConfigValue("corpus.folder").resolve()
+    version: str = ConfigValue("corpus.version").resolve()
+    opts: dict = ConfigValue("corpus.github").resolve()
     pc.download_protocols(filenames=protocols, target_folder=target_folder, create_subfolder=True, tag=version, **opts)
 
 
 # @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_gh_dl_metadata_folder():
-    version: str = ConfigStore.config().get("metadata.version")
+def test_gh_fetch_metadata_by_config():
+    version: str = ConfigValue("metadata.version").resolve()
     target_folder: str = jj('./metadata/data/', version)
     schema: md.MetadataSchema = md.MetadataSchema(version)
-    md.gh_dl_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True)
+    md.gh_fetch_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True, errors='raise')
     assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in schema.tablesnames0)
 
-def test_gh_dl_metadata():
+
+def test_gh_fetch_metadata_folder():
     version: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()
     repository: str = ConfigValue("metadata.github.repository").resolve()
@@ -50,16 +50,35 @@ def test_gh_dl_metadata():
 
     target_folder: str = jj('./metadata/data/', version)
 
-    md.gh_dl_metadata_by_ls(folder=target_folder, user=user, repository=repository, path=path, tag=version,  force=True)
+    md.gh_fetch_metadata_folder(
+        target_folder=target_folder, user=user, repository=repository, path=path, tag=version, force=True
+    )
 
     assert True
 
+
+def test_gh_fetch_metadata_folder_old():
+    version: str = "v0.14.0"
+    user: str = "welfare-state-analytics"
+    repository: str = "riksdagen-corpus"
+    path: str = "corpus/metadata"
+
+    target_folder: str = jj('./metadata/data/full', version)
+
+    md.gh_fetch_metadata_folder(
+        target_folder=target_folder, user=user, repository=repository, path=path, tag=version, force=True
+    )
+
+    assert True
+
+
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus():
-    version: str = ConfigStore.config().get("version")
-    data_folder: str = ConfigStore.config().get("data_folder")
-    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    version: str = ConfigValue("version").resolve()
+    data_folder: str = ConfigValue("data_folder").resolve()
+    tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
     riksprot_tagged_folder: str = jj(data_folder, version, 'tagged_frames')
+
     create_test_tagged_frames_corpus(
         protocols=load_test_documents(),
         source_folder=riksprot_tagged_folder,
@@ -69,17 +88,25 @@ def test_setup_sample_tagged_frames_corpus():
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_subset_corpus_and_metadata():
-    version: str = ConfigStore.config().get("metadata.version")
-    data_folder: str = ConfigStore.config().get("data_folder")
-    opts = ConfigStore.config().get("metadata.github")
-    subset_corpus_and_metadata(tag=version, target_folder=data_folder, documents=load_test_documents(), **opts)
+    version: str = ConfigValue("metadata.version").resolve()
+    data_folder: str = ConfigValue("data_folder").resolve()
+    gh_metadata_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
+    gh_records_opts: dict[str, str] = ConfigValue("corpus.github").resolve()
+
+    subset_corpus_and_metadata(
+        tag=version,
+        target_folder=data_folder,
+        documents=load_test_documents(),
+        gh_metadata_opts=gh_metadata_opts,
+        gh_records_opts=gh_records_opts,
+    )
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
-    version: str = ConfigStore.config().get("version")
-    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
-    database: str = ConfigStore.config().get("metadata.database")
+    version: str = ConfigValue("version").resolve()
+    tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
+    database: str = ConfigValue("metadata.database").resolve()
     create_test_speech_corpus(
         source_folder=tagged_folder,
         tag=version,

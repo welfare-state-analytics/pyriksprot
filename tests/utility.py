@@ -107,7 +107,8 @@ def ensure_test_corpora_exist(
     tagged_source_folder: str = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder: str = root_folder or ConfigValue("root_folder").resolve()
     database: str = database or ConfigValue("metadata:database").resolve()
-    opts: dict = ConfigValue("metadata:github").resolve()
+    gh_metadata_opts: dict[str,str] = ConfigValue("metadata:github").resolve()
+    gh_records_opts: dict[str, str] = ConfigValue("corpus:github").resolve()
 
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
@@ -115,7 +116,8 @@ def ensure_test_corpora_exist(
             tag=corpus_version,
             target_folder=root_folder,
             force=force,
-            **opts,
+            gh_metadata_opts=gh_metadata_opts,
+            gh_records_opts=gh_records_opts,
         )
 
     if force or not sample_tagged_frames_corpus_exists():
