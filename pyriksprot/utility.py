@@ -249,12 +249,14 @@ def fetch_text_by_url(url: str, errors: Literal['raise', 'ignore'] = 'ignore') -
     response: requests.Response = requests.get(url, allow_redirects=True, timeout=10)
     if response.status_code == 200:
         return response.content.decode("utf-8")
-    else:
-        if errors == 'raise':
-            raise ValueError(f"Failed to download {url}")
+    if errors == 'raise':
+        raise ValueError(f"Failed to download {url}")
     return ""
 
-def download_url_to_file(url: str, target_name: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'ignore') -> None:
+
+def download_url_to_file(
+    url: str, target_name: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'ignore'
+) -> None:
     target_name: str = expanduser(target_name)
 
     if os.path.isfile(target_name):
