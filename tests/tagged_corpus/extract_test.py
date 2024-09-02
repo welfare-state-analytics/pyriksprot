@@ -83,7 +83,7 @@ def test_glob_protocols():
     filenames: list[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip', strip_path=True)
     assert len(filenames) == 6
     """Empty files should be included"""
-    assert 'prot-1955--ak--22.zip' in filenames
+    assert 'prot-1955--ak--022.zip' in filenames
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")

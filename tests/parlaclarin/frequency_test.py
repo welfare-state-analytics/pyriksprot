@@ -14,10 +14,10 @@ from .. import fakes
 jj = os.path.join
 
 TEST_PARLACLARIN_XML_FILES = [
-    ("prot-1933--fk--5.xml", 'protocol', 1),
-    ("prot-1955--ak--22.xml", 'protocol', 1),
-    ("prot-197879--14.xml", 'protocol', 1),
-    ("prot-199596--35.xml", 'protocol', 1),
+    ("prot-1933--fk--005.xml", 'protocol', 1),
+    ("prot-1955--ak--022.xml", 'protocol', 1),
+    ("prot-197879--014.xml", 'protocol', 1),
+    ("prot-199596--035.xml", 'protocol', 1),
 ]
 
 

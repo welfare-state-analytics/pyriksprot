@@ -15,7 +15,7 @@ from .utility import get_test_filenames
 
 def test_create_grouping_hashcoder():
     version: str = ConfigStore.config().get("corpus:version")
-    protocol_name: str = "prot-1955--ak--22"
+    protocol_name: str = "prot-1955--ak--022"
     person_id: str = "Q5715273"
     u_id: str = "d68df3cd45d2eec6-0"
     item: iterate.ProtocolSegment = iterate.ProtocolSegment(
@@ -31,15 +31,14 @@ def test_create_grouping_hashcoder():
         year=1955,
         n_tokens=0,
     )
-    # source_item = source_index.lookup.get("prot-1955--ak--22")
     source_item: csi.ICorpusSourceItem = csi.TaggedCorpusSourceItem(
-        path=os.path.join("tests/test_data/source", version, "tagged_frames/prot-1955--ak--22.zip"),
-        filename='prot-1955--ak--22.zip',
-        name='prot-1955--ak--22',
+        path=os.path.join("tests/test_data/source", version, "tagged_frames/prot-1955--ak--022.zip"),
+        filename='prot-1955--ak--022.zip',
+        name='prot-1955--ak--022',
         subfolder=version,
         year=1955,
         metadata={
-            'name': 'prot-1955--ak--22',
+            'name': 'prot-1955--ak--022',
             'date': '1955-05-20',
             'checksum': '560f443658031647fbe1d3f88cdd60b515b1dbba',
         },

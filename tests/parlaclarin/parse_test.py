@@ -42,12 +42,12 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_nam
 @pytest.mark.parametrize(
     'filename',
     [
-        "prot-1933--fk--5.xml",
-        "prot-1955--ak--22.xml",
-        "prot-197879--14.xml",
+        "prot-1933--fk--005.xml",
+        "prot-1955--ak--022.xml",
+        "prot-197879--014.xml",
         'prot-199192--127.xml',
-        'prot-199192--21.xml',
-        "prot-199596--35.xml",
+        'prot-199192--021.xml',
+        "prot-199596--035.xml",
     ],
 )
 def test_parlaclarin_n_utterances(filename: str):
@@ -64,12 +64,12 @@ def test_parlaclarin_n_utterances(filename: str):
 @pytest.mark.parametrize(
     'filename, u_count, intro_count',
     [
-        ("prot-1933--fk--5.xml", 0, 1),
-        ("prot-1955--ak--22.xml", 428, 165),
-        ("prot-197879--14.xml", 1, 0),
-        ('prot-199192--21.xml', 113, 21),
+        ("prot-1933--fk--005.xml", 0, 1),
+        ("prot-1955--ak--022.xml", 428, 165),
+        ("prot-197879--014.xml", 1, 0),
+        ('prot-199192--021.xml', 113, 21),
         ('prot-199192--127.xml', 2568, 250),
-        ("prot-199596--35.xml", 393, 54),
+        ("prot-199596--035.xml", 393, 54),
     ],
 )
 def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: int):

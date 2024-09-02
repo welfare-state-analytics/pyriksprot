@@ -140,18 +140,15 @@ Hence it is (for now) commented out.
 @pytest.mark.parametrize(
     'filename, speech_count, strategy',
     [
-        ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.chain),
-        # ("prot-1933--fk--5.xml", 0, ts.MergeStrategyType.who_speaker_note_id_sequence),
-        ('prot-1933--fk--5.xml', 0, ts.MergeStrategyType.who_sequence),
-        ("prot-1955--ak--22.xml", 163, ts.MergeStrategyType.chain),
-        ("prot-1955--ak--22.xml", 163, ts.MergeStrategyType.chain_consecutive_unknowns),
-        # ("prot-1955--ak--22.xml", 163, ts.MergeStrategyType.who_speaker_note_id_sequence),
-        ("prot-1955--ak--22.xml", 160, ts.MergeStrategyType.who_sequence),
+        ("prot-1933--fk--005.xml", 0, ts.MergeStrategyType.chain),
+        ('prot-1933--fk--005.xml', 0, ts.MergeStrategyType.who_sequence),
+        ("prot-1955--ak--022.xml", 163, ts.MergeStrategyType.chain),
+        ("prot-1955--ak--022.xml", 163, ts.MergeStrategyType.chain_consecutive_unknowns),
+        ("prot-1955--ak--022.xml", 160, ts.MergeStrategyType.who_sequence),
         ('prot-199192--127.xml', 248, ts.MergeStrategyType.chain),
         ('prot-199192--127.xml', 248, ts.MergeStrategyType.chain_consecutive_unknowns),
         ('prot-199192--127.xml', 54, ts.MergeStrategyType.who),
         ('prot-199192--127.xml', 248, ts.MergeStrategyType.who_sequence),
-        # ('prot-199192--127.xml', 248, ts.MergeStrategyType.who_speaker_note_id_sequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(filename: str, speech_count: int, strategy: str):
@@ -163,7 +160,7 @@ def test_protocol_to_speeches_with_different_strategies(filename: str, speech_co
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(xml_path)
 
-    speeches = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
+    speeches: list[interface.Speech] = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
     assert len(speeches) == speech_count
 
     assert all(x.text != "" for x in speeches)
@@ -181,7 +178,7 @@ def test_protocol_to_speeches_with_different_strategies(filename: str, speech_co
 @pytest.mark.parametrize(
     'filename, expected_speech_count',
     [
-        ('prot-199192--21.xml', 0),
+        ('prot-199192--021.xml', 0),
     ],
 )
 def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
@@ -274,13 +271,9 @@ def test_load_protocols_from_folder():
 @pytest.mark.parametrize(
     'protocol_name,merge_strategy,expected_speech_count',
     [
-        ('prot-1955--ak--22', 'who_sequence', 160),
-        # ('prot-1955--ak--22', 'who_speaker_note_id_sequence', 214),
-        # ('prot-1955--ak--22', 'speaker_note_id_sequence', 214),
-        ('prot-1955--ak--22', 'chain', 163),
+        ('prot-1955--ak--022', 'who_sequence', 160),
+        ('prot-1955--ak--022', 'chain', 163),
         ('prot-199192--127', 'who_sequence', 248),
-        # ('prot-199192--127', 'who_speaker_note_id_sequence', 456),
-        # ('prot-199192--127', 'speaker_note_id_sequence', 456),
         ('prot-199192--127', 'chain', 248),
     ],
 )
@@ -312,7 +305,7 @@ def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_spe
 
 @pytest.mark.skip(reason="Infrastructure test")
 @pytest.mark.parametrize(
-    'protocol_name', ['prot-199192--21', 'prot-199192--127', 'prot-1933--fk--5', 'prot-1955--ak--22', 'prot-199596--35']
+    'protocol_name', ['prot-199192--021', 'prot-199192--127', 'prot-1933--fk--005', 'prot-1955--ak--022', 'prot-199596--035']
 )
 def test_protocol_to_speeches(protocol_name: str):
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")

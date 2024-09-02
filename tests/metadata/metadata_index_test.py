@@ -286,15 +286,3 @@ def test_unknown(person_index: md.PersonIndex):
     assert speaker.person_id == "unknown"
     assert speaker.gender_id == 1
     assert speaker.party_id == 8
-
-
-@pytest.mark.skip("infra test")
-def test_load_speaker_index2():
-    database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
-    speech_index_filename: str = (
-        "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"
-    )
-    speech_index: pd.DataFrame = pd.read_feather(speech_index_filename)
-
-    with sqlite3.connect(database_filename) as db:
-        speech_index.to_sql("speech_index", db, if_exists="replace")
