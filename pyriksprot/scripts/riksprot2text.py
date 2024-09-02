@@ -80,12 +80,6 @@ if __name__ == "__main__":
     # source_folder: str = "/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/"
     # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
 
-    # # source_folder: str = "tests/test_data/source/v0.4.6/parlaclarin/protocols/"
-    # # metadata_filename: str = "tests/test_data/source/v0.4.6/riksprot_metadata.db"
-
-    # # source_folder: str = "tests/test_data/tmp/"
-    # # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
-
     # runner = CliRunner()
     # result = runner.invoke(
     #     main,
