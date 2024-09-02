@@ -1,8 +1,8 @@
 # type: ignore
 
 from .codecs import Codecs
-from .download import gh_fetch_metadata_folder, gh_dl_metadata_by_config
-from .generate import CorpusIndexFactory, DatabaseHelper
+from .download import gh_fetch_metadata_by_config, gh_fetch_metadata_folder
+from .generate import CorpusIndexFactory, GenerateService
 from .person import Person, PersonIndex, PersonParty, SpeakerInfo, SpeakerInfoService, TermOfOffice
 from .schema import (
     IDNAME2NAME_MAPPING,
