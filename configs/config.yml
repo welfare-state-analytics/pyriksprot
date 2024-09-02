@@ -8,7 +8,7 @@ corpus:
   folder: /data/riksdagen_corpus_data/riksdagen-records/data
   pattern: "**/prot-*.xml"
   github:
-    user: swerik-projects
+    user: swerik-project
     repository: riksdagen-records
     path: data
 
@@ -21,7 +21,7 @@ metadata:
   folder: /data/riksdagen_corpus_data/metadata/v1.1.0
   database: /data/riksdagen_corpus_data/metadata/riksprot_metadata.v1.1.0.db
   github:
-    user: swerik-projects
+    user: swerik-project
     repository: riksdagen-persons
     path: data
 

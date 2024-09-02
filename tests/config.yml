@@ -9,7 +9,7 @@ corpus:
   subfolder: 
   pattern: "**/prot-*.xml"
   github:
-    user: swerik-projects
+    user: swerik-project
     repository: riksdagen-records
     path: data
 
@@ -23,7 +23,7 @@ metadata:
   subfolder: 
   database: !path_join [ *folder, *version, riksprot_metadata.db ]
   github:
-    user: swerik-projects
+    user: swerik-project
     repository: riksdagen-persons
     path: data
 
