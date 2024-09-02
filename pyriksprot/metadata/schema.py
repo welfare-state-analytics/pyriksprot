@@ -4,27 +4,14 @@ from importlib import import_module
 from os.path import isfile, join
 from pathlib import Path
 from typing import Any, Callable, Iterable, Literal
-from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
 
 import pyriksprot.sql
 
-from .. import gitchen as gh
-from ..utility import probe_filename, revdict
+from ..utility import revdict
 from .utility import fix_incomplete_datetime_series
-
-
-def input_unknown_url(tag: str = "main"):
-    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{quote(tag)}/input/matching/unknowns.csv"
-
-
-def table_url(tablename: str, tag: str = "main") -> str:
-    if tablename == "unknowns":
-        return input_unknown_url(tag)
-    return f"https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/{quote(tag)}/corpus/metadata/{quote(tablename)}.csv"
-
 
 PARTY_COLORS = [
     (0, 'S', '#E8112d'),
@@ -49,29 +36,6 @@ NAME2IDNAME_MAPPING: dict[str, str] = {
     'person_id': 'pid',
 }
 IDNAME2NAME_MAPPING: dict[str, str] = revdict(NAME2IDNAME_MAPPING)
-
-
-# def fix_ts_fx(column: str, action: Literal['extend', 'truncate']) -> Callable[[pd.DataFrame], pd.DataFrame]:
-#     return lambda df: fix_incomplete_datetime_series(df, column, action, inplace=True)
-
-# EXTRA_TABLES = {
-#     'speech_index': {
-#         'document_id': 'int primary key',
-#         'document_name': 'text',
-#         'year': 'int',
-#         'who': 'text',
-#         'gender_id': 'int',
-#         'party_id': 'int',
-#         'office_type_id': 'int',
-#         'sub_office_type_id': 'int',
-#         'n_tokens': 'int',
-#         'filename': 'text',
-#         'u_id': 'text',
-#         'n_utterances': 'int',
-#         'speaker_note_id': 'text',
-#         'speech_index': 'int',
-#     },
-# }
 
 
 def fix_ts_config(column: str, action: Literal['extend', 'truncate']) -> dict[str, Any]:
@@ -135,6 +99,15 @@ class MetadataTable:
     def all_columns(self) -> list[str]:
         return self.columns + self.compute_columns
 
+    @property
+    def constraints(self) -> list[str]:
+        data: str | None | list[str] = self.data.get(':constraints:')
+        if isinstance(data, str):
+            return [data]
+        if not data:
+            return []
+        return data
+
     @cached_property
     def all_columns_specs(self) -> dict[str, str]:
         """All target columns i.e. columns from source plus computed columns"""
@@ -147,18 +120,22 @@ class MetadataTable:
         return (revdict(self.rename_map) | self.copy_map).get(name, name)
 
     @property
+    def basename(self) -> str:
+        return self.data.get(':filename:', f"{self.name}.csv")
+
+    @property
     def has_url(self) -> bool:
         return ':url:' in self.data
 
-    @cached_property
+    @property
     def url(self) -> str | Callable | None:
         return self.data.get(':url:')
 
-    @cached_property
+    @property
     def rename_map(self) -> dict:
         return self.data.get(':rename_column:', {})
 
-    @cached_property
+    @property
     def copy_map(self) -> dict:
         return self.data.get(':copy_column:', {})
 
@@ -190,43 +167,6 @@ class MetadataTable:
                 table[c] = [int(x) for x in table[c]]
 
         return table
-
-    def load_table(self, folder: str | None, tag: str | None, **opts) -> pd.DataFrame:
-        """Loads table from specified folder or from url in configuration"""
-        if self.has_url and folder is None:
-            return pd.read_csv(self.url, sep=',')
-
-        if isinstance(folder, str):
-            url: str = probe_filename(join(folder, f"{self.name}.csv"), ["zip", "csv.gz"])
-            return pd.read_csv(url)
-
-        if isinstance(tag, str):
-            url: str = gh.gh_create_url(
-                filename=f"{self.name}.csv",
-                tag=tag,
-                user=opts.get("user"),
-                repository=opts.get("repository"),
-                path=opts.get("path"),
-            )
-            return pd.read_csv(url)
-
-        raise ValueError("either :url:, folder or branch must be set")
-
-    def to_sql_create(self) -> str:
-        lf = '\n' + (12 * ' ')
-        sql_ddl: str = f"""
-            create table {self.name} (
-                {(','+lf).join(f"{k} {t}" for k, t in self.all_columns_specs.items())}
-            );
-        """
-        return sql_ddl
-
-    def to_sql_insert(self) -> str:
-        insert_sql = f"""
-        insert into {self.name} ({', '.join(self.all_columns)})
-            values ({', '.join(['?'] * len(self.all_columns))});
-        """
-        return insert_sql
 
 
 class MetadataSchema:
@@ -306,4 +246,4 @@ class MetadataSchema:
 
     def files_exist(self, folder: str) -> bool:
         """Checks that all expected files exist in given location."""
-        return all(isfile(join(folder, f"{x}.csv")) for x in self.tablenames)
+        return all(isfile(join(folder, x.basename)) for _, x in self.definitions.items())

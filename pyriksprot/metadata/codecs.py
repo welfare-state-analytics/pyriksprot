@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sqlite3
-from contextlib import nullcontext
 from dataclasses import dataclass
 from functools import cached_property
 from os.path import isfile
@@ -9,8 +7,9 @@ from typing import Callable, Literal, Mapping
 
 import pandas as pd
 
+from pyriksprot.metadata import database
+
 from .. import utility as pu
-from . import utility as mdu
 
 CODE_TABLES: dict[str, str] = {
     'chamber': 'chamber_id',
@@ -19,6 +18,7 @@ CODE_TABLES: dict[str, str] = {
     'office_type': 'office_type_id',
     'party': 'party_id',
     'sub_office_type': 'sub_office_type_id',
+    # FIXME: Add more tables
 }
 
 
@@ -43,13 +43,16 @@ class Codecs:
         self.party: pd.DataFrame = null_frame
         self.sub_office_type: pd.DataFrame = null_frame
         self.extra_codecs: list[Codec] = []
+        self.code_tables: dict[str, str] = CODE_TABLES
 
-    def load(self, source: str | sqlite3.Connection | dict) -> Codecs:
+    def load(self, source: str | dict) -> Codecs:
         if not isfile(source):
             raise FileNotFoundError(f"File not found: {source}")
 
-        with sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source) as db:
-            tables: dict[str, pd.DataFrame] = mdu.load_tables(CODE_TABLES, db=db)
+        db: database.DatabaseInterface = database.DefaultDatabaseType(filename=source)
+
+        with db:
+            tables: dict[str, pd.DataFrame] = db.fetch_tables(self.code_tables)
             for table_name, table in tables.items():
                 setattr(self, table_name, table)
         return self

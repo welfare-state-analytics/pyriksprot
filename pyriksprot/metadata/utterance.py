@@ -4,7 +4,7 @@ from functools import cached_property
 
 import pandas as pd
 
-from . import generate
+from . import database
 
 null_frame: pd.DataFrame = pd.DataFrame()
 
@@ -24,7 +24,9 @@ class UtteranceIndex:
         }
 
     def load(self, database_filename: str) -> UtteranceIndex:
-        tables: dict[str, pd.DataFrame] = generate.DatabaseHelper(database_filename).load_data_tables(self._table_infos)
+        with database.DefaultDatabaseType(filename=database_filename) as db:
+            tables: dict[str, pd.DataFrame] = db.fetch_tables(self._table_infos)
+
         for table_name, table in tables.items():
             setattr(self, table_name, table)
         return self

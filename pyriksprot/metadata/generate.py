@@ -1,164 +1,147 @@
 from __future__ import annotations
 
 import os
-import sqlite3
 from glob import glob
-from os.path import isdir, isfile
+from os.path import isdir, isfile, join
+from typing import Self
 
-import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
+from pyriksprot.gitchen import gh_create_url
 from pyriksprot.interface import IProtocol, IProtocolParser, SpeakerNote
+from pyriksprot.metadata import database
 
 from ..sql import sql_file_paths
-from ..utility import ensure_path, probe_filename, reset_file
-from . import schema as cfg
-from . import utility
+from ..utility import probe_filename
+from .schema import MetadataSchema, MetadataTable
 
 jj = os.path.join
 
 
 # pylint: disable=unsupported-assignment-operation, unsubscriptable-object
 
+INDEX_TABLE_NAMES: list[str] = ["protocols", "utterances", "speaker_notes"]
 
-class DatabaseHelper:
-    def __init__(self, filename: str):
-        self.filename: str = filename if isinstance(filename, str) else None
-        self.connection: sqlite3.Connection = None
 
-        utility.register_numpy_adapters()
+class GenerateService:
+    def __init__(self, **opts) -> None:
+        self.opts: dict[str, str] = opts
+        self.db: database.DatabaseInterface = (
+            opts['db']
+            if isinstance(opts.get('db'), database.DatabaseInterface)
+            else database.DefaultDatabaseType(**opts)
+        )
 
-    def open(self):
-        self.connection = sqlite3.connect(self.filename)
-
-    def close(self):
-        if self.connection is None:
-            return
-        self.connection.commit()
-        self.connection.close()
-        self.connection = None
-
-    def commit(self) -> None:
-        if self.connection is None:
-            return
-        self.connection.commit()
-
-    def __enter__(self):
-        self.open()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-    def get_tag(self) -> str | None:
-        with self:
-            return (self.connection.execute("select version from version").fetchone() or [None])[0]
-
-    def set_tag(self, tag: str) -> None:
-        sql: str = f"""
-            create table if not exists version (
-                version text
-            );
-            delete from version;
-            insert into version(version) values ('{tag}');
-        """
-        with self:
-            self.connection.executescript(sql).close()
-
-    def verify_tag(self, tag: str) -> DatabaseHelper:
-        if self.get_tag() != tag:
-            raise ValueError(f"metadata version mismatch: db version {self.get_tag()} differs from {tag}")
+    def verify_tag(self, tag: str) -> GenerateService:
+        if self.db.version != tag:
+            raise ValueError(f"metadata version mismatch: db version {self.db.version} differs from {tag}")
         return self
 
-    def reset(self, tag: str, force: bool) -> DatabaseHelper:
-        ensure_path(self.filename)
-        reset_file(self.filename, force=force)
+    def create(self, tag: str = None, folder: str = None, scripts_folder: str = None, force: bool = False) -> Self:
+        logger.info(f"Creating database for tag '{tag}' using folder '{folder}'.")
 
-        if tag is None:
-            raise ValueError("Git version tag cannot be NULL!")
+        schema: MetadataSchema = MetadataSchema(tag)
 
-        self.set_tag(tag)
-        return self
+        self.db.create_database(tag=tag, force=force)
 
-    def create(self, tag: str = None, folder: str = None, force: bool = False):
-        logger.info(f"Creating database {self.filename}, using source {tag}/{folder} (tag/folder).")
+        with self.db:
+            self._create_tables(schema)
+            self.upload_metadata(schema, folder)
 
-        schema: cfg.MetadataSchema = cfg.MetadataSchema(tag)
-
-        self.reset(tag=tag, force=force)
-        self.create_base_tables(schema)
-        self.load_base_tables(schema, folder)
+            if scripts_folder:
+                self.execute_sql_scripts(folder=scripts_folder, tag=tag)
 
         return self
 
-    def create_base_tables(self, schema: cfg.MetadataSchema) -> DatabaseHelper:
-        with self:
-            for _, table_schema in schema.items():
-                self.connection.executescript(table_schema.to_sql_create()).close()
+    def _create_tables(self, schema: MetadataSchema) -> GenerateService:
+        for tablename, cfg in schema.items():
+            self.db.create(tablename, cfg.all_columns_specs, cfg.constraints)
         return self
 
-    def load_base_tables(self, schema: cfg.MetadataSchema, folder: str) -> DatabaseHelper:
-        tag: str = self.get_tag()
-
-        with self:
-            for _, table_schema in schema.items():
-                self.load_base_table(table_schema, folder, tag)
+    def upload_metadata(self, schema: MetadataSchema, folder: str) -> GenerateService:
+        for _, cfg in schema.items():
+            self._import_table(cfg, folder=folder, tag=self.db.version)
 
         return self
 
-    def load_base_table(self, table_schema: cfg.MetadataTable, folder: str, tag: str) -> DatabaseHelper:
-        logger.info(f"loading table: {table_schema.name}")
-        table: pd.DataFrame = table_schema.load_table(folder, tag)
-        transformed_table: pd.DataFrame = table_schema.transform(table)[table_schema.all_columns]
-        logger.warning(f"{','.join(transformed_table.columns)}")
-        data: np.recarray = transformed_table.to_records(index=False)
-        self.connection.executemany(table_schema.to_sql_insert(), data).close()
+    def _import_table(self, cfg: MetadataTable, folder: str, tag: str) -> GenerateService:
+        logger.info(f"loading table: {cfg.name}")
+
+        columns: list[str] = cfg.all_columns
+        table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=tag)
+        self.db.store(cfg.transform(table)[columns], tablename=cfg.name, columns=columns)
+
         return self
 
-    def load_scripts(self, *, folder: str = None, tag: str = None) -> DatabaseHelper:
+    def execute_sql_scripts(self, *, folder: str = None, tag: str = None) -> GenerateService:
         """Loads SQL files from specified folder otherwise loads files in sql module"""
 
-        if not (folder or tag):
-            raise ValueError("Either folder or tag must be specified.")
+        with self.db:
+            if not (folder or tag):
+                raise ValueError("Either folder or tag must be specified.")
 
-        if folder and not isdir(folder):
-            raise FileNotFoundError(folder)
+            if folder and not isdir(folder):
+                raise FileNotFoundError(folder)
 
-        filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths(tag=tag)
+            filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths(tag=tag)
 
-        with self:
-            for filename in filenames:
-                logger.info(f"loading script: {os.path.split(filename)[1]}")
-                with open(filename, "r", encoding="utf-8") as fp:
-                    sql_str: str = fp.read()
-                self.connection.executescript(sql_str).close()
+            with self.db:
+                for filename in filenames:
+                    self.db.load_script(filename=filename)
 
         return self
 
-    def load_corpus_indexes(self, *, folder: str) -> DatabaseHelper:
-        """Loads corpus indexes into iven database."""
+    def upload_corpus_indexes(self, *, folder: str, index_tables: list[str] = None) -> GenerateService:
+        """Loads corpus indexes into given database."""
 
-        tablenames: list[str] = ["protocols", "utterances", "speaker_notes"]
-        filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
+        with self.db:
+            tablenames: list[str] = index_tables or INDEX_TABLE_NAMES
+            filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
 
-        if not all(isfile(filename) for filename in filenames):
-            raise FileNotFoundError(','.join(filenames))
+            if not all(isfile(filename) for filename in filenames):
+                raise FileNotFoundError(','.join(filenames))
 
-        with self:
             for tablename in tablenames:
-                self.connection.executescript(f"drop table if exists {tablename};").close()
+                self.db.drop(tablename)
 
             for tablename, filename in zip(tablenames, filenames):
-                logger.info(f"loading table: {tablename}")
-                pd.read_csv(filename, sep='\t', index_col=0).to_sql(tablename, self.connection, if_exists="replace")
+                data: pd.DataFrame = pd.read_csv(filename, sep='\t', index_col=0)
+                self.db.store2(data=data, tablename=tablename)
 
         return self
 
     def load_data_tables(self, data_tables: dict[str, str | None]):
-        with self:
-            data: dict[str, pd.DataFrame] = utility.load_tables(data_tables, db=self.connection)
+        with self.db:
+            data: dict[str, pd.DataFrame] = self.db.fetch_tables(data_tables)
             return data
+
+
+def load(tablename: str, sep: str = ',', **opts) -> pd.DataFrame:
+    """Loads table from specified folder or from url in configuration"""
+
+    if opts.get("url"):
+        return pd.read_csv(opts['url'], sep=sep)
+
+    if opts.get("folder"):
+        folder: str = probe_filename(join(opts['folder'], tablename), ['csv', "zip", "csv.gz"])
+        return pd.read_csv(folder, sep=sep)
+
+    if opts.get("tag"):
+        if not all(opts.get(x) for x in ["user", "repository", "path"]):
+            raise ValueError("when fetching from Github user, repository and path must be set")
+
+        url: str = gh_create_url(
+            filename=tablename,
+            tag=opts.get("tag"),
+            user=opts.get("user"),
+            repository=opts.get("repository"),
+            path=opts.get("path"),
+        )
+        return pd.read_csv(url)
+
+    raise ValueError("either :url:, folder or branch must be set")
 
 
 class CorpusIndexFactory:

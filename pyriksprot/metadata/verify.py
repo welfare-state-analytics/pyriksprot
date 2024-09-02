@@ -69,8 +69,12 @@ class TagsConformSpecification(ConformBaseSpecification):
         self.left_key: str = tag1
         self.right_key: str = tag2
 
-        tag1_data: dict = gh_fetch_metadata_folder(user=user, repository=repository, path=path, tag=tag1, target_folder=None)
-        tag2_data: dict = gh_fetch_metadata_folder(user=user, repository=repository, path=path, tag=tag2, target_folder=None)
+        tag1_data: dict = gh_fetch_metadata_folder(
+            user=user, repository=repository, path=path, tag=tag1, target_folder=None
+        )
+        tag2_data: dict = gh_fetch_metadata_folder(
+            user=user, repository=repository, path=path, tag=tag2, target_folder=None
+        )
 
         self.left_tables: dict = {n: v['headers'] for n, v in tag1_data.items()}
         self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
@@ -87,7 +91,9 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
         self.left_key: str = "config"
         self.right_key: str = tag
 
-        tag2_data: dict = gh_fetch_metadata_folder(user=user, repository=repository, path=path, tag=tag, target_folder=None)
+        tag2_data: dict = gh_fetch_metadata_folder(
+            user=user, repository=repository, path=path, tag=tag, target_folder=None
+        )
 
         self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
         self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}

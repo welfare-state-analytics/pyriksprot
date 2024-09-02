@@ -60,7 +60,7 @@ def verify_metadata_columns(config_filename: str, tags: str):
 @click.option('--tag', type=click.STRING, help='Metadata version', default=None)
 @click.argument('target_folder', type=click.STRING)
 def download_metadata(tag: str, target_folder: str):
-    md.gh_dl_metadata_by_config(schema=md.MetadataSchema(tag=tag), tag=tag, folder=target_folder, force=True)
+    md.gh_fetch_metadata_by_config(schema=md.MetadataSchema(tag=tag), tag=tag, folder=target_folder, force=True)
 
 
 @click.command()
@@ -94,16 +94,16 @@ def create_database(
     skip_scripts: bool = False,
 ) -> None:
     try:
-        service: md.DatabaseHelper = md.DatabaseHelper(target)
+        service: md.GenerateService = md.GenerateService(filename=target)
         service.create(tag=tag, folder=source_folder, force=force)
 
         if load_index:
             logger.info("loading index...")
-            service.load_corpus_indexes(folder=source_folder or dirname(target))
+            service.upload_corpus_indexes(folder=source_folder or dirname(target))
 
         if not skip_scripts:
             logger.info(f"loading scripts from {scripts_folder if scripts_folder else 'sql module'}...")
-            service.load_scripts(folder=scripts_folder, tag=tag)
+            service.execute_sql_scripts(folder=scripts_folder, tag=tag)
 
     except Exception as ex:
         logger.error(ex)

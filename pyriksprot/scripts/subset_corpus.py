@@ -34,7 +34,8 @@ def main(
             target_folder=target_folder,
             tag=ConfigValue("version").resolve(),
             scripts_folder=scripts_folder,
-            **ConfigValue("metadata.github").resolve(),
+            gh_metadata_opts=ConfigValue("metadata.github").resolve(),
+            gh_records_opts=ConfigValue("corpus.github").resolve(),
         )
     except Exception as ex:
         click.echo(ex)

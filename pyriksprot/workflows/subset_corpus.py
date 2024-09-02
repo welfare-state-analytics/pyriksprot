@@ -38,7 +38,8 @@ def subset_corpus_and_metadata(
     tag: str | None = None,
     scripts_folder: str | None = None,
     force: bool = True,
-    **opts,
+    gh_metadata_opts: dict[str, str] = None,
+    gh_records_opts: dict[str, str] = None,
 ):
     """Subset metadata to folder `target_folder`/tag"""
 
@@ -50,20 +51,14 @@ def subset_corpus_and_metadata(
     protocols_target_folder: str = join(parlaclarin_folder, "protocols")
     database_name: str = join(root_folder, "riksprot_metadata.db")
 
-    user: str = opts.get("user")
-    repository: str = opts.get("repository")
-    path: str = opts.get("path")
-
     reset_folder(root_folder, force=force)
 
     if isinstance(documents, str):
         documents: list[str] = _load_document_filenames(documents)
 
-    md.gh_fetch_metadata_folder()(
+    md.gh_fetch_metadata_folder(
         target_folder=metadata_folder,
-        user=user,
-        repository=repository,
-        path=path,
+        **gh_metadata_opts,
         tag=tag,
         force=True,
     )
@@ -74,9 +69,7 @@ def subset_corpus_and_metadata(
             target_folder=protocols_target_folder,
             create_subfolder=True,
             tag=tag,
-            user=user,
-            repository=repository,
-            path=path,
+            **gh_records_opts,
         )
     else:
         pc.copy_protocols(
@@ -97,9 +90,9 @@ def subset_corpus_and_metadata(
     factory.generate(corpus_folder=parlaclarin_folder, target_folder=metadata_target_folder)
 
     """Create metadata database with base tables"""
-    md.DatabaseHelper(database_name).create(tag=tag, folder=metadata_target_folder, force=True).load_corpus_indexes(
-        folder=metadata_target_folder
-    ).load_scripts(folder=scripts_folder)
+    md.GenerateService(filename=database_name).create(
+        tag=tag, folder=metadata_target_folder, force=True
+    ).upload_corpus_indexes(folder=metadata_target_folder).execute_sql_scripts(folder=scripts_folder)
 
     shutil.rmtree(path=metadata_folder, ignore_errors=True)
 

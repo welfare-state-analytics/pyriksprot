@@ -10,8 +10,10 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.metadata import database
+
 from ..utility import replace_extension, revdict
-from . import codecs, generate
+from . import codecs
 from . import utility as mdu
 from . import utterance
 
@@ -255,10 +257,13 @@ class PersonIndex:
         if not isfile(self.database_filename):
             raise FileNotFoundError(f"File not found: {self.database_filename}")
 
-        self.data: dict[str, str] = generate.DatabaseHelper(self.database_filename).load_data_tables(self._table_infos)
+        with database.DefaultDatabaseType(filename=self.database_filename) as db:
+            self.data: dict[str, str] = db.fetch_tables(self._table_infos)
+
         """ ensure `unknown` has pid = 0 """
         if self.persons.loc[0]['person_id'] != 'unknown':
             swap_rows(self.persons, 0, index_of_person_id(self.persons, 'unknown'))
+
         return self
 
     @cached_property

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sqlite3
 from typing import Any, Literal, Type
 
 import numpy as np
@@ -33,51 +32,6 @@ COLUMN_DEFAULTS = {
 }
 
 DATE_COLUMNS = ['start_date', 'end_date']
-
-
-def read_sql_table(table_name: str, con: Any) -> pd.DataFrame:
-    return pd.read_sql(f"select * from {table_name}", con)
-
-
-def read_sql_tables(tables: list[str] | dict, db: Any) -> dict[str, pd.DataFrame]:
-    return tables if isinstance(tables, dict) else {table_name: read_sql_table(table_name, db) for table_name in tables}
-
-
-def sql_table_info(table_name: str, con: Any) -> pd.DataFrame:
-    data: pd.DataFrame = pd.read_sql(f"select * from PRAGMA_TABLE_INFO('{table_name}');", con)
-    return data
-
-
-def load_tables(
-    tables: dict[str, str],
-    *,
-    db: sqlite3.Connection,
-    defaults: dict[str, Any] = None,
-    types: dict[str, Any] = None,
-) -> dict[str, pd.DataFrame]:
-    """Loads tables as pandas dataframes, slims types, fills NaN, sets pandas index"""
-    data: dict[str, pd.DataFrame] = {}
-    for table_name, primary_key in tables.items():
-        table: pd.DataFrame = read_sql_table(table_name, db)
-        table_info: pd.DataFrame = sql_table_info(table_name, db)
-        for bool_column in table_info[table_info.type == 'bool'].name:
-            table[bool_column] = table[bool_column].astype(bool)
-        for date_column in table_info[table_info.type == 'date'].name:
-            if pd.api.types.is_string_dtype(table[date_column]):
-                table[date_column] = pd.to_datetime(table[date_column])
-
-        if primary_key:
-            table.set_index(tables.get(table_name), drop=True, inplace=True)
-        slim_table_types(table, defaults=defaults, types=types)
-        data[table_name] = table
-
-    # data: dict[str, pd.DataFrame] = read_sql_tables(list(tables.keys()), db)
-    # slim_table_types(data.values(), defaults=defaults, types=types)
-    # for table_name, table in data.items():
-    #     if tables.get(table_name):
-    #         table.set_index(tables.get(table_name), drop=True, inplace=True)
-
-    return data
 
 
 def slim_table_types(
@@ -127,16 +81,6 @@ def group_to_list_of_records(
 
 def fx_or_url(url: Any, tag: str) -> str:
     return url(tag) if callable(url) else url
-
-
-def register_numpy_adapters():
-    for dt in [np.int8, np.int16, np.int32, np.int64]:
-        sqlite3.register_adapter(dt, int)
-    for dt in [np.float16, np.float32, np.float64]:
-        sqlite3.register_adapter(dt, float)
-    sqlite3.register_adapter(np.nan, lambda _: "'NaN'")
-    sqlite3.register_adapter(np.inf, lambda _: "'Infinity'")
-    sqlite3.register_adapter(-np.inf, lambda _: "'-Infinity'")
 
 
 def fix_incomplete_datetime_series(
