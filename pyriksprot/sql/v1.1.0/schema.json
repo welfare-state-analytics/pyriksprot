@@ -1,12 +1,53 @@
 {
-    "alias": {
-        "person_id": "text references person (person_id) not null",
-        "alias": "text not null",
-        ":rename_column:": {"wiki_id": "person_id"}
+    "chairs": {
+        "chair_id": "text primary key",
+        "chamber": "text",
+        "chair_nr": "int",
+        ":filename:": "chairs.csv"
+    },
+    "chair_mp": {
+        "chair_id": "text not null",
+        "parliament_year": "int",
+        "start": "date",
+        "end": "date",
+        "person_id": "text",
+        ":constraints:": "foreign key (chair_id) references chair (chair_id)",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ]
+    },
+    "described_by_source": {
+        "person_id": "text not null",
+        "source": "text",
+        "volume": "text",
+        ":constraints:":[
+             "foreign key (person_id) references person (person_id)"
+        ]
+    },
+    "explicit_no_party": {
+        "person_id": "text",
+        "wiki_id": "text",
+        "pages": "int",
+        "ref": "text",
+        "vol": "text"
+    },
+    "external_identifiers": {
+        "person_id": "text not null",
+        "authority": "text not null",
+        "identifier": "text not null",
+        ":constraints:": [
+            "primary key (person_id, authority, identifier)",
+            "foreign key (person_id) references person (person_id)"
+    ]
+    },
+    "location_specifier": {
+        "person_id": "text",
+        "location": "text"
     },
     "government": {
         "government_id": "text not null",
-        "government": "text primary key not null",
+        "government": "text primary key",
         "start": "text",
         "end": "text",
         ":index:": {},
@@ -16,108 +57,147 @@
             ["fix_ts_config", "end", "extend"]
         ]
     },
-    "location_specifier": {
-        "person_id": "text references person (person_id) not null",
-        "location": "text",
-        ":rename_column:": {"wiki_id": "person_id"}
-    },
     "member_of_parliament": {
-        "person_id": "text references person (person_id) not null",
+        "person_id": "text not null",
         "district": "text",
         "role": "text",
         "start": "date",
         "end": "date",
-        ":rename_column:": {"wiki_id": "person_id"},
         ":compute:": [
             ["fix_ts_config", "start", "truncate"],
             ["fix_ts_config", "end", "extend"]
-        ]
+        ],
+        ":constraints:": "foreign key (person_id) references person (person_id)"
     },
     "minister": {
-        "person_id": "text references person (person_id) not null",
+        "person_id": "text not null",
         "government": "text",
         "role": "text",
         "start": "date",
         "end": "date",
-        ":rename_column:": {"wiki_id": "person_id"},
         ":compute:": [
             ["fix_ts_config", "start", "truncate"],
             ["fix_ts_config", "end", "extend"]
-        ]
+        ],
+        ":constraints:": "foreign key (person_id) references person (person_id)"
     },
     "name": {
-        "person_id": "text references person (person_id) not null",
+        "person_id": "text not null",
         "name": "text not null",
         "primary_name": "integer not null",
-        ":rename_column:": {"wiki_id": "person_id"}
+        ":constraints:": "foreign key (person_id) references person (person_id)"
     },
     "party_abbreviation": {
-        "party": "text primary key not null",
+        "party": "text primary key",
         "abbreviation": "text not null",
         "ocr_correction": "text"
     },
     "party_affiliation": {
-        "person_id": "text references person (person_id) not null",
+        "person_id": "text not null",
         "start": "int",
         "end": "int",
         "party": "text",
         "party_id": "text",
-        ":rename_column:": {"wiki_id": "person_id"},
         ":compute:": [
             ["fix_ts_config", "start", "truncate"],
             ["fix_ts_config", "end", "extend"]
-        ]
+        ],
+        ":constraints:": "foreign key (person_id) references person (person_id)"
     },
     "person": {
         "person_id": "text primary key",
         "born": "date",
         "dead": "date",
         "gender": "text",
-        "wiki_id": "text",
         "riksdagen_id": "text",
-        ":drop_duplicates:": "wiki_id",
-        ":copy_column:": {"person_id": "wiki_id"},
         ":compute:": [
             ["fix_ts_config", "born", "truncate"],
             ["fix_ts_config", "dead", "extend"]
         ]
     },
-    "speaker": {
-        "person_id": "text references person (person_id) not null",
-        "role": "text",
+    "place_of_birth": {
+        "person_id": "text not null",
+        "link": "text",
+        "place": "text",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id)"
+        ]
+    },    
+    "place_of_death": {
+        "person_id": "text not null",
+        "link": "text",
+        "place": "text",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id)"
+        ]
+    },   
+    "portraits": {
+        "person_id": "text not null",
+        "portrait": "text",
+        ":constraints:": "foreign key (person_id) references person (person_id)"
+    },   
+    "references_map": {
+        "person_id": "text not null",
+        "bibtex_key": "text not null",
+        "wiki_id": "text",
+        "page": "int",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id)"
+        ]
+    },
+    "riksdag_year": {
+        "parliament_year": "int not null",
+        "specifier": "text",
+        "chamber": "text not null",
         "start": "date",
         "end": "date",
-        ":rename_column:": {"wiki_id": "person_id"},
+        ":constraints:": [],
+        ":filename:": "riksdag-year.csv",
+        ":index:": {
+            "parliament_year": "parliament_year",
+            "specifier": "specifier",
+            "chamber": "chamber"
+        },
         ":compute:": [
             ["fix_ts_config", "start", "truncate"],
             ["fix_ts_config", "end", "extend"]
         ]
     },
+    "speaker": {
+        "person_id": "text not null",
+        "role": "text",
+        "start": "date",
+        "end": "date",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ],
+        ":constraints:": "foreign key (person_id) references person (person_id)"
+    },
     "twitter": {
-        "twitter": "text",
-        "person_id": "text references person (person_id) not null",
-        ":rename_column:": {"wiki_id": "person_id"}
+        "twitter": "text primary key",
+        "person_id": "text not null",
+        ":rename_column:": {"wiki_id": "person_id"},
+        ":constraints:": "foreign key (person_id) references person (person_id)"
     },
-    "name_location_specifier": {
-        "person_id": "text references person (person_id) not null",
-        "alias": "text",
-        "name": "text not null",
-        ":rename_column:": {"wiki_id": "person_id"}
-    },
-    "unknowns": {
-        "protocol_id": "text", 
-        "uuid": "text",
-        "gender": "text",
-        "party": "text",
-        "other": "text",
-        ":url:": "https://raw.githubusercontent.com/welfare-state-analytics/riksdagen-corpus/v0.10.0/input/matching/unknowns.csv",
-        ":is_extra:": true
+    "wiki_id": {
+        "person_id": "text not null",
+        "wiki_id": "text",
+        ":constraints:": "foreign key (person_id) references person (person_id)"
     },
     ":config:" : {
         "github": {
-            "user": "swerik-projects",
+            "user": "swerik-project",
             "repository": "riksdagen-persons",
             "path": "data"
+        },
+        "code_tables": {
+            "chamber": "chamber_id",
+            "gender": "gender_id",
+            "government": "government_id",
+            "office_type": "office_type_id",
+            "party": "party_id",
+            "sub_office_type": "sub_office_type_id"
         }
     }
 }
