@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import os
 import re
+from fnmatch import fnmatch
 from typing import Literal
 
 import pygit2
@@ -15,6 +16,9 @@ ts = datetime.datetime.fromtimestamp
 
 
 def gh_create_url(*, user: str, repository: str, path: str, filename: str, tag: str) -> str:
+    if not user or not repository or not filename or not tag:
+        raise ValueError("Missing required parameter")
+    filename = (filename or "").lstrip("/")
     return f"https://raw.githubusercontent.com/{user}/{repository}/{tag}/{path}/{filename}"
 
 
@@ -22,9 +26,16 @@ def gh_repository_url(*, user: str, repository: str) -> str:
     return f"https://github.com/{user}/{repository}"
 
 
-def gh_ls(user: str, repository: str, path: str = "", tag: str = "main") -> list[dict]:
+def gh_ls(user: str, repository: str, path: str = "", tag: str = "main", pattern: str | None = None) -> list[dict]:
     url: str = f"https://api.github.com/repos/{user}/{repository}/contents/{path}?ref={tag}"
     data: list[dict] = load_json(url)
+    if isinstance(data, dict):
+        if 'status' in data:
+            raise Exception(f"Github API error: {data.get('message')}")
+    if not isinstance(data, list):
+        raise Exception(f"Github API error: expected list {url} got {type(data)}")
+    if data and pattern is not None:
+        data = [x for x in data if fnmatch(x.get("name"), pattern)]
     return data
 
 
