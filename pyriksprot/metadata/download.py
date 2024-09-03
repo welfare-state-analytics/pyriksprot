@@ -64,13 +64,11 @@ def gh_fetch_metadata_folder(
     infos: dict[str, dict] = {}
 
     for item in items:
-        table, _ = splitext(basename(item.get("name")))
+        filename = basename(item.get("name"))
 
-        # infos[table] = gh_fetch_metadata_item(table, tag, errors, url=item.get("url"))
+        infos[filename] = gh_fetch_metadata_item(filename, tag, errors, url=item.get("url"))
 
-        infos[table] = gh_fetch_metadata_item(table, tag, errors, user=user, repository=repository, path=path)
-
-        gh_store_metadata_item(target_folder, infos[table])
+        gh_store_metadata_item(target_folder, infos[filename])
 
     return infos
 
@@ -85,11 +83,11 @@ def gh_fetch_metadata_by_config(
     else:
         os.makedirs(folder, exist_ok=True)
 
-    for tablename, _ in schema.definitions.items():
+    for tablename, cfg in schema.definitions.items():
         if tablename.startswith(':'):
             continue
 
-        download_url_to_file(_resolve_url(schema, tag, tablename), jj(folder, f"{tablename}.csv"), force, errors=errors)
+        download_url_to_file(_resolve_url(schema, tag, cfg.basename), jj(folder, f"{tablename}.csv"), force, errors=errors)
 
 
 def _resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
