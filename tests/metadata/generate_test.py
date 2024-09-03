@@ -45,10 +45,10 @@ def test_gh_fetch_metadata_folder(tmp_path: pathlib.Path):
     data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
 
-    filenames: list[str] = md.gh_fetch_metadata_folder(
+    infos: dict[str, dict] = md.gh_fetch_metadata_folder(
         target_folder=tmp_path, user=user, repository=repository, path=path, tag=tag, force=True
     )
-    assert len(filenames) > 0
+    assert len(infos) > 0
 
     shutil.rmtree(str(tmp_path))
 

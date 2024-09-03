@@ -67,11 +67,11 @@ class GenerateService:
         return self
 
     def _import_table(self, cfg: MetadataTable, folder: str, tag: str) -> GenerateService:
-        logger.info(f"loading table: {cfg.name}")
+        logger.info(f"loading table: {cfg.tablename}")
 
         columns: list[str] = cfg.all_columns
         table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=tag)
-        self.db.store(cfg.transform(table)[columns], tablename=cfg.name, columns=columns)
+        self.db.store(cfg.transform(table)[columns], tablename=cfg.tablename, columns=columns)
 
         return self
 

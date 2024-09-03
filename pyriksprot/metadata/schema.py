@@ -67,7 +67,7 @@ def resolve_column_config(fx_name: str, *args) -> Callable[[Any], Any]:
 
 class MetadataTable:
     def __init__(self, name: str, data: dict):
-        self.name: str = name
+        self.tablename: str = name
         self.data: dict = data
 
     @cached_property
@@ -121,7 +121,7 @@ class MetadataTable:
 
     @property
     def basename(self) -> str:
-        return self.data.get(':filename:', f"{self.name}.csv")
+        return self.data.get(':filename:', f"{self.tablename}.csv")
 
     @property
     def has_url(self) -> bool:
