@@ -305,7 +305,8 @@ def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_spe
 
 @pytest.mark.skip(reason="Infrastructure test")
 @pytest.mark.parametrize(
-    'protocol_name', ['prot-199192--021', 'prot-199192--127', 'prot-1933--fk--005', 'prot-1955--ak--022', 'prot-199596--035']
+    'protocol_name',
+    ['prot-199192--021', 'prot-199192--127', 'prot-1933--fk--005', 'prot-1955--ak--022', 'prot-199596--035'],
 )
 def test_protocol_to_speeches(protocol_name: str):
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")

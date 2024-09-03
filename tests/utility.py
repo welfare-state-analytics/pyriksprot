@@ -107,7 +107,7 @@ def ensure_test_corpora_exist(
     tagged_source_folder: str = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder: str = root_folder or ConfigValue("root_folder").resolve()
     database: str = database or ConfigValue("metadata:database").resolve()
-    gh_metadata_opts: dict[str,str] = ConfigValue("metadata:github").resolve()
+    gh_metadata_opts: dict[str, str] = ConfigValue("metadata:github").resolve()
     gh_records_opts: dict[str, str] = ConfigValue("corpus:github").resolve()
 
     if force or not sample_metadata_exists():

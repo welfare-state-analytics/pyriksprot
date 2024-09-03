@@ -22,6 +22,7 @@ ConfigStore.configure_context(source='tests/config.yml', env_prefix=None)
 
 # ensure_test_corpora_exist()
 
+
 @pytest.fixture(scope='session')
 def source_index() -> csi.CorpusSourceIndex:
     tagged_source_folder = ConfigStore.config().get("tagged_frames.folder")
