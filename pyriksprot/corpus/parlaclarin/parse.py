@@ -18,7 +18,7 @@ class ProtocolMapper(interface.IProtocolParser):
     @staticmethod
     def get_date(data: untangle.Element) -> str:
         try:
-            docDate = data.teiCorpus.TEI.text.front.div.docDate
+            docDate = data.TEI.text.front.div.docDate
             return docDate[0]['when'] if isinstance(docDate, list) else docDate['when']
         except (AttributeError, KeyError):
             return None
@@ -27,14 +27,14 @@ class ProtocolMapper(interface.IProtocolParser):
     def get_name(data: untangle.Element) -> str:
         """Protocol name"""
         try:
-            return data.teiCorpus.TEI.text.front.div.head.cdata
+            return data.TEI.text.front.div.head.cdata
         except (AttributeError, KeyError):
             return None
 
     @staticmethod
     def get_content_sections(data: untangle.Element) -> list[untangle.Element]:
         try:
-            sections: Any = data.teiCorpus.TEI.text.body.children
+            sections: Any = data.TEI.text.body.children
         except AttributeError:
             logger.warning(f'no content (text.body) found in {ProtocolMapper.get_name(data) or "unknown"}')
             return []
