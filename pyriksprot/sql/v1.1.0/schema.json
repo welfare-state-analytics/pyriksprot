@@ -177,7 +177,6 @@
     "twitter": {
         "twitter": "text primary key",
         "person_id": "text not null",
-        ":rename_column:": {"wiki_id": "person_id"},
         ":constraints:": "foreign key (person_id) references person (person_id)"
     },
     "wiki_id": {
