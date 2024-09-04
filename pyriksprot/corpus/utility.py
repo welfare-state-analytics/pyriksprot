@@ -57,17 +57,12 @@ def copy_protocols(
     if not os.path.isdir(source_folder):
         raise ValueError(f"source_folder {source_folder} is not a folder")
 
-    protocol_source_folder: str = jj(source_folder, 'corpus', 'protocols')
-
-    if not os.path.isdir(protocol_source_folder):
-        raise ValueError(f"source_folder {protocol_source_folder} is not a riksprot repository folder")
-
     reset_folder(target_folder, force=True)
 
     logger.info(f"copying protocols from {source_folder}.")
 
     for pattern in filenames:
-        for path in glob.glob(jj(protocol_source_folder, '**', pattern), recursive=True):
+        for path in glob.glob(jj(source_folder, '**', pattern), recursive=True):
             document_name: str = os.path.basename(path)
             protocol_year: str = document_name.split('-')[1]
             target_name: str = replace_extension(document_name, 'xml')
