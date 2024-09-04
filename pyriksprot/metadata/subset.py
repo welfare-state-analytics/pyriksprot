@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+from genericpath import isfile
 import os
 import shutil
 from typing import Any
+from glob import glob
+from os.path import basename
 
 import pandas as pd
 from loguru import logger
 
 from ..interface import IProtocolParser
 from .generate import CorpusIndexFactory
-from .schema import MetadataSchema
+from .schema import MetadataSchema, MetadataTable
 
 jj = os.path.join
 
@@ -39,20 +42,29 @@ def subset_to_folder(
 
     schema: MetadataSchema = MetadataSchema(tag)
 
-    for tablename in schema.tablesnames0:
-        source_name: str = jj(source_folder, f"{tablename}.csv")
-        target_name: str = jj(target_folder, f"{tablename}.csv")
+    filenames: set[str] = set([ basename(x) for x in glob(jj(source_folder, "*.csv")) ])
 
-        if not 'person_id' in schema[tablename].columns:
+    if not set(schema.filenames).issubset(filenames):
+        raise Exception("subset_to_folder: not all metadata tables defined in config found in source")
+                        
+    for filename in filenames:
+
+        source_name: str = jj(source_folder, filename)
+        target_name: str = jj(target_folder, filename)
+
+        cfg: MetadataTable = schema.get_by_filename(filename)
+
+        if cfg is None or not 'person_id' in cfg.columns:
             shutil.copy(source_name, target_name)
             continue
 
-        id_column: str = schema[tablename].resolve_source_column('person_id')
+        id_column: str = cfg.resolve_source_column('person_id')
         copy_csv_subset(source_name, target_name, {id_column: person_ids})
 
     protocol_ids: set[str] = {f"{x}.xml" for x in protocols['document_name']}
 
-    copy_csv_subset(jj(source_folder, "unknowns.csv"), jj(target_folder, "unknowns.csv"), {'protocol_id': protocol_ids})
+    if os.path.isfile(jj(source_folder, "unknowns.csv")):
+        copy_csv_subset(jj(source_folder, "unknowns.csv"), jj(target_folder, "unknowns.csv"), {'protocol_id': protocol_ids})
 
 
 def copy_csv_subset(source_name: str, target_name: str, key_values: dict[str, list[Any]]) -> None:

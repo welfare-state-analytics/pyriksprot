@@ -35,3 +35,8 @@ tagged_frames:
 tagged_speeches:
   folder: &speech_folder !path_join [ *folder, *version, tagged_frames_speeches.feather ]
 
+global:
+  corpus:
+    folder: /data/riksdagen_corpus_data/riksdagen-records/data
+  metadata:
+    folder: /data/riksdagen_corpus_data/riksdagen-records/data

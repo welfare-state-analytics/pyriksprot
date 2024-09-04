@@ -247,3 +247,14 @@ class MetadataSchema:
     def files_exist(self, folder: str) -> bool:
         """Checks that all expected files exist in given location."""
         return all(isfile(join(folder, x.basename)) for _, x in self.definitions.items())
+
+    def get_by_filename(self, filename: str) -> MetadataTable:
+        for _, table in self.definitions.items():
+            if table.basename == filename:
+                return table
+        return None
+    
+    @property
+    def filenames(self) -> list[str]:
+        return [x.basename for x in self.definitions.values()]
+    

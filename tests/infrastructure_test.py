@@ -13,7 +13,6 @@ from .utility import (
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
-    load_test_documents,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
     subset_corpus_and_metadata,
@@ -24,13 +23,15 @@ jj = os.path.join
 FORCE_RUN_SKIPS = False  # os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 
 
-@pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
-def test_setup_sample_xml_corpus():
-    protocols: list[str] = load_test_documents()
+# @pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
+def test_setup_sample_xml_corpus(test_protocols):
     target_folder: str = ConfigValue("corpus.folder").resolve()
     version: str = ConfigValue("corpus.version").resolve()
     opts: dict = ConfigValue("corpus.github").resolve()
-    pc.download_protocols(filenames=protocols, target_folder=target_folder, create_subfolder=True, tag=version, **opts)
+
+    pc.download_protocols(
+        filenames=test_protocols, target_folder=target_folder, create_subfolder=True, tag=version, **opts
+    )
 
 
 # @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
@@ -73,30 +74,32 @@ def test_gh_fetch_metadata_folder_old():
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
-def test_setup_sample_tagged_frames_corpus():
+def test_setup_sample_tagged_frames_corpus(test_protocols: list[str]):
     version: str = ConfigValue("version").resolve()
     data_folder: str = ConfigValue("data_folder").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
     riksprot_tagged_folder: str = jj(data_folder, version, 'tagged_frames')
 
     create_test_tagged_frames_corpus(
-        protocols=load_test_documents(),
+        protocols=test_protocols,
         source_folder=riksprot_tagged_folder,
         target_folder=tagged_folder,
     )
 
 
-@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_subset_corpus_and_metadata():
+# @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
+def test_subset_corpus_and_metadata(test_protocols: list[str]):
     version: str = ConfigValue("metadata.version").resolve()
     data_folder: str = ConfigValue("data_folder").resolve()
     gh_metadata_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
     gh_records_opts: dict[str, str] = ConfigValue("corpus.github").resolve()
+    source_folder: str = ConfigValue("global.corpus.folder").resolve()
 
     subset_corpus_and_metadata(
+        source_folder=source_folder,
         tag=version,
         target_folder=data_folder,
-        documents=load_test_documents(),
+        documents=test_protocols,
         gh_metadata_opts=gh_metadata_opts,
         gh_records_opts=gh_records_opts,
     )

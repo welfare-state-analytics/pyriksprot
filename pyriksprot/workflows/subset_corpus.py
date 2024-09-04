@@ -8,7 +8,7 @@ from loguru import logger
 from pyriksprot import corpus as pc
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
-from pyriksprot.utility import reset_folder
+from pyriksprot.utility import replace_extension, reset_folder
 
 
 def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_folder: str) -> None:
@@ -51,17 +51,22 @@ def subset_corpus_and_metadata(
     protocols_target_folder: str = join(parlaclarin_folder, "protocols")
     database_name: str = join(root_folder, "riksprot_metadata.db")
 
-    reset_folder(root_folder, force=force)
-
     if isinstance(documents, str):
-        documents: list[str] = _load_document_filenames(documents)
+        documents: list[str] = load_document_patterns(documents, extension='xml')
 
-    md.gh_fetch_metadata_folder(
-        target_folder=metadata_folder,
-        **gh_metadata_opts,
-        tag=tag,
-        force=True,
-    )
+    # FIXME Remove this if statement
+
+    update_metadata: bool = False
+
+    if update_metadata or not exists(metadata_folder):
+        reset_folder(root_folder, force=force)
+
+        md.gh_fetch_metadata_folder(
+            target_folder=metadata_folder,
+            **gh_metadata_opts,
+            tag=tag,
+            force=True,
+        )
 
     if source_folder is None:
         pc.download_protocols(
@@ -82,7 +87,7 @@ def subset_corpus_and_metadata(
         ProtocolMapper,
         tag=tag,
         protocols_source_folder=parlaclarin_folder,
-        source_folder=join(metadata_folder, tag),
+        source_folder=metadata_folder,
         target_folder=metadata_target_folder,
     )
     """Add generated corpus indexes (speeches, utterances)"""
@@ -92,15 +97,23 @@ def subset_corpus_and_metadata(
     """Create metadata database with base tables"""
     md.GenerateService(filename=database_name).create(
         tag=tag, folder=metadata_target_folder, force=True
-    ).upload_corpus_indexes(folder=metadata_target_folder).execute_sql_scripts(folder=scripts_folder)
+    ).upload_corpus_indexes(folder=metadata_target_folder).execute_sql_scripts(folder=scripts_folder, tag=tag)
 
     shutil.rmtree(path=metadata_folder, ignore_errors=True)
 
 
-def _load_document_filenames(filename):
-    """Loads a list of ParlaCLARIN document names from a file"""
+def load_document_patterns(filename: str, extension: str = None) -> list[str]:
+    """Loads a list of ParlaCLARIN document names/patterns from a file"""
     if not os.path.isfile(filename):
         raise FileNotFoundError(filename)
 
+    patterns: list[str] = []
     with open(filename, "r", encoding="utf8") as fp:
-        return [x for x in fp.read().splitlines() if x.endswith(".xml")]
+        for pattern in fp.read().splitlines():
+            if not pattern:
+                continue
+            if extension and '*' not in pattern:
+                pattern: str = replace_extension(pattern, 'xml')
+            patterns.append(pattern)
+
+    return patterns

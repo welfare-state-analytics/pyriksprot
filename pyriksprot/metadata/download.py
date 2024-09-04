@@ -1,7 +1,6 @@
 import os
 from os.path import basename
 from os.path import join as jj
-from os.path import splitext
 from typing import Any, Literal
 
 from loguru import logger
@@ -9,7 +8,7 @@ from loguru import logger
 from pyriksprot.gitchen import gh_create_url, gh_ls
 
 from ..utility import dotget, download_url_to_file, fetch_text_by_url, reset_folder
-from .schema import MetadataSchema
+from .schema import MetadataSchema, MetadataTable
 
 
 def gh_fetch_metadata_item(
@@ -38,7 +37,7 @@ def gh_fetch_metadata_item(
 def gh_store_metadata_item(target_folder: str, item):
     if not target_folder:
         return
-    target_name: str = jj(target_folder, f"{item['name']}.csv")
+    target_name: str = jj(target_folder, item['name'])
     if target_name is not None:
         with open(target_name, 'w', encoding="utf-8") as fp:
             logger.info(f' -> downloaded {item.get("name", "")}')
@@ -66,7 +65,7 @@ def gh_fetch_metadata_folder(
     for item in items:
         filename = basename(item.get("name"))
 
-        infos[filename] = gh_fetch_metadata_item(filename, tag, errors, url=item.get("url"))
+        infos[filename] = gh_fetch_metadata_item(filename, tag, errors, url=item.get("download_url"))
 
         gh_store_metadata_item(target_folder, infos[filename])
 
@@ -83,26 +82,21 @@ def gh_fetch_metadata_by_config(
     else:
         os.makedirs(folder, exist_ok=True)
 
+    gh_opts: dict[str, str] = dotget(schema.config, "github")
+
     for tablename, cfg in schema.definitions.items():
         if tablename.startswith(':'):
             continue
 
-        download_url_to_file(_resolve_url(schema, tag, cfg.basename), jj(folder, f"{tablename}.csv"), force, errors=errors)
+        url: str = _resolve_url(cfg, tag, **gh_opts)
+        download_url_to_file(url, jj(folder, cfg.basename), force, errors=errors)
 
 
-def _resolve_url(schema: MetadataSchema, tag: str, tablename: str) -> str:
+def _resolve_url(cfg: MetadataTable, tag: str, **opts) -> str:
     """Resolves proper URL to table for tag based on configuration"""
-    if tablename not in schema.definitions:
-        raise ValueError(f"Table {tablename} not found in configuration")
-    url: Any = schema[tablename].url
+    url: Any = cfg.url
     if url is None:
-        return gh_create_url(
-            user=dotget(schema.config, "github.user"),
-            repository=dotget(schema.config, "github.repository"),
-            path=dotget(schema.config, "github.path"),
-            filename=f"{tablename}.csv",
-            tag=tag,
-        )
+        return gh_create_url(filename=cfg.basename, tag=tag, **opts)
 
     if callable(url):
         return url(tag)

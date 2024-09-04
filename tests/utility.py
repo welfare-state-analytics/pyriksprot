@@ -1,4 +1,3 @@
-import functools
 import os
 import shutil
 from glob import glob
@@ -17,11 +16,7 @@ from pyriksprot import workflows
 from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.workflows import subset_corpus_and_metadata
-
-
-@functools.lru_cache(maxsize=1)
-def load_test_documents() -> list[str]:
-    return open('tests/test_data/test_documents.txt', encoding="utf-8").read().splitlines()
+from pyriksprot.workflows.subset_corpus import load_document_patterns
 
 
 def generate_merged_speech_test_data(protocol_name: str) -> None:
@@ -57,7 +52,8 @@ def generate_merged_speech_test_data(protocol_name: str) -> None:
 
 def sample_parlaclarin_corpus_exists() -> bool:
     source_folder: str = ConfigValue("corpus:folder").resolve()
-    return all(isfile(jj(source_folder, x.split('-')[1], f"{x}.xml")) for x in load_test_documents())
+    test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt', extension='xml')
+    return all(isfile(jj(source_folder, x.split('-')[1], x)) for x in test_protocols)
 
 
 def sample_metadata_exists() -> bool:
@@ -69,14 +65,14 @@ def sample_metadata_exists() -> bool:
 
 def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
     folder: str = folder or ConfigValue("tagged_frames:folder").resolve()
-    return all(
-        isfile(jj(folder, f"{x}.zip")) or jj(folder, f"{x.split('-')[1]}/{x}.zip") for x in load_test_documents()
-    )
+    test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt', extension='zip')
+    return all(isfile(jj(folder, f"{x}.zip")) or jj(folder, x.split('-')[1], x) for x in test_protocols)
 
 
 def sample_tagged_speech_corpus_exists():
     tagged_source_folder: str = ConfigValue("tagged_frames:folder").resolve()
     tagged_speech_folder: str = ConfigValue("tagged_speeches:folder").resolve()
+
     """Checks if the test data contains a complete tagged speech corpus. Empty files are ignored."""
 
     def isfile_and_non_empty(filename: str) -> bool:
@@ -87,13 +83,17 @@ def sample_tagged_speech_corpus_exists():
         return False
 
     def non_empty_tagged_frames_document_names() -> list[str]:
-        return [x for x in load_test_documents() if isfile_and_non_empty(f"{x}.zip")]
+        return [x for x in get_test_documents(extension="zip") if isfile_and_non_empty(x)]
 
     expected_files: set[str] = set(non_empty_tagged_frames_document_names())
     document_names: set[str] = {
         splitext(basename(p))[0] for p in glob(jj(tagged_speech_folder, '**', 'prot-*.*'), recursive=True)
     }
     return document_names == expected_files
+
+
+def get_test_documents(extension=None) -> list[str]:
+    return load_document_patterns(filename='tests/test_data/test_documents.txt', extension=extension)
 
 
 def ensure_test_corpora_exist(
@@ -110,9 +110,11 @@ def ensure_test_corpora_exist(
     gh_metadata_opts: dict[str, str] = ConfigValue("metadata:github").resolve()
     gh_records_opts: dict[str, str] = ConfigValue("corpus:github").resolve()
 
+    filenames: list[str] = get_test_documents(extension="xml")
+
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
-            documents=load_test_documents(),
+            documents=filenames,
             tag=corpus_version,
             target_folder=root_folder,
             force=force,
@@ -124,7 +126,7 @@ def ensure_test_corpora_exist(
         data_folder: str = root_folder
         riksprot_tagged_folder: str = jj(data_folder, corpus_version, 'tagged_frames')
         create_test_tagged_frames_corpus(
-            protocols=load_test_documents(),
+            protocols=filenames,
             source_folder=riksprot_tagged_folder,
             target_folder=tagged_source_folder,
         )

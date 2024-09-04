@@ -13,6 +13,7 @@ from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, tagged
 from pyriksprot.dispatch import merge as sg
+from pyriksprot.workflows.subset_corpus import load_document_patterns
 
 from .utility import ensure_test_corpora_exist
 
@@ -21,6 +22,11 @@ ConfigStore.configure_context(source='tests/config.yml', env_prefix=None)
 # pylint: disable=redefined-outer-name
 
 # ensure_test_corpora_exist()
+
+
+@pytest.fixture(scope='session')
+def test_protocols() -> list[str]:
+    return load_document_patterns(filename='tests/test_data/test_documents.txt', extension='xml')
 
 
 @pytest.fixture(scope='session')

@@ -9,7 +9,7 @@ from tests.utility import (
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
-    load_test_documents,
+    get_test_documents,
     sample_metadata_exists,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
@@ -47,10 +47,12 @@ def generate_corpus_and_metadata(force: bool = False):
             if not force:
                 raise ValueError("Metadata already exists. Use --force to overwrite.")
 
+        filenames: list[str] = get_test_documents(extension="xml")
+
         subset_corpus_and_metadata(
             tag=version,
             target_folder=root_folder,
-            documents=load_test_documents(),
+            documents=filenames,
             gh_metadata_opts=gh_metadata_opts,
             gh_records_opts=gh_records_opts,
         )
@@ -71,8 +73,9 @@ def generate_tagged_frames(force: bool = False, source_folder: str = None, targe
             if not force:
                 raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
 
+        filenames: list[str] = get_test_documents(extension="xml")
         create_test_tagged_frames_corpus(
-            protocols=load_test_documents(),
+            protocols=filenames,
             source_folder=source_folder,
             target_folder=target_folder,
         )

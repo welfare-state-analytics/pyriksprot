@@ -150,8 +150,6 @@ class CorpusIndexFactory:
         self.data: dict[str, pd.DataFrame]
 
     def generate(self, corpus_folder: str, target_folder: str) -> CorpusIndexFactory:
-        if os.path.isdir(jj(corpus_folder, "protocols")):
-            corpus_folder = jj(corpus_folder, "protocols")
         logger.info("Corpus index: generating utterance, protocol, speaker notes and page reference indices.")
         logger.info(f"     Source: {corpus_folder}")
         logger.info(f"     Target: {target_folder}")
