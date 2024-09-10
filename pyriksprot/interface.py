@@ -20,8 +20,7 @@ from .utility import flatten, merge_csv_strings, strip_extensions
 MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 
-class ParlaClarinError(ValueError):
-    ...
+class ParlaClarinError(ValueError): ...
 
 
 class TemporalKey(str, Enum):
@@ -80,15 +79,12 @@ class IDispatchItem(abc.ABC):
     n_tokens: int
 
     @property
-    def filename(self) -> str:
-        ...
+    def filename(self) -> str: ...
 
     @property
-    def text(self) -> str:
-        ...
+    def text(self) -> str: ...
 
-    def to_dict(self):
-        ...
+    def to_dict(self): ...
 
 
 class IProtocol(abc.ABC):
@@ -99,24 +95,19 @@ class IProtocol(abc.ABC):
     page_references: list[PageReference] = []
 
     @abc.abstractmethod
-    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
-        ...
+    def get_year(self, which: Literal["filename", "date"] = "filename") -> int: ...
 
     @abc.abstractmethod
-    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
-        ...
+    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol": ...
 
     @abc.abstractmethod
-    def checksum(self) -> Optional[str]:
-        ...
+    def checksum(self) -> Optional[str]: ...
 
     @abc.abstractmethod
-    def get_content(self, content_type: ContentType) -> str:
-        ...
+    def get_content(self, content_type: ContentType) -> str: ...
 
     @abc.abstractmethod
-    def get_speaker_notes(self) -> dict[str, str]:
-        ...
+    def get_speaker_notes(self) -> dict[str, str]: ...
 
 
 @dataclass
@@ -155,8 +146,8 @@ class Utterance:
     ):
         self.u_id: str = u_id
         self.who: str = who
-        self.prev_id: str = prev_id if isinstance(prev_id, str) else None
-        self.next_id: str = next_id if isinstance(next_id, str) else None
+        self.prev_id: str | None = prev_id if isinstance(prev_id, str) else None
+        self.next_id: str | None = next_id if isinstance(next_id, str) else None
         self.paragraphs: list[str] = (
             [] if not paragraphs else paragraphs if isinstance(paragraphs, list) else paragraphs.split(PARAGRAPH_MARKER)
         )
@@ -173,7 +164,7 @@ class Utterance:
         return f'{self.who}_{self.u_id}'
 
     @property
-    def tagged_text(self) -> str:
+    def tagged_text(self) -> str | None:
         return self.annotation
 
     @property
@@ -185,7 +176,7 @@ class Utterance:
         """Compute checksum of utterance text."""
         return UtteranceHelper.compute_checksum(self.text)
 
-    def to_str(self, what: ContentType) -> str:
+    def to_str(self, what: ContentType) -> str | None:
         return self.tagged_text if what == ContentType.TaggedFrame else self.text
 
     def to_dict(self) -> dict:
