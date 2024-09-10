@@ -18,6 +18,7 @@ import time
 import unicodedata
 import warnings
 import zlib
+from importlib import import_module
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
@@ -30,6 +31,18 @@ import requests
 import unidecode  # pylint: disable=import-error
 import yaml
 from loguru import logger
+
+
+def create_class(class_or_function_path: str) -> Callable | Type:
+    try:
+        module_path, cls_or_function_name = class_or_function_path.rsplit('.', 1)
+        module: ModuleType = import_module(module_path)
+        return getattr(module, cls_or_function_name)
+    except (ImportError, AttributeError, ValueError) as e:
+        try:
+            return eval(class_or_function_path)  # pylint: disable=eval-used
+        except NameError:
+            raise ImportError(f"fatal: config error: unable to load {class_or_function_path}") from e
 
 
 def norm_join(a: str, *paths: str):
@@ -486,9 +499,14 @@ def load_json(url: str) -> list[dict]:
 
 def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
     """Probes existence of filename with any of given extensions in folder"""
+
     for probe_name in set([filename] + ([replace_extension(filename, ext) for ext in exts] if exts else [])):
         if isfile(probe_name):
             return probe_name
+
+    if exts:
+        raise FileNotFoundError(f"{filename} tested with extensions {exts} not found")
+
     raise FileNotFoundError(filename)
 
 
