@@ -1,6 +1,5 @@
 import os
 import shutil
-from glob import glob
 from os.path import basename, dirname, exists, join, splitext
 
 from loguru import logger
@@ -8,13 +7,17 @@ from loguru import logger
 from pyriksprot import corpus as pc
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
+from pyriksprot.corpus.utility import ls_corpus_folder
+from pyriksprot.metadata import database
 from pyriksprot.utility import replace_extension, reset_folder
+
+# pylint: disable=too-many-arguments
 
 
 def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_folder: str) -> None:
     """Given a local parlaclarin folder, copy the global VRT (tagged frame) for all protocols that exists in the local parlaclarin folder"""
 
-    for filename in glob(join(local_xml_folder, '**/*.xml'), recursive=True):
+    for filename in ls_corpus_folder(local_xml_folder):
         subfolder: str = basename(dirname(filename))
 
         global_vrt_filename: str = join(global_vrt_folder, subfolder, f'{splitext(basename(filename))[0]}.zip')
@@ -40,22 +43,21 @@ def subset_corpus_and_metadata(
     force: bool = True,
     gh_metadata_opts: dict[str, str] = None,
     gh_records_opts: dict[str, str] = None,
+    db_opts: dict[str, str | dict[str, str]] = None,
 ):
     """Subset metadata to folder `target_folder`/tag"""
 
-    root_folder: str = join(target_folder, tag)
+    root_folder: str = join(target_folder or "", tag or "")
 
     metadata_folder: str = join(root_folder, "tmp")
     parlaclarin_folder: str = join(root_folder, "parlaclarin")
     metadata_target_folder: str = join(parlaclarin_folder, "metadata")
     protocols_target_folder: str = join(parlaclarin_folder, "protocols")
-    database_name: str = join(root_folder, "riksprot_metadata.db")
 
     if isinstance(documents, str):
-        documents: list[str] = load_document_patterns(documents, extension='xml')
+        documents = load_document_patterns(documents, extension='xml')
 
     # FIXME Remove this if statement
-
     update_metadata: bool = False
 
     if update_metadata or not exists(metadata_folder):
@@ -90,14 +92,19 @@ def subset_corpus_and_metadata(
         source_folder=metadata_folder,
         target_folder=metadata_target_folder,
     )
+
+    db: database.DatabaseInterface = md.create_backend(backend=db_opts.get('type'), **db_opts.get('options', {}))
+
+    """Create metadata database with base tables"""
+    service: md.MetadataFactory = md.MetadataFactory(tag=tag, backend=db)
+    service.create(folder=metadata_target_folder, force=True)
+
     """Add generated corpus indexes (speeches, utterances)"""
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
     factory.generate(corpus_folder=parlaclarin_folder, target_folder=metadata_target_folder)
+    factory.upload(db=db, folder=metadata_target_folder, tablenames=service.schema.derived_tablenames)
 
-    """Create metadata database with base tables"""
-    md.GenerateService(filename=database_name).create(
-        tag=tag, folder=metadata_target_folder, force=True
-    ).upload_corpus_indexes(folder=metadata_target_folder).execute_sql_scripts(folder=scripts_folder, tag=tag)
+    service.execute_sql_scripts(folder=scripts_folder)
 
     shutil.rmtree(path=metadata_folder, ignore_errors=True)
 
