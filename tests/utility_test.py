@@ -14,10 +14,48 @@ from pyriksprot import preprocess as pr
 from pyriksprot import utility as pu
 from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.iterate import ProtocolSegment
+from pyriksprot.corpus.utility import ls_corpus_by_tei_corpora, ls_corpus_folder
 
 from . import fakes
 
 jj = os.path.join
+
+
+def test_ls_corpus_by_tei_corpora():
+    folder: str = ConfigStore.config().get("corpus.folder")
+
+    dict_data: dict[str, dict[str, str | list[str]]] = ls_corpus_by_tei_corpora(
+        folder=folder, mode='dict', normalize=False
+    )
+
+    assert isinstance(dict_data, dict)
+    assert len(dict_data) == 3
+    assert set(dict_data.keys()) == {'ak', 'ek', 'fk'}
+    assert len(dict_data['ak']['filenames']) == 1
+    assert len(dict_data['fk']['filenames']) == 1
+    assert len(dict_data['ek']['filenames']) == 4
+
+    filenames: list[str] = ls_corpus_by_tei_corpora(folder=folder, mode='filenames', normalize=False)
+    assert isinstance(filenames, list)
+    assert len(filenames) == 6
+    assert './199192/prot-199192--127.xml' in filenames
+
+    filenames = ls_corpus_by_tei_corpora(folder=folder, mode='filenames', normalize=True)
+    assert isinstance(filenames, list)
+    assert len(filenames) == 6
+    assert all(f.startswith('/') for f in filenames)
+    assert any(f.endswith('199192/prot-199192--127.xml') for f in filenames)
+
+    tuples: list[str] = ls_corpus_by_tei_corpora(folder=folder, mode='tuples', normalize=False)
+    assert isinstance(tuples, list)
+    assert len(tuples) == 6
+    assert ('ek', './199192/prot-199192--127.xml') in tuples
+
+    filenames = ls_corpus_folder(folder=folder)
+    assert isinstance(filenames, list)
+    assert len(filenames) == 6
+    assert all(f.startswith(folder) for f in filenames)
+    assert any(f.endswith('199192/prot-199192--127.xml') for f in filenames)
 
 
 @pytest.mark.parametrize(
