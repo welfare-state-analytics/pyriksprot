@@ -63,7 +63,7 @@ def gh_fetch_metadata_folder(
     infos: dict[str, dict] = {}
 
     for item in items:
-        filename = basename(item.get("name"))
+        filename = basename(item["name"])
 
         infos[filename] = gh_fetch_metadata_item(filename, tag, errors, url=item.get("download_url"))
 
@@ -86,6 +86,9 @@ def gh_fetch_metadata_by_config(
 
     for tablename, cfg in schema.definitions.items():
         if tablename.startswith(':'):
+            continue
+
+        if cfg.is_derived:
             continue
 
         url: str = _resolve_url(cfg, tag, **gh_opts)
