@@ -4,7 +4,7 @@ import contextlib
 import os
 from glob import glob
 
-from ..utility import strip_path_and_extension
+from ..utility import strip_paths
 from .download import gh_fetch_metadata_folder
 from .schema import MetadataSchema
 
@@ -95,7 +95,10 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
             user=user, repository=repository, path=path, tag=tag, target_folder=None
         )
 
-        self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
+        self.left_tables: dict = {
+            self.table_configs[t].basename: self.table_configs[t].source_columns
+            for t in self.table_configs.tablesnames0
+        }
         self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
 
 
@@ -110,11 +113,16 @@ class ConfigConformsToFolderSpecification(ConformBaseSpecification):
         self.left_key: str = "config"
         self.right_key: str = folder
 
-        self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
+        self.left_tables: dict = {
+            self.table_configs[t].basename: self.table_configs[t].source_columns
+            for t in self.table_configs.tablesnames0
+        }
         self.right_tables: dict = self.get_folder_info(folder)
 
     def get_folder_info(self, folder: str) -> dict:
-        return {strip_path_and_extension(t): self.load_columns(t) for t in glob(jj(folder, "*.csv"))}
+        return {
+            self.table_configs.get_by_filename(strip_paths(t)): self.load_columns(t) for t in glob(jj(folder, "*.csv"))
+        }
 
     def load_columns(self, filename: str) -> list[str]:
         with contextlib.suppress():

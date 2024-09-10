@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-from genericpath import isfile
 import os
 import shutil
-from typing import Any
 from glob import glob
 from os.path import basename
+from typing import Any
 
 import pandas as pd
 from loguru import logger
 
 from ..interface import IProtocolParser
-from .generate import CorpusIndexFactory
+from .corpus_index_factory import CorpusIndexFactory
 from .schema import MetadataSchema, MetadataTable
 
 jj = os.path.join
@@ -42,15 +41,20 @@ def subset_to_folder(
 
     schema: MetadataSchema = MetadataSchema(tag)
 
-    filenames: set[str] = set([ basename(x) for x in glob(jj(source_folder, "*.csv")) ])
+    filenames: set[str] = {basename(x) for x in glob(jj(source_folder, "*.csv"))}
 
-    if not set(schema.filenames).issubset(filenames):
+    schema_filenames: set[str] = {x.basename for x in schema.definitions.values() if not x.is_derived}
+
+    if not set(schema_filenames).issubset(filenames):
         raise Exception("subset_to_folder: not all metadata tables defined in config found in source")
-                        
-    for filename in filenames:
 
+    for filename in filenames:
         source_name: str = jj(source_folder, filename)
         target_name: str = jj(target_folder, filename)
+
+        if filename not in schema_filenames:
+            logger.warning(f"Skipping file {filename} as it is not defined in metadata schema.")
+            continue
 
         cfg: MetadataTable = schema.get_by_filename(filename)
 
@@ -64,7 +68,9 @@ def subset_to_folder(
     protocol_ids: set[str] = {f"{x}.xml" for x in protocols['document_name']}
 
     if os.path.isfile(jj(source_folder, "unknowns.csv")):
-        copy_csv_subset(jj(source_folder, "unknowns.csv"), jj(target_folder, "unknowns.csv"), {'protocol_id': protocol_ids})
+        copy_csv_subset(
+            jj(source_folder, "unknowns.csv"), jj(target_folder, "unknowns.csv"), {'protocol_id': protocol_ids}
+        )
 
 
 def copy_csv_subset(source_name: str, target_name: str, key_values: dict[str, list[Any]]) -> None:
