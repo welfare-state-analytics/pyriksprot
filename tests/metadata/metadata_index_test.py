@@ -32,7 +32,7 @@ def dummy() -> md.Person:
 
 
 def test_code_lookups():
-    database: str = ConfigStore.config().get("metadata.database")
+    database: str = ConfigStore.config().get("metadata.database.filename")
 
     lookups: md.Codecs = md.Codecs().load(database)
     assert lookups
@@ -179,7 +179,7 @@ def test_person_index(person_index: md.PersonIndex):
 
 
 def test_overload_by_person(person_index: md.PersonIndex):
-    database: str = ConfigStore.config().get("metadata.database")
+    database: str = ConfigStore.config().get("metadata.database.filename")
 
     person_index: md.PersonIndex = md.PersonIndex(database).load()
     person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
@@ -244,7 +244,7 @@ def test_person_party_at():
 
 
 def test_speaker_info_service(person_index: md.PersonIndex):
-    database: str = ConfigStore.config().get("metadata.database")
+    database: str = ConfigStore.config().get("metadata.database.filename")
     service = md.SpeakerInfoService(database, person_index=person_index)
 
     person: md.Person = service.person_index.get_person('Q5556026')
@@ -261,7 +261,7 @@ def test_speaker_info_service(person_index: md.PersonIndex):
 
 @pytest.mark.skip("No unknown in test data")
 def test_unknown(person_index: md.PersonIndex):
-    database: str = ConfigStore.config().get("metadata.database")
+    database: str = ConfigStore.config().get("metadata.database.filename")
     service = md.SpeakerInfoService(database, person_index=person_index)
     person: md.Person = service.person_index.get_person('unknown')
 

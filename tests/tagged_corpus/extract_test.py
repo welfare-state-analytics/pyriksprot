@@ -123,7 +123,7 @@ def test_load_protocols():
 )
 def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
-    database: str = ConfigStore.config().get("metadata.database")
+    database: str = ConfigStore.config().get("metadata.database.filename")
 
     target_name: str = f'tests/output/{temporal_key}_{"_".join(group_keys)}_{uuid.uuid1()}.zip'
 
@@ -165,7 +165,7 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
 )
 def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
-    database: str = ConfigStore.config().get("metadata.database")
+    database: str = ConfigStore.config().get("metadata.database.filename")
     target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{merge_strategy}'
 
     fixed_opts: dict = dict(

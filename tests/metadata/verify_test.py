@@ -22,7 +22,7 @@ def test_tags_conform_specification():
     repository: str = ConfigValue("metadata.github.repository").resolve()
     path: str = ConfigValue("metadata.github.path").resolve()
 
-    verify.TagsConformSpecification(user=user, repository=repository, path=path, tag1="v0.5.0", tag2=tag).is_satisfied()
+    verify.TagsConformSpecification(user=user, repository=repository, path=path, tag1="v1.1.0", tag2=tag).is_satisfied()
 
 
 def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | int]:

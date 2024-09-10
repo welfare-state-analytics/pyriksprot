@@ -133,11 +133,10 @@ def generate_tagged_speech_corpora(
 #     skip_scripts: bool = False,
 # ) -> None:
 #     try:
-#         service: md.GenerateService = md.GenerateService(target)
+#         service: md.MetadataFactory = md.MetadataFactory(tag=tag, target)
 #         service.create(
-#             tag=tag,
 #             folder=source_folder,
-#             force=force,
+#             force=force
 #         )
 
 #         if load_index:
