@@ -43,7 +43,7 @@ def fix_ts_config(column: str, action: Literal['extend', 'truncate']) -> dict[st
     return {
         'fx': lambda df: fix_incomplete_datetime_series(df, column, action, inplace=True),
         'columns': {
-            f'{column}0': 'date',
+            f'{column}0': 'text',
             f'{column}_flag': 'text',
         },
     }
@@ -130,6 +130,14 @@ class MetadataTable:
     @property
     def url(self) -> str | Callable | None:
         return self.data.get(':url:')
+
+    @property
+    def is_derived(self) -> bool:
+        return self.data.get(':derived:')
+
+    @property
+    def is_extra(self) -> bool:
+        return self.data.get(':is_extra:')
 
     @property
     def rename_map(self) -> dict:
@@ -222,14 +230,8 @@ class MetadataSchema:
         }
 
     @property
-    def tablenames(self) -> list[str]:
-        tables: list[str] = list(self.data.keys())
-        return tables
-
-    @property
-    def tablesnames0(self) -> list[str]:
-        tables: list[str] = [x for x in self.tablenames if not bool(self.data[x].get(':is_extra:'))]
-        return tables
+    def tablesnames0(self) -> set[str]:
+        return {x.tablename for x in self.definitions.values() if not x.is_derived and not x.is_extra}
 
     def __getitem__(self, key: str) -> MetadataTable:
         return self.definitions[key]
@@ -240,10 +242,6 @@ class MetadataSchema:
     def items(self) -> Iterable[tuple[str, MetadataTable]]:
         return self.definitions.items()
 
-    @property
-    def person_tables(self) -> list[str]:
-        return [table for table in self.tablenames if 'person_id' in self[table].columns]
-
     def files_exist(self, folder: str) -> bool:
         """Checks that all expected files exist in given location."""
         return all(isfile(join(folder, x.basename)) for _, x in self.definitions.items())
@@ -253,8 +251,11 @@ class MetadataSchema:
             if table.basename == filename:
                 return table
         return None
-    
+
     @property
-    def filenames(self) -> list[str]:
-        return [x.basename for x in self.definitions.values()]
-    
+    def tablenames(self) -> list[str]:
+        return {cfg.tablename for cfg in self.definitions.values() if not cfg.is_derived}
+
+    @property
+    def derived_tablenames(self) -> list[str]:
+        return {cfg.tablename for cfg in self.definitions.values() if cfg.is_derived}
