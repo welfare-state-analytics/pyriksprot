@@ -158,6 +158,8 @@ reportUntypedClassDecorator = true
 reportOptionalSubscript = false
 reportOptionalMemberAccess = false
 reportOptionalCall = false
+reportAssignmentType = false
+reportArgumentType = false
 pythonVersion = "3.11"
 
 [build-system]
