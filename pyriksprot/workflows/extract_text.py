@@ -6,6 +6,7 @@ from loguru import logger
 
 from pyriksprot.corpus.iterate import ProtocolSegment
 from pyriksprot.corpus.parlaclarin import iterate
+from pyriksprot.corpus.utility import ls_corpus_by_tei_corpora
 
 from .. import dehyphenation, interface
 from .. import metadata as md
@@ -57,8 +58,11 @@ def extract_corpus_text(
         dehyphen (bool, optional): Dehyphen text. Defaults to False.
         data_path (str, optional): Path to model data (used by dedent/dehyphen). Defaults to '.'.
     """
+    ls_tei = lambda d: ls_corpus_by_tei_corpora(  # pylint: disable=unnecessary-lambda-assignment
+        d, mode='filenames', normalize=True
+    )
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
-        source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
+        source_folder=source_folder, source_pattern=ls_tei, years=years
     )
 
     lookups: md.Codecs = md.Codecs().load(source=metadata_filename)

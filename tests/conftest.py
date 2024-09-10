@@ -42,7 +42,7 @@ def xml_source_index() -> csi.CorpusSourceIndex:
     source_folder = ConfigStore.config().get("corpus.folder")
     items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
         source_folder=source_folder,
-        source_pattern='**/prot-*.xml',
+        source_pattern='**/prot-*-*.xml',
         skip_empty=False,
     )
     return items
@@ -50,13 +50,13 @@ def xml_source_index() -> csi.CorpusSourceIndex:
 
 @pytest.fixture(scope='session')
 def person_index() -> md.PersonIndex:
-    sample_metadata_database_name = ConfigStore.config().get("metadata.database")
+    sample_metadata_database_name = ConfigStore.config().get("metadata.database.filename")
     return md.PersonIndex(database_filename=sample_metadata_database_name).load()
 
 
 @pytest.fixture(scope='session')
 def speaker_service(person_index: md.PersonIndex) -> md.SpeakerInfoService:
-    sample_metadata_database_name = ConfigStore.config().get("metadata.database")
+    sample_metadata_database_name = ConfigStore.config().get("metadata.database.filename")
     return md.SpeakerInfoService(database_filename=sample_metadata_database_name, person_index=person_index)
 
 

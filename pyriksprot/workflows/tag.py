@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import importlib
 from functools import reduce
-from glob import glob
 from os.path import dirname, getmtime, isfile, join, split
 from typing import Any, Mapping, Protocol, Type, Union
 
@@ -12,6 +11,7 @@ from tqdm import tqdm
 
 from pyriksprot.corpus.parlaclarin import parse
 from pyriksprot.corpus.tagged import persist
+from pyriksprot.corpus.utility import ls_corpus_folder
 
 from .. import interface
 from .. import preprocess as pp
@@ -211,12 +211,12 @@ def tag_protocols(
     target_folder: str,
     force: bool,
     recursive: bool = False,
-    pattern: str = "**/prot-*.xml",
+    pattern: str | None = None,
 ):
     """Tags protocols in `source_folder`. Stores result in `target_folder`.
     Note: not used by Snakemake workflow (used by tag CLI script)
     """
-    source_files: list[str] = glob(join(source_folder, pattern), recursive=recursive)
+    source_files: list[str] = ls_corpus_folder(source_folder, pattern=pattern)
     for source_file in tqdm(source_files):
         target_file: str = resolve_target_filename(source_file, target_folder, recursive)
         if force or expired(target_file, source_file):

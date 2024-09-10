@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Iterable, List, Union
 from tqdm.auto import tqdm
 
 from pyriksprot.corpus.parlaclarin import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
+from pyriksprot.corpus.utility import ls_corpus_folder
 
 from ..foss.sparv_tokenize import default_tokenize
 
@@ -90,9 +91,9 @@ def compute_term_frequencies(
         else:
             if isinstance(source, str):
                 if os.path.isfile(source):
-                    filenames = [source]
+                    filenames: List[str] = [source]
                 elif os.path.isdir(source):
-                    filenames = glob(os.path.join(source, "**", "*.xml"), recursive=True)
+                    filenames = ls_corpus_folder(source)
                 else:
                     filenames = glob(source)
             elif isinstance(source, list):
