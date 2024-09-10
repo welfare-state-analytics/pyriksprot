@@ -1,6 +1,6 @@
 import os
 import sys
-from os.path import dirname, join
+from os.path import join
 
 import click
 from loguru import logger
@@ -8,6 +8,9 @@ from loguru import logger
 from pyriksprot import metadata as md
 from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
+from pyriksprot.metadata import database
+
+# pylint: disable=too-many-arguments
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
@@ -16,8 +19,8 @@ def main():
 
 
 @click.command()
-@click.argument('config_filename', type=click.STRING)
-@click.option('--tag', type=click.STRING, help='Metadata version', default=None)
+@click.argument('config_filename', type=str)
+@click.option('--tag', type=str, help='Metadata version', default=None)
 def verify_metadata_filenames(config_filename: str, tag: str = None):
     try:
         ConfigStore().configure_context(source=config_filename)
@@ -35,8 +38,8 @@ def verify_metadata_filenames(config_filename: str, tag: str = None):
 
 
 @click.command()
-@click.argument('config_filename', type=click.STRING)
-@click.argument('tags', nargs=-1, type=click.STRING)
+@click.argument('config_filename', type=str)
+@click.argument('tags', nargs=-1, type=str)
 def verify_metadata_columns(config_filename: str, tags: str):
     try:
         ConfigStore().configure_context(source=config_filename)
@@ -57,58 +60,87 @@ def verify_metadata_columns(config_filename: str, tags: str):
 
 
 @click.command()
-@click.option('--tag', type=click.STRING, help='Metadata version', default=None)
-@click.argument('target_folder', type=click.STRING)
+@click.option('--tag', type=str, help='Metadata version', default=None)
+@click.argument('target_folder', type=str)
 def download_metadata(tag: str, target_folder: str):
     md.gh_fetch_metadata_by_config(schema=md.MetadataSchema(tag=tag), tag=tag, folder=target_folder, force=True)
 
 
 @click.command()
-@click.argument('corpus_folder', type=click.STRING)
-@click.argument('target_folder', type=click.STRING)
+@click.argument('corpus_folder', type=str)
+@click.argument('target_folder', type=str)
 def create_corpus_indexes(corpus_folder: str, target_folder: str):
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
 @click.command()
-@click.argument('target', type=click.STRING)
-@click.option('--tag', type=click.STRING, help='Metadata version', default=None)
-@click.option('--source-folder', type=click.STRING, default=None)
-@click.option('--force', type=click.BOOL, is_flag=True, help='Force overwrite', default=False)
-@click.option('--load-index', type=click.BOOL, is_flag=True, help='Load utterance index', default=False)
+@click.argument('target', type=str)
+@click.argument('config_filename', type=str)
+@click.option('--target-filename', type=str, help='Sqlite target filename', default=None)
+@click.option('--tag', type=str, help='Metadata version', default=None)
+@click.option('--source-folder', type=str, default=None)
+@click.option('--force', type=bool, is_flag=True, help='Force overwrite', default=False)
+@click.option('--load-index', type=bool, is_flag=True, help='Load utterance index', default=False)
+@click.option('--corpus-folder', type=str, help='ParlaCLARIN source folder', default=None)
 @click.option(
     '--scripts-folder',
-    type=click.STRING,
+    type=str,
     help='Apply scripts in specified folder to DB. If not specified the scripts are loaded from SQL-module.',
     default=None,
 )
-@click.option('--skip-scripts', type=click.BOOL, is_flag=True, help='Skip loading SQL scripts', default=False)
+@click.option('--skip-scripts', type=bool, is_flag=True, help='Skip loading SQL scripts', default=False)
 def create_database(
-    target: str,
+    config_filename: str,
+    target_filename: str = None,
     tag: str = None,
     source_folder: str = None,
     force: bool = False,
     scripts_folder: str = None,
-    load_index: bool = True,
+    create_index: bool = True,
+    corpus_folder: str = None,
     skip_scripts: bool = False,
 ) -> None:
+    """Create a database from metadata configuration"""
     try:
-        service: md.GenerateService = md.GenerateService(filename=target)
-        service.create(tag=tag, folder=source_folder, force=force)
+        ConfigStore().configure_context(source=config_filename)
 
-        if load_index:
-            logger.info("loading index...")
-            service.upload_corpus_indexes(folder=source_folder or dirname(target))
+        tag: str = tag or ConfigValue("version").resolve()
+
+        db: md.DatabaseInterface = resolve_backend(target_filename)
+
+        service: md.MetadataFactory = md.MetadataFactory(tag=tag, backend=db, **db.opts)
+        service.create(folder=source_folder, force=force)
+
+        if create_index:
+            logger.info("generating indexes...")
+
+            corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
+
+            factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
+            factory.generate(corpus_folder=corpus_folder, target_folder=source_folder)
+            factory.upload(db=db, folder=source_folder, tablenames=service.schema.derived_tablenames)
 
         if not skip_scripts:
             logger.info(f"loading scripts from {scripts_folder if scripts_folder else 'sql module'}...")
-            service.execute_sql_scripts(folder=scripts_folder, tag=tag)
+            service.execute_sql_scripts(folder=scripts_folder)
 
     except Exception as ex:
         logger.error(ex)
         click.echo(ex)
         sys.exit(1)
+
+
+def resolve_backend(target_filename) -> md.DatabaseInterface:
+    if target_filename:
+        backend = database.SqliteDatabase
+        opts: dict = {'filename': target_filename}
+    else:
+        backend: str = ConfigValue("metadata.database.type").resolve()
+        opts: dict = ConfigValue("metadata.database.options").resolve()
+
+    db: database.DatabaseInterface = database.create_backend(backend=backend, **opts)
+    return db
 
 
 # type: ignore

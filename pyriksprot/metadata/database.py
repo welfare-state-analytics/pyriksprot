@@ -1,25 +1,32 @@
 import abc
 import sqlite3
+from calendar import c
 from os.path import basename
 from typing import Any, Self, Type
 
 import numpy as np
 import pandas as pd
+import psycopg2
+import psycopg2.sql
 from loguru import logger
+from psycopg2 import extensions as pg
+from psycopg2 import extras as pgx
+from sqlalchemy import create_engine
 
 from pyriksprot.metadata.utility import slim_table_types
-from pyriksprot.utility import ensure_path, reset_file
+from pyriksprot.utility import create_class, ensure_path, reset_file
 
 
 class SqlCompiler:
     def to_create(self, tablename: str, columns_specs: dict[str, str], constraints: list[str]) -> str:
         lf: str = '\n' + (4 * ' ')
-        constraints: str = f",{lf}".join(constraints)
-        if constraints:
-            constraints: str = f",{lf}{constraints}"
+        constraints = [c for c in constraints if not c.strip().startswith('--')]
+        clause: str = f",{lf}".join(constraints)
+        if clause:
+            clause: str = f",{lf}{clause}"
         sql_ddl: str = f"""
 create table {tablename} (
-    {(','+lf).join(f'"{k}" {t}' for k, t in columns_specs.items())}{constraints}
+    {(','+lf).join(f'"{k}" {t}' for k, t in columns_specs.items())}{clause}
 );
 """
         return sql_ddl
@@ -34,14 +41,16 @@ create table {tablename} (
 
 class DatabaseInterface(abc.ABC):
     def __init__(self, **opts):
-        self.opts: str = opts
+        self.opts: dict[str, Any] = opts
         self.session_depth: int = 0
         self.compiler: SqlCompiler = opts.get("compiler") or SqlCompiler()
+        self.quote_chars: str | tuple[str, str] = ('"', '"')
 
     def open(self) -> Self:
         self.session_depth += 1
         if self.session_depth == 1:
             self._open()
+        return self
 
     def close(self) -> None:
         self.session_depth = max(0, self.session_depth - 1)
@@ -49,7 +58,7 @@ class DatabaseInterface(abc.ABC):
             self._close()
 
     @abc.abstractmethod
-    def _open(self) -> None:
+    def _open(self) -> Self:
         ...
 
     @abc.abstractmethod
@@ -86,31 +95,27 @@ class DatabaseInterface(abc.ABC):
             self.execute_script(
                 f"""
                 create table if not exists version (
-                    version text
+                    version text primary key
                 );
                 delete from version;
                 insert into version(version) values ('{tag}');
             """
             )
 
-    def create(self, tablename: str, columns: dict[str, str], constraints: list[str]) -> None:
+    def create(self, tablename: str, columns: dict[str, str], constraints: list[str]) -> Self:
+        sql: str = ""
         try:
             sql: str = self.compiler.to_create(tablename, columns, constraints)
             self.execute_script(sql)
-        except sqlite3.DatabaseError as e:
+        except Exception as e:
             logger.error(f"Error creating table: {tablename}")
             logger.error(f"SQL: {sql}")
             logger.error(e)
         return self
 
     @abc.abstractmethod
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> None:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
         """Loads dataframe into the database."""
-        # FIXME: Consolidate with store2 method
-        ...
-
-    @abc.abstractmethod
-    def store2(self, *, data: pd.DataFrame, tablename: str) -> None:
         ...
 
     def load_script(self, *, filename) -> None:
@@ -126,25 +131,45 @@ class DatabaseInterface(abc.ABC):
             logger.error(e)
             raise
 
-    def drop(self, tablename: str) -> None:
-        with self:
-            self.execute_script(f"drop table if exists {tablename};")
-        return self
-
     @abc.abstractmethod
-    def fetch_tables(self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None):
+    def drop(self, tablename: str, cascade: bool = False) -> Self:
         ...
 
-    def create_database(self, tag: str, force: bool) -> None:
+    @abc.abstractmethod
+    def fetch_tables(
+        self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None
+    ) -> dict[str, pd.DataFrame]:
+        ...
+
+    def create_database(self, tag: str, force: bool) -> Self:
+        ...
+
+    def quote(self, value: Any) -> str:
+        if isinstance(value, str):
+            return f'{self.quote_chars[0]}{value}{self.quote_chars[1]}'
+        return str(value)
+
+    @abc.abstractmethod
+    def set_deferred(self, value: bool) -> None:
+        with self:
+            self.execute_script(f"pragma defer_foreign_keys = {int(value)};")
+
+    @abc.abstractmethod
+    def exists(self, tablename: str) -> bool:
+        ...
+
+    @abc.abstractmethod
+    def set_foreign_keys(self, value: bool) -> None:
         ...
 
 
 class SqliteDatabase(DatabaseInterface):
     def __init__(self, **opts):
         super().__init__(**opts)
-        self.connection: sqlite3.Connection = None
+        self.quote_chars: str | tuple[str, str] = ('"', '"')
+        self.connection: sqlite3.Connection | None = None
 
-        self.filename: str = opts.get("filename")  # or ":memory:"
+        self.filename: str | None = opts.get("filename")  # or ":memory:"
 
         self.register_numpy_adapters()
 
@@ -159,7 +184,7 @@ class SqliteDatabase(DatabaseInterface):
 
     def _open(self) -> Self:
         if not self.connection:
-            self.connection: sqlite3.Connection = sqlite3.connect(self.filename)
+            self.connection = sqlite3.connect(self.filename)
         return self
 
     def _close(self):
@@ -168,6 +193,16 @@ class SqliteDatabase(DatabaseInterface):
         self.connection.commit()
         self.connection.close()
         self.connection = None
+
+    def set_deferred(self, value: bool) -> None:
+        if value:
+            self.connection.execute("pragma defer_foreign_keys = on;")
+        else:
+            self.connection.execute("pragma defer_foreign_keys = off;")
+
+    def set_foreign_keys(self, value: bool) -> None:
+        with self:
+            self.execute_script(f"pragma foreign_keys = {'on' if value else 'off'};")
 
     def commit(self) -> None:
         if self.connection is None:
@@ -194,11 +229,11 @@ class SqliteDatabase(DatabaseInterface):
         with self:
             return pd.read_sql(sql, self.connection)
 
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> None:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
         """Loads dataframe into the database"""
         try:
-            data: np.recarray = data.to_records(index=False)
-            columns: list[str] = columns or data.columns.to_list()
+            data = data.to_records(index=False)
+            columns = columns or data.columns.to_list()
             with self:
                 sql: str = self.compiler.to_insert(tablename, columns)
                 self.connection.executemany(sql, data).close()
@@ -207,14 +242,6 @@ class SqliteDatabase(DatabaseInterface):
             logger.error(f"Error loading table: {tablename}")
             logger.error(e)
             raise
-
-    def store2(self, *, data: pd.DataFrame, tablename: str) -> None:
-        """Loads datafrane into the database."""
-        logger.info(f"loading table: {tablename}")
-        with self:
-            data.to_sql(tablename, self.connection, if_exists="replace")
-
-        return self
 
     def fetch_tables(
         self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None
@@ -252,9 +279,9 @@ class SqliteDatabase(DatabaseInterface):
     def fetch_table_info(self, table_name: str) -> pd.DataFrame:
         """Returns table information"""
         with self:
-            return self.fetch_sql()(f"select * from PRAGMA_TABLE_INFO('{table_name}');")
+            return self.fetch_sql(f"select * from PRAGMA_TABLE_INFO('{table_name}');")
 
-    def create_database(self, tag: str, force: bool) -> None:
+    def create_database(self, tag: str, force: bool) -> Self:
         """Resets the database by dropping all tables and creating a version table"""
 
         ensure_path(self.filename)
@@ -263,10 +290,214 @@ class SqliteDatabase(DatabaseInterface):
         self.version = tag
         return self
 
+    def exists(self, tablename: str) -> bool:
+        return (
+            self.fetch_scalar(f"select count(name) from sqlite_master where type='table' and name='{tablename}'") == 1
+        )
+
+    def drop(self, tablename: str, cascade: bool = False) -> Self:
+        with self:
+            if cascade:
+                self.set_foreign_keys(False)
+            self.execute_script(f"drop table if exists {tablename};")
+        return self
+
 
 class PostgresDatabase(DatabaseInterface):
     def __init__(self, **opts):
         super().__init__(**opts)
+        self.connection: None | pg.connection = None
+        self.quote_chars: str | tuple[str, str] = ('"', '"')
+
+    def _open(self) -> Self:
+        if not self.connection:
+            self.connection = psycopg2.connect(**self.opts)
+        return self
+
+    def _close(self):
+        if self.connection is None:
+            return
+        self.connection.commit()
+        self.connection.close()
+        self.connection = None
+
+    def commit(self) -> None:
+        if self.connection is None:
+            return
+        self.connection.commit()
+
+    def set_deferred(self, value: bool) -> None:
+        with self.connection.cursor() as cursor:
+            if value:
+                cursor.execute("set constraints all deferred;")
+            else:
+                cursor.execute("set constraints all immediate;")
+
+    def set_foreign_keys(self, value: bool) -> None:
+        self.set_deferred(value)
+
+    def execute_script(self, sql: str) -> None:
+        """Executes a script in the database"""
+        with self:
+            with self.connection.cursor() as cursor:
+                cursor.execute(sql)
+
+    def fetch_one(self, sql: str) -> list[Any]:
+        """Fetches a single row from the database"""
+        with self:
+            with self.connection.cursor() as cursor:
+                cursor.execute(sql)
+                return list(cursor.fetchone() or [None])
+
+    def fetch_scalar(self, sql: str) -> Any:
+        """Fetches a single value from the database"""
+        return self.fetch_one(sql)[0]
+
+    def fetch_sql(self, sql: str) -> pd.DataFrame:
+        """Reads a table from the database"""
+        with self:
+            with self.connection.cursor() as cursor:
+                data: list[tuple[Any, ...]] = cursor.fetchall()
+                columns: list[str] = [desc[0] for desc in cursor.description]
+                df = pd.DataFrame(data, columns=columns)
+                return df
+
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
+        """Loads dataframe into the database into the specified existing table"""
+        try:
+            columns = columns or data.columns.to_list()
+            data = data[columns].where(pd.notnull(data), None)
+
+            data_tuples: list[tuple[Any, ...]] = [tuple(row) for row in data.itertuples(index=False, name=None)]
+            insert_query: str = f'insert into {tablename} ({", ".join(map(self.quote, columns))}) values %s'
+
+            with self.connection.cursor() as cursor:
+                pgx.execute_values(cursor, insert_query, data_tuples)
+
+            return self
+        except Exception as e:  # noqa
+            logger.error(f"Error loading table: {tablename}")
+            logger.error(e)
+            raise
+
+    def fetch_tables(
+        self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None
+    ) -> dict[str, pd.DataFrame]:
+        """Loads tables as pandas dataframes, slims types, fills NaN, sets pandas index"""
+        data: dict[str, pd.DataFrame] = {}
+        with self:
+            for table_name, primary_key in tables.items():
+                data[table_name] = self.fetch_table(table_name, primary_key=primary_key, defaults=defaults, types=types)
+        return data
+
+    def fetch_table(
+        self, table_name: str, *, primary_key: str = None, defaults: dict[str, Any] = None, types: dict[str, Any] = None
+    ) -> pd.DataFrame:
+        """Reads a table from the database"""
+        data: pd.DataFrame = self.fetch_sql(f"select * from {table_name}")
+
+        table_info: pd.DataFrame = self.fetch_table_info(table_name)
+
+        if table_info is not None:
+            data = _set_optimal_types(data, table_info)
+
+        if primary_key:
+            data.set_index(primary_key, drop=True, inplace=True)
+
+        slim_table_types(data, defaults=defaults, types=types)
+
+        return data
+
+    def fetch_table_info(self, table_name: str) -> pd.DataFrame:
+        """Returns table information"""
+        with self:
+            query = f"""
+                select column_name, data_type
+                from information_schema.columns
+                where table_name = '{table_name}';
+            """
+            return pd.read_sql(query, self.connection)
+
+    def create_database(self, tag: str, force: bool) -> Self:
+        """Resets the database by dropping all tables and creating a version table"""
+        db: str = f"riksprot_metadata_{tag.replace('.', '_')}"
+        connection: pg.connection = psycopg2.connect(**(self.opts | {'database': 'postgres'}))
+        try:
+            connection.autocommit = True
+            with connection.cursor() as cursor:
+                cursor.execute(f"drop database if exists {db};")
+                cursor.execute(f"create database {db};")
+        finally:
+            connection.close()
+
+        self.version = tag
+        return self
+
+    def exists(self, tablename: str) -> bool:
+        return (
+            self.fetch_scalar(
+                f"select count(table_name) from information_schema.tables where table_name = '{tablename}'"
+            )
+            == 1
+        )
+
+    def drop(self, tablename: str, cascade: bool = False) -> Self:
+        with self:
+            self.execute_script(f"drop table if exists {tablename} {'cascade' if cascade else ''};")
+        return self
+
+
+def _map_postgres_types_to_pandas(postgres_type: str):
+    """Map PostgreSQL data types to Pandas dtypes."""
+    if postgres_type == 'integer':
+        return 'Int64'  # nullable integer in Pandas
+    elif postgres_type == 'bigint':
+        return 'Int64'
+    elif postgres_type == 'numeric' or postgres_type == 'double precision':
+        return 'float'
+    elif postgres_type == 'character varying' or postgres_type == 'text':
+        return 'string'
+    elif postgres_type == 'boolean':
+        return 'bool'
+    elif postgres_type == 'date':
+        return 'datetime64[ns]'
+    elif postgres_type == 'timestamp without time zone' or postgres_type == 'timestamp with time zone':
+        return 'datetime64[ns]'
+
+    return 'object'  # fallback to generic object
+
+
+def _set_optimal_types(df: pd.DataFrame, schema_df: pd.DataFrame) -> pd.DataFrame:
+    """Set optimal types for the DataFrame columns based on the table schema."""
+    for _, row in schema_df.iterrows():
+        col_name = row['column_name']
+        pg_type = row['data_type']
+
+        # Get corresponding Pandas type
+        pandas_type = _map_postgres_types_to_pandas(pg_type)
+
+        if col_name in df.columns:
+            try:
+                df[col_name] = df[col_name].astype(pandas_type)
+            except Exception as e:
+                print(f"Error converting column {col_name} to {pandas_type}: {e}")
+
+    return df
 
 
 DefaultDatabaseType: Type[DatabaseInterface] = SqliteDatabase
+
+
+def create_backend(
+    backend: DatabaseInterface | str = DefaultDatabaseType | Type[DatabaseInterface], **opts
+) -> DatabaseInterface:
+    db: DatabaseInterface = (
+        backend
+        if isinstance(backend, DatabaseInterface)
+        else (
+            create_class(backend)(**opts)
+            if isinstance(backend, str)
+            else (backend(**opts) if issubclass(backend, DatabaseInterface) else DefaultDatabaseType(**opts))
+        )
+    )
+    return db

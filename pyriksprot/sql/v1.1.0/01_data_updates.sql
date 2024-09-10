@@ -1,7 +1,7 @@
 
--- insert into _person values ('unknown', null, null, 'unknown', null, null, null);
+insert into _person (person_id, born, dead, gender, riksdagen_id) values ('unknown', null, null, 'unknown', null);
 
--- insert into _name values ('unknown', 'unknown', 1);
+insert into _name values ('unknown', 'unknown', 1);
 
 update _party_abbreviation
     set abbreviation = 'FRIS'
@@ -72,9 +72,9 @@ create table if not exists _party_abbreviation_jj (
             from _party_abbreviation_jj_data;
 
 
-insert into _party_abbreviation (party, abbreviation, ocr_correction)
-    select party, abbreviation, ocr_correction
-    from _party_abbreviation_jj
-    where TRUE
-        on conflict(party) do update set abbreviation = excluded.abbreviation, ocr_correction=excluded.ocr_correction
-;
+-- insert into _party_abbreviation (party, abbreviation, ocr_correction)
+--     select party, abbreviation, ocr_correction
+--     from _party_abbreviation_jj
+--     where TRUE
+--         on conflict(party) do update set abbreviation = excluded.abbreviation, ocr_correction=excluded.ocr_correction
+-- ;

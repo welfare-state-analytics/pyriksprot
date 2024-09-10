@@ -1,5 +1,7 @@
+select 'execute_script: cleanup.sql deprecated' as "notice";
+
 -- drop table unknowns;
-alter table unknowns rename to _unknowns;
+-- alter table unknowns rename to _unknowns;
 
 -- alter table terms_of_office drop column _government_id;
 
@@ -34,6 +36,5 @@ insert into terms_of_office (
   from _terms_of_office;
 
 commit;
-*/
-
 pragma foreign_keys=on;
+*/
