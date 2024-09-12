@@ -64,7 +64,7 @@ def sample_metadata_exists() -> bool:
 
 
 def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
-    folder: str = folder or ConfigValue("tagged_frames:folder").resolve()
+    folder = folder or ConfigValue("tagged_frames:folder").resolve()
     test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt', extension='zip')
     return all(isfile(jj(folder, f"{x}.zip")) or jj(folder, x.split('-')[1], x) for x in test_protocols)
 
@@ -103,10 +103,10 @@ def ensure_test_corpora_exist(
     root_folder: str = None,
     database: str = None,
 ):
-    corpus_version: str = corpus_version or ConfigValue("corpus:version").resolve()
-    tagged_source_folder: str = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
-    root_folder: str = root_folder or ConfigValue("root_folder").resolve()
-    database: str = database or ConfigValue("metadata:database").resolve()
+    corpus_version = corpus_version or ConfigValue("corpus:version").resolve()
+    tagged_source_folder = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
+    root_folder = root_folder or ConfigValue("root_folder").resolve()
+    database = database or ConfigValue("metadata:database").resolve()
     gh_metadata_opts: dict[str, str] = ConfigValue("metadata:github").resolve()
     gh_records_opts: dict[str, str] = ConfigValue("corpus:github").resolve()
 
