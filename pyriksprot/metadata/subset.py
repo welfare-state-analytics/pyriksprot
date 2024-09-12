@@ -29,7 +29,9 @@ def subset_to_folder(
     logger.info(f"  Target metadata folder: {target_folder}")
 
     data: dict[str, pd.DataFrame] = (
-        CorpusIndexFactory(parser).generate(corpus_folder=protocols_source_folder, target_folder=target_folder).data
+        CorpusIndexFactory(parser, schema=tag)
+        .generate(corpus_folder=protocols_source_folder, target_folder=target_folder)
+        .data
     )
 
     protocols: pd.DataFrame = data.get("protocols")

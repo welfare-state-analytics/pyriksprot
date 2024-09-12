@@ -497,10 +497,10 @@ def load_json(url: str) -> list[dict]:
     return json.loads(urlopen(url).read())
 
 
-def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
+def probe_filename(filename: str, exts: list[str] = None) -> str:
     """Probes existence of filename with any of given extensions in folder"""
 
-    for probe_name in set([filename] + ([replace_extension(filename, ext) for ext in exts] if exts else [])):
+    for probe_name in [filename] + [replace_extension(filename, ext) for ext in (exts or [])]:
         if isfile(probe_name):
             return probe_name
 

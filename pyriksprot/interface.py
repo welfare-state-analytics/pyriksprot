@@ -95,7 +95,7 @@ class IProtocol(abc.ABC):
     date: str
     name: str
     utterances: list[Utterance]
-    speaker_notes: dict[str, str]
+    speaker_notes: dict[str, SpeakerNote]
     page_references: list[PageReference] = []
 
     @abc.abstractmethod
@@ -115,7 +115,7 @@ class IProtocol(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def get_speaker_notes(self) -> dict[str, str]:
+    def get_speaker_notes(self) -> dict[str, SpeakerNote]:
         ...
 
 
@@ -406,7 +406,7 @@ class Protocol(UtteranceMixIn, IProtocol):
         date: str,
         name: str,
         utterances: list[Utterance],
-        speaker_notes: dict[str, str],
+        speaker_notes: dict[str, SpeakerNote],
         page_references: list[PageReference],
         **_,
     ):
@@ -414,7 +414,7 @@ class Protocol(UtteranceMixIn, IProtocol):
         self.name: str = name
         self.utterances: list[Utterance] = utterances
         self.page_references: list[PageReference] = page_references
-        self.speaker_notes: dict[str, str] = speaker_notes or {}
+        self.speaker_notes: dict[str, SpeakerNote] = speaker_notes or {}
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
         """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
@@ -442,7 +442,7 @@ class Protocol(UtteranceMixIn, IProtocol):
     def get_content(self, content_type: ContentType) -> str:
         return self.text if content_type == ContentType.Text else self.tagged_text
 
-    def get_speaker_notes(self) -> dict[str, str]:
+    def get_speaker_notes(self) -> dict[str, SpeakerNote]:
         return self.speaker_notes
 
 
