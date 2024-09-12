@@ -49,7 +49,7 @@ def subset_corpus_and_metadata(
 
     root_folder: str = join(target_folder or "", tag or "")
 
-    metadata_folder: str = join(root_folder, "tmp")
+    tmp_folder: str = join(root_folder, "tmp")
     parlaclarin_folder: str = join(root_folder, "parlaclarin")
     metadata_target_folder: str = join(parlaclarin_folder, "metadata")
     protocols_target_folder: str = join(parlaclarin_folder, "protocols")
@@ -57,14 +57,10 @@ def subset_corpus_and_metadata(
     if isinstance(documents, str):
         documents = load_document_patterns(documents, extension='xml')
 
-    # FIXME Remove this if statement
-    update_metadata: bool = False
-
-    if update_metadata or not exists(metadata_folder):
+    if force or not exists(tmp_folder):
         reset_folder(root_folder, force=force)
-
         md.gh_fetch_metadata_folder(
-            target_folder=metadata_folder,
+            target_folder=tmp_folder,
             **gh_metadata_opts,
             tag=tag,
             force=True,
@@ -89,7 +85,7 @@ def subset_corpus_and_metadata(
         ProtocolMapper,
         tag=tag,
         protocols_source_folder=parlaclarin_folder,
-        source_folder=metadata_folder,
+        source_folder=tmp_folder,
         target_folder=metadata_target_folder,
     )
 
@@ -100,13 +96,13 @@ def subset_corpus_and_metadata(
     service.create(folder=metadata_target_folder, force=True)
 
     """Add generated corpus indexes (speeches, utterances)"""
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
     factory.generate(corpus_folder=parlaclarin_folder, target_folder=metadata_target_folder)
-    factory.upload(db=db, folder=metadata_target_folder, tablenames=service.schema.derived_tablenames)
+    factory.upload(db=db, folder=metadata_target_folder)
 
     service.execute_sql_scripts(folder=scripts_folder)
 
-    shutil.rmtree(path=metadata_folder, ignore_errors=True)
+    shutil.rmtree(path=tmp_folder, ignore_errors=True)
 
 
 def load_document_patterns(filename: str, extension: str = None) -> list[str]:
