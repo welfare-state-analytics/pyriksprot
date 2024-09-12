@@ -37,10 +37,6 @@ def generate_complete_sample_data(force: bool):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_corpus_and_metadata(force: bool = False):
-    version: str = ConfigValue("corpus:version").resolve()
-    root_folder: str = ConfigValue("root_folder").resolve()
-    gh_metadata_opts: dict = ConfigValue("metadata:github").resolve()
-    gh_records_opts: dict = ConfigValue("corpus:github").resolve()
 
     try:
         if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
@@ -50,11 +46,15 @@ def generate_corpus_and_metadata(force: bool = False):
         filenames: list[str] = get_test_documents(extension="xml")
 
         subset_corpus_and_metadata(
-            tag=version,
-            target_folder=root_folder,
             documents=filenames,
-            gh_metadata_opts=gh_metadata_opts,
-            gh_records_opts=gh_records_opts,
+            source_folder=None,
+            target_folder=ConfigValue("root_folder").resolve(),
+            tag=ConfigValue("corpus:version").resolve(),
+            scripts_folder=None,
+            gh_metadata_opts= ConfigValue("metadata:github").resolve(),
+            gh_records_opts=ConfigValue("corpus:github").resolve(),
+            db_opts=ConfigValue("metadata:database").resolve(),
+            force=force
         )
 
     except ValueError as ex:
@@ -67,7 +67,7 @@ def generate_corpus_and_metadata(force: bool = False):
 @click.argument('source-folder', type=str, required=True)
 @click.argument('target-folder', type=str, required=False)
 def generate_tagged_frames(force: bool = False, source_folder: str = None, target_folder: str = None):
-    target_folder: str = target_folder or ConfigValue("tagged_frames:folder").resolve()
+    target_folder = target_folder or ConfigValue("tagged_frames:folder").resolve()
     try:
         if sample_tagged_frames_corpus_exists(target_folder):
             if not force:
@@ -93,7 +93,7 @@ def generate_tagged_speech_corpora(
     force: bool = False, tag: str = None, database: str = None, source_folder: str = None
 ):
     version: str = tag or ConfigValue("corpus:version").resolve()
-    database: str = database or ConfigValue("metadata:database").resolve()
+    database = database or ConfigValue("metadata:database").resolve()
     try:
         if sample_tagged_speech_corpus_exists():
             if not force:
@@ -108,60 +108,6 @@ def generate_tagged_speech_corpora(
     except ValueError as ex:
         logger.error(ex)
         sys.exit(-1)
-
-
-# @click.command()
-# @click.argument('target', type=click.STRING)
-# @click.option('--tag', type=click.STRING, help='Metadata version', default=None)
-# @click.option('--source-folder', type=click.STRING, default=None)
-# @click.option('--force', type=click.BOOL, is_flag=True, help='Force overwrite', default=False)
-# @click.option('--load-index', type=click.BOOL, is_flag=True, help='Load utterance index', default=False)
-# @click.option(
-#     '--scripts-folder',
-#     type=click.STRING,
-#     help='Apply scripts in specified folder to DB. If not specified the scripts are loaded from SQL-module.',
-#     default=None,
-# )
-# @click.option('--skip-scripts', type=click.BOOL, is_flag=True, help='Skip loading SQL scripts', default=False)
-# def create_database(
-#     target: str,
-#     tag: str = None,
-#     source_folder: str = None,
-#     force: bool = False,
-#     scripts_folder: str = None,
-#     load_index: bool = True,
-#     skip_scripts: bool = False,
-# ) -> None:
-#     try:
-#         service: md.MetadataFactory = md.MetadataFactory(tag=tag, target)
-#         service.create(
-#             folder=source_folder,
-#             force=force
-#         )
-
-#         if load_index:
-#             logger.info("loading index...")
-#             service.load_corpus_indexes(folder=source_folder or dirname(target))
-
-#         if not skip_scripts:
-#             logger.info(f"loading scripts from {scripts_folder if scripts_folder else 'sql module'}...")
-#             service.load_scripts(folder=scripts_folder)
-
-#     except Exception as ex:
-#         logger.error(ex)
-#         click.echo(ex)
-#         sys.exit(1)
-
-
-# # type: ignore
-
-
-# def setup_logs(log_folder: str = "./tests/output"):
-#     os.makedirs(log_folder, exist_ok=True)
-
-#     logger.remove(0)
-#     logger.add(join(log_folder, "{time:YYYYMMDDHHmmss}_testdata.log"), backtrace=True, diagnose=True)
-
 
 if __name__ == "__main__":
     main.add_command(generate_complete_sample_data, "complete")
