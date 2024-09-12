@@ -57,7 +57,11 @@ def gh_fetch_metadata_folder(
     """Returns name, headers and content for each metadata CSV file for given tag. Optionally stores content in folder"""
 
     if target_folder is not None:
+        
         reset_folder(target_folder, force=force)
+
+        with open(jj(target_folder, 'version'), 'w', encoding="utf-8") as fp:
+            fp.write(tag)
 
     items: list[dict] = gh_ls(user, repository, path, tag, pattern="*.csv")
     infos: dict[str, dict] = {}
@@ -68,6 +72,7 @@ def gh_fetch_metadata_folder(
         infos[filename] = gh_fetch_metadata_item(filename, tag, errors, url=item.get("download_url"))
 
         gh_store_metadata_item(target_folder, infos[filename])
+
 
     return infos
 
