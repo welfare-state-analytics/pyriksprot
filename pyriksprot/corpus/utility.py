@@ -1,15 +1,11 @@
-import fnmatch
 import glob
 import os
 import re
 import shutil
-import xml
 import xml.etree.ElementTree as ET
-from calendar import c
-from collections import defaultdict
 from os.path import abspath, basename, expanduser
 from os.path import join as jj
-from typing import Any, Generator, Literal
+from typing import Literal
 from urllib.parse import quote as q
 from urllib.request import urlretrieve
 
@@ -50,9 +46,9 @@ def ls_corpus_by_tei_corpora(
         }
     if mode == 'dict':
         return data
-    elif mode == 'filenames':
+    if mode == 'filenames':
         return [filename for item in data.values() for filename in item['filenames']]
-    elif mode == 'tuples':
+    if mode == 'tuples':
         return [(item['chamber'], filename) for item in data.values() for filename in item['filenames']]
     return data
 
@@ -66,7 +62,7 @@ def ls_corpus_folder(folder: str, pattern: str = None) -> list[str]:
         return glob.glob(jj(folder, '**', pattern), recursive=True)
 
     regex_pattern: str = r'prot-\d*-.*-\d*\.xml'
-    rx: re.Pattern[str] = re.compile(pattern)
+    rx: re.Pattern[str] = re.compile(regex_pattern)
     candidates: list[str] = glob.glob(jj(folder, '**', 'prot-*.xml'), recursive=True)
     return [f for f in candidates if rx.match(basename(f))]
 
