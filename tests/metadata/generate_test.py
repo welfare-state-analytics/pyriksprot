@@ -106,8 +106,11 @@ def store_sql_script(tag: str) -> str:
     return script
 
 
+@pytest.mark.skip("Infrastructure test only")
 def test_create_metadata_database_DEVELOP():
-    ConfigStore.configure_context(source='tests/config.yml')
+    ConfigStore.configure_context(source='configs/config.yml')
+    # ConfigStore.configure_context(source='configs/config_postgres.yml')
+    # ConfigStore.configure_context(source='tests/config.yml')
 
     corpus_folder: str = ConfigValue("corpus.folder").resolve()
 
