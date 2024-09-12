@@ -6,7 +6,7 @@ version: &version v1.1.0
 corpus:
   version: *version
   folder: /data/riksdagen_corpus_data/riksdagen-records/data
-  pattern: "**/prot-*.xml"
+  pattern: "**/prot-*-*.xml"
   github:
     user: swerik-project
     repository: riksdagen-records
@@ -19,7 +19,18 @@ fakes:
 metadata:
   version: *version
   folder: /data/riksdagen_corpus_data/metadata/v1.1.0
-  database: /data/riksdagen_corpus_data/metadata/riksprot_metadata.v1.1.0.db
+  database:
+    type: pyriksprot.metadata.database.SqliteDatabase
+    options:
+      filename: /data/riksdagen_corpus_data/metadata/riksprot_metadata.v1.1.0.db
+    # type: pyriksprot.metadata.database.PostgresDatabase
+    # options:
+    #   # filename: /data/riksdagen_corpus_data/metadata/riksprot_metadata.v1.1.0.db
+    #   host: humlabseadserv.srv.its.umu.se
+    #   database: riksprot_metadata_v1_1_0
+    #   user: humlab_admin
+    #   password: xyz
+    #   port: 5433
   github:
     user: swerik-project
     repository: riksdagen-persons
