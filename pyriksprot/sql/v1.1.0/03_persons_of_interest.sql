@@ -22,7 +22,7 @@ create table persons_of_interest (
    "year_of_birth" integer null,
    "year_of_death" integer null,
    "has_multiple_parties" bool not null default(FALSE),
-   "wiki_id" text not null default('unknown'),
+   "wiki_id" text not null default('unknown')
 );
 
 delete from persons_of_interest;
