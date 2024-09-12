@@ -40,7 +40,9 @@ def test_gh_fetch_metadata_by_config():
     target_folder: str = jj('./metadata/data/', version)
     schema: md.MetadataSchema = md.MetadataSchema(version)
     md.gh_fetch_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True, errors='raise')
-    assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in schema.tablesnames0)
+    assert all(
+        os.path.isfile(jj(target_folder, cfg.basename)) for cfg in schema.definitions.values() if not cfg.is_derived
+    )
 
 
 def test_gh_fetch_metadata_folder():
@@ -94,6 +96,7 @@ def test_subset_corpus_and_metadata(test_protocols: list[str]):
     gh_metadata_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
     gh_records_opts: dict[str, str] = ConfigValue("corpus.github").resolve()
     source_folder: str = ConfigValue("global.corpus.folder").resolve()
+    db_opts: dict[str, str] = ConfigValue("metadata.database").resolve()
 
     subset_corpus_and_metadata(
         source_folder=source_folder,
@@ -102,6 +105,7 @@ def test_subset_corpus_and_metadata(test_protocols: list[str]):
         documents=test_protocols,
         gh_metadata_opts=gh_metadata_opts,
         gh_records_opts=gh_records_opts,
+        db_opts=db_opts,
     )
 
 
@@ -109,12 +113,8 @@ def test_subset_corpus_and_metadata(test_protocols: list[str]):
 def test_setup_sample_speech_corpora():
     version: str = ConfigValue("version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
-    database: str = ConfigValue("metadata.database").resolve()
-    create_test_speech_corpus(
-        source_folder=tagged_folder,
-        tag=version,
-        database_name=database,
-    )
+    database: str = ConfigValue("metadata.database.filename").resolve()
+    create_test_speech_corpus(source_folder=tagged_folder, tag=version, database_name=database)
 
 
 @pytest.mark.skip(reason="Test infrastructure test")

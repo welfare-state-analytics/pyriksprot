@@ -2,6 +2,8 @@ import os
 import pathlib
 import shutil
 import uuid
+from typing import Any
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -10,6 +12,7 @@ import pyriksprot.sql as sql
 from pyriksprot import gitchen as gh
 from pyriksprot import metadata as md
 from pyriksprot.configuration import ConfigValue
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.metadata import database
 from pyriksprot.metadata.schema import MetadataSchema
@@ -55,14 +58,14 @@ def test_gh_fetch_metadata_folder(tmp_path: pathlib.Path):
 
 def test_get_and_set_db_version():
     dummy_db_name: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
-
-    service: md.GenerateService = md.GenerateService(filename=dummy_db_name)
-
     tag: str = "kurt"
+
+    service: md.MetadataFactory = md.MetadataFactory(tag=tag, schema=MagicMock(), filename=dummy_db_name)
+
     service.db.version = tag
     stored_tag: str = service.db.version
     assert tag == stored_tag
-    service.verify_tag(tag=tag)
+    service.verify_tag()
 
     tag: str = "olle"
     service.db.version = tag
@@ -72,22 +75,24 @@ def test_get_and_set_db_version():
 
 
 def test_create_metadata_database():
-    ensure_test_corpora_exist(force=True)
+    # ensure_test_corpora_exist(force=True)
 
     tag: str = ConfigValue("metadata.version").resolve()
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
-    service: md.GenerateService = md.GenerateService(filename=target_filename)
-    service.create(tag=tag, folder=source_folder, force=True)
+    service: md.MetadataFactory = md.MetadataFactory(tag=tag, schema=MagicMock(), filename=target_filename)
+    service.create(folder=source_folder, force=True)
 
     assert os.path.isfile(target_filename)
 
-    service.verify_tag(tag=tag)
+    service.verify_tag()
 
     os.remove(target_filename)
 
     with pytest.raises(ValueError):
-        md.GenerateService(filename=target_filename).create(tag=None, folder=source_folder, force=True)
+        md.MetadataFactory(tag=None, schema=MagicMock(), filename=target_filename).create(
+            folder=source_folder, force=True
+        )
 
 
 def store_sql_script(tag: str) -> str:
@@ -102,25 +107,30 @@ def store_sql_script(tag: str) -> str:
 
 
 def test_create_metadata_database_DEVELOP():
+    ConfigStore.configure_context(source='tests/config.yml')
+
+    corpus_folder: str = ConfigValue("corpus.folder").resolve()
+
     tag: str = "v1.1.0"
 
-    # store_sql_script(tag)
+    opts: dict[str, Any] = ConfigValue("metadata.database").resolve()
+    metadata_folder: str = ConfigValue("metadata.folder").resolve()
 
-    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
-    source_folder: str = f"./metadata/data/{tag}"
-    service: md.GenerateService = md.GenerateService(filename=target_filename)
-    service.create(tag=tag, folder=source_folder, force=True)
+    # gh_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
 
-    assert os.path.isfile(target_filename)
+    # md.gh_fetch_metadata_folder(
+    #     target_folder=metadata_folder, **gh_opts, tag=tag, force=True
+    # )
 
-    service.verify_tag(tag=tag)
+    service: md.MetadataFactory = md.MetadataFactory(tag=tag, backend=opts['type'], **opts['options'])
+    service.create(folder=metadata_folder, force=True)
+    service.verify_tag()
+    service.execute_sql_scripts()
 
-    service.execute_sql_scripts(folder=None, tag=tag)
+    index_service: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
+    index_service.generate(corpus_folder=corpus_folder, target_folder=metadata_folder)
 
-    os.remove(target_filename)
-
-    with pytest.raises(ValueError):
-        md.GenerateService(filename=target_filename).create(tag=None, folder=source_folder, force=True)
+    index_service.upload(db=service.db, folder=metadata_folder)
 
 
 @pytest.mark.parametrize(
@@ -128,17 +138,13 @@ def test_create_metadata_database_DEVELOP():
     [ConfigValue("corpus.folder").resolve(), ConfigValue("fakes.folder").resolve()],
 )
 def test_generate_corpus_indexes(corpus_folder: str):
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
+    tag: str = ConfigValue("metadata.version").resolve()
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=tag)
     data: dict[str, pd.DataFrame] = factory.generate(corpus_folder=corpus_folder, target_folder="tests/output").data
 
     assert data.get('protocols') is not None
     assert data.get('utterances') is not None
     assert data.get('speaker_notes') is not None
-
-
-def _db_table_exists(database_filename: str, table: str):
-    with database.DefaultDatabaseType(filename=database_filename) as db:
-        return db.fetch_scalar(f"select count(name) from sqlite_master where type='table' and name='{table}'") == 1
 
 
 def test_generate_and_load_corpus_indexes():
@@ -148,17 +154,21 @@ def test_generate_and_load_corpus_indexes():
     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
 
     # Make sure DB exists by creating a version table
-    service: md.GenerateService = md.GenerateService(filename=database_filename)
+    service: md.MetadataFactory = md.MetadataFactory(tag=version, schema=None, filename=database_filename)
     service.db.version = version
 
-    assert _db_table_exists(database_filename=database_filename, table='version')
+    assert service.db.exists('version')
 
-    md.CorpusIndexFactory(ProtocolMapper).generate(corpus_folder=corpus_folder, target_folder=target_folder)
+    service._create_tables(service.schema)
 
-    service.upload_corpus_indexes(folder=target_folder)
+    index_service: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
+    index_service.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
-    for tablename in ["protocols", "utterances", "speaker_notes"]:
-        assert _db_table_exists(database_filename=database_filename, table=tablename)
+    tablenames: list[str] = service.schema.derived_tablenames
+    index_service.upload(db=service.db, folder=target_folder)
+
+    for tablename in tablenames:
+        assert service.db.exists(tablename)
 
 
 # def test_load_scripts():
@@ -167,21 +177,7 @@ def test_generate_and_load_corpus_indexes():
 #     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 #     script_folder: str = None
-#     service: md.GenerateService = md.GenerateService(database_filename)
-#     service.create(tag=tag, folder=source_folder, force=True)
+#     service: md.MetadataFactory = md.MetadataFactory(tag=tag, filename=database_filename)
+#     service.create(folder=source_folder, force=True)
 #     # service.load_corpus_indexes(folder=source_folder)
 #     # service.load_scripts(folder=script_folder)
-
-
-# def test_bugg():
-
-#     tag: str = ConfigStore().config().get("version")
-#     folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
-#     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
-
-#     service: md.GenerateService = md.GenerateService(database_filename)
-#     configs: MetadataSchema = MetadataSchema(tag)
-
-#     service.reset(tag=tag, force=True)
-#     service.create_base_tables(configs)
-#     service.load_base_tables(configs, folder)

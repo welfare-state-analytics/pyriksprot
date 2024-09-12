@@ -32,8 +32,10 @@ def dummy() -> md.Person:
 
 
 def test_code_lookups():
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
 
+    assert database is not None
+    
     lookups: md.Codecs = md.Codecs().load(database)
     assert lookups
 
@@ -172,14 +174,15 @@ def test_person_index(person_index: md.PersonIndex):
                 ),
             ],
             key=lambda x: x.start_year,
-        )
+        ) # type: ignore
     )
 
     assert len(person_index.property_values_specs) == 5
 
 
-def test_overload_by_person(person_index: md.PersonIndex):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+def test_overload_by_person():
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    assert database is not None
 
     person_index: md.PersonIndex = md.PersonIndex(database).load()
     person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
