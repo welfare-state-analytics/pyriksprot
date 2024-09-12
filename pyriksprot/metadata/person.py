@@ -106,7 +106,7 @@ class Person:
 
     @property
     def has_multiple_parties(self) -> bool:
-        return self.alt_parties and len(self.alt_parties) > 0
+        return bool(self.alt_parties) and len(self.alt_parties) > 0
 
     def party_at(self, pit: int | datetime.date) -> int:
         if self.party_id:
@@ -190,7 +190,7 @@ class SpeakerInfo:
             'end_year': self.term_of_office.end_year,
         }
 
-    def to_tuple(self) -> tuple:
+    def to_tuple(self) -> list[Any]:
         return [getattr(self, name) for name in self.columns]
 
     @cached_property
@@ -243,9 +243,9 @@ def index_of_person_id(df: pd.DataFrame, person_id: str) -> int:
 class PersonIndex:
     def __init__(self, database_filename: str):
         self.database_filename: str = database_filename
-        self.data: dict = None
+        self.data: dict[str, pd.DataFrame] | None = None
 
-        self._table_infos: dict[str, str] = {
+        self._table_infos: dict[str, str|None] = {
             'persons_of_interest': None,
             'terms_of_office': 'terms_of_office_id',
             'person_party': None,
@@ -258,7 +258,7 @@ class PersonIndex:
             raise FileNotFoundError(f"File not found: {self.database_filename}")
 
         with database.DefaultDatabaseType(filename=self.database_filename) as db:
-            self.data: dict[str, str] = db.fetch_tables(self._table_infos)
+            self.data = db.fetch_tables(self._table_infos)
 
         """ ensure `unknown` has pid = 0 """
         if self.persons.loc[0]['person_id'] != 'unknown':
@@ -308,7 +308,7 @@ class PersonIndex:
             logger.info(f"{type(ex).__name__}: {ex}")
             raise
 
-    def __getitem__(self, key: int | str) -> Person:
+    def __getitem__(self, key: int | str) -> Person | None:
         person_id: str = key if isinstance(key, str) else self.pid2person_id.get(key)
         return self.person_lookup.get(person_id)
 
@@ -358,14 +358,14 @@ class PersonIndex:
         if 'pid' not in df.columns and join_column:
             df['pid'] = df[join_column].apply(fg)
         else:
-            if not np.issubtype(df.index.dtype, np.integer):
+            if not np.issubdtype(df.index.dtype, np.integer):
                 """assume index is person_id"""
                 df['pid'] = pd.Series(df.index).apply(fg)
             else:
                 """assume pid is index"""
                 join_criterias = dict(left_index=True)
 
-        columns: list = ['gender_id', 'party_id']
+        columns = ['gender_id', 'party_id']
 
         xi: pd.DataFrame = df.merge(persons[columns], right_index=True, how='left', **join_criterias)
 
@@ -388,7 +388,7 @@ class PersonIndex:
     def property_values_specs(self) -> list[dict[str, str | dict[str, int]]]:
         return self.lookups.property_values_specs + [
             dict(text_name='person_id', id_name='pid', values=self.person_id2pid),
-        ]
+        ] # type: ignore
 
     def unknown_person(self) -> Person:
         return Person(
@@ -423,12 +423,12 @@ class SpeakerInfoService:
     def person_index(self) -> PersonIndex:
         return self.kwargs.get('person_index') or PersonIndex(self.database_filename).load()
 
-    def get_speaker_info(self, *, u_id: str, person_id: str = None, year: int = None) -> dict[str, SpeakerInfo]:
+    def get_speaker_info(self, *, u_id: str, person_id: str = None, year: int = None) -> SpeakerInfo:
         if person_id is None or year is None:
             try:
                 uttr: pd.Series = self.utterance_index.utterances.loc[u_id]
                 person_id = uttr.person_id
-                year: int = self.utterance_index.protocol(uttr.document_id).year
+                year = self.utterance_index.protocol(uttr.document_id).year
             except Exception as ex:
                 logger.info(f"{ex}: {u_id}")
 

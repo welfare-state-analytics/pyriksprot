@@ -14,21 +14,20 @@ from pyriksprot.metadata import database
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
-def main():
-    ...
+def main(): ...
 
 
 @click.command()
 @click.argument('config_filename', type=str)
-@click.option('--tag', type=str, help='Metadata version', default=None)
-def verify_metadata_filenames(config_filename: str, tag: str = None):
+@click.argument('tag', type=str)
+def verify_metadata_filenames(config_filename: str, tag: str):
     try:
         ConfigStore().configure_context(source=config_filename)
 
         user: str = ConfigValue("metadata.github.user").resolve()
         repository: str = ConfigValue("metadata.github.repository").resolve()
         path: str = ConfigValue("metadata.github.path").resolve()
-        tag: str = tag or ConfigValue("version").resolve()
+        tag = tag or ConfigValue("version").resolve()
 
         md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
 
@@ -51,7 +50,9 @@ def verify_metadata_columns(config_filename: str, tags: str):
         if len(tags) == 1:
             md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tags[0]).is_satisfied()
         elif len(tags) == 2:
-            md.TagsConformSpecification(user=user, repository=repository, path=path, **tags).is_satisfied()
+            md.TagsConformSpecification(
+                user=user, repository=repository, path=path, tag1=tags[0], tag2=tags[1]
+            ).is_satisfied()
         else:
             raise ValueError("please specify 1 or 2 tags")
     except ValueError as ex:
@@ -60,9 +61,9 @@ def verify_metadata_columns(config_filename: str, tags: str):
 
 
 @click.command()
-@click.option('--tag', type=str, help='Metadata version', default=None)
 @click.argument('target_folder', type=str)
-def download_metadata(tag: str, target_folder: str):
+@click.argument('tag', type=str)
+def download_metadata(target_folder: str, tag: str):
     md.gh_fetch_metadata_by_config(schema=md.MetadataSchema(tag=tag), tag=tag, folder=target_folder, force=True)
 
 

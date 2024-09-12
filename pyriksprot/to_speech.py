@@ -197,4 +197,4 @@ class MergerFactory:
             else MergerFactory.strategies.get(strategy)
             if strategy in MergerFactory.strategies
             else MergerFactory.strategies.get('undefined')
-        )
+        ) # type: ignore
