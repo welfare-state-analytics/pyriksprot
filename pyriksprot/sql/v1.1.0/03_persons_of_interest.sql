@@ -21,7 +21,8 @@ create table persons_of_interest (
    "name" varchar not null default(''),
    "year_of_birth" integer null,
    "year_of_death" integer null,
-   "has_multiple_parties" bool not null default(FALSE)
+   "has_multiple_parties" bool not null default(FALSE),
+   "wiki_id" text not null default('unknown'),
 );
 
 delete from persons_of_interest;
@@ -54,6 +55,13 @@ insert into persons_of_interest ("person_id", "name")
     join person_name using ("person_id")
 	    on conflict("person_id") do update
 			set "name" = excluded."name";
+
+insert into persons_of_interest ("person_id", "wiki_id")
+    select persons_of_interest."person_id", _wiki_id."wiki_id"
+    from persons_of_interest
+    join _wiki_id using ("person_id")
+	    on conflict("person_id") do update
+			set "wiki_id" = excluded."wiki_id";
 
 create table person_location (
    "person_location_id" integer primary key,
