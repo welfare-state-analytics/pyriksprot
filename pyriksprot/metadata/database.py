@@ -11,10 +11,11 @@ import psycopg2.sql
 from loguru import logger
 from psycopg2 import extensions as pg
 from psycopg2 import extras as pgx
-from sqlalchemy import create_engine
 
 from pyriksprot.metadata.utility import slim_table_types
 from pyriksprot.utility import create_class, ensure_path, reset_file
+
+from .schema import MetadataSchema, MetadataTable
 
 
 class SqlCompiler:
@@ -58,16 +59,13 @@ class DatabaseInterface(abc.ABC):
             self._close()
 
     @abc.abstractmethod
-    def _open(self) -> Self:
-        ...
+    def _open(self) -> Self: ...
 
     @abc.abstractmethod
-    def _close(self) -> None:
-        ...
+    def _close(self) -> None: ...
 
     @abc.abstractmethod
-    def commit(self) -> None:
-        ...
+    def commit(self) -> None: ...
 
     def __enter__(self) -> Self:
         return self.open()
@@ -76,12 +74,10 @@ class DatabaseInterface(abc.ABC):
         self.close()
 
     @abc.abstractmethod
-    def execute_script(self, sql: str) -> None:
-        ...
+    def execute_script(self, sql: str) -> None: ...
 
     @abc.abstractmethod
-    def fetch_scalar(self, sql: str) -> Any:
-        ...
+    def fetch_scalar(self, sql: str) -> Any: ...
 
     @property
     def version(self) -> str | None:
@@ -132,17 +128,14 @@ class DatabaseInterface(abc.ABC):
             raise
 
     @abc.abstractmethod
-    def drop(self, tablename: str, cascade: bool = False) -> Self:
-        ...
+    def drop(self, tablename: str, cascade: bool = False) -> Self: ...
 
     @abc.abstractmethod
     def fetch_tables(
         self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None
-    ) -> dict[str, pd.DataFrame]:
-        ...
+    ) -> dict[str, pd.DataFrame]: ...
 
-    def create_database(self, tag: str, force: bool) -> Self:
-        ...
+    def create_database(self, tag: str, force: bool) -> Self: ...
 
     def quote(self, value: Any) -> str:
         if isinstance(value, str):
@@ -155,14 +148,31 @@ class DatabaseInterface(abc.ABC):
             self.execute_script(f"pragma defer_foreign_keys = {int(value)};")
 
     @abc.abstractmethod
-    def exists(self, tablename: str) -> bool:
-        ...
+    def exists(self, tablename: str) -> bool: ...
 
     @abc.abstractmethod
-    def set_foreign_keys(self, value: bool) -> None:
-        ...
+    def set_foreign_keys(self, value: bool) -> None: ...
+
+    def create_table(self, cfg: MetadataTable) -> None:
+        """Creates table in database based on schema."""
+        self.create(cfg.tablename, cfg.all_columns_specs, cfg.constraints)
+
+    def create_tables(self, schema: MetadataSchema) -> None:
+
+        for cfg in filter(lambda x: not x.has_constraints, schema.definitions.values()):
+            self.create_table(cfg)
+
+        for cfg in filter(lambda x: x.has_constraints, schema.definitions.values()):
+            self.create_table(cfg)
 
 
+    def _create_tables(self, schema: MetadataSchema) -> None:
+        """Creates tables in database based on schema. Create base tables first and then tables with constraints."""
+        for has_constraints in [False, True]:
+            for cfg in schema.definitions.values():
+                if cfg.has_constraints == has_constraints:
+                    self.create_table(cfg)
+    
 class SqliteDatabase(DatabaseInterface):
     def __init__(self, **opts):
         super().__init__(**opts)
@@ -232,11 +242,11 @@ class SqliteDatabase(DatabaseInterface):
     def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
         """Loads dataframe into the database"""
         try:
-            data = data.to_records(index=False)
+            records: np.recarray = data.to_records(index=False)
             columns = columns or data.columns.to_list()
             with self:
                 sql: str = self.compiler.to_insert(tablename, columns)
-                self.connection.executemany(sql, data).close()
+                self.connection.executemany(sql, records).close()
             return self
         except Exception as e:  # noqa
             logger.error(f"Error loading table: {tablename}")
