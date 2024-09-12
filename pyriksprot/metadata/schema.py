@@ -128,16 +128,24 @@ class MetadataTable:
         return ':url:' in self.data
 
     @property
+    def has_constraints(self) -> bool:
+        return bool(self.constraints)
+
+    @property
     def url(self) -> str | Callable | None:
         return self.data.get(':url:')
 
     @property
     def is_derived(self) -> bool:
-        return self.data.get(':derived:')
+        return self.data.get(':derived:', False)
 
     @property
     def is_extra(self) -> bool:
-        return self.data.get(':is_extra:')
+        return self.data.get(':is_extra:', False)
+
+    @property
+    def sep(self) -> str:
+        return self.data.get(':sep:', ',')
 
     @property
     def rename_map(self) -> dict:
@@ -246,16 +254,20 @@ class MetadataSchema:
         """Checks that all expected files exist in given location."""
         return all(isfile(join(folder, x.basename)) for _, x in self.definitions.items())
 
-    def get_by_filename(self, filename: str) -> MetadataTable:
+    def get_by_filename(self, filename: str) -> MetadataTable | None:
         for _, table in self.definitions.items():
             if table.basename == filename:
                 return table
         return None
 
     @property
-    def tablenames(self) -> list[str]:
+    def tablenames(self) -> set[str]:
         return {cfg.tablename for cfg in self.definitions.values() if not cfg.is_derived}
 
     @property
-    def derived_tablenames(self) -> list[str]:
+    def derived_tablenames(self) -> set[str]:
         return {cfg.tablename for cfg in self.definitions.values() if cfg.is_derived}
+
+    @property
+    def derived_tables(self) -> Iterable[MetadataTable]:
+        return (cfg for cfg in self.definitions.values() if cfg.is_derived)
