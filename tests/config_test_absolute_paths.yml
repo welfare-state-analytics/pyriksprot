@@ -1,11 +1,11 @@
 
 root_folder: &folder tests/test_data/source/
 data_folder: *folder
-version: &version v1.1.0
+version: v1.1.0
 
 corpus:
-  version: *version
-  folder: !path_join [ *folder, *version, parlaclarin/protocols ]
+  version: v1.1.0
+  folder: tests/test_data/source/v1.1.0/parlaclarin/protocols
   subfolder: 
   pattern: "**/prot-*-*.xml"
   github:
@@ -14,17 +14,17 @@ corpus:
     path: data
 
 fakes:
-  folder: !path_join [ tests/test_data/fakes, *version, parlaclarin/protocols ]
-  expected_folder: !path_join [ tests/test_data/fakes, *version, expected ]
+  folder: tests/test_data/fakes/v1.1.0/parlaclarin/protocols
+  expected_folder: tests/test_data/fakes/v1.1.0/expected
 
 metadata:
-  version: *version
-  folder: !path_join [ *folder, *version, parlaclarin/metadata ]
+  version: v1.1.0
+  folder: tests/test_data/source/v1.1.0/parlaclarin/metadata
   subfolder: 
   database:
     type: pyriksprot.metadata.database.SqliteDatabase
     options:
-      filename: !path_join [ *folder, *version, riksprot_metadata.db ]
+      filename: tests/test_data/source/v1.1.0/riksprot_metadata.db
     # type: pyriksprot.metadata.database.PostgresDatabase
     # options:
     #   host: xxx
@@ -38,12 +38,12 @@ metadata:
     path: data
 
 tagged_frames:
-  folder: &tagged_folder !path_join [ *folder, *version, tagged_frames ]
+  folder: &tagged_folder tests/test_data/source/v1.1.0/tagged_frames
   file_pattern: &file_pattern prot-*.zip
-  pattern: !path_join [ *tagged_folder, "**", *file_pattern ]
+  pattern: tests/test_data/source/v1.1.0/tagged_frames/**/prot-*.zip
 
 tagged_speeches:
-  folder: &speech_folder !path_join [ *folder, *version, tagged_frames_speeches.feather ]
+  folder: &speech_folder tests/test_data/source/v1.1.0/tagged_frames_speeches.feather
 
 global:
   corpus:
