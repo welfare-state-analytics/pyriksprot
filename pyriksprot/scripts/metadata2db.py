@@ -69,8 +69,9 @@ def download_metadata(tag: str, target_folder: str):
 @click.command()
 @click.argument('corpus_folder', type=str)
 @click.argument('target_folder', type=str)
-def create_corpus_indexes(corpus_folder: str, target_folder: str):
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
+@click.argument('tag', type=str)
+def create_corpus_indexes(corpus_folder: str, target_folder: str, tag: str) -> None:
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(tag=tag))
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
@@ -105,7 +106,7 @@ def create_database(
     try:
         ConfigStore().configure_context(source=config_filename)
 
-        tag: str = tag or ConfigValue("version").resolve()
+        tag = tag or ConfigValue("version").resolve()
 
         db: md.DatabaseInterface = resolve_backend(target_filename)
 
@@ -117,9 +118,9 @@ def create_database(
 
             corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
 
-            factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper)
+            factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
             factory.generate(corpus_folder=corpus_folder, target_folder=source_folder)
-            factory.upload(db=db, folder=source_folder, tablenames=service.schema.derived_tablenames)
+            factory.upload(db=db, folder=source_folder)
 
         if not skip_scripts:
             logger.info(f"loading scripts from {scripts_folder if scripts_folder else 'sql module'}...")
