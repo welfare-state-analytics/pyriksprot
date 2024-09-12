@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import os
-from glob import glob
-from os.path import isfile
 from typing import Type
 
 import pandas as pd
@@ -11,18 +9,19 @@ from tqdm import tqdm
 
 from pyriksprot.corpus.utility import ls_corpus_folder
 from pyriksprot.interface import IProtocol, IProtocolParser, SpeakerNote
-from pyriksprot.metadata import database
 
-from ..utility import probe_filename
+from . import database
+from .schema import MetadataSchema
 
 jj = os.path.join
 
 
 class CorpusIndexFactory:
-    def __init__(self, parser: IProtocolParser | Type[IProtocolParser]) -> None:
+    def __init__(self, parser: IProtocolParser | Type[IProtocolParser], schema: MetadataSchema | str) -> None:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
-        self.data: dict[str, pd.DataFrame]
+        self.data: dict[str, pd.DataFrame] = {}
         self.sep: str = '\t'
+        self.schema: MetadataSchema = schema if isinstance(schema, MetadataSchema) else MetadataSchema(schema)
 
     def generate(self, corpus_folder: str, target_folder: str) -> CorpusIndexFactory:
         logger.info("Corpus index: generating utterance, protocol, speaker notes and page reference indices.")
@@ -32,7 +31,7 @@ class CorpusIndexFactory:
 
         filenames: list[str] = ls_corpus_folder(corpus_folder)
 
-        return self.collect(filenames).store(target_folder)
+        return self.collect(filenames).to_csv(target_folder)
 
     def _empty(self) -> pd.DataFrame:
         """Find and store protocols without any utterance."""
@@ -92,33 +91,29 @@ class CorpusIndexFactory:
 
         return self
 
-    def store(self, target_folder: str) -> CorpusIndexFactory:
-        if target_folder:
-            os.makedirs(target_folder, exist_ok=True)
+    def to_csv(self, folder: str) -> CorpusIndexFactory:
+        if folder:
+            os.makedirs(folder, exist_ok=True)
 
             for tablename, df in self.data.items():
-                filename: str = jj(target_folder, f"{tablename}.csv.gz")
+                filename: str = jj(folder, f"{tablename}.csv.gz")
                 df.to_csv(filename, sep=self.sep)
 
             logger.info("Corpus index: stored.")
 
         return self
 
-    def upload(
-        self, *, db: database.DatabaseInterface, folder: str, tablenames: list[str] = None
-    ) -> CorpusIndexFactory:
+    def upload(self, *, db: database.DatabaseInterface, folder: str) -> CorpusIndexFactory:
         """Loads corpus indexes into given database."""
 
         with db:
             db.set_deferred(True)
-
-            filenames: list[str] = [probe_filename(jj(folder, f"{x}.csv"), ["zip", "csv.gz"]) for x in tablenames]
-
-            if not all(isfile(filename) for filename in filenames):
-                raise FileNotFoundError(','.join(filenames))
-
-            for tablename, filename in zip(tablenames, filenames):
-                data: pd.DataFrame = pd.read_csv(filename, sep=self.sep, index_col=0)
-                db.store(data=data, tablename=tablename)
+            for cfg in self.schema.derived_tables:
+                data: pd.DataFrame = (
+                    self.data[cfg.tablename].reset_index()
+                    if self.data
+                    else pd.read_csv(jj(folder, cfg.basename), sep=cfg.sep, index_col=None)
+                )
+                db.store(data=data, tablename=cfg.tablename)
 
         return self

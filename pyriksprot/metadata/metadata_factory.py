@@ -129,9 +129,9 @@ def load(tablename: str, sep: str = ',', **opts) -> pd.DataFrame:
         folder: str = probe_filename(jj(opts['folder'], tablename), ['csv', "zip", "csv.gz"])
         return pd.read_csv(folder, sep=sep)
 
-    if opts.get("tag"):
-        if not all(opts.get(x) for x in ["user", "repository", "path"]):
-            raise ValueError("when fetching from Github user, repository and path must be set")
+    if opts.get("repository"):
+        if not all(opts.get(x) for x in ["user", "repository", "path", "tag"]):
+            raise ValueError("when fetching from Github user, repository, branch and path must be set")
 
         url: str = gh_create_url(
             filename=tablename,

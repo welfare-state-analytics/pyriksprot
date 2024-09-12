@@ -213,26 +213,33 @@
         ]
     },
     "protocols": {
-        "document_name": "text primary key",
-        "date": "date",
+        "document_id": "int primary key",
+        "document_name": "text",
+        "date": "text not null",
         "year": "integer",
         ":derived:": true,
-        ":filename:": "protocols.csv.gz"
+        ":filename:": "protocols.csv.gz",
+        ":sep:": "\t"
     },
     "utterances": {
-        "document_id": "text not null",
-        "speaker_note_id": "text not null references speaker_notes (speaker_note_id)",
+        "u_id": "text primary key",
+        "document_id": "int not null",
+        "speaker_note_id": "text not null",
         "person_id": "text not null",
         "page_number": "int not null",
         ":derived:": true,
         ":filename:": "utterances.csv.gz",
+        ":sep:": "\t",
         ":constraints:": [
-            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+            "foreign key (person_id) references person (person_id) deferrable initially deferred",
+            "foreign key (speaker_note_id) references speaker_notes (speaker_note_id) deferrable initially deferred"
         ]
     },
     "speaker_notes": {
         "speaker_note_id": "text primary key",
+        "speaker_note": "text not null",
         ":filename:": "speaker_notes.csv.gz",
+        ":sep:": "\t",
         ":derived:": true
     },
 
