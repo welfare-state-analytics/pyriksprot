@@ -51,10 +51,10 @@ def generate_corpus_and_metadata(force: bool = False):
             target_folder=ConfigValue("root_folder").resolve(),
             tag=ConfigValue("corpus:version").resolve(),
             scripts_folder=None,
-            gh_metadata_opts= ConfigValue("metadata:github").resolve(),
+            gh_metadata_opts=ConfigValue("metadata:github").resolve(),
             gh_records_opts=ConfigValue("corpus:github").resolve(),
             db_opts=ConfigValue("metadata:database").resolve(),
-            force=force
+            force=force,
         )
 
     except ValueError as ex:
@@ -108,6 +108,7 @@ def generate_tagged_speech_corpora(
     except ValueError as ex:
         logger.error(ex)
         sys.exit(-1)
+
 
 if __name__ == "__main__":
     main.add_command(generate_complete_sample_data, "complete")
