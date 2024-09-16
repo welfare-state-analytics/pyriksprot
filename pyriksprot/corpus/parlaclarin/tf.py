@@ -34,9 +34,11 @@ class TermFrequencyCounter:
         texts = (
             value
             if isinstance(value, str)
-            else (x.data for x in value)
-            if isinstance(value, (XmlUntangleSegmentIterator, XmlProtocolSegmentIterator))
-            else value
+            else (
+                (x.data for x in value)
+                if isinstance(value, (XmlUntangleSegmentIterator, XmlProtocolSegmentIterator))
+                else value
+            )
         )
         for text in tqdm(texts, disable=not self._progress):
             if self._do_lower_case:

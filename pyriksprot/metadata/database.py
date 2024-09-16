@@ -165,14 +165,14 @@ class DatabaseInterface(abc.ABC):
         for cfg in filter(lambda x: x.has_constraints, schema.definitions.values()):
             self.create_table(cfg)
 
-
     def _create_tables(self, schema: MetadataSchema) -> None:
         """Creates tables in database based on schema. Create base tables first and then tables with constraints."""
         for has_constraints in [False, True]:
             for cfg in schema.definitions.values():
                 if cfg.has_constraints == has_constraints:
                     self.create_table(cfg)
-    
+
+
 class SqliteDatabase(DatabaseInterface):
     def __init__(self, **opts):
         super().__init__(**opts)

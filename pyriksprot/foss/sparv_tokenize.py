@@ -31,7 +31,7 @@ import re
 from functools import cache, cached_property
 from os.path import dirname
 from os.path import join as jj
-from typing import Any, Callable, Iterable, Type
+from typing import Any, Callable, Iterable, Sequence, Type
 
 import nltk
 
@@ -54,11 +54,11 @@ class ISegmenter(abc.ABC):
         return cls(**(cls.default_args | args))
 
     @abc.abstractmethod
-    def tokenize(self, s: str) -> list[str | list[str]]:
+    def tokenize(self, s: str) -> Iterable[str | list[str]]:
         return []
 
     @abc.abstractmethod
-    def span_tokenize(self, s) -> list[tuple[int, int]]:
+    def span_tokenize(self, s) -> Iterable[tuple[int, int]]:
         return []
 
     def tokenize2(self, s: str) -> Iterable[tuple[str, int, int]]:
@@ -153,9 +153,11 @@ class BetterWordTokenizer(ISegmenter):
                 self._word_tokenize_fmt
                 % {
                     "tokens": ("(?:" + "|".join(self.patterns["tokens"]) + ")|") if self.patterns["tokens"] else "",
-                    "abbrevs": ("(?:" + "|".join(re.escape(a + ".") for a in self.abbreviations) + ")|")
-                    if self.abbreviations
-                    else "",
+                    "abbrevs": (
+                        ("(?:" + "|".join(re.escape(a + ".") for a in self.abbreviations) + ")|")
+                        if self.abbreviations
+                        else ""
+                    ),
                     "misc": "|".join(self.patterns["misc"]),
                     "number": self.patterns["number"],
                     "within": self.patterns["within"],
@@ -235,27 +237,28 @@ class BetterWordSentenceTokenizer(ISegmenter):
         return SegmenterRepository.get(BetterSentenceTokenizer)
 
     @cached_property
-    def _tokenize(self) -> Callable[[str], list[str | list[str]]]:
+    def _tokenize(self) -> Callable[[str], Iterable[str | Iterable[str]]]:
         return self.create_tokenize(self.sentenize, False)
 
     @cached_property
-    def _span_tokenize(self) -> Callable[[str], list[str | list[str]]]:
+    def _span_tokenize(self) -> Callable[[str], Iterable[str | Iterable[str]]]:
         return self.create_tokenize(self.sentenize, True)
 
-    def tokenize(self, s: str) -> list[str | list[str]]:
+    def tokenize(self, s: str) -> Iterable[str | Iterable[str]]:
         return self._tokenize(s)
 
-    def span_tokenize(self, s: str) -> list[tuple[int, int] | list[tuple[int, int]]]:
+    def span_tokenize(self, s: str) -> Iterable[tuple[int, int] | Iterable[tuple[int, int]]]:
         return self._span_tokenize(s)
 
     def tokenize2(self, s: str) -> Iterable[tuple[str, int, int]]:
         if not self.sentenize:
             return [(s[x:y], x, y) for x, y in self.tokenizer.span_tokenize(s)]
-        return [[(t[x:y], x, y) for x, y in self.tokenizer.span_tokenize(t)] for t in self.sentenizer.tokenize(s)]
+        return [[(t[x:y], x, y) for x, y in self.tokenizer.span_tokenize(t)] for t in self.sentenizer.tokenize(s)]  # type: ignore
 
-    def create_tokenize(
-        self, sentenize: bool = False, return_spans: bool = False
-    ) -> Callable[[str], list[str | list[str] | tuple[str, int, int] | list[tuple[str, int, int]]]]:
+    def create_tokenize(self, sentenize: bool = False, return_spans: bool = False) -> Callable[
+        [str],
+        Iterable[str | list[str] | tuple[str, int, int] | Iterable[tuple[str, int, int]]] | Iterable[tuple[int, int]],
+    ]:
         """Creates a tokenize functions for given args."""
         tokenize = self.tokenizer.tokenize if not return_spans else self.tokenizer.span_tokenize
 
@@ -263,7 +266,7 @@ class BetterWordSentenceTokenizer(ISegmenter):
             return tokenize
 
         sentenize = self.sentenizer.tokenize
-        return lambda t: list(list(tokenize(s)) for s in sentenize(t))
+        return lambda t: list(list(tokenize(s)) for s in sentenize(t))  # type: ignore
 
 
 class SegmenterRepository:
@@ -287,7 +290,7 @@ class SegmenterRepository:
     @staticmethod
     def create_tokenize(
         sentenize: bool = False, return_spans: bool = False
-    ) -> Callable[[str], list[str | list[str] | tuple[str, int, int] | list[tuple[str, int, int]]]]:
+    ) -> Callable[[str], Iterable[str | list[str] | tuple[str, int, int] | Iterable[tuple[str, int, int]]]]:
         """Creates a tokenize functions for given args."""
         tokenizer: ISegmenter = SegmenterRepository.tokenizer()
         tokenize = tokenizer.tokenize if not return_spans else tokenizer.tokenize2
@@ -297,12 +300,12 @@ class SegmenterRepository:
 
         sentenizer = SegmenterRepository.sentenizer()
         sentenize = sentenizer.tokenize
-        return lambda t: list(list(tokenize(s)) for s in sentenize(t))
+        return lambda t: list(list(tokenize(s)) for s in sentenize(t))  # type: ignore
 
     @staticmethod
     def default_tokenize(
         text: str, sentenize: bool = False, return_spans: bool = False
-    ) -> list[str | list[str] | tuple[str, int, int] | list[tuple[str, int, int]]]:
+    ) -> Iterable[str | Iterable[str] | tuple[str, int, int] | Iterable[tuple[str, int, int]]]:
         """Split `text` into tokens. Returns tokens.
 
         Args:
@@ -321,16 +324,15 @@ class SegmenterRepository:
             SegmenterRepository.tokenizer().tokenize if not return_spans else SegmenterRepository.tokenizer().tokenize2
         )
         if sentenize:
-            return list(tokenize(s) for s in SegmenterRepository.sentenizer().tokenize(text))
+            return list(tokenize(s) for s in SegmenterRepository.sentenizer().tokenize(text))  # type: ignore
         return tokenize(text)
 
     @staticmethod
-    def default_sentenize(text: str) -> list[str]:
+    def default_sentenize(text: str) -> Iterable[str | list[str]]:
         return SegmenterRepository.sentenizer().tokenize(text)
 
 
-class ModelNotFoundError(Exception):
-    ...
+class ModelNotFoundError(Exception): ...
 
 
 create_tokenize = SegmenterRepository.create_tokenize

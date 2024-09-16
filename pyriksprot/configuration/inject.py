@@ -36,6 +36,11 @@ class ConfigValue(Generic[T]):
     after: Callable[[T], T] | None = None
     mandatory: bool = False
 
+    @property
+    def value(self) -> T:
+        """Resolve the value from the current store (configuration file)"""
+        return self.resolve()
+
     def resolve(self) -> T:
         """Resolve the value from the current store (configuration file)"""
         if isinstance(self.key, Config):

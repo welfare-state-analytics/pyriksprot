@@ -35,7 +35,7 @@ def test_code_lookups():
     database: str = ConfigStore.config().get("metadata.database.options.filename")
 
     assert database is not None
-    
+
     lookups: md.Codecs = md.Codecs().load(database)
     assert lookups
 
@@ -174,7 +174,7 @@ def test_person_index(person_index: md.PersonIndex):
                 ),
             ],
             key=lambda x: x.start_year,
-        ) # type: ignore
+        )  # type: ignore
     )
 
     assert len(person_index.property_values_specs) == 5

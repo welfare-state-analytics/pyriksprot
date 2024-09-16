@@ -194,7 +194,9 @@ class MergerFactory:
         return (
             strategy()
             if inspect.isclass(strategy) and issubclass(strategy, IMergeStrategy)
-            else MergerFactory.strategies.get(strategy)
-            if strategy in MergerFactory.strategies
-            else MergerFactory.strategies.get('undefined')
-        ) # type: ignore
+            else (
+                MergerFactory.strategies.get(strategy)
+                if strategy in MergerFactory.strategies
+                else MergerFactory.strategies.get('undefined')
+            )
+        )  # type: ignore

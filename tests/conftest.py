@@ -21,11 +21,11 @@ ConfigStore.configure_context(source='tests/config.yml', env_prefix=None)
 
 # pylint: disable=redefined-outer-name
 
-# ensure_test_corpora_exist()
+ensure_test_corpora_exist()
 
 
 @pytest.fixture(scope='session')
-def test_protocols() -> list[str]:
+def list_of_test_protocols() -> list[str]:
     return load_document_patterns(filename='tests/test_data/test_documents.txt', extension='xml')
 
 

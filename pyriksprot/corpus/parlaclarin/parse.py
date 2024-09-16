@@ -45,9 +45,7 @@ class ProtocolMapper(interface.IProtocolParser):
 
     @staticmethod
     def get_content_elements(data: untangle.Element) -> Iterable[untangle.Element]:
-        for section in ProtocolMapper.get_content_sections(data):
-            for item in section.children:
-                yield item
+        yield from (item for section in ProtocolMapper.get_content_sections(data) for item in section.children)
 
     @staticmethod
     def has_body(data: untangle.Element) -> bool:

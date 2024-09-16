@@ -245,7 +245,7 @@ class PersonIndex:
         self.database_filename: str = database_filename
         self.data: dict[str, pd.DataFrame] | None = None
 
-        self._table_infos: dict[str, str|None] = {
+        self._table_infos: dict[str, str | None] = {
             'persons_of_interest': None,
             'terms_of_office': 'terms_of_office_id',
             'person_party': None,
@@ -388,7 +388,7 @@ class PersonIndex:
     def property_values_specs(self) -> list[dict[str, str | dict[str, int]]]:
         return self.lookups.property_values_specs + [
             dict(text_name='person_id', id_name='pid', values=self.person_id2pid),
-        ] # type: ignore
+        ]  # type: ignore
 
     def unknown_person(self) -> Person:
         return Person(

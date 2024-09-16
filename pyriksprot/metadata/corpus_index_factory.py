@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import itertools
 import os
-from types import SimpleNamespace
+from dataclasses import dataclass, field
 from typing import Sequence, Type
 
-from dataclasses import dataclass, field
-from unittest import result
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
@@ -19,10 +17,6 @@ from .schema import MetadataSchema
 
 jj = os.path.join
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
-from dataclasses import dataclass
-from typing import Sequence, Type
 
 class CorpusScanner:
 
@@ -60,7 +54,7 @@ class CorpusScanner:
     #     # Function to process a single file
     #     def process_file(document_id, filename):
     #         protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
-    #         protocols = (document_id, protocol.name, protocol.date, int(protocol.date[:4])) 
+    #         protocols = (document_id, protocol.name, protocol.date, int(protocol.date[:4]))
     #         utterances = [
     #             (document_id, u.u_id, u.who, u.speaker_note_id, u.page_number) for u in protocol.utterances
     #         ]
@@ -73,7 +67,7 @@ class CorpusScanner:
     #     # Parallel processing with ThreadPoolExecutor
     #     with ThreadPoolExecutor() as executor:
     #         futures = {
-    #             executor.submit(process_file, document_id, filename): filename 
+    #             executor.submit(process_file, document_id, filename): filename
     #             for document_id, filename in enumerate(filenames)
     #         }
 

@@ -23,18 +23,18 @@ jj = os.path.join
 FORCE_RUN_SKIPS = False  # os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 
 
-# @pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
-def test_setup_sample_xml_corpus(test_protocols):
+@pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
+def test_setup_sample_xml_corpus(list_of_test_protocols: list[str]):
     target_folder: str = ConfigValue("corpus.folder").resolve()
     version: str = ConfigValue("corpus.version").resolve()
     opts: dict = ConfigValue("corpus.github").resolve()
 
     pc.download_protocols(
-        filenames=test_protocols, target_folder=target_folder, create_subfolder=True, tag=version, **opts
+        filenames=list_of_test_protocols, target_folder=target_folder, create_subfolder=True, tag=version, **opts
     )
 
 
-# @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_gh_fetch_metadata_by_config():
     version: str = ConfigValue("metadata.version").resolve()
     target_folder: str = jj('./metadata/data/', version)
@@ -76,21 +76,21 @@ def test_gh_fetch_metadata_folder_old():
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
-def test_setup_sample_tagged_frames_corpus(test_protocols: list[str]):
+def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
     version: str = ConfigValue("version").resolve()
     data_folder: str = ConfigValue("data_folder").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
     riksprot_tagged_folder: str = jj(data_folder, version, 'tagged_frames')
 
     create_test_tagged_frames_corpus(
-        protocols=test_protocols,
+        protocols=list_of_test_protocols,
         source_folder=riksprot_tagged_folder,
         target_folder=tagged_folder,
     )
 
 
-# @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_subset_corpus_and_metadata(test_protocols: list[str]):
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
+def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
     version: str = ConfigValue("metadata.version").resolve()
     data_folder: str = ConfigValue("data_folder").resolve()
     gh_metadata_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
@@ -102,7 +102,7 @@ def test_subset_corpus_and_metadata(test_protocols: list[str]):
         source_folder=source_folder,
         tag=version,
         target_folder=data_folder,
-        documents=test_protocols,
+        documents=list_of_test_protocols,
         gh_metadata_opts=gh_metadata_opts,
         gh_records_opts=gh_records_opts,
         db_opts=db_opts,
@@ -122,6 +122,7 @@ def test_setup_test_corpora():
     ensure_test_corpora_exist(force=True)
 
 
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_gh_tables_data():
     tag: str = ConfigValue("metadata.version").resolve()
     cfg: dict[str, str] = ConfigValue("metadata.github").resolve() or {}
@@ -134,7 +135,7 @@ def test_gh_tables_data():
 
     infos: dict[str, dict] = {}
     for item in items:
-        table, extension = splitext(item.get("name"))
+        table, extension = splitext(item.get("name", ""))
         if not extension.endswith("csv"):
             continue
         url: str = gh.gh_create_url(

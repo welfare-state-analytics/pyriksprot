@@ -75,7 +75,7 @@ class ConformBaseSpecification:
         if cfg is None:
             return filename
         return cfg.tablename
-    
+
     def resolve_schema_infos(self, tag: str) -> dict:
         return {
             cfg.tablename: cfg.source_columns
@@ -141,9 +141,7 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
         self.left_key: str = "config"
         self.right_key: str = tag
 
-        data: dict = gh_fetch_metadata_folder(
-            user=user, repository=repository, path=path, tag=tag, target_folder=None
-        )
+        data: dict = gh_fetch_metadata_folder(user=user, repository=repository, path=path, tag=tag, target_folder=None)
 
         self.left_tables: dict = self.resolve_schema_infos(tag)
         self.right_tables: dict = self.resolve_github_infos(tag, data)

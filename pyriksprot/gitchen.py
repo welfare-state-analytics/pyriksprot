@@ -143,5 +143,4 @@ class GitInfo:
         write_yaml(data, filename)
 
 
-class TagNotFoundError(Exception):
-    ...
+class TagNotFoundError(Exception): ...
