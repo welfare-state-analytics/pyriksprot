@@ -25,7 +25,7 @@ def test_find_dispatchers():
 
 
 def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(database)
     with dispatch.FilesInFolderDispatcher(
@@ -39,7 +39,7 @@ def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
 
 
 def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
     lookups: md.Codecs = md.Codecs().load(database)
     with dispatch.FilesInZipDispatcher(
@@ -59,7 +59,7 @@ def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
 def test_organized_speeches_in_zip_dispatch(
     tagged_speeches: list[sg.DispatchItem], temporal_key: str, naming_keys: list[str]
 ):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
     lookups: md.Codecs = md.Codecs().load(database)
     with dispatch.SortedSpeechesInZipDispatcher(
@@ -95,7 +95,7 @@ def test_find_dispatch_class():
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(database)
     with dispatch.CheckpointPerGroupDispatcher(
@@ -129,7 +129,7 @@ def test_single_feather_per_group_dispatch(
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(database)
     with cls(
@@ -156,7 +156,7 @@ def test_single_feather_per_group_dispatch_with_skips(
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
-    database: str = ConfigStore.config().get("metadata.database.filename")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(database)
     with cls(

@@ -13,6 +13,7 @@ from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, tagged
 from pyriksprot.dispatch import merge as sg
+from pyriksprot.dispatch.item import DispatchItem
 from pyriksprot.workflows.subset_corpus import load_document_patterns
 
 from .utility import ensure_test_corpora_exist
@@ -31,7 +32,7 @@ def list_of_test_protocols() -> list[str]:
 
 @pytest.fixture(scope='session')
 def source_index() -> csi.CorpusSourceIndex:
-    tagged_source_folder = ConfigStore.config().get("tagged_frames.folder")
+    tagged_source_folder: str = ConfigStore.config().get("tagged_frames.folder")
     return csi.CorpusSourceIndex.load(
         source_folder=tagged_source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
     )
@@ -39,7 +40,7 @@ def source_index() -> csi.CorpusSourceIndex:
 
 @pytest.fixture(scope='session')
 def xml_source_index() -> csi.CorpusSourceIndex:
-    source_folder = ConfigStore.config().get("corpus.folder")
+    source_folder: str = ConfigStore.config().get("corpus.folder")
     items: csi.CorpusSourceIndex = csi.CorpusSourceIndex.load(
         source_folder=source_folder,
         source_pattern='**/prot-*-*.xml',
@@ -50,13 +51,13 @@ def xml_source_index() -> csi.CorpusSourceIndex:
 
 @pytest.fixture(scope='session')
 def person_index() -> md.PersonIndex:
-    sample_metadata_database_name = ConfigStore.config().get("metadata.database.filename")
+    sample_metadata_database_name: str = ConfigStore.config().get("metadata.database.options.filename")
     return md.PersonIndex(database_filename=sample_metadata_database_name).load()
 
 
 @pytest.fixture(scope='session')
 def speaker_service(person_index: md.PersonIndex) -> md.SpeakerInfoService:
-    sample_metadata_database_name = ConfigStore.config().get("metadata.database.filename")
+    sample_metadata_database_name = ConfigStore.config().get("metadata.database.options.filename")
     return md.SpeakerInfoService(database_filename=sample_metadata_database_name, person_index=person_index)
 
 
@@ -64,7 +65,7 @@ def speaker_service(person_index: md.PersonIndex) -> md.SpeakerInfoService:
 def tagged_speeches(
     source_index: csi.CorpusSourceIndex,
     speaker_service: md.SpeakerInfoService,
-) -> list[sg.DispatchItem]:
+) -> list[dict[str, DispatchItem]]:
     def assign_speaker_info(item: iterate.ProtocolSegment) -> None:
         item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
 

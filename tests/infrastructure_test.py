@@ -113,7 +113,7 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
 def test_setup_sample_speech_corpora():
     version: str = ConfigValue("version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
-    database: str = ConfigValue("metadata.database.filename").resolve()
+    database: str = ConfigValue("metadata.database.options.filename").resolve()
     create_test_speech_corpus(source_folder=tagged_folder, tag=version, database_name=database)
 
 
