@@ -31,7 +31,7 @@ import re
 from functools import cache, cached_property
 from os.path import dirname
 from os.path import join as jj
-from typing import Any, Callable, Iterable, Sequence, Type
+from typing import Any, Callable, Iterable, Type
 
 import nltk
 
@@ -238,17 +238,17 @@ class BetterWordSentenceTokenizer(ISegmenter):
 
     @cached_property
     def _tokenize(self) -> Callable[[str], Iterable[str | Iterable[str]]]:
-        return self.create_tokenize(self.sentenize, False)
+        return self.create_tokenize(self.sentenize, False)  # type: ignore
 
     @cached_property
     def _span_tokenize(self) -> Callable[[str], Iterable[str | Iterable[str]]]:
-        return self.create_tokenize(self.sentenize, True)
+        return self.create_tokenize(self.sentenize, True)  # type: ignore
 
     def tokenize(self, s: str) -> Iterable[str | Iterable[str]]:
         return self._tokenize(s)
 
     def span_tokenize(self, s: str) -> Iterable[tuple[int, int] | Iterable[tuple[int, int]]]:
-        return self._span_tokenize(s)
+        return self._span_tokenize(s)  # type: ignore
 
     def tokenize2(self, s: str) -> Iterable[tuple[str, int, int]]:
         if not self.sentenize:

@@ -16,7 +16,6 @@ from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.metadata import database
 from pyriksprot.metadata.schema import MetadataSchema
-from tests.utility import ensure_test_corpora_exist
 
 jj = os.path.join
 
@@ -161,7 +160,7 @@ def test_generate_and_load_corpus_indexes():
 
     assert service.db.exists('version')
 
-    service._create_tables(service.schema)
+    service._create_tables(service.schema)  # pylint: disable=protected-access
 
     index_service: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
     index_service.generate(corpus_folder=corpus_folder, target_folder=target_folder)
