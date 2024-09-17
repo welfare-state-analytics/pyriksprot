@@ -115,3 +115,92 @@ insert into party("party_id", "party", "party_abbrev", "party_color")
             select "party_id", "party", "party_abbrev", "party_color"
             from party_data
 ;
+
+/*
+Create a single table out of:
+  - members of parliament
+  - ministers
+  - speakers
+*/
+drop table if exists minister_government;
+drop table if exists terms_of_office;
+drop table if exists sub_office_type;
+drop table if exists office_type;
+drop table if exists chamber;
+
+/* Chambers */
+
+create table chamber (
+    chamber_id integer primary key,
+    chamber text
+);
+
+insert into chamber (chamber_id, chamber)
+    values
+        (0, 'unknown'),
+        (1, 'Första kammaren'),
+        (2, 'Andra kammaren'),
+        (3, 'Sveriges riksdag')
+;
+
+/* Office types */
+create table office_type (
+    office_type_id integer primary key,
+    office text,
+    role text
+);
+
+insert into office_type (office_type_id, office)
+    values
+        (0, 'unknown'),
+        (1, 'Ledamot'),
+        (2, 'Minister'),
+        (3, 'Talman')
+;
+
+/*
+sub_office_type: division of office_type (e.g. minister types, speaker types)
+*/
+create table sub_office_type (
+    "sub_office_type_id" integer primary key not null,
+    "office_type_id" integer not null references office_type(office_type_id),
+    "description" text not null,
+    "chamber_id" integer null references chamber(chamber_id),
+    "identifier" text null
+);
+
+insert into sub_office_type (sub_office_type_id, office_type_id, "description", chamber_id, identifier)
+	with sot(sub_office_type_id, office_type_id, "description", chamber_id, identifier) as (
+	    values
+	        (0, 0, 'unknown', null, null),
+	        (1, 1, 'Ledamot av första kammaren', 1, 'förstakammarledamot'),
+	        (2, 1, 'Ledamot av andra kammaren', 2, 'andrakammarledamot'),
+	        (3, 1, 'ledamot av Sveriges riksdag', 3, 'ledamot av Sveriges riksdag'),
+	        (4, 2, 'minister (ospecificerad)', null, null),
+	        (5, 3, 'talman (ospecificerad)', null, null)
+	)
+		select sub_office_type_id, office_type_id, "description", chamber_id, identifier
+		from sot;
+	
+insert into sub_office_type (sub_office_type_id, office_type_id, "description", chamber_id, identifier)
+	with mnstr as (
+	    select distinct role, (select max(sub_office_type_id) from sub_office_type) as max_id
+	    from _minister
+	)
+		select row_number() over (order by role) + max_id, 2, role, null, role
+		from mnstr
+	    order by role;
+
+insert into sub_office_type (sub_office_type_id, office_type_id, "description", chamber_id, identifier)
+	with spkr as (
+	    select distinct role, (select max(sub_office_type_id) from sub_office_type) as max_id
+	    from _speaker
+	)
+	    select row_number() over (order by role) + max_id, 3, role,
+	        case
+	            when role like '%första kammaren%' then 1
+	            when role like '%andra kammaren%' then 2
+	            else 3
+	        end,
+	        role
+	    from spkr;
