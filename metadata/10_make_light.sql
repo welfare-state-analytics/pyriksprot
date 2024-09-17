@@ -1,3 +1,4 @@
+-- This script is outdated and should not be used anymore.
 
 drop table if exists _government;
 drop table if exists _location_specifier;
