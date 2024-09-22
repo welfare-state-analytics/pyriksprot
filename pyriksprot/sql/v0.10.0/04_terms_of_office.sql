@@ -87,8 +87,16 @@ create table terms_of_office (
 );
 
 insert into terms_of_office (
-        person_id, office_type_id, sub_office_type_id, district_id,
-        [start_date], [start_flag], [end_date], [end_flag], [start_year], [end_year]
+        [person_id],
+        [office_type_id],
+        [sub_office_type_id],
+        [district_id],
+        [start_date],
+        [start_flag],
+        [end_date],
+        [end_flag],
+        [start_year],
+        [end_year]
     )
     select  _member_of_parliament.person_id,
             1,
