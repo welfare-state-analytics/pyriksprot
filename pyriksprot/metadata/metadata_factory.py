@@ -45,30 +45,23 @@ class MetadataFactory:
             )
         )
 
-    def verify_tag(self) -> MetadataFactory:
+    def verify_tag(self) -> Self:
         if self.db.version != (self.tag):
             raise ValueError(f"metadata version mismatch: db version {self.db.version} differs from {self.tag}")
         return self
 
-    def create(self, folder: str = None, scripts_folder: str = None, force: bool = False) -> Self:
-        logger.info(f"Creating database for tag '{self.tag}' using folder '{folder}'.")
+    def create(self, force: bool = False) -> Self:
+        """Creates database based on schema"""
+        logger.info(f"Creating database for tag '{self.tag}'.")
 
         self.db.create_database(tag=self.tag, force=force)
 
         with self.db:
             self._create_tables(self.schema)
 
-        with self.db:
-            self.db.set_deferred(True)
-            self.upload(self.schema, folder)
-
-        if scripts_folder:
-            with self.db:
-                self.execute_sql_scripts(folder=scripts_folder)
-
         return self
 
-    def _create_tables(self, schema: MetadataSchema) -> MetadataFactory:
+    def _create_tables(self, schema: MetadataSchema) -> Self:
         """Creates tables in database based on schema. Create base tables first and then tables with constraints."""
         for p in [1, 2]:
             for tablename, cfg in schema.items():
@@ -77,26 +70,31 @@ class MetadataFactory:
                 self.db.create(tablename, cfg.all_columns_specs, cfg.constraints)
         return self
 
-    def upload(self, schema: MetadataSchema, folder: str) -> MetadataFactory:
-        for _, cfg in schema.items():
-            if cfg.is_derived:
-                logger.info(f"Skipping derived table: {cfg.tablename}")
-                continue
-            self._import_table(cfg, folder=folder)
+    def upload(self, schema: MetadataSchema, folder: str) -> Self:
+        """Uploads data to database based on schema"""
+        logger.info(f"Uploading data for tag '{self.tag}' using {folder}.")
+        with self.db:
+            self.db.set_deferred(True)
+            for _, cfg in schema.items():
+                if cfg.is_extra:
+                    logger.info(f"Skipping extra table: {cfg.tablename}")
+                    continue
+                self._import_table(cfg, folder=folder)
         return self
 
-    def _import_table(self, cfg: MetadataTable, folder: str) -> MetadataFactory:
+    def _import_table(self, cfg: MetadataTable, folder: str) -> Self:
         logger.info(f"loading table: {cfg.tablename}")
 
         columns: list[str] = cfg.all_columns
-        table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=self.tag)
+        table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=self.tag, sep=cfg.sep)
         table = cfg.transform(table)[columns]
         self.db.store(table, tablename=cfg.tablename, columns=columns)
 
         return self
 
-    def execute_sql_scripts(self, *, folder: str = None) -> MetadataFactory:
+    def execute_sql_scripts(self, *, folder: str = None) -> Self:
         """Loads SQL files from specified folder otherwise loads files in sql module"""
+        logger.info(f"loading scripts from {folder if folder else 'sql module'}...")
 
         with self.db:
             if not (folder or self.tag):

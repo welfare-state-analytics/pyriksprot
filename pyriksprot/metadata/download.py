@@ -53,6 +53,7 @@ def gh_fetch_metadata_folder(
     path: str = None,
     force: bool = False,
     errors: Literal['raise', 'ignore'] = 'raise',
+    **_,
 ) -> dict[str, dict]:
     """Returns name, headers and content for each metadata CSV file for given tag. Optionally stores content in folder"""
 

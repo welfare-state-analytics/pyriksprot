@@ -12,7 +12,6 @@ from tqdm import tqdm
 from pyriksprot.corpus.utility import ls_corpus_folder
 from pyriksprot.interface import MISSING_SPEAKER_NOTE, IProtocol, IProtocolParser, SpeakerNote
 
-from . import database
 from .schema import MetadataSchema
 
 jj = os.path.join
@@ -108,10 +107,16 @@ class CorpusScanner:
         page_references.drop(columns=['reference'], inplace=True)
 
         missing: tuple[str, str] = (MISSING_SPEAKER_NOTE.speaker_note_id, MISSING_SPEAKER_NOTE.speaker_note)
-        speaker_notes_data: pd.DataFrame = pd.DataFrame(
-            itertools.chain([missing], ((x.speaker_note_id, x.speaker_note) for x in result.speaker_notes.values())),
-            columns=['speaker_note_id', 'speaker_note'],
-        ).set_index('speaker_note_id')
+        speaker_notes_data: pd.DataFrame = (
+            pd.DataFrame(
+                itertools.chain(
+                    [missing], ((x.speaker_note_id, x.speaker_note) for x in result.speaker_notes.values())
+                ),
+                columns=['speaker_note_id', 'speaker_note'],
+            )
+            .set_index('speaker_note_id')
+            .fillna("")
+        )
 
         protocol_ids: set[int] = set(utterances.document_id.unique())
         empty_protocols: pd.DataFrame = protocols[~protocols.index.isin(protocol_ids)]
@@ -161,17 +166,17 @@ class CorpusIndexFactory:
 
         return self
 
-    def upload(self, *, db: database.DatabaseInterface, folder: str) -> CorpusIndexFactory:
-        """Loads corpus indexes into given database."""
+    # def upload(self, *, db: database.DatabaseInterface, folder: str) -> CorpusIndexFactory:
+    #     """Loads corpus indexes into given database."""
 
-        with db:
-            db.set_deferred(True)
-            for cfg in self.schema.derived_tables:
-                data: pd.DataFrame = (
-                    self.data[cfg.tablename].reset_index()
-                    if self.data
-                    else pd.read_csv(jj(folder, cfg.basename), sep=cfg.sep, index_col=None)
-                )
-                db.store(data=data, tablename=cfg.tablename)
+    #     with db:
+    #         db.set_deferred(True)
+    #         for cfg in self.schema.derived_tables:
+    #             data: pd.DataFrame = (
+    #                 self.data[cfg.tablename].reset_index()
+    #                 if self.data
+    #                 else pd.read_csv(jj(folder, cfg.basename), sep=cfg.sep, index_col=None)
+    #             )
+    #             db.store(data=data, tablename=cfg.tablename)
 
-        return self
+    #     return self
