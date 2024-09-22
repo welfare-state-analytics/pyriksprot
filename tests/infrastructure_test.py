@@ -1,5 +1,6 @@
 import os
 from posixpath import splitext
+from typing import Any
 
 import pytest
 import requests
@@ -91,25 +92,24 @@ def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
-    version: str = ConfigValue("metadata.version").resolve()
-    data_folder: str = ConfigValue("data_folder").resolve()
-    gh_metadata_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
-    gh_records_opts: dict[str, str] = ConfigValue("corpus.github").resolve()
-    source_folder: str = ConfigValue("global.corpus.folder").resolve()
-    db_opts: dict[str, str] = ConfigValue("metadata.database").resolve()
 
     subset_corpus_and_metadata(
-        source_folder=source_folder,
-        tag=version,
-        target_folder=data_folder,
+        tag=ConfigValue("metadata.version").resolve(),
         documents=list_of_test_protocols,
-        gh_metadata_opts=gh_metadata_opts,
-        gh_records_opts=gh_records_opts,
-        db_opts=db_opts,
+        global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
+        global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),
+        target_folder=ConfigValue("data_folder").resolve(),
+        scripts_folder = None,
+        gh_metadata_opts=ConfigValue("metadata.github").resolve(),
+        gh_records_opts=ConfigValue("corpus.github").resolve(),
+        db_opts=ConfigValue("metadata.database").resolve(),
+        tf_filename=ConfigValue("dehyphen.tf_filename").resolve(),
+        skip_download=True,
+        force=True,
     )
 
 
-@pytest.mark.skip(reason="Test infrastructure test")
+# @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
     version: str = ConfigValue("version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()

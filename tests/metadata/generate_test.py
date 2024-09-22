@@ -16,6 +16,7 @@ from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.metadata import database
 from pyriksprot.metadata.schema import MetadataSchema
+from pyriksprot.workflows.create_metadata import create_database_workflow
 
 jj = os.path.join
 
@@ -77,9 +78,18 @@ def test_create_metadata_database():
 
     tag: str = ConfigValue("metadata.version").resolve()
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
-    source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
-    service: md.MetadataFactory = md.MetadataFactory(tag=tag, schema=MagicMock(), filename=target_filename)
-    service.create(folder=source_folder, force=True)
+    metadata_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
+    corpus_folder: str = ConfigValue("corpus.folder").resolve()
+
+    schema = MetadataSchema(tag)
+
+    md.CorpusIndexFactory(ProtocolMapper, schema=schema).generate(
+        corpus_folder=corpus_folder, target_folder=metadata_folder
+    )
+
+    service: md.MetadataFactory = md.MetadataFactory(tag=tag, filename=target_filename)
+
+    service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
 
     assert os.path.isfile(target_filename)
 
@@ -88,9 +98,7 @@ def test_create_metadata_database():
     os.remove(target_filename)
 
     with pytest.raises(ValueError):
-        md.MetadataFactory(tag=None, schema=MagicMock(), filename=target_filename).create(
-            folder=source_folder, force=True
-        )
+        md.MetadataFactory(tag=None, schema=MagicMock(), filename=target_filename).create(force=True)
 
 
 def store_sql_script(tag: str) -> str:
@@ -106,9 +114,9 @@ def store_sql_script(tag: str) -> str:
 
 @pytest.mark.skip("Infrastructure test only")
 def test_create_metadata_database_DEVELOP():
-    ConfigStore.configure_context(source='configs/config.yml')
+    # ConfigStore.configure_context(source='configs/config.yml')
     # ConfigStore.configure_context(source='configs/config_postgres.yml')
-    # ConfigStore.configure_context(source='tests/config.yml')
+    ConfigStore.configure_context(source='tests/config.yml')
 
     corpus_folder: str = ConfigValue("corpus.folder").resolve()
 
@@ -117,21 +125,40 @@ def test_create_metadata_database_DEVELOP():
     opts: dict[str, Any] = ConfigValue("metadata.database").resolve()
     metadata_folder: str = ConfigValue("metadata.folder").resolve()
 
-    # gh_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
+    schema = MetadataSchema(tag)
 
-    # md.gh_fetch_metadata_folder(
-    #     target_folder=metadata_folder, **gh_opts, tag=tag, force=True
-    # )
+    md.CorpusIndexFactory(ProtocolMapper, schema=schema).generate(
+        corpus_folder=corpus_folder, target_folder=metadata_folder
+    )
 
-    service: md.MetadataFactory = md.MetadataFactory(tag=tag, backend=opts['type'], **opts['options'])
-    service.create(folder=metadata_folder, force=True)
+    service: md.MetadataFactory = md.MetadataFactory(tag=tag, schema=schema, backend=opts['type'], **opts['options'])
+    service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
     service.verify_tag()
-    service.execute_sql_scripts()
 
-    index_service: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
-    index_service.generate(corpus_folder=corpus_folder, target_folder=metadata_folder)
 
-    index_service.upload(db=service.db, folder=metadata_folder)
+# @pytest.mark.skip("Infrastructure test only")
+def test_create_metadata_database_with_workflow():
+    # ConfigStore.configure_context(source='configs/config.yml')
+    # ConfigStore.configure_context(source='configs/config_postgres.yml')
+    ConfigStore.configure_context(source='tests/config.yml')
+
+    corpus_folder: str = ConfigValue("corpus.folder").resolve()
+    metadata_folder: str = ConfigValue("metadata.folder").resolve()
+    tag: str = ConfigValue("corpus.version").resolve()
+
+    db_opts: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
+    # db_opts: dict[str, Any] = ConfigValue("metadata.database").resolve()
+
+    create_database_workflow(
+        tag=tag,
+        metadata_folder=metadata_folder,
+        db_opts=db_opts,
+        corpus_folder=corpus_folder,
+        force=True,
+        skip_create_index=True,
+        skip_download_metadata=True,
+        skip_load_scripts=False,
+    )
 
 
 @pytest.mark.parametrize(
@@ -146,30 +173,6 @@ def test_generate_corpus_indexes(corpus_folder: str):
     assert data.get('protocols') is not None
     assert data.get('utterances') is not None
     assert data.get('speaker_notes') is not None
-
-
-def test_generate_and_load_corpus_indexes():
-    version: str = ConfigValue("metadata.version").resolve()
-    corpus_folder: str = jj("./tests/test_data/source", version, "parlaclarin")
-    target_folder: str = f"./tests/output/{str(uuid.uuid4())[:8]}"
-    database_filename: str = f'./tests/output/{str(uuid.uuid4())[:8]}.db'
-
-    # Make sure DB exists by creating a version table
-    service: md.MetadataFactory = md.MetadataFactory(tag=version, schema=None, filename=database_filename)
-    service.db.version = version
-
-    assert service.db.exists('version')
-
-    service._create_tables(service.schema)  # pylint: disable=protected-access
-
-    index_service: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=service.schema)
-    index_service.generate(corpus_folder=corpus_folder, target_folder=target_folder)
-
-    tablenames: list[str] = service.schema.derived_tablenames
-    index_service.upload(db=service.db, folder=target_folder)
-
-    for tablename in tablenames:
-        assert service.db.exists(tablename)
 
 
 # def test_load_scripts():
