@@ -59,8 +59,23 @@ def sample_parlaclarin_corpus_exists() -> bool:
 def sample_metadata_exists() -> bool:
     source_folder: str = ConfigValue("metadata:folder").resolve()
     corpus_version: str = ConfigValue("metadata:version").resolve()
+
+    filename: str = ConfigValue("metadata.database.options.filename").resolve()
+    if not isfile(filename):
+        logger.info(f"metadata database file not found: {filename}")
+        return False
+    
     configs: md.MetadataSchema = md.MetadataSchema(tag=corpus_version)
-    return configs.files_exist(source_folder)
+    if not configs.files_exist(source_folder):
+        logger.info(f"metadata schema files not found in: {source_folder}")
+        return False
+    
+    tf_filename: str = ConfigValue("dehyphen:tf_filename").resolve()
+    if not isfile(tf_filename):
+        logger.info(f"term frequency file not found: {tf_filename}")
+        return False
+    
+    return True
 
 
 def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
@@ -107,19 +122,23 @@ def ensure_test_corpora_exist(
     tagged_source_folder = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder = root_folder or ConfigValue("root_folder").resolve()
     database = database or ConfigValue("metadata:database").resolve()
-    gh_metadata_opts: dict[str, str] = ConfigValue("metadata:github").resolve()
-    gh_records_opts: dict[str, str] = ConfigValue("corpus:github").resolve()
 
     filenames: list[str] = get_test_documents(extension="xml")
 
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
-            documents=filenames,
             tag=corpus_version,
-            target_folder=root_folder,
+            documents=filenames,
+            global_corpus_folder=ConfigValue("metadata:folder").resolve(),
+            global_metadata_folder=ConfigValue("metadata:folder").resolve(),
+            target_folder=ConfigValue("root_folder").resolve(),
+            scripts_folder=None,
+            gh_metadata_opts=ConfigValue("metadata:github").resolve(),
+            gh_records_opts=ConfigValue("corpus:github").resolve(),
+            db_opts=ConfigValue("metadata:database").resolve(),
+            tf_filename=ConfigValue("dehyphen:tf_filename").resolve(),
+            skip_download=True,
             force=force,
-            gh_metadata_opts=gh_metadata_opts,
-            gh_records_opts=gh_records_opts,
         )
 
     if force or not sample_tagged_frames_corpus_exists():
