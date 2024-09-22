@@ -72,6 +72,7 @@ subset-corpus = "pyriksprot.scripts.subset_corpus:main"
 subset-vrt-corpus = "pyriksprot.scripts.subset_vrt_corpus:main"
 speech-index = "pyriksprot.scripts.speech_index:main"
 metadata2db = "pyriksprot.scripts.metadata2db:main"
+make-test-data = "pyriksprot.tests.scripts.make_test_data:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
