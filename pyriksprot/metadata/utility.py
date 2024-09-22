@@ -44,8 +44,8 @@ def slim_table_types(
     if isinstance(tables, pd.DataFrame):
         tables = [tables]
 
-    defaults: dict[str, Any] = COLUMN_DEFAULTS if defaults is None else defaults
-    types: dict[str, Any] = COLUMN_TYPES if types is None else types
+    defaults = COLUMN_DEFAULTS if defaults is None else defaults
+    types = COLUMN_TYPES if types is None else types
 
     for table in tables:
         for column_name, value in defaults.items():
@@ -60,7 +60,7 @@ def slim_table_types(
 
 def group_to_list_of_records2(df: pd.DataFrame, key: str) -> dict[str | int, list[dict]]:
     """Groups `df` by `key` and aggregates each group to list of row records (dicts)"""
-    return {q: df.loc[ds].to_dict(orient='records') for q, ds in df.groupby(key).groups.items()}
+    return {q: df.loc[ds].to_dict(orient='records') for q, ds in df.groupby(key).groups.items()}  # type: ignore
 
 
 def group_to_list_of_records(
@@ -92,12 +92,12 @@ def fix_incomplete_datetime_series(
     D: existing date was already complete
     M: days was missing and date was truncated to first-day in month or last day of month
     """
-    ds = df[column_name]
+    ds: pd.Series[str] = df[column_name]
 
     df = df if inplace else df.copy()
 
     df[f"{column_name}0"] = ds
-    df[column_name] = np.nan
+    df[column_name] = ''
     df[f"{column_name}_flag"] = 'X'
 
     mask_year: pd.Series[bool] = ds.str.len() == 4
@@ -105,8 +105,8 @@ def fix_incomplete_datetime_series(
     mask_yearmonthday: pd.Series[bool] = ds.str.len() == 10
 
     """Truncate to beginning of year/month"""
-    df.loc[mask_year, column_name] = ds[mask_year] + '-01-01'
-    df.loc[mask_yearmonth, column_name] = ds[mask_yearmonth] + '-01'
+    df.loc[mask_year, column_name] = ds[mask_year].astype(str) + '-01-01'
+    df.loc[mask_yearmonth, column_name] = ds[mask_yearmonth].astype(str) + '-01'
     df.loc[mask_yearmonthday, column_name] = ds[mask_yearmonthday]
 
     if action == 'extend':
