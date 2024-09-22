@@ -1,12 +1,10 @@
-
-root_folder: &folder tests/test_data/source/
-data_folder: *folder
-version: &version v1.1.0
+root_folder: tests/test_data/source/
+data_folder: tests/test_data/source/
+version: v1.1.0
 
 corpus:
-  version: *version
-  folder: !path_join [ *folder, *version, parlaclarin/protocols ]
-  subfolder: 
+  version: v1.1.0
+  folder: tests/test_data/source/v1.1.0/parlaclarin/protocols
   pattern: "**/prot-*-*.xml"
   github:
     user: swerik-project
@@ -14,17 +12,16 @@ corpus:
     path: data
 
 fakes:
-  folder: !path_join [ tests/test_data/fakes, *version, parlaclarin/protocols ]
-  expected_folder: !path_join [ tests/test_data/fakes, *version, expected ]
+  folder: tests/test_data/fakes/v1.1.0/parlaclarin/protocols
+  expected_folder: tests/test_data/fakes/v1.1.0/expected
 
 metadata:
-  version: *version
-  folder: !path_join [ *folder, *version, parlaclarin/metadata ]
-  subfolder: 
+  version: v1.1.0
+  folder: tests/test_data/source/v1.1.0/parlaclarin/metadata
   database:
     type: pyriksprot.metadata.database.SqliteDatabase
     options:
-      filename: !path_join [ *folder, *version, riksprot_metadata.db ]
+      filename: tests/test_data/source/v1.1.0/riksprot_metadata.db
     # type: pyriksprot.metadata.database.PostgresDatabase
     # options:
     #   host: xxx
@@ -36,17 +33,33 @@ metadata:
     user: swerik-project
     repository: riksdagen-persons
     path: data
+    url: https://github.com/swerik-project/riksdagen-records.git
 
 tagged_frames:
-  folder: &tagged_folder !path_join [ *folder, *version, tagged_frames ]
-  file_pattern: &file_pattern prot-*.zip
-  pattern: !path_join [ *tagged_folder, "**", *file_pattern ]
+  folder: tests/test_data/source/v1.1.0/tagged_frames
+  file_pattern: prot-*.zip
+  pattern: tests/test_data/source/v1.1.0/tagged_frames/**/prot-*.zip
 
 tagged_speeches:
-  folder: &speech_folder !path_join [ *folder, *version, tagged_frames_speeches.feather ]
+  folder: tests/test_data/source/v1.1.0/tagged_frames_speeches.feather
+
+dehyphen:
+  folder: tests/test_data/source/v1.1.0/dehyphen
+  tf_filename: tests/test_data/source/v1.1.0/dehyphen/word-frequencies.pkl
+
+tagger:
+  module: pyriksprot_tagger.taggers.stanza_tagger
+  stanza_datadir: /data/sparv/models/stanza
+  preprocessors: dedent,dehyphen,strip,pretokenize
+  lang: "sv"
+  processors: tokenize,lemma,pos
+  tokenize_pretokenized: true
+  tokenize_no_ssplit: true
+  use_gpu: true
+  num_threads: 1
 
 global:
   corpus:
     folder: /data/riksdagen_corpus_data/riksdagen-records/data
   metadata:
-    folder: /data/riksdagen_corpus_data/riksdagen-records/data
+    folder: /data/riksdagen_corpus_data/riksdagen-persons/data
