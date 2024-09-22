@@ -1,10 +1,10 @@
 
-root_folder: &folder /data/riksdagen_corpus_data
-data_folder: *folder
-version: &version v1.1.0
+root_folder: /data/riksdagen_corpus_data
+data_folder: /data/riksdagen_corpus_data
+version: v1.1.0
 
 corpus:
-  version: *version
+  version: v1.1.0
   folder: /data/riksdagen_corpus_data/riksdagen-records/data
   pattern: "**/prot-*-*.xml"
   github:
@@ -17,7 +17,7 @@ fakes:
   expected_folder: tests/test_data/fakes/version/v1.1.0/expected
 
 metadata:
-  version: *version
+  version: v1.1.0
   folder: /data/riksdagen_corpus_data/metadata/v1.1.0
   database:
     type: pyriksprot.metadata.database.SqliteDatabase
@@ -38,9 +38,22 @@ metadata:
 
 tagged_frames:
   folder: /data/riksdagen_corpus_data/v1.1.0/tagged_frames
-  file_pattern: &file_pattern prot-*.zip
+  file_pattern: prot-*.zip
   pattern: /data/riksdagen_corpus_data/v1.1.0/tagged_frames/**/prot-*.zip
 
 tagged_speeches:
-  folder: &speech_folder /data/riksdagen_corpus_data/v1.1.0/tagged_frames_speeches.feather
+  folder: /data/riksdagen_corpus_data/v1.1.0/tagged_frames_speeches.feather
+dehyphen:
+  folder: /data/riksdagen_corpus_data/v1.1.0/dehyphen
+  tf_filename: /data/riksdagen_corpus_data/riksdagen-corpus-term-frequencies.pkl
 
+tagger:
+  module: pyriksprot_tagger.taggers.stanza_tagger
+  stanza_datadir: /data/sparv/models/stanza
+  preprocessors: dedent,dehyphen,strip,pretokenize
+  lang: "sv"
+  processors: tokenize,lemma,pos
+  tokenize_pretokenized: true
+  tokenize_no_ssplit: true
+  use_gpu: true
+  num_threads: 1
