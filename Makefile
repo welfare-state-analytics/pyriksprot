@@ -25,6 +25,8 @@ SPEECH_CORPUS_FORMAT=feather
 TAGGED_FRAMES_FOLDER=$(ROOT_FOLDER)/$(VERSION)/tagged_frames
 LEMMA_VRT_SPEECHES_FOLDER=$(ROOT_FOLDER)/$(VERSION)/lemma_vrt_speeches.$(SPEECH_CORPUS_FORMAT)
 
+WORD_FREQUENCY_FILENAME=$(shell yq '.dehyphen.tf_filename' $(CONFIG_FILENAME))
+
 ifeq ($(wildcard $(CORPUS_FOLDER)/.git),)
 	CHECKED_OUT_TAG := $(VERSION)
 else
@@ -92,8 +94,7 @@ SPEECH_INDEX_TARGET_NAME=$(LOCAL_METADATA_FOLDER)/speech_index.$(MERGE_STRATEGY)
 word-frequencies:
 	@echo "info: computing word frequencies for $(VERSION)"
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2tfs.py \
-		$(CORPUS_FOLDER) \
-		$(LOCAL_METADATA_FOLDER)/word-frequencies.pkl
+		$(CORPUS_FOLDER) $(WORD_FREQUENCY_FILENAME)
 
 speech-index:
 	@echo "info: creating speech index for $(VERSION)"
@@ -266,21 +267,30 @@ metadata-dump-schema:
 # ENTRYPOINT: Main recipe that creates sample test data for current tag
 ########################################################################################################
 
-test-data: test-data-clear test-corpus-and-metadata test-tagged-frames test-speech-corpora test-corpus-config test-data-bundle
+test-data: test-corpus-and-metadata test-tagged-frames test-speech-corpora test-corpus-config test-data-bundle
 	@echo "info: $(VERSION) test data refreshed!"
 
-test-data-clear:
-	@rm -rf tests/test_data/source/$(VERSION)
-	@echo "info: $(VERSION) test data cleared."
 
+# This recipe creates a test corpus and metadata database for the current tag
 test-corpus-and-metadata:
-	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py $(TEST_CONFIG_FILENAME) corpus-and-metadata  --force
+	@PYTHONPATH=. poetry run python ./tests/scripts/make_test_data.py $(TEST_CONFIG_FILENAME) corpus-and-metadata  --force
+	@echo "info: test ParlaCLARIN corpus and metadata copied to test data."
+	@echo "info: Word frequencies created."
+	@echo "info: Corpus indexes (protocols, utterances) generated."
+	@echo "info: Corpus metadata database created."
+
+# test-data-clear:
+# 	@echo "skipped: rm -rf tests/test_data/source/$(VERSION)"
+# 	@echo "info: $(VERSION) test data cleared."
+
+# test-word-frequencies:
+# 	@PYTHONPATH=. poetry run python ./tests/scripts/make_test_data.py $(TEST_CONFIG_FILENAME) word-frequencies --force
 
 test-tagged-frames:
-	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py $(TEST_CONFIG_FILENAME) tagged-frames $(TAGGED_FRAMES_FOLDER) --force
+	@PYTHONPATH=. poetry run python ./tests/scripts/make_test_data.py $(TEST_CONFIG_FILENAME) tagged-frames $(TAGGED_FRAMES_FOLDER) --force
 
 test-speech-corpora:
-	@PYTHONPATH=. poetry run python ./tests/scripts/testdata.py $(TEST_CONFIG_FILENAME) tagged-speech-corpora --force
+	@PYTHONPATH=. poetry run python ./tests/scripts/make_test_data.py $(TEST_CONFIG_FILENAME) tagged-speech-corpora --force
 
 # test-data-corpora:
 # 	@poetry run python -c 'import tests.utility; tests.utility.ensure_test_corpora_exist(force=True)'
