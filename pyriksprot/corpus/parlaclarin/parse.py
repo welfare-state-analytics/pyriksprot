@@ -14,34 +14,45 @@ XML_ID: str = '{http://www.w3.org/XML/1998/namespace}id'
 # pylint: disable=too-many-statements
 
 
+def zero_fill_filename_sequence(name: str) -> str:
+    parts: list[str] = name.split('-')
+    if parts[-1].isdigit():
+        parts[-1] = parts[-1].zfill(3)
+    return '-'.join(parts)
+
+
 class ProtocolMapper(interface.IProtocolParser):
     @staticmethod
-    def get_date(data: untangle.Element) -> str:
+    def get_date(data: untangle.Element) -> str | None:
         try:
-            docDate = data.TEI.text.front.div.docDate
-            return docDate[0]['when'] if isinstance(docDate, list) else docDate['when']
+            docDate = data.TEI.text.front.div.docDate  # type: ignore
+            return docDate[0]['when'] if isinstance(docDate, list) else docDate['when']  # type: ignore
         except (AttributeError, KeyError):
             return None
 
     @staticmethod
-    def get_name(data: untangle.Element) -> str:
+    def get_name(data: untangle.Element) -> str | None:
         """Protocol name"""
         try:
-            return data.TEI.text.front.div.head.cdata
+            name: str = data.TEI.text.front.div.head.cdata  # type: ignore
+            """Bug fix: Replace underscores with dashes and lowercase"""
+            if name.startswith("prot_"):
+                name = name.replace("_", "-").lower()
+            return zero_fill_filename_sequence(name)  # type: ignore
         except (AttributeError, KeyError):
             return None
 
     @staticmethod
     def get_content_sections(data: untangle.Element) -> list[untangle.Element]:
         try:
-            sections: Any = data.TEI.text.body.children
+            sections: Any = data.TEI.text.body.children  # type: ignore
         except AttributeError:
             logger.warning(f'no content (text.body) found in {ProtocolMapper.get_name(data) or "unknown"}')
             return []
 
         if not isinstance(sections, (list, tuple)):
             return [sections]
-        return sections
+        return sections  # type: ignore
 
     @staticmethod
     def get_content_elements(data: untangle.Element) -> Iterable[untangle.Element]:
@@ -52,13 +63,15 @@ class ProtocolMapper(interface.IProtocolParser):
         return len(ProtocolMapper.get_content_sections(data)) > 0
 
     @staticmethod
-    def get_data(data: untangle.Element) -> tuple[list[interface.Utterance], dict[str, interface.SpeakerNote]]:
+    def get_data(
+        data: untangle.Element,
+    ) -> dict[str, list[interface.Utterance] | dict[str, interface.SpeakerNote] | list[interface.PageReference]]:
         """All utterances in sequence"""
         utterances: list[interface.Utterance] = []
         """All speaker notes"""
         speaker_notes: dict[str, interface.SpeakerNote] = {}
 
-        page_refs: list[str, interface.PageReference] = []
+        page_refs: list[interface.PageReference] = []
         page_ref: interface.PageReference = interface.PageReference(source_id=0, page_number=-1, reference="")
 
         """Current Speaker Note"""
@@ -159,7 +172,7 @@ class ProtocolMapper(interface.IProtocolParser):
         protocol: interface.Protocol = None
         source_name: str = filename if isinstance(filename, str) else "unknown"
         try:
-            ignore_tags: set[str] = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
+            ignore_tags = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
             data: untangle.Element = (
                 filename
                 if isinstance(filename, untangle.Element)

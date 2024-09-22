@@ -410,8 +410,15 @@ class Protocol(UtteranceMixIn, IProtocol):
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
         """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
         if which != "filename":
+            if not self.date.isdigit():
+                raise ParlaClarinError(f"cannot extract year from {which}: {self.date}")
             return int(self.date[:4])
-        return int(self.name.split("-")[1][:4])
+
+        parts: list[str] = self.name.split("-")
+        if len(parts) < 2 or not parts[1][:4].isdigit():
+            raise ParlaClarinError(f"cannot extract year from {which}: {self.name}")
+
+        return int(parts[1][:4])
 
     def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
         """Apply text transforms. Return self."""
