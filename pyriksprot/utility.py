@@ -322,7 +322,7 @@ def ensure_folder(path: str) -> str:
     return path
 
 
-def reset_folder(folder: str, force: bool = False) -> str:
+def reset_folder(folder: str, force: bool = False) -> None:
     if os.path.isdir(folder) and not force:
         raise FileExistsError(folder)
 
