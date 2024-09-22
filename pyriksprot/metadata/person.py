@@ -52,16 +52,16 @@ class TimePeriod:
 
     @property
     def start_year(self) -> int:
-        return self.start_date.year if self._is_date(self.start_date) else 0
+        return self.start_date.year if self._is_date(self.start_date) else 0  # type: ignore
 
     @property
     def end_year(self) -> int:
-        return self.end_date.year if self._is_date(self.end_date) else 9999
+        return self.end_date.year if self._is_date(self.end_date) else 9999  # type: ignore
 
     def covers(self, pit: int | datetime.date) -> bool:
         if isinstance(pit, (int, np.integer)):
             return self.start_year <= pit <= self.end_year
-        return self.start_date <= pit <= self.end_date
+        return self.start_date <= pit <= self.end_date  # type: ignore
 
     @property
     def is_closed(self) -> bool:
@@ -93,6 +93,7 @@ class PersonParty(TimePeriod):
 class Person:
     pid: int
     person_id: str
+    wiki_id: str
     name: str
     gender_id: int
     party_id: int
@@ -171,6 +172,7 @@ class Person:
 class SpeakerInfo:
     speech_id: str
     person_id: str
+    wiki_id: str
     name: str
     gender_id: int
     party_id: int
@@ -181,6 +183,7 @@ class SpeakerInfo:
         return {
             'speech_id': self.speech_id,
             'person_id': self.person_id,
+            'wiki_id': self.person_id,
             'name': self.name,
             'gender_id': self.gender_id,
             'party_id': self.party_id,
@@ -216,6 +219,7 @@ class SpeakerInfo:
         return SpeakerInfo(
             speech_id='',
             person_id='',
+            wiki_id='',
             name="unknown",
             gender_id=0,
             party_id=0,
@@ -236,7 +240,8 @@ def swap_rows(df: pd.DataFrame, i: int, j: int):
 
 
 def index_of_person_id(df: pd.DataFrame, person_id: str) -> int:
-    return df.index[df['person_id'] == person_id].tolist()[0]
+    id_column: str = 'wiki_id' if person_id.startswith('Q') else 'person_id'
+    return df.index[df[id_column] == person_id].tolist()[0]
 
 
 # pylint: disable=too-many-public-methods
@@ -249,8 +254,8 @@ class PersonIndex:
             'persons_of_interest': None,
             'terms_of_office': 'terms_of_office_id',
             'person_party': None,
-            'unknown_utterance_gender': 'u_id',
-            'unknown_utterance_party': 'u_id',
+            # 'unknown_utterance_gender': 'u_id',
+            # 'unknown_utterance_party': 'u_id',
         }
 
     def load(self) -> PersonIndex:
@@ -274,16 +279,32 @@ class PersonIndex:
         return data
 
     @cached_property
-    def pid2person_id(self) -> dict:
+    def pid2person_id(self) -> dict[int, str]:
         return self.persons['person_id'].to_dict()
 
     @cached_property
-    def person_id2pid(self) -> dict:
+    def person_id2pid(self) -> dict[str, int]:
         return revdict(self.pid2person_id)
 
     @cached_property
-    def pid2person_name(self) -> dict:
+    def pid2wiki_id(self) -> dict[int, str]:
+        return self.persons['wiki_id'].to_dict()
+
+    @cached_property
+    def wiki_id2pid(self) -> dict[str, int]:
+        return revdict(self.pid2wiki_id)
+
+    @cached_property
+    def pid2person_name(self) -> dict[int, str]:
         return self.persons['name'].to_dict()
+
+    @cached_property
+    def person_id2wiki_id(self) -> dict[str, str]:
+        return self.persons[['person_id', 'wiki_id']].set_index('person_id')['wiki_id'].to_dict()
+
+    @cached_property
+    def wiki_id2person_id(self) -> dict[str, str]:
+        return revdict(self.person_id2wiki_id)
 
     @property
     def persons(self) -> pd.DataFrame:
@@ -297,9 +318,26 @@ class PersonIndex:
     def person_lookup(self) -> dict[str, Person]:
         return {person_id: self.get_person(person_id) for person_id in self.person_id2pid}
 
+    def any2pid(self, key: str | int) -> int:
+        if isinstance(key, int):
+            return key
+        if key.startswith('Q'):
+            return self.wiki_id2pid.get(key, 0)
+        return self.person_id2pid.get(key, 0)
+
+    def any2person_id(self, key: str | int) -> str:
+        if isinstance(key, int):
+            return self.pid2person_id.get(key, 'unknown')
+        if key.startswith('Q'):
+            return self.wiki_id2person_id.get(key, 'unknown')
+        return key
+
     def get_person(self, person_id: str | int) -> Person:
         try:
-            pid: int = person_id if isinstance(person_id, int) else self.person_id2pid.get(person_id)
+            if not isinstance(person_id, (str, int)):
+                raise ValueError(f"Invalid person_id: {person_id}")
+
+            pid: int = self.any2pid(person_id)
             data: dict = self.persons.loc[pid][self.person_attributes].to_dict()
             terms: list[TermOfOffice] = self.terms_of_office_lookup.get(data['person_id']) or []
             alt_parties: list[PersonParty] = self.person_multiple_party_lookup.get(data['person_id'])
@@ -394,6 +432,7 @@ class PersonIndex:
         return Person(
             pid=0,
             person_id='unknown',
+            wiki_id='unknown',
             name='unknown',
             gender_id=0,
             party_id=0,
@@ -435,16 +474,18 @@ class SpeakerInfoService:
         person = self.person_index[person_id]
         gender_id: int = person.gender_id
         party_id: int = person.party_id
-        if person.is_unknown:
-            gender_id = gender_id or self.utterance_index.unknown_gender_lookup.get(u_id, 0)
-            party_id = party_id or self.utterance_index.unknown_party_lookup.get(u_id, 0)
-        elif not party_id:
+        # if person.is_unknown:
+        #     gender_id = gender_id or self.utterance_index.unknown_gender_lookup.get(u_id, 0)
+        #     party_id = party_id or self.utterance_index.unknown_party_lookup.get(u_id, 0)
+        # elif not party_id:
+        if not party_id:
             party_id = person.party_at(year)
 
         term_of_office: TermOfOffice = person.term_of_office_at(year)
         speaker_info: SpeakerInfo = SpeakerInfo(
             speech_id=u_id,
             person_id=person.person_id,
+            wiki_id=person.wiki_id,
             name=person.name,
             gender_id=gender_id,
             party_id=party_id,
