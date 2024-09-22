@@ -24,7 +24,7 @@ def test_find_dispatchers():
     assert dispatcher is not None
 
 
-def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
+def test_folder_with_zips_dispatch(tagged_speeches: list[dict[str, sg.DispatchItem]]):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(database)
@@ -38,7 +38,7 @@ def test_folder_with_zips_dispatch(tagged_speeches: list[sg.DispatchItem]):
     assert isdir(target_name)
 
 
-def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
+def test_zip_file_dispatch(tagged_speeches: list[dict[str, sg.DispatchItem]]):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
     lookups: md.Codecs = md.Codecs().load(database)
@@ -57,7 +57,7 @@ def test_zip_file_dispatch(tagged_speeches: list[sg.DispatchItem]):
     [("decade", ("gender_id", "party_id")), ("year", ("gender_id",)), ("decade", [])],
 )
 def test_organized_speeches_in_zip_dispatch(
-    tagged_speeches: list[sg.DispatchItem], temporal_key: str, naming_keys: list[str]
+    tagged_speeches: list[dict[str, sg.DispatchItem]], temporal_key: str, naming_keys: list[str]
 ):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
@@ -94,7 +94,9 @@ def test_find_dispatch_class():
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
-def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_index: corpus_index.CorpusSourceIndex):
+def test_checkpoint_dispatch(
+    tagged_speeches: list[dict[str, sg.DispatchItem]], source_index: corpus_index.CorpusSourceIndex
+):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}'
     lookups: md.Codecs = md.Codecs().load(database)
@@ -114,7 +116,7 @@ def test_checkpoint_dispatch(tagged_speeches: list[sg.DispatchItem], source_inde
 
 
 def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip_ext: bool = True) -> Set[str]:
-    files: List[str] = set(basename(x) for x in glob.glob(join(folder, pattern), recursive=True))
+    files: set[str] = set(basename(x) for x in glob.glob(join(folder, pattern), recursive=True))
     if strip_path:
         files = {basename(x) for x in files}
     if strip_ext:
@@ -125,7 +127,7 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch(
-    tagged_speeches: list[sg.DispatchItem],
+    tagged_speeches: list[dict[str, sg.DispatchItem]],
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):
@@ -152,7 +154,7 @@ def test_single_feather_per_group_dispatch(
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
 def test_single_feather_per_group_dispatch_with_skips(
-    tagged_speeches: list[sg.DispatchItem],
+    tagged_speeches: list[dict[str, sg.DispatchItem]],
     source_index: corpus_index.CorpusSourceIndex,
     cls: Type[dispatch.IDispatcher],
 ):

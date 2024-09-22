@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 import pytest
-from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import
+from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import, # type: ignore
 from loguru import logger
 
 from pyriksprot import interface
@@ -77,7 +77,9 @@ def tagged_speeches(
         segment_skip_size=1,
         preprocess=assign_speaker_info,
     )
-    groups = sg.SegmentMerger(source_index=source_index, temporal_key=None, grouping_keys=None).merge(segments)
+    groups: list[dict[str, DispatchItem]] = sg.SegmentMerger(
+        source_index=source_index, temporal_key=None, grouping_keys=None
+    ).merge(segments)
     groups = list(groups)
     return groups
 
