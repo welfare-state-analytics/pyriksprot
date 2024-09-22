@@ -237,7 +237,7 @@
     },
     "speaker_notes": {
         "speaker_note_id": "text primary key",
-        "speaker_note": "text not null",
+        "speaker_note": "text null",
         ":filename:": "speaker_notes.csv.gz",
         ":sep:": "\t",
         ":derived:": true
