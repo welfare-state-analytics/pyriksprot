@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 
 from pyriksprot.corpus.parlaclarin import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
 from pyriksprot.corpus.utility import ls_corpus_folder
+from pyriksprot.utility import ensure_path
 
 from ..foss.sparv_tokenize import default_tokenize
 
@@ -116,6 +117,7 @@ def compute_term_frequencies(
         counter.ingest(texts)
 
         if filename is not None:
+            ensure_path(filename)
             counter.store(filename)
 
         return counter
