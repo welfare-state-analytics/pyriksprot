@@ -252,5 +252,5 @@ def test_fix_incomplete_datetime_series_extend_not_inplace():
     assert 'df_flag' not in df.columns
 
     assert df2.dt0.equals(pd.Series(SAMPLE_DATISH_VALUES))
-    assert df2.dt.equals(pd.Series(["2020-12-31", np.NaN, "2023-02-28", '2023-03-24']))
+    assert df2.dt.equals(pd.Series(["2020-12-31", np.nan, "2023-02-28", '2023-03-24']))
     assert df2.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))

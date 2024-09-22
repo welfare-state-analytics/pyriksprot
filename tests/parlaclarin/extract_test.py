@@ -46,7 +46,8 @@ def test_create_grouping_hashcoder():
     # speaker_service.get_speaker_info(u_id=item.u_id, person_id=item.who, year=item.year)
     speaker: md.SpeakerInfo = md.SpeakerInfo(
         speech_id='d68df3cd45d2eec6-0',
-        person_id='Q5715273',
+        person_id='u-5715273',
+        wiki_id='Q5715273',
         name='Ericsson',
         gender_id=1,
         party_id=8,
@@ -79,7 +80,8 @@ def test_create_grouping_hashcoder():
 def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
     speaker: md.SpeakerInfo = md.SpeakerInfo(
         speech_id='dummy-0',
-        person_id='Q123456',
+        person_id='u-123456',
+        wiki_id='Q123456',
         name='Dummy',
         gender_id=1,
         party_id=8,
