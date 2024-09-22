@@ -9,6 +9,8 @@ from typing import Any
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.utility import reset_folder
+
 from ..interface import IProtocolParser
 from .corpus_index_factory import CorpusIndexFactory
 from .schema import MetadataSchema, MetadataTable
@@ -27,6 +29,8 @@ def subset_to_folder(
     logger.info(f"      ParlaClarin folder: {protocols_source_folder}")
     logger.info(f"  Source metadata folder: {source_folder}")
     logger.info(f"  Target metadata folder: {target_folder}")
+    
+    reset_folder(target_folder, force=True)
 
     data: dict[str, pd.DataFrame] = (
         CorpusIndexFactory(parser, schema=tag)

@@ -29,13 +29,18 @@ def main(
     try:
         ConfigStore().configure_context(source=config_filename)
         subset_corpus_and_metadata(
-            source_folder=source_folder,
-            documents=documents,
-            target_folder=target_folder,
             tag=ConfigValue("version").resolve(),
+            documents=documents,
+            global_corpus_folder=source_folder or ConfigValue("corpus.folder").resolve(),
+            global_metadata_folder=ConfigValue("metadata.folder").resolve(),
+            target_folder=target_folder,
             scripts_folder=scripts_folder,
             gh_metadata_opts=ConfigValue("metadata.github").resolve(),
             gh_records_opts=ConfigValue("corpus.github").resolve(),
+            db_opts=ConfigValue("metadata.database").resolve(),
+            tf_filename=ConfigValue("dehyphen.tf_filename").resolve(),
+            skip_download=True,
+            force=True,
         )
     except Exception as ex:
         click.echo(ex)
