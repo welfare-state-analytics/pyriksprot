@@ -1,6 +1,5 @@
 import os
-from posixpath import splitext
-from typing import Any
+from os.path import splitext
 
 import pytest
 import requests
@@ -9,6 +8,8 @@ from pyriksprot import corpus as pc
 from pyriksprot import gitchen as gh
 from pyriksprot import metadata as md
 from pyriksprot.configuration.inject import ConfigValue
+from pyriksprot.metadata.database import DatabaseInterface
+from pyriksprot.workflows.create_metadata import resolve_backend
 
 from .utility import (
     create_test_speech_corpus,
@@ -99,7 +100,7 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
         global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
         global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),
         target_folder=ConfigValue("data_folder").resolve(),
-        scripts_folder = None,
+        scripts_folder=None,
         gh_metadata_opts=ConfigValue("metadata.github").resolve(),
         gh_records_opts=ConfigValue("corpus.github").resolve(),
         db_opts=ConfigValue("metadata.database").resolve(),
@@ -108,8 +109,14 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
         force=True,
     )
 
+    db: DatabaseInterface = resolve_backend(ConfigValue("metadata.database").resolve())
 
-# @pytest.mark.skip(reason="Test infrastructure test")
+    assert db is not None
+
+    assert db.fetch_scalar("SELECT COUNT(*) FROM _person") > 0
+
+
+@pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
     version: str = ConfigValue("version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
