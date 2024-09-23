@@ -64,17 +64,17 @@ def sample_metadata_exists() -> bool:
     if not isfile(filename):
         logger.info(f"metadata database file not found: {filename}")
         return False
-    
+
     configs: md.MetadataSchema = md.MetadataSchema(tag=corpus_version)
     if not configs.files_exist(source_folder):
         logger.info(f"metadata schema files not found in: {source_folder}")
         return False
-    
+
     tf_filename: str = ConfigValue("dehyphen:tf_filename").resolve()
     if not isfile(tf_filename):
         logger.info(f"term frequency file not found: {tf_filename}")
         return False
-    
+
     return True
 
 
@@ -119,6 +119,11 @@ def ensure_test_corpora_exist(
     database: str = None,
 ):
     corpus_version = corpus_version or ConfigValue("corpus:version").resolve()
+
+    if not corpus_version:
+        logger.warning("ensure_test_corpora_exist: corpus version not set, unable to verify test corpora")
+        return
+
     tagged_source_folder = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder = root_folder or ConfigValue("root_folder").resolve()
     database = database or ConfigValue("metadata:database").resolve()
