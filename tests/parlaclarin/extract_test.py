@@ -122,10 +122,10 @@ def test_segment_merger_merge(xml_source_index: csi.CorpusSourceIndex):
 def test_extract_corpus_text_yearly_grouped_by_party():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
     corpus_folder: str = ConfigStore.config().get("corpus:folder")
-    database: str = ConfigStore.config().get("metadata:database")
+    database_filename: str = ConfigStore.config().get("metadata:database:options:filename")
     workflows.extract_corpus_text(
         source_folder=corpus_folder,
-        metadata_filename=database,
+        metadata_filename=database_filename,
         target_name=target_name,
         target_type='files-in-zip',
         compress_type=dispatch.CompressType.Zip,
@@ -144,10 +144,10 @@ def test_extract_corpus_text_yearly_grouped_by_party():
 def test_extract_corpus_with_no_temporal_key():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
     corpus_folder: str = ConfigStore.config().get("corpus:folder")
-    database: str = ConfigStore.config().get("metadata:database")
+    database_filename: str = ConfigStore.config().get("metadata:database:options:filename")
     workflows.extract_corpus_text(
         source_folder=corpus_folder,
-        metadata_filename=database,
+        metadata_filename=database_filename,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -164,10 +164,10 @@ def test_extract_corpus_with_no_temporal_key():
 def test_extract_corpus_with_no_matching_protocols():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
     corpus_folder: str = ConfigStore.config().get("corpus:folder")
-    database: str = ConfigStore.config().get("metadata:database")
+    database_filename: str = ConfigStore.config().get("metadata:database:options:filename")
     workflows.extract_corpus_text(
         source_folder=corpus_folder,
-        metadata_filename=database,
+        metadata_filename=database_filename,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -184,10 +184,10 @@ def test_extract_corpus_with_no_matching_protocols():
 def test_aggregator_extract_gender_party_no_temporal_key():
     target_filename: str = f'tests/output/{uuid.uuid1()}.zip'
     corpus_folder: str = ConfigStore.config().get("corpus:folder")
-    database: str = ConfigStore.config().get("metadata:database")
+    database_filename: str = ConfigStore.config().get("metadata:database:options:filename")
     workflows.extract_corpus_text(
         source_folder=corpus_folder,
-        metadata_filename=database,
+        metadata_filename=database_filename,
         target_name=target_filename,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Who,
@@ -210,14 +210,14 @@ def test_aggregator_extract_gender_party_no_temporal_key():
 def test_extract_corpus_with_sorted_files():
     target_name: str = f'tests/output/{uuid.uuid1()}.zip'
     corpus_folder: str = ConfigStore.config().get("corpus:folder")
-    database: str = ConfigStore.config().get("metadata:database")
+    database_filename: str = ConfigStore.config().get("metadata:database:options:filename")
 
     def file_namer():
         return None
 
     workflows.extract_corpus_text(
         source_folder=corpus_folder,
-        metadata_filename=database,
+        metadata_filename=database_filename,
         target_name=target_name,
         target_type='files-in-zip',
         segment_level=interface.SegmentLevel.Speech,
