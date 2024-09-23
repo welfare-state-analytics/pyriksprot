@@ -60,7 +60,7 @@ class SegmentMerger:
             current_temporal_value: str = None
             current_temporal_group: dict[str, DispatchItem] = {}
             grouping_keys: set[str] = set(self.grouping_keys)
-            source_item: corpus_index.ICorpusSourceItem
+            source_item: corpus_index.ICorpusSourceItem = None
 
             if grouping_keys and getattr(iterator, 'segment_level', None) == SegmentLevel.Protocol:
                 raise ValueError("cannot group by key (within protocol) when segement level is entire protocol.")
