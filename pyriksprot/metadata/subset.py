@@ -29,7 +29,7 @@ def subset_to_folder(
     logger.info(f"      ParlaClarin folder: {protocols_source_folder}")
     logger.info(f"  Source metadata folder: {source_folder}")
     logger.info(f"  Target metadata folder: {target_folder}")
-    
+
     reset_folder(target_folder, force=True)
 
     data: dict[str, pd.DataFrame] = (
