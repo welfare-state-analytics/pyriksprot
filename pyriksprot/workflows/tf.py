@@ -4,6 +4,7 @@ from collections import defaultdict
 from glob import glob
 from typing import Any, Callable, Dict, Iterable, List, Union
 
+from loguru import logger
 from tqdm.auto import tqdm
 
 from pyriksprot.corpus.parlaclarin import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
@@ -123,5 +124,5 @@ def compute_term_frequencies(
         return counter
 
     except Exception as ex:
-        print(ex)
+        logger.error(ex)
         raise

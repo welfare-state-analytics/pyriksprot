@@ -18,7 +18,7 @@ def rename_tagged_filename(zip_path: str):
         return
 
     if faulty_name == f"{protocol_name}.json":
-        print(f"File '{faulty_name}' already has the correct name.")
+        logger.info(f"File '{faulty_name}' already has the correct name.")
         return
 
     temp_dir: str = f"/tmp/{protocol_name}"
@@ -34,7 +34,7 @@ def rename_tagged_filename(zip_path: str):
             for file in listdir(temp_dir):
                 fp.write(join(temp_dir, file), file)
 
-        print(f"Renamed '{faulty_name}' to '{protocol_name}.json' in the zip file.")
+        logger.info(f"Renamed '{faulty_name}' to '{protocol_name}.json' in the zip file.")
 
     finally:
         shutil.rmtree(temp_dir)

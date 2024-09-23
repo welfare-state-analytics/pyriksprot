@@ -20,7 +20,6 @@ def main(
     local_xml_folder: str,
     local_vrt_folder: str,
 ):
-    print(locals())
     try:
         subset_vrt_corpus(global_vrt_folder, local_xml_folder, local_vrt_folder)
     except Exception as ex:

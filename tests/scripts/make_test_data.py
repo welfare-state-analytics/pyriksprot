@@ -96,10 +96,10 @@ def generate_tagged_frames(force: bool = False, source_folder: str = None, targe
 def generate_word_frequencies(source_folder: str = None, target_filename: str = None, force: bool = False):
     try:
         source_folder = source_folder or ConfigValue("corpus:folder").resolve()
-        print(f"source_folder: {source_folder}")
+        logger.info(f"source_folder: {source_folder}")
 
         target_filename = target_filename or ConfigValue("dehyphen:tf_filename").resolve()
-        print(f"target_filename: {target_filename}")
+        logger.info(f"target_filename: {target_filename}")
 
         if os.path.exists(target_filename):
             if not force:

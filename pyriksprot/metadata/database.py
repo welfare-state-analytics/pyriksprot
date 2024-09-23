@@ -490,7 +490,7 @@ def _set_optimal_types(df: pd.DataFrame, schema_df: pd.DataFrame) -> pd.DataFram
             try:
                 df[col_name] = df[col_name].astype(pandas_type)
             except Exception as e:
-                print(f"Error converting column {col_name} to {pandas_type}: {e}")
+                logger.error(f"Error converting column {col_name} to {pandas_type}: {e}")
 
     return df
 

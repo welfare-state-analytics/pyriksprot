@@ -48,7 +48,6 @@ def main(
             multiproc_chunksize=10,
         ),
     }
-    # print(arguments)
     try:
         extract_speech_index(**arguments)
     except Exception as ex:

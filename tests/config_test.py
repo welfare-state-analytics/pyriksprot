@@ -99,14 +99,6 @@ dehyphen:
     assert tagger is not None
 
 
-def test_args():
-    def fox(*args, default=None):
-        return print(args, default)
-
-    fox(1, 2, 3, default=4)
-    fox(1, 2, 3)
-
-
 def test_configure_by_string_and_env():
     config: Config = Config.load(source=SIMPLE_YAML_STR, env_prefix=None)
 

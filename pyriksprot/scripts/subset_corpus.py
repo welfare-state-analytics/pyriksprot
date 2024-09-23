@@ -25,7 +25,6 @@ def main(
     scripts_folder: str = None,
     source_folder: str = None,
 ):
-    print(locals())
     try:
         ConfigStore().configure_context(source=config_filename)
         subset_corpus_and_metadata(
