@@ -22,7 +22,7 @@ from tests.utility import (
 
 @click.group(help="CLI tool to manage riksprot metadata")
 @click.argument('config-filename', type=str, required=False)
-def main(config_filename):
+def main(config_filename: str):
     ConfigStore.configure_context(source=config_filename, env_prefix=None)
 
 
@@ -50,8 +50,8 @@ def generate_corpus_and_metadata(force: bool = False):
         subset_corpus_and_metadata(
             tag=ConfigValue("corpus:version").resolve(),
             documents=filenames,
-            global_corpus_folder=ConfigValue("metadata:folder").resolve(),
-            global_metadata_folder=ConfigValue("metadata:folder").resolve(),
+            global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
+            global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),
             target_folder=ConfigValue("root_folder").resolve(),
             scripts_folder=None,
             gh_metadata_opts=ConfigValue("metadata:github").resolve(),
@@ -121,7 +121,7 @@ def generate_tagged_speech_corpora(
     force: bool = False, tag: str = None, database: str = None, source_folder: str = None
 ):
     version: str = tag or ConfigValue("corpus:version").resolve()
-    database = database or ConfigValue("metadata:database").resolve()
+    database_filename: str = ConfigValue("metadata:database.options.filename").resolve()
     try:
         if sample_tagged_speech_corpus_exists():
             if not force:
@@ -130,7 +130,7 @@ def generate_tagged_speech_corpora(
         create_test_speech_corpus(
             source_folder=source_folder or ConfigValue("tagged_frames:folder").resolve(),
             tag=version,
-            database_name=database,
+            database_name=database_filename,
         )
 
     except ValueError as ex:
@@ -139,12 +139,71 @@ def generate_tagged_speech_corpora(
 
 
 if __name__ == "__main__":
+
     main.add_command(generate_complete_sample_data, "complete")
     main.add_command(generate_corpus_and_metadata, "corpus-and-metadata")
     main.add_command(generate_word_frequencies, "word-frequencies")
     main.add_command(generate_tagged_frames, "tagged-frames")
     main.add_command(generate_tagged_speech_corpora, "tagged-speech-corpora")
 
-    # setup_logs()
-
     main()  # pylint: disable=no-value-for-parameter
+
+    # # from click.testing import CliRunner
+    # # runner = CliRunner()
+    # # result = runner.invoke(
+    # #     main,
+    # #     [
+    # #         'generate_corpus_and_metadata',
+    # #         'tests/test_data/config.yml',
+    # #     ],
+    # # )
+    # # print(result.output)
+    # config_filename = "tests/config.yml"
+    # force = True
+    # ConfigStore.configure_context(source=config_filename, env_prefix=None)
+    # try:
+    #     if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
+    #         if not force:
+    #             raise ValueError("Metadata already exists. Use --force to overwrite.")
+
+    #     filenames: list[str] = get_test_documents(extension="xml")
+    #     logger.info(f"filenames: {filenames}")
+    #     subset_corpus_and_metadata(
+    #         tag=ConfigValue("corpus:version").resolve(),
+    #         documents=filenames,
+    #         global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
+    #         global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),
+    #         target_folder=ConfigValue("root_folder").resolve(),
+    #         scripts_folder=None,
+    #         gh_metadata_opts=ConfigValue("metadata:github").resolve(),
+    #         gh_records_opts=ConfigValue("corpus:github").resolve(),
+    #         db_opts=ConfigValue("metadata:database").resolve(),
+    #         tf_filename=ConfigValue("dehyphen:tf_filename").resolve(),
+    #         skip_download=True,
+    #         force=force,
+    #     )
+
+    # except ValueError as ex:
+    #     logger.error(ex)
+    #     sys.exit(-1)
+
+    # config_filename = "tests/config.yml"
+    # force = True
+    # source_folder = None
+    # ConfigStore.configure_context(source=config_filename, env_prefix=None)
+    # version: str = ConfigValue("corpus:version").resolve()
+    # database_filename = ConfigValue("metadata:database.options.filename").resolve()
+    # try:
+    #     if sample_tagged_speech_corpus_exists():
+    #         if not force:
+    #             raise ValueError("Tagged frames corpus already exists. Use --force to overwrite.")
+
+    #     create_test_speech_corpus(
+    #         source_folder=source_folder or ConfigValue("tagged_frames:folder").resolve(),
+    #         tag=version,
+    #         database_name=database_filename,
+    #     )
+
+    # except ValueError as ex:
+    #     logger.error(ex)
+    #     sys.exit(-1)
