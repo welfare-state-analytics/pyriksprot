@@ -79,13 +79,8 @@ def test_create_metadata_database():
     tag: str = ConfigValue("metadata.version").resolve()
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
     metadata_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
-    corpus_folder: str = ConfigValue("corpus.folder").resolve()
 
     schema = MetadataSchema(tag)
-
-    md.CorpusIndexFactory(ProtocolMapper, schema=schema).generate(
-        corpus_folder=corpus_folder, target_folder=metadata_folder
-    )
 
     service: md.MetadataFactory = md.MetadataFactory(tag=tag, filename=target_filename)
 
