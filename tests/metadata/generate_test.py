@@ -136,7 +136,7 @@ def test_create_metadata_database_DEVELOP():
     service.verify_tag()
 
 
-# @pytest.mark.skip("Infrastructure test only")
+@pytest.mark.skip("Infrastructure test only")
 def test_create_metadata_database_with_workflow():
     # ConfigStore.configure_context(source='configs/config.yml')
     # ConfigStore.configure_context(source='configs/config_postgres.yml')
