@@ -108,7 +108,7 @@ def test_person_index(person_index: md.PersonIndex):
     person: md.Person = person_lookup[person_id]
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
-    terms: list[md.TermOfOffice] = person_index.terms_of_office_lookup.get(wiki_id)
+    terms: list[md.TermOfOffice] = person_index.terms_of_office_lookup.get(person_id)
 
     assert (
         sorted(terms, key=lambda x: x.start_year)
@@ -191,9 +191,12 @@ def test_overload_by_person():
     assert database is not None
 
     person_index: md.PersonIndex = md.PersonIndex(database).load()
-    person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
+    wiki_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
+    person_ids: list[str] = [person_index.wiki_id2person_id.get(x) for x in wiki_ids]
+
     df: pd.DataFrame = pd.DataFrame(data=dict(person_id=person_ids))
     df_overloaded: pd.DataFrame = person_index.overload_by_person(df)
+
     assert df_overloaded is not None
     assert set(df_overloaded.columns) == {'person_id', 'pid', 'gender_id', 'party_id'}
     assert (df_overloaded.pid == [person_index.person_id2pid.get(x) for x in person_ids]).all()
@@ -252,16 +255,40 @@ def test_person_party_at():
     assert person.party_at(1990) == 1
 
 
+def test_get_person_by_ids(person_index: md.PersonIndex):
+
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    service = md.SpeakerInfoService(database, person_index=person_index)
+
+    wiki_id: str = 'Q5556026'
+    person_id: str = person_index.wiki_id2person_id.get(wiki_id)
+
+    assert person_id == 'i-84xpErSjuTzEi5hvTA1Jtt'
+
+    person_by_wiki_id: md.Person = service.person_index.get_person(wiki_id)
+    person_by_person_id: md.Person = service.person_index.get_person(person_id)
+    person_by_pid: md.Person = service.person_index.get_person(person_by_wiki_id.pid)
+
+    assert person_by_person_id.wiki_id == person_by_wiki_id.wiki_id
+    assert person_by_person_id.person_id == person_by_wiki_id.person_id
+    assert person_by_person_id.pid == person_by_wiki_id.pid
+    assert person_by_pid.wiki_id == person_by_wiki_id.wiki_id
+    assert person_by_pid.person_id == person_by_wiki_id.person_id
+
+
 def test_speaker_info_service(person_index: md.PersonIndex):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     service = md.SpeakerInfoService(database, person_index=person_index)
 
-    person: md.Person = service.person_index.get_person('Q5556026')
+    wiki_id: str = 'Q5556026'
+
+    person: md.Person = service.person_index.get_person(wiki_id)
+
     assert person.alt_parties
     assert len(person.alt_parties) == 9
-    assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
     assert set(a.end_year for a in person.alt_parties) == {9999, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
+    assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
     assert person.party_at(1950) == 0
     assert person.party_at(1994) == 7
     assert person.party_at(2000) == 7
