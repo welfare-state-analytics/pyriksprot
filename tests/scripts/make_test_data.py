@@ -115,13 +115,13 @@ def generate_word_frequencies(source_folder: str = None, target_filename: str = 
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 @click.option('--tag', type=click.STRING, help='Corpus version', default=None, required=False)
-@click.option('--database', type=click.STRING, help='Metadata database', default=None, required=False)
+@click.option('--database-filename', type=click.STRING, help='Metadata database', default=None, required=False)
 @click.argument('source-folder', type=str, required=False)
 def generate_tagged_speech_corpora(
-    force: bool = False, tag: str = None, database: str = None, source_folder: str = None
+    force: bool = False, tag: str = None, database_filename: str = None, source_folder: str = None
 ):
-    version: str = tag or ConfigValue("corpus:version").resolve()
-    database_filename: str = ConfigValue("metadata:database.options.filename").resolve()
+    tag = tag or ConfigValue("corpus:version").resolve()
+    database_filename = database_filename or ConfigValue("metadata:database.options.filename").resolve()
     try:
         if sample_tagged_speech_corpus_exists():
             if not force:
@@ -129,7 +129,7 @@ def generate_tagged_speech_corpora(
 
         create_test_speech_corpus(
             source_folder=source_folder or ConfigValue("tagged_frames:folder").resolve(),
-            tag=version,
+            tag=tag,
             database_name=database_filename,
         )
 
