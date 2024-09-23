@@ -1,1 +1,442 @@
 person_id,start,end,district,role
+i-C35yyip4t5V4hBSBwnGD7Z,1918,1921,Malmöhus läns södra valkrets,andrakammarledamot
+i-2HyRdnwNjJfPPeCiQ2cg17,1937,1937,Skaraborgs läns valkrets,andrakammarledamot
+i-4YQFYCZptEWZxiREjfJbJ6,1937,1940,Östergötlands läns valkrets,andrakammarledamot
+i-BqDGKscaLhUZHhaFFmx5pf,1938,1944,Stockholms kommuns valkrets,förstakammarledamot
+i-9jhvJdksrB87LGgUuY4HrE,1942,1944,Västra Götalands läns västra valkrets,andrakammarledamot
+i-VD3ayfYPfGVgSzgaiMXnrs,1945,1948,Älvsborgs läns norra valkrets,andrakammarledamot
+i-3R5C8vQo1FXLQaqX7yYqq8,1950,1952,Värmlands läns valkrets,förstakammarledamot
+i-QUvttyFs7dHYEJzxW6zyJH,1951,1952,Kronobergs läns och Hallands läns valkrets,förstakammarledamot
+i-5QJsEUravEgVPFV6wHts4r,1933,1955,Fyrstadskretsen,andrakammarledamot
+i-LToMcVXu3j48yboSLK1sPQ,1925,1956,Jönköpings läns valkrets,andrakammarledamot
+i-TW2v8kvC9bB35Jx86j8aCC,1929,1956,Fyrstadskretsen,andrakammarledamot
+i-WpmrqhX63Es2BchJ5zXczf,1933,1956,Stockholms kommuns valkrets,andrakammarledamot
+i-4YQFYCZptEWZxiREjfJbJ6,1943,1956,Östergötlands läns valkrets,andrakammarledamot
+i-UzNm618CskFtY3jF64hgNG,1945,1956,Skåne läns norra och östra valkrets,andrakammarledamot
+i-WJt9CvN6go2ndHjsmuUcHK,1949,1956,Göteborgs kommuns valkrets,andrakammarledamot
+i-LhYyN2c3mQaesyUNSPg5Uq,1949,1956,Blekinge läns valkrets,andrakammarledamot
+i-CiY7VNsAwtDMYeA3zzhgP2,1949-10-17,1956,Malmöhus läns valkrets,andrakammarledamot
+i-XNR1rnnKBMVQeMxhbj1afA,1951,1956,Gävleborgs läns valkrets,andrakammarledamot
+i-RszKEuYv8eMZ5L8A5Q8Fuw,1954,1956,Örebro läns valkrets,andrakammarledamot
+i-YSiiSuJqBLt4dhLxm7iu93,1937,1957,Värmlands läns valkrets,andrakammarledamot
+i-JgRYTBR82A6fZXYWrDDTJv,1949,1957,Göteborgs kommuns valkrets,andrakammarledamot
+i-Lcd3uLV5ZW69Tt1s2baQhn,1949,1957-04-22,Stockholms kommuns valkrets,andrakammarledamot
+i-XagQaE6Y2Zc9wu7WvmLcTC,1922,1957-10-03,Gävleborgs läns valkrets,andrakammarledamot
+i-FooDdbstXg6Pqwp431p9Bu,1938,1958,Malmöhus läns valkrets,förstakammarledamot
+i-XkAPddbHxSrxgEhj4f98qz,1941,1958,Blekinge läns valkrets,andrakammarledamot
+i-riJfB4CgvG9jt4652TdCv,1949,1958,Älvsborgs läns norra valkrets,andrakammarledamot
+i-184mh7uhT7D8tGsavsHbSJ,1949,1958,Värmlands läns valkrets,andrakammarledamot
+i-TpbmXU1qADouQvh7zWwskC,1953,1958,Stockholms stads valkrets,andrakammarledamot
+i-Lyd4uNV4VNB2HmVp3LdFbd,1945,1958-04-28,Dalarnas läns valkrets,andrakammarledamot
+i-HrFkdZvTMMR7zA25xt1Lgw,1949,1958-04-28,Gävleborgs läns valkrets,andrakammarledamot
+i-DMs16qwN3uGgTraB34UW2Z,1937,1959,Västra Götalands läns södra valkrets,andrakammarledamot
+i-V2gYZ8XERX96ZTpdHjKDHk,1933,1960,Hallands läns valkrets,andrakammarledamot
+i-4DAUFXnbqzCtaoFJumzEaf,1936,1960,Skaraborgs läns valkrets,andrakammarledamot
+i-N5DuX7A68dF9YwBSdFfwP1,1937,1960,Västerbottens läns valkrets,andrakammarledamot
+i-LLnQ8RYVszR7dBi2EAHt1C,1940-01-01,1960,Skåne läns norra och östra valkrets,andrakammarledamot
+i-7k8zFFY69k9DVxZJwLskxW,1941,1960,Kronobergs läns valkrets,andrakammarledamot
+i-NBpwJayKpXu4u1Uu87zKT1,1945,1960,Uppsala läns valkrets,andrakammarledamot
+i-CBtNTZGJtZPBBSm4FxdhSN,1949,1960,Stockholms kommuns valkrets,andrakammarledamot
+i-VD3ayfYPfGVgSzgaiMXnrs,1953,1960,Älvsborgs läns valkrets,andrakammarledamot
+i-HJkUbagoaGvf95jXdVvgSA,1953,1960,Kalmar läns valkrets,andrakammarledamot
+i-UbdkaWThBLeb83tF5THaPC,1949,1960-05-18,Stockholms läns valkrets,andrakammarledamot
+i-Q8GqdC3JjTLrmBKfpHpnPQ,1945,1960-12-07,Västerbottens läns valkrets,andrakammarledamot
+i-DMs16qwN3uGgTraB34UW2Z,1960,1961,Skaraborgs läns valkrets,förstakammarledamot
+i-AD4PVxoWFJ5WK9APNtM5vP,1937,1962,Göteborgs kommuns valkrets,andrakammarledamot
+i-GKVS1EDVXVuggYqHoj3LVm,1953,1963,Södermanlands läns och Västmanlands läns valkrets,förstakammarledamot
+i-5QJsEUravEgVPFV6wHts4r,1956,1963,Malmöhus läns valkrets,förstakammarledamot
+i-TpbmXU1qADouQvh7zWwskC,1961,1963,Stockholms stads valkrets,andrakammarledamot
+i-C35yyip4t5V4hBSBwnGD7Z,1922,1964,Malmöhus läns valkrets,andrakammarledamot
+i-UDh9LhPS6Vd6F6rXG4Ub8N,1933,1964,Göteborgs stads valkrets,andrakammarledamot
+i-2HyRdnwNjJfPPeCiQ2cg17,1941,1964,Skaraborgs läns valkrets,andrakammarledamot
+i-Mw31BTf7uoxHTWx5X3k5QD,1941,1964,Västra Götalands läns västra valkrets,andrakammarledamot
+i-M5KFuw2v5B8wXgpDefGs2d,1945,1964,Gotlands läns valkrets,andrakammarledamot
+i-7AdEUptmDDBeNmgpp22aZb,1949,1964,Stockholms kommuns valkrets,andrakammarledamot
+i-RgPXdGuWYKQ6GVW8emfxxz,1950,1964,Västmanlands läns valkrets,andrakammarledamot
+i-QUvttyFs7dHYEJzxW6zyJH,1953,1964,Kronobergs läns valkrets,andrakammarledamot
+i-JgRYTBR82A6fZXYWrDDTJv,1958,1964,Göteborgs kommuns valkrets,förstakammarledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1961,1964,Stockholms stads valkrets,andrakammarledamot
+i-6dbbwLmze8R4p7yWmcezLY,1934,1965,Värmlands läns valkrets,förstakammarledamot
+i-CiY7VNsAwtDMYeA3zzhgP2,1958,1965,Malmöhus läns valkrets,andrakammarledamot
+i-6oh2fmMy6eW4v5gtufrZdh,1949,1966,Göteborgs kommuns valkrets,andrakammarledamot
+i-XMTSTL8n8H7DwXjCiELq1r,1955,1966,Västra Götalands läns västra valkrets,andrakammarledamot
+i-9jhvJdksrB87LGgUuY4HrE,1945-12-19,1968,Västra Götalands läns västra valkrets,andrakammarledamot
+i-8xTNMP7CVTCRZUC85xfBv2,1949,1968,Jämtlands läns valkrets,andrakammarledamot
+i-GM1k7EHRipg9AKbMRUTHAd,1953,1968,Gävleborgs läns valkrets,andrakammarledamot
+i-LhYyN2c3mQaesyUNSPg5Uq,1958,1968,Blekinge läns valkrets,andrakammarledamot
+i-EuDLsjc6kknhMzPB1UFjeq,1953,1969-08-25,Jönköpings läns valkrets,andrakammarledamot
+i-F8bSD7JcePAy5c3DWYPLRs,1937,1970,Västmanlands läns valkrets,andrakammarledamot
+i-AC8RFPqgo4aFfG6KooA2u5,1941,1970,Uppsala läns valkrets,andrakammarledamot
+i-KaEwnQ53dsfqZGV8fcpYbX,1942,1970,Västernorrlands läns valkrets,andrakammarledamot
+i-BqDGKscaLhUZHhaFFmx5pf,1945,1970,Stockholms kommuns valkrets,andrakammarledamot
+i-Fs9KpZYHZp1uu9ioJZkH5D,1947,1970,Älvsborgs läns norra valkrets,andrakammarledamot
+i-2ze5QGGJAsCoqCn8nthhnj,1951,1970,Fyrstadskretsen,andrakammarledamot
+i-LFaD1Z7d9YNRL6fxTwLYgr,1953,1970,Kalmar läns valkrets,andrakammarledamot
+i-3R5C8vQo1FXLQaqX7yYqq8,1953,1970,Värmlands läns valkrets,andrakammarledamot
+i-PyiwQBpejCpREAaq6BBAgf,1953,1970,Malmöhus läns valkrets,andrakammarledamot
+i-4YQFYCZptEWZxiREjfJbJ6,1957,1970,Östergötlands läns valkrets,förstakammarledamot
+i-7k8zFFY69k9DVxZJwLskxW,1961,1970,Kronobergs läns och Hallands läns valkrets,förstakammarledamot
+i-DMs16qwN3uGgTraB34UW2Z,1962,1970,Älvsborgs läns valkrets,förstakammarledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1966-02-28,1970,Stockholms stads valkrets,andrakammarledamot
+i-K7A3HxRuQWaoRkthu77uVa,1969,1970,Stockholms kommuns valkrets,andrakammarledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1969,1970,Göteborgs kommuns valkrets,andrakammarledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1969,1970,Fyrstadskretsen,andrakammarledamot
+i-LFaD1Z7d9YNRL6fxTwLYgr,1971-01-11,1973-07-21,Kalmar läns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1971-01-11,1974-01-10,Stockholms läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1971-01-11,1974-01-10,Stockholms kommuns valkrets,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1971-01-11,1974-01-10,Göteborgs kommuns valkrets,ledamot
+i-KaEwnQ53dsfqZGV8fcpYbX,1971-01-11,1974-01-10,Västernorrlands läns valkrets,ledamot
+i-2ze5QGGJAsCoqCn8nthhnj,1971-01-11,1974-01-10,Fyrstadskretsen,ledamot
+i-Fs9KpZYHZp1uu9ioJZkH5D,1971-01-11,1974-01-10,Älvsborgs läns norra valkrets,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1971-01-11,1974-01-10,Fyrstadskretsen,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1971-01-11,1974-01-10,Dalarnas läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1971-01-11,1974-01-10,Stockholms kommuns valkrets,ledamot
+i-AC8RFPqgo4aFfG6KooA2u5,1971-01-11,1974-01-10,Uppsala läns valkrets,ledamot
+i-PyiwQBpejCpREAaq6BBAgf,1971-01-11,1974-01-10,Malmöhus läns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1971-01-11,1974-01-10,Skaraborgs läns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1974-01-10,1976-10-04,Stockholms läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1974-01-10,1976-10-04,Stockholms kommuns valkrets,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1974-01-10,1976-10-04,Göteborgs kommuns valkrets,ledamot
+i-KaEwnQ53dsfqZGV8fcpYbX,1974-01-10,1976-10-04,Stockholms kommuns valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1974-01-10,1976-10-04,Uppsala läns valkrets,ledamot
+i-2ze5QGGJAsCoqCn8nthhnj,1974-01-10,1976-10-04,Fyrstadskretsen,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1974-01-10,1976-10-04,Fyrstadskretsen,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1974-01-10,1976-10-04,Dalarnas läns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1974-01-10,1976-10-04,Malmöhus läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1974-01-10,1976-10-04,Stockholms kommuns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1974-01-10,1976-10-04,Skaraborgs läns valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1976-10-04,1976-10-10,Uppsala läns valkrets,ledamot
+i-9iNp1MZbdkNsrM73feEQmc,1976-10-11,1977-01-09,Stockholms kommuns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1976-10-11,1978-10-17,,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1976-10-04,1979-10-01,Stockholms läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1976-10-04,1979-10-01,Stockholms kommuns valkrets,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1976-10-04,1979-10-01,Göteborgs kommuns valkrets,ledamot
+i-2ze5QGGJAsCoqCn8nthhnj,1976-10-04,1979-10-01,Fyrstadskretsen,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1976-10-04,1979-10-01,Fyrstadskretsen,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1976-10-04,1979-10-01,Blekinge läns valkrets,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1976-10-04,1979-10-01,Dalarnas läns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1976-10-04,1979-10-01,Malmöhus läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1976-10-04,1979-10-01,Stockholms kommuns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1976-10-04,1979-10-01,Skaraborgs läns valkrets,ledamot
+i-9iNp1MZbdkNsrM73feEQmc,1977-10-01,1979-10-01,Stockholms kommuns valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1978-10-18,1979-10-01,Uppsala läns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1979-10-17,1979-11-20,,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1980-10-20,1980-11-21,,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1981-11-16,1981-12-17,,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1979-10-01,1982-10-04,Stockholms läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1979-10-01,1982-10-04,Stockholms kommuns valkrets,ledamot
+i-SftjZkfkccEWbWRMJEbd7c,1979-10-01,1982-10-04,Västra Götalands läns södra valkrets,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1979-10-01,1982-10-04,Göteborgs kommuns valkrets,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1979-10-01,1982-10-04,Västerbottens läns valkrets,ledamot
+i-5sxzSZSUx9KLqvREcwz58f,1979-10-01,1982-10-04,Värmlands läns valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1979-10-01,1982-10-04,Uppsala läns valkrets,ledamot
+i-HF1be62hHhvaXoZiyUz2HF,1979-10-01,1982-10-04,Västerbottens läns valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1979-10-01,1982-10-04,Stockholms läns valkrets,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1979-10-01,1982-10-04,Fyrstadskretsen,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1979-10-01,1982-10-04,Blekinge läns valkrets,ledamot
+i-8cFSCdWjvpDgozuk8RHZyW,1979-10-01,1982-10-04,Jämtlands läns valkrets,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1979-10-01,1982-10-04,Dalarnas läns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1979-10-01,1982-10-04,Malmöhus läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1979-10-01,1982-10-04,Stockholms kommuns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1979-10-01,1982-10-04,Skaraborgs läns valkrets,ledamot
+i-9iNp1MZbdkNsrM73feEQmc,1979-10-12,1982-10-04,,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1982-10-04,1982-10-07,Blekinge läns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1982-10-04,1982-10-08,Stockholms läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1982-10-04,1982-10-08,Stockholms kommuns valkrets,ledamot
+i-JgqDoQfn7LrFWFe8vQvbAc,1982-10-08,1983-02-28,,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1982-10-04,1983-04-04,Dalarnas läns valkrets,ledamot
+i-HF1be62hHhvaXoZiyUz2HF,1982-10-04,1983-10-11,Västerbottens läns valkrets,ledamot
+i-Ahzryxd2b7naJSD37mfHNJ,1982-10-04,1985-09-30,Göteborgs kommuns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1982-10-04,1985-09-30,Kalmar läns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1982-10-04,1985-09-30,Uppsala läns valkrets,ledamot
+i-Wiq5749k7owcARUynxZuX7,1982-10-04,1985-09-30,Gotlands läns valkrets,ledamot
+i-SftjZkfkccEWbWRMJEbd7c,1982-10-04,1985-09-30,Västra Götalands läns södra valkrets,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1982-10-04,1985-09-30,Fyrstadskretsen,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1982-10-04,1985-09-30,Göteborgs kommuns valkrets,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1982-10-04,1985-09-30,Västerbottens läns valkrets,ledamot
+i-5sxzSZSUx9KLqvREcwz58f,1982-10-04,1985-09-30,Värmlands läns valkrets,ledamot
+i-Ds7sSTFH4EAscvdepjuZf3,1982-10-04,1985-09-30,Västra Götalands läns västra valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1982-10-04,1985-09-30,Uppsala läns valkrets,ledamot
+i-RCTjiWPTWsdbhU76ZmcCUr,1982-10-04,1985-09-30,Jönköpings läns valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1982-10-04,1985-09-30,Stockholms läns valkrets,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1982-10-04,1985-09-30,Fyrstadskretsen,ledamot
+i-8cFSCdWjvpDgozuk8RHZyW,1982-10-04,1985-09-30,Jämtlands läns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1982-10-04,1985-09-30,Malmöhus läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1982-10-04,1985-09-30,Stockholms kommuns valkrets,ledamot
+i-5q7m7rZyufN9RHaGjB6GHh,1982-10-04,1985-09-30,Värmlands läns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1982-10-04,1985-09-30,Skaraborgs läns valkrets,ledamot
+i-JgqDoQfn7LrFWFe8vQvbAc,1983-03-01,1985-09-30,,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1983-05-28,1985-09-30,Dalarnas läns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,1983-05-31,1985-09-30,,ledamot
+i-HF1be62hHhvaXoZiyUz2HF,1983-11-11,1985-09-30,Västerbottens läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1985-09-30,1985-09-30,Stockholms kommuns valkrets,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1985-09-30,1985-09-30,Blekinge läns valkrets,ledamot
+i-3M1s36ECJm8aj113TDC85w,1985-09-30,1985-09-30,Västernorrlands läns valkrets,ledamot
+i-JgqDoQfn7LrFWFe8vQvbAc,1985-09-30,1986-10-09,Stockholms läns valkrets,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1985-09-30,1986-10-17,Västerbottens läns valkrets,ledamot
+i-AQXTwzTQEJiySickVRFT1U,1986-11-11,1986-12-13,,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,1987-04-27,1987-06-01,,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1985-09-30,1987-10-13,Kalmar läns valkrets,ledamot
+i-Kytbd3WZfQeKTPffXjTEpk,1987-11-13,1987-12-20,,ledamot
+i-5BAuoreWuHEDmfStAQQoco,1985-09-30,1988-10-03,Västernorrlands läns valkrets,ledamot
+i-Ahzryxd2b7naJSD37mfHNJ,1985-09-30,1988-10-03,Göteborgs kommuns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1985-09-30,1988-10-03,Stockholms läns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1985-09-30,1988-10-03,Uppsala läns valkrets,ledamot
+i-Wiq5749k7owcARUynxZuX7,1985-09-30,1988-10-03,Gotlands läns valkrets,ledamot
+i-H6rrzni8wdNEWHUXz4FTEZ,1985-09-30,1988-10-03,Fyrstadskretsen,ledamot
+i-SftjZkfkccEWbWRMJEbd7c,1985-09-30,1988-10-03,Västra Götalands läns södra valkrets,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1985-09-30,1988-10-03,Fyrstadskretsen,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1985-09-30,1988-10-03,Göteborgs kommuns valkrets,ledamot
+i-5sxzSZSUx9KLqvREcwz58f,1985-09-30,1988-10-03,Värmlands läns valkrets,ledamot
+i-GmSFH9fmi5xjm5ydcN6R1m,1985-09-30,1988-10-03,Göteborgs kommuns valkrets,ledamot
+i-DsA7JDV9XexiB7YxfnpCm5,1985-09-30,1988-10-03,Gotlands läns valkrets,ledamot
+i-7SJK192EL4VbjkLD12Xg8y,1985-09-30,1988-10-03,Västernorrlands läns valkrets,ledamot
+i-Ds7sSTFH4EAscvdepjuZf3,1985-09-30,1988-10-03,Västra Götalands läns västra valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1985-09-30,1988-10-03,Uppsala läns valkrets,ledamot
+i-NLfT4RS4huMCGpWx1zB8Ag,1985-09-30,1988-10-03,Göteborgs kommuns valkrets,ledamot
+i-HF1be62hHhvaXoZiyUz2HF,1985-09-30,1988-10-03,Västerbottens läns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,1985-09-30,1988-10-03,Fyrstadskretsen,ledamot
+i-RCTjiWPTWsdbhU76ZmcCUr,1985-09-30,1988-10-03,Jönköpings läns valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1985-09-30,1988-10-03,Stockholms läns valkrets,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1985-09-30,1988-10-03,Fyrstadskretsen,ledamot
+i-8cFSCdWjvpDgozuk8RHZyW,1985-09-30,1988-10-03,Jämtlands läns valkrets,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1985-09-30,1988-10-03,Dalarnas läns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1985-09-30,1988-10-03,Malmöhus läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1985-09-30,1988-10-03,Stockholms kommuns valkrets,ledamot
+i-5q7m7rZyufN9RHaGjB6GHh,1985-09-30,1988-10-03,Värmlands läns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1985-09-30,1988-10-03,Skaraborgs läns valkrets,ledamot
+i-TA35ZZCd9AZayRg33KLBtE,1985-09-30,1988-10-03,http://www.wikidata.org/.well-known/genid/ab87261552eba8446adad02376c37ab3,ledamot
+i-8tpDmPvgnXjJkWGy9k68Ba,1985-10-01,1988-10-03,,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1986-11-18,1988-10-03,Västerbottens läns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1987-11-17,1988-10-03,Kalmar läns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1988-10-03,1988-10-03,Stockholms läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1988-10-03,1988-10-03,Stockholms kommuns valkrets,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1988-10-03,1988-10-03,Blekinge läns valkrets,ledamot
+i-JgqDoQfn7LrFWFe8vQvbAc,1988-10-03,1988-10-03,Stockholms läns valkrets,ledamot
+i-3M1s36ECJm8aj113TDC85w,1988-10-03,1988-10-03,Västernorrlands läns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,1988-10-03,1988-10-27,Stockholms kommuns valkrets,ledamot
+i-PdJw8xPqQjV6cBPBbRhsqT,1989-01-10,1989-01-29,,ledamot
+i-3sPbyicZy7gfbq8RdVTQMb,1989-01-16,1989-06-15,,ledamot
+i-rrg9t2XUkHE4iAjAykgpb,1988-10-03,1989-11-09,Uppsala läns valkrets,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,1990-03-19,1990-04-19,,ledamot
+i-PdJw8xPqQjV6cBPBbRhsqT,1989-10-03,1990-06-30,,ledamot
+i-Kytbd3WZfQeKTPffXjTEpk,1990-10-02,1990-12-31,,ledamot
+i-5BAuoreWuHEDmfStAQQoco,1988-10-03,1991-09-30,Västernorrlands läns valkrets,ledamot
+i-Ahzryxd2b7naJSD37mfHNJ,1988-10-03,1991-09-30,Göteborgs kommuns valkrets,ledamot
+i-SZKUTdtCrCo58yNCQsH76,1988-10-03,1991-09-30,Stockholms kommuns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1988-10-03,1991-09-30,Kalmar läns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1988-10-03,1991-09-30,Uppsala läns valkrets,ledamot
+i-Wiq5749k7owcARUynxZuX7,1988-10-03,1991-09-30,Gotlands läns valkrets,ledamot
+i-SftjZkfkccEWbWRMJEbd7c,1988-10-03,1991-09-30,Västra Götalands läns södra valkrets,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1988-10-03,1991-09-30,Fyrstadskretsen,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1988-10-03,1991-09-30,Göteborgs kommuns valkrets,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1988-10-03,1991-09-30,Västerbottens läns valkrets,ledamot
+i-8tpDmPvgnXjJkWGy9k68Ba,1988-10-03,1991-09-30,Stockholms läns valkrets,ledamot
+i-AQXTwzTQEJiySickVRFT1U,1988-10-03,1991-09-30,Kalmar läns valkrets,ledamot
+i-5sxzSZSUx9KLqvREcwz58f,1988-10-03,1991-09-30,Värmlands läns valkrets,ledamot
+i-GmSFH9fmi5xjm5ydcN6R1m,1988-10-03,1991-09-30,Göteborgs kommuns valkrets,ledamot
+i-DsA7JDV9XexiB7YxfnpCm5,1988-10-03,1991-09-30,Gotlands läns valkrets,ledamot
+i-7SJK192EL4VbjkLD12Xg8y,1988-10-03,1991-09-30,Västernorrlands läns valkrets,ledamot
+i-Ds7sSTFH4EAscvdepjuZf3,1988-10-03,1991-09-30,Västra Götalands läns västra valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1988-10-03,1991-09-30,Uppsala läns valkrets,ledamot
+i-NLfT4RS4huMCGpWx1zB8Ag,1988-10-03,1991-09-30,Göteborgs kommuns valkrets,ledamot
+i-C3ssPUv2X6tsSEWo9qPD5D,1988-10-03,1991-09-30,Västmanlands läns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,1988-10-03,1991-09-30,Fyrstadskretsen,ledamot
+i-RCTjiWPTWsdbhU76ZmcCUr,1988-10-03,1991-09-30,Jönköpings läns valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1988-10-03,1991-09-30,Stockholms läns valkrets,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1988-10-03,1991-09-30,Fyrstadskretsen,ledamot
+i-SZgcxyxYn6GnRBLikzLy7M,1988-10-03,1991-09-30,Värmlands läns valkrets,ledamot
+i-8cFSCdWjvpDgozuk8RHZyW,1988-10-03,1991-09-30,Jämtlands läns valkrets,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1988-10-03,1991-09-30,Dalarnas läns valkrets,ledamot
+i-7A6No7x5ayKka9TbjUeeEa,1988-10-03,1991-09-30,Göteborgs kommuns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1988-10-03,1991-09-30,Malmöhus läns valkrets,ledamot
+i-9GkZmWA6j3AXTPSkudVbZ,1988-10-03,1991-09-30,Östergötlands läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1988-10-03,1991-09-30,Stockholms kommuns valkrets,ledamot
+i-5q7m7rZyufN9RHaGjB6GHh,1988-10-03,1991-09-30,Värmlands läns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1988-10-03,1991-09-30,Skaraborgs läns valkrets,ledamot
+i-TA35ZZCd9AZayRg33KLBtE,1988-10-03,1991-09-30,Västmanlands läns valkrets,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1988-10-04,1991-09-30,Blekinge läns valkrets,ledamot
+i-CBuK3dFLMHFNiQVSusHsaD,1988-10-04,1991-09-30,Jönköpings läns valkrets,ledamot
+i-3M1s36ECJm8aj113TDC85w,1988-10-04,1991-09-30,Västernorrlands läns valkrets,ledamot
+i-H6rrzni8wdNEWHUXz4FTEZ,1989-10-01,1991-09-30,Fyrstadskretsen,ledamot
+i-PTwgnmFQaFTXvr8SByLQzu,1989-10-01,1991-09-30,,ledamot
+i-rrg9t2XUkHE4iAjAykgpb,1989-12-16,1991-09-30,Uppsala läns valkrets,ledamot
+i-3sPbyicZy7gfbq8RdVTQMb,1990-06-14,1991-09-30,Hallands läns valkrets,ledamot
+i-h1aVBzexdmWPt4dFvXiYA,1991-09-30,1991-10-04,Stockholms läns valkrets,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1991-09-30,1991-10-14,Fyrstadskretsen,ledamot
+i-TA35ZZCd9AZayRg33KLBtE,1991-10-05,1991-11-29,Västmanlands läns valkrets,ledamot
+i-9aRLLJUPp6dkL6wGF6nZuc,1991-09-30,1992-03-10,Kronobergs läns valkrets,ledamot
+i-TA35ZZCd9AZayRg33KLBtE,1992-02-03,1992-05-22,http://www.wikidata.org/.well-known/genid/322d651bb5e3e3840cde2f9491f9f2c2,ledamot
+i-JgqDoQfn7LrFWFe8vQvbAc,1991-09-30,1992-07-31,Stockholms läns valkrets,ledamot
+i-GaozvGLNGCb9Vstyp2PrQH,1991-09-30,1992-08-31,Dalarnas läns valkrets,ledamot
+i-K7A3HxRuQWaoRkthu77uVa,1991-10-05,1992-10-31,Stockholms kommuns valkrets,ledamot
+i-5q7m7rZyufN9RHaGjB6GHh,1991-09-30,1992-11-15,Värmlands läns valkrets,ledamot
+i-HF1be62hHhvaXoZiyUz2HF,1991-09-30,1993-01-11,Västerbottens läns valkrets,ledamot
+i-NpH9yMBX9F5REgmdLDF5Nm,1991-09-30,1993-01-23,Göteborgs kommuns valkrets,ledamot
+i-PdJw8xPqQjV6cBPBbRhsqT,1991-09-30,1993-10-05,Stockholms kommuns valkrets,ledamot
+i-NpH9yMBX9F5REgmdLDF5Nm,1993-01-24,1993-10-05,Göteborgs kommuns valkrets,ledamot
+i-2FVUSVT1SC2fewMNdrmgeb,1991-09-30,1994-02-06,Fyrstadskretsen,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1991-10-08,1994-06-11,Västerbottens läns valkrets,ledamot
+i-LvT4xzQrHUKrVDH5VNSL5s,1991-09-30,1994-08-31,Dalarnas läns valkrets,ledamot
+i-5BAuoreWuHEDmfStAQQoco,1991-09-30,1994-10-03,Västernorrlands läns valkrets,ledamot
+i-Ahzryxd2b7naJSD37mfHNJ,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1991-09-30,1994-10-03,Stockholms läns valkrets,ledamot
+i-Vrxw6nqNsC7Xr3jonLTumw,1991-09-30,1994-10-03,Stockholms kommuns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1991-09-30,1994-10-03,Kalmar läns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1991-09-30,1994-10-03,Uppsala läns valkrets,ledamot
+i-Wiq5749k7owcARUynxZuX7,1991-09-30,1994-10-03,Gotlands läns valkrets,ledamot
+i-H6rrzni8wdNEWHUXz4FTEZ,1991-09-30,1994-10-03,Fyrstadskretsen,ledamot
+i-rrg9t2XUkHE4iAjAykgpb,1991-09-30,1994-10-03,Uppsala läns valkrets,ledamot
+i-SftjZkfkccEWbWRMJEbd7c,1991-09-30,1994-10-03,Västra Götalands läns södra valkrets,ledamot
+i-UkRVDvbmgQTeC2YtiGZ7K5,1991-09-30,1994-10-03,Stockholms läns valkrets,ledamot
+i-HBefMTHdym5gJ3a1vqK6pr,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-8tpDmPvgnXjJkWGy9k68Ba,1991-09-30,1994-10-03,Stockholms läns valkrets,ledamot
+i-AQXTwzTQEJiySickVRFT1U,1991-09-30,1994-10-03,Kalmar läns valkrets,ledamot
+i-5sxzSZSUx9KLqvREcwz58f,1991-09-30,1994-10-03,Värmlands läns valkrets,ledamot
+i-GmSFH9fmi5xjm5ydcN6R1m,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-TBWJgK7R6pzsE6Ap5PiEb4,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-DsA7JDV9XexiB7YxfnpCm5,1991-09-30,1994-10-03,Gotlands läns valkrets,ledamot
+i-7SJK192EL4VbjkLD12Xg8y,1991-09-30,1994-10-03,Västernorrlands läns valkrets,ledamot
+i-3sPbyicZy7gfbq8RdVTQMb,1991-09-30,1994-10-03,Stockholms läns valkrets,ledamot
+i-Ds7sSTFH4EAscvdepjuZf3,1991-09-30,1994-10-03,Västra Götalands läns västra valkrets,ledamot
+i-DtxLnvKNi8eR1muemGYCHj,1991-09-30,1994-10-03,Hallands läns valkrets,ledamot
+i-Kytbd3WZfQeKTPffXjTEpk,1991-09-30,1994-10-03,Stockholms kommuns valkrets,ledamot
+i-BkQoi6KA1EKK9EEJhT16Cz,1991-09-30,1994-10-03,Uppsala läns valkrets,ledamot
+i-NLfT4RS4huMCGpWx1zB8Ag,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-C3ssPUv2X6tsSEWo9qPD5D,1991-09-30,1994-10-03,Västmanlands läns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,1991-09-30,1994-10-03,Fyrstadskretsen,ledamot
+i-PvZh9Zhc6sdAt87Ng4CMcQ,1991-09-30,1994-10-03,Skåne läns norra och östra valkrets,ledamot
+i-RCTjiWPTWsdbhU76ZmcCUr,1991-09-30,1994-10-03,Jönköpings läns valkrets,ledamot
+i-5oxq9QfXuQEKCyB87SfvtP,1991-09-30,1994-10-03,Västra Götalands läns västra valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1991-09-30,1994-10-03,Stockholms läns valkrets,ledamot
+i-Ap6PaQn9pzDFdUtnP8xyzP,1991-09-30,1994-10-03,Dalarnas läns valkrets,ledamot
+i-3keJ4YLp7mio52y4ibMPhZ,1991-09-30,1994-10-03,Kalmar läns valkrets,ledamot
+i-8hxDNLW9NgYYqBHg8RCZcj,1991-09-30,1994-10-03,Fyrstadskretsen,ledamot
+i-CACgimSSwyWTa9yioWxPRC,1991-09-30,1994-10-03,Västra Götalands läns södra valkrets,ledamot
+i-SZgcxyxYn6GnRBLikzLy7M,1991-09-30,1994-10-03,Värmlands läns valkrets,ledamot
+i-UwR9aTcbsp2FAzzbpFB47A,1991-09-30,1994-10-03,Stockholms kommuns valkrets,ledamot
+i-cNo6XnCMDc2LkrvXc6U2b,1991-09-30,1994-10-03,Uppsala läns valkrets,ledamot
+i-9bfQSfVCLTvHZiJQpxNMkR,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-WAR7Xtq5vM5vhtMxcKDZv4,1991-09-30,1994-10-03,Blekinge läns valkrets,ledamot
+i-8cFSCdWjvpDgozuk8RHZyW,1991-09-30,1994-10-03,Jämtlands läns valkrets,ledamot
+i-LBN95MD8hn6zkXhRBcbJbB,1991-09-30,1994-10-03,,ledamot
+i-7A6No7x5ayKka9TbjUeeEa,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-PTwgnmFQaFTXvr8SByLQzu,1991-09-30,1994-10-03,Norrbottens läns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1991-09-30,1994-10-03,Malmöhus läns valkrets,ledamot
+i-9GkZmWA6j3AXTPSkudVbZ,1991-09-30,1994-10-03,Östergötlands läns valkrets,ledamot
+i-GCJVTREcJGRyYmFdeMbNaN,1991-09-30,1994-10-03,Stockholms kommuns valkrets,ledamot
+i-WvrkgGMVWbiVxVoPqgJuEF,1991-09-30,1994-10-03,Göteborgs kommuns valkrets,ledamot
+i-FYsVUYKruvwGFkVY3YHpi7,1991-09-30,1994-10-03,Skaraborgs läns valkrets,ledamot
+i-8kfLUBHhscwaye3ZSBPr3G,1991-09-30,1994-10-03,Hallands läns valkrets,ledamot
+i-L8FJ5Uq6DWCoY3cXS1trPk,1991-09-30,1994-10-03,Östergötlands läns valkrets,ledamot
+i-87J9L7KEcoTvFpdYMWuFTy,1991-09-30,1994-10-03,Gävleborgs läns valkrets,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,1991-09-30,1994-10-03,Stockholms kommuns valkrets,ledamot
+i-3M1s36ECJm8aj113TDC85w,1991-09-30,1994-10-03,Västernorrlands läns valkrets,ledamot
+i-F8qdE2eedz12PwFanq3ahv,1991-10-05,1994-10-03,,ledamot
+i-CBuK3dFLMHFNiQVSusHsaD,1991-10-05,1994-10-03,Jönköpings läns valkrets,ledamot
+i-PYyYJc4bAcYHVAE5H3YE6g,1991-10-05,1994-10-03,http://www.wikidata.org/.well-known/genid/4b4faaf3802b7d070ba6684af64b68e7,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1991-11-18,1994-10-03,Fyrstadskretsen,ledamot
+i-9aRLLJUPp6dkL6wGF6nZuc,1992-03-11,1994-10-03,Kronobergs läns valkrets,ledamot
+i-5q7m7rZyufN9RHaGjB6GHh,1992-12-17,1994-10-03,Värmlands läns valkrets,ledamot
+i-HF1be62hHhvaXoZiyUz2HF,1993-01-12,1994-10-03,Västerbottens läns valkrets,ledamot
+i-2FVUSVT1SC2fewMNdrmgeb,1994-05-30,1994-10-03,Fyrstadskretsen,ledamot
+i-LvT4xzQrHUKrVDH5VNSL5s,1994-09-01,1994-10-03,Dalarnas läns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1994-10-03,1994-10-06,Stockholms läns valkrets,ledamot
+i-F8qdE2eedz12PwFanq3ahv,1994-10-03,1994-10-07,Skåne läns norra och östra valkrets,ledamot
+i-3sPbyicZy7gfbq8RdVTQMb,1994-10-03,1994-10-07,Stockholms läns valkrets,ledamot
+i-PTwgnmFQaFTXvr8SByLQzu,1994-10-03,1995-01-09,Norrbottens läns valkrets,ledamot
+i-RCTjiWPTWsdbhU76ZmcCUr,1994-10-03,1995-09-30,Jönköpings läns valkrets,ledamot
+i-8rjVavTFp7UjLy1RbrHnia,1994-10-10,1995-10-09,Stockholms läns valkrets,ledamot
+i-JZKa6caqdSKy8yhUyfEJeU,1995-01-10,1995-10-09,Stockholms kommuns valkrets,ledamot
+i-5q7m7rZyufN9RHaGjB6GHh,1994-10-03,1996-06-09,Värmlands läns valkrets,ledamot
+i-3M1s36ECJm8aj113TDC85w,1994-10-03,1996-06-29,Västernorrlands läns valkrets,ledamot
+i-L8FJ5Uq6DWCoY3cXS1trPk,1994-10-03,1998-05-31,Östergötlands läns valkrets,ledamot
+i-5BAuoreWuHEDmfStAQQoco,1994-10-03,1998-10-05,Västernorrlands läns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1994-10-03,1998-10-05,Kalmar läns valkrets,ledamot
+i-3Qz6CXUz6kGGCR1aT9MZrB,1994-10-03,1998-10-05,Uppsala läns valkrets,ledamot
+i-H6rrzni8wdNEWHUXz4FTEZ,1994-10-03,1998-10-05,Malmöhus läns södra valkrets,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1994-10-03,1998-10-05,Malmö kommuns valkrets,ledamot
+i-UkRVDvbmgQTeC2YtiGZ7K5,1994-10-03,1998-10-05,Stockholms läns valkrets,ledamot
+i-8tpDmPvgnXjJkWGy9k68Ba,1994-10-03,1998-10-05,Stockholms läns valkrets,ledamot
+i-5sxzSZSUx9KLqvREcwz58f,1994-10-03,1998-10-05,Värmlands läns valkrets,ledamot
+i-TBWJgK7R6pzsE6Ap5PiEb4,1994-10-03,1998-10-05,Göteborgs kommuns valkrets,ledamot
+i-C44sMEE9ocAndjedeN9fLp,1994-10-03,1998-10-05,Örebro läns valkrets,ledamot
+i-7SJK192EL4VbjkLD12Xg8y,1994-10-03,1998-10-05,Västernorrlands läns valkrets,ledamot
+i-Ds7sSTFH4EAscvdepjuZf3,1994-10-03,1998-10-05,Västra Götalands läns västra valkrets,ledamot
+i-CakSt71sHecUuCwQm5ALoP,1994-10-03,1998-10-05,Malmöhus läns södra valkrets,ledamot
+i-DtxLnvKNi8eR1muemGYCHj,1994-10-03,1998-10-05,Hallands läns valkrets,ledamot
+i-Kytbd3WZfQeKTPffXjTEpk,1994-10-03,1998-10-05,Stockholms kommuns valkrets,ledamot
+i-NLfT4RS4huMCGpWx1zB8Ag,1994-10-03,1998-10-05,Göteborgs kommuns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,1994-10-03,1998-10-05,Malmö kommuns valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1994-10-03,1998-10-05,Stockholms läns valkrets,ledamot
+i-Ap6PaQn9pzDFdUtnP8xyzP,1994-10-03,1998-10-05,Dalarnas läns valkrets,ledamot
+i-3keJ4YLp7mio52y4ibMPhZ,1994-10-03,1998-10-05,Kalmar läns valkrets,ledamot
+i-SZgcxyxYn6GnRBLikzLy7M,1994-10-03,1998-10-05,Värmlands läns valkrets,ledamot
+i-cNo6XnCMDc2LkrvXc6U2b,1994-10-03,1998-10-05,Uppsala läns valkrets,ledamot
+i-9bfQSfVCLTvHZiJQpxNMkR,1994-10-03,1998-10-05,Göteborgs kommuns valkrets,ledamot
+i-LBN95MD8hn6zkXhRBcbJbB,1994-10-03,1998-10-05,Uppsala läns valkrets,ledamot
+i-7A6No7x5ayKka9TbjUeeEa,1994-10-03,1998-10-05,Göteborgs kommuns valkrets,ledamot
+i-imLyujzk1umFZiqwdNY9q,1994-10-03,1998-10-05,Malmöhus läns södra valkrets,ledamot
+i-9GkZmWA6j3AXTPSkudVbZ,1994-10-03,1998-10-05,Östergötlands läns valkrets,ledamot
+i-WvrkgGMVWbiVxVoPqgJuEF,1994-10-03,1998-10-05,Göteborgs kommuns valkrets,ledamot
+i-CBuK3dFLMHFNiQVSusHsaD,1994-10-03,1998-10-05,Jönköpings läns valkrets,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,1994-10-03,1998-10-05,Stockholms kommuns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,1994-10-08,1998-10-05,Stockholms kommuns valkrets,ledamot
+i-h1aVBzexdmWPt4dFvXiYA,1994-10-08,1998-10-05,Stockholms läns valkrets,ledamot
+i-F8qdE2eedz12PwFanq3ahv,1995-10-04,1998-10-05,Skåne läns norra och östra valkrets,ledamot
+i-JZKa6caqdSKy8yhUyfEJeU,1995-10-10,1998-10-05,,ledamot
+i-PTwgnmFQaFTXvr8SByLQzu,1995-10-10,1998-10-05,Norrbottens läns valkrets,ledamot
+i-TVpY9zEquJ2jKT7pqxS85w,1996-02-01,1998-10-05,Västerbottens läns valkrets,ledamot
+i-TBWJgK7R6pzsE6Ap5PiEb4,1998-10-05,2000-01-31,Göteborgs kommuns valkrets,ledamot
+i-CBuK3dFLMHFNiQVSusHsaD,2000-09-05,2000-12-01,Jönköpings läns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,1998-10-05,2001-10-29,Malmö kommuns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,1998-10-05,2002-09-30,Stockholms kommuns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,1998-10-05,2002-09-30,Kalmar läns valkrets,ledamot
+i-JZKa6caqdSKy8yhUyfEJeU,1998-10-05,2002-09-30,Stockholms kommuns valkrets,ledamot
+i-h1aVBzexdmWPt4dFvXiYA,1998-10-05,2002-09-30,Stockholms läns valkrets,ledamot
+i-F8qdE2eedz12PwFanq3ahv,1998-10-05,2002-09-30,Skåne läns norra och östra valkrets,ledamot
+i-KFLLBh5CxVpZkUZaHy3pAz,1998-10-05,2002-09-30,Malmö kommuns valkrets,ledamot
+i-UkRVDvbmgQTeC2YtiGZ7K5,1998-10-05,2002-09-30,Stockholms läns valkrets,ledamot
+i-8tpDmPvgnXjJkWGy9k68Ba,1998-10-05,2002-09-30,Stockholms läns valkrets,ledamot
+i-C44sMEE9ocAndjedeN9fLp,1998-10-05,2002-09-30,Stockholms kommuns valkrets,ledamot
+i-Ds7sSTFH4EAscvdepjuZf3,1998-10-05,2002-09-30,Västra Götalands läns västra valkrets,ledamot
+i-DtxLnvKNi8eR1muemGYCHj,1998-10-05,2002-09-30,Hallands läns valkrets,ledamot
+i-Kytbd3WZfQeKTPffXjTEpk,1998-10-05,2002-09-30,Stockholms kommuns valkrets,ledamot
+i-VvqVwyrQgUiYjtEt3CpQcM,1998-10-05,2002-09-30,Stockholms läns valkrets,ledamot
+i-Ap6PaQn9pzDFdUtnP8xyzP,1998-10-05,2002-09-30,Dalarnas läns valkrets,ledamot
+i-3keJ4YLp7mio52y4ibMPhZ,1998-10-05,2002-09-30,Kalmar läns valkrets,ledamot
+i-CACgimSSwyWTa9yioWxPRC,1998-10-05,2002-09-30,Västra Götalands läns södra valkrets,ledamot
+i-cNo6XnCMDc2LkrvXc6U2b,1998-10-05,2002-09-30,Uppsala läns valkrets,ledamot
+i-9bfQSfVCLTvHZiJQpxNMkR,1998-10-05,2002-09-30,Göteborgs kommuns valkrets,ledamot
+i-LBN95MD8hn6zkXhRBcbJbB,1998-10-05,2002-09-30,Uppsala läns valkrets,ledamot
+i-7A6No7x5ayKka9TbjUeeEa,1998-10-05,2002-09-30,Göteborgs kommuns valkrets,ledamot
+i-WvrkgGMVWbiVxVoPqgJuEF,1998-10-05,2002-09-30,Göteborgs kommuns valkrets,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,1998-10-05,2002-09-30,Stockholms kommuns valkrets,ledamot
+i-84xpErSjuTzEi5hvTA1Jtt,2001-10-30,2002-09-30,Malmö kommuns valkrets,ledamot
+i-UkRVDvbmgQTeC2YtiGZ7K5,2002-09-30,2002-11-06,Stockholms läns valkrets,ledamot
+i-WvrkgGMVWbiVxVoPqgJuEF,2002-09-30,2002-11-14,Göteborgs kommuns valkrets,ledamot
+i-C44sMEE9ocAndjedeN9fLp,2002-09-30,2003-01-22,Stockholms kommuns valkrets,ledamot
+i-WvrkgGMVWbiVxVoPqgJuEF,2003-01-01,2003-02-06,Göteborgs kommuns valkrets,ledamot
+i-JZKa6caqdSKy8yhUyfEJeU,2002-09-30,2005-12-31,Stockholms kommuns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,2002-09-30,2006-10-02,Stockholms kommuns valkrets,ledamot
+i-2ggBvfkHRn3s8FvFEPLxjs,2002-09-30,2006-10-02,Kalmar läns valkrets,ledamot
+i-h1aVBzexdmWPt4dFvXiYA,2002-09-30,2006-10-02,Stockholms läns valkrets,ledamot
+i-NLfT4RS4huMCGpWx1zB8Ag,2002-09-30,2006-10-02,Göteborgs kommuns valkrets,ledamot
+i-LBN95MD8hn6zkXhRBcbJbB,2002-09-30,2006-10-02,Uppsala läns valkrets,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,2002-09-30,2006-10-02,Stockholms kommuns valkrets,ledamot
+i-C44sMEE9ocAndjedeN9fLp,2003-07-01,2006-10-02,Stockholms kommuns valkrets,ledamot
+i-F8qdE2eedz12PwFanq3ahv,2004-10-01,2006-10-02,Skåne läns norra och östra valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,2006-10-02,2006-10-05,Stockholms kommuns valkrets,ledamot
+i-DnTstrvT1jenyw6pdMxfZi,2006-10-02,2006-10-05,Stockholms kommuns valkrets,ledamot
+i-CACgimSSwyWTa9yioWxPRC,2006-10-02,2007-03-18,Södermanlands läns valkrets,ledamot
+i-CACgimSSwyWTa9yioWxPRC,2007-04-19,2007-11-05,Södermanlands läns valkrets,ledamot
+i-h1aVBzexdmWPt4dFvXiYA,2006-10-02,2010-10-04,Stockholms läns valkrets,ledamot
+i-LBN95MD8hn6zkXhRBcbJbB,2006-10-02,2010-10-04,Uppsala läns valkrets,ledamot
+i-SZKUTdtCrCo58yNCQsH76,2006-10-07,2010-10-04,Skåne läns norra och östra valkrets,ledamot
+i-CACgimSSwyWTa9yioWxPRC,2007-12-06,2010-10-04,Södermanlands läns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,2010-10-04,2010-10-04,Stockholms kommuns valkrets,ledamot
+i-SZKUTdtCrCo58yNCQsH76,2010-10-04,2014-09-29,Stockholms kommuns valkrets,ledamot
+i-SZKUTdtCrCo58yNCQsH76,2014-09-29,2014-10-02,Stockholms kommuns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,2014-10-04,2018-09-24,Stockholms kommuns valkrets,ledamot
+i-SZKUTdtCrCo58yNCQsH76,2018-09-24,2018-09-24,Stockholms kommuns valkrets,ledamot
+i-PRHkYxGCaT2cbJpjjfnRtn,2018-09-24,2019-12-31,Stockholms kommuns valkrets,ledamot
