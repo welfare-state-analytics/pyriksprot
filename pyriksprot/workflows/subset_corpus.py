@@ -9,7 +9,7 @@ from pyriksprot import corpus as pc
 from pyriksprot import metadata as md
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.corpus.utility import ls_corpus_folder
-from pyriksprot.utility import ensure_folder, replace_extension, reset_folder
+from pyriksprot.utility import replace_extension, reset_folder
 from pyriksprot.workflows import tf
 
 from .create_metadata import create_database_workflow
@@ -139,7 +139,7 @@ def load_document_patterns(filename: str, extension: str = None) -> list[str]:
             if not pattern:
                 continue
             if extension and '*' not in pattern:
-                pattern: str = replace_extension(pattern, 'xml')
+                pattern: str = replace_extension(pattern, extension)
             patterns.append(pattern)
 
     return patterns
