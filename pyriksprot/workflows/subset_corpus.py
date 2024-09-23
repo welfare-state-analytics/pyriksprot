@@ -1,6 +1,6 @@
-from glob import glob
 import os
 import shutil
+from glob import glob
 from os.path import basename, dirname, exists, join, splitext
 
 from loguru import logger
@@ -122,6 +122,7 @@ def subset_corpus_and_metadata(
     )
 
     shutil.rmtree(path=metadata_temp_folder, ignore_errors=True)
+
 
 def files_existst(filenames: list[str], folder: str) -> bool:
     return all(exists(join(folder, f)) for f in filenames)
