@@ -387,10 +387,16 @@ class PersonIndex:
     def overload_by_person(
         self, df: pd.DataFrame, *, encoded: bool = True, drop: bool = True, columns: list[str] = None
     ) -> pd.DataFrame:
-        persons: pd.DataFrame = self.persons
-        fg = self.person_id2pid.get
 
-        join_column: str = next((x for x in df.columns if x in ['who', 'person_id']), None)
+        persons: pd.DataFrame = self.persons
+
+        join_column: str = next((x for x in df.columns if x in ['wiki_id', 'who', 'person_id']), None)
+
+        if not join_column:
+            raise ValueError("overload_by_person: target data must have a column 'wiki_id', 'who' or 'person_id'")
+
+        fg = self.person_id2pid.get if join_column == 'person_id' else self.wiki_id2pid.get
+
         join_criterias = dict(left_on='pid')
 
         if 'pid' not in df.columns and join_column:
