@@ -8,7 +8,6 @@ from loguru import logger
 from tqdm import tqdm
 
 from pyriksprot.corpus import iterate, tagged
-from pyriksprot.dispatch.item import DispatchItem
 
 from .. import interface
 from .. import metadata as md
