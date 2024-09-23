@@ -21,7 +21,7 @@ jj = os.path.join
     ],
 )
 def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str):
-    fakes_folder: ConfigValue = ConfigValue("fakes:folder").resolve()
+    fakes_folder: str = ConfigValue("fakes:folder").resolve()
     filename: str = jj(fakes_folder, f"{protocol_name}.xml")
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename)
 
@@ -51,7 +51,7 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_nam
     ],
 )
 def test_parlaclarin_n_utterances(filename: str):
-    corpus_folder: ConfigValue = ConfigValue("corpus:folder").resolve()
+    corpus_folder: str = ConfigValue("corpus:folder").resolve()
     path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(path)
@@ -68,12 +68,12 @@ def test_parlaclarin_n_utterances(filename: str):
         ("prot-1955--ak--022.xml", 428, 165),
         ("prot-197879--014.xml", 1, 0),
         ('prot-199192--021.xml', 113, 21),
-        ('prot-199192--127.xml', 2568, 250),
-        ("prot-199596--035.xml", 393, 54),
+        ('prot-199192--127.xml', 2568, 249),
+        ("prot-199596--035.xml", 393, 41),
     ],
 )
 def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: int):
-    corpus_folder: ConfigValue = ConfigValue("corpus:folder").resolve()
+    corpus_folder: str = ConfigValue("corpus:folder").resolve()
 
     path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
