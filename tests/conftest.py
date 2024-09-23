@@ -22,7 +22,7 @@ ConfigStore.configure_context(source='tests/config.yml', env_prefix=None)
 
 # pylint: disable=redefined-outer-name
 
-ensure_test_corpora_exist()
+ensure_test_corpora_exist(only_check=True)
 
 
 @pytest.fixture(scope='session')

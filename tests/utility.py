@@ -1,7 +1,7 @@
 import os
 import shutil
 from glob import glob
-from os.path import basename, getsize, isdir, isfile
+from os.path import isdir, isfile
 from os.path import join as jj
 from os.path import splitext
 
@@ -53,7 +53,10 @@ def generate_merged_speech_test_data(protocol_name: str) -> None:
 def sample_parlaclarin_corpus_exists() -> bool:
     source_folder: str = ConfigValue("corpus:folder").resolve()
     test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt', extension='xml')
-    return all(isfile(jj(source_folder, x.split('-')[1], x)) for x in test_protocols)
+    is_complete: bool = all(isfile(jj(source_folder, x.split('-')[1], x)) for x in test_protocols)
+    if not is_complete:
+        logger.info(f"ParlaClarin corpus in {source_folder} is not complete!")
+    return is_complete
 
 
 def sample_metadata_exists() -> bool:
@@ -80,31 +83,20 @@ def sample_metadata_exists() -> bool:
 
 def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
     folder = folder or ConfigValue("tagged_frames:folder").resolve()
-    test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt', extension='zip')
-    return all(isfile(jj(folder, f"{x}.zip")) or jj(folder, x.split('-')[1], x) for x in test_protocols)
+    test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt')
+    is_complete: bool = all(isfile(jj(folder, f"{x}.zip")) or jj(folder, x.split('-')[1], x) for x in test_protocols)
+    if not is_complete:
+        logger.info(f"tagged frames corpus in {folder} is not complete")
+    return is_complete
 
 
 def sample_tagged_speech_corpus_exists():
-    tagged_source_folder: str = ConfigValue("tagged_frames:folder").resolve()
     tagged_speech_folder: str = ConfigValue("tagged_speeches:folder").resolve()
-
-    """Checks if the test data contains a complete tagged speech corpus. Empty files are ignored."""
-
-    def isfile_and_non_empty(filename: str) -> bool:
-        """Check if file exists in soruce folder, or in sub-folder, and is non-empty."""
-        for path in [tagged_source_folder, jj(tagged_source_folder, f"{filename.split('-')[1]}")]:
-            if isfile(jj(path, filename)) and getsize(jj(path, filename)) > 0:
-                return True
-        return False
-
-    def non_empty_tagged_frames_document_names() -> list[str]:
-        return [x for x in get_test_documents(extension="zip") if isfile_and_non_empty(x)]
-
-    expected_files: set[str] = set(non_empty_tagged_frames_document_names())
-    document_names: set[str] = {
-        splitext(basename(p))[0] for p in glob(jj(tagged_speech_folder, '**', 'prot-*.*'), recursive=True)
-    }
-    return document_names == expected_files
+    extension: str = splitext(tagged_speech_folder)[1]
+    is_at_least_not_empty: bool = len(glob(jj(tagged_speech_folder, "**", f"prot-*{extension}"), recursive=True)) > 0
+    if not is_at_least_not_empty:
+        logger.info(f"tagged speech corpus in {tagged_speech_folder} is empty")
+    return is_at_least_not_empty
 
 
 def get_test_documents(extension=None) -> list[str]:
@@ -117,12 +109,24 @@ def ensure_test_corpora_exist(
     tagged_source_folder: str = None,
     root_folder: str = None,
     database: str = None,
+    only_check: bool = False,
 ):
     corpus_version = corpus_version or ConfigValue("corpus:version").resolve()
 
     if not corpus_version:
         logger.warning("ensure_test_corpora_exist: corpus version not set, unable to verify test corpora")
         return
+
+    if only_check:
+        if not all(
+            [
+                sample_parlaclarin_corpus_exists(),
+                sample_metadata_exists(),
+                sample_tagged_frames_corpus_exists(),
+                sample_tagged_speech_corpus_exists(),
+            ]
+        ):
+            raise Exception(f"test data for version {corpus_version} is not complete")
 
     tagged_source_folder = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder = root_folder or ConfigValue("root_folder").resolve()
