@@ -3,6 +3,7 @@ import sys
 from typing import Any, Callable, Optional
 
 import click
+from loguru import logger
 
 from pyriksprot import interface, to_speech
 from pyriksprot.dispatch import dispatch
@@ -74,6 +75,20 @@ def update_arguments_from_options_file(
         log_arguments(arguments, suffix=suffix)
 
     return arguments
+
+
+def setup_log_to_file(
+    level: str = 'WARNING',
+    log_folder: str = CLI_LOG_PATH,
+    subdir: bool = False,
+    suffix: str = None,
+) -> None:
+    cli_command: str = utility.strip_path_and_extension(sys.argv[0])
+    folder: str = os.path.join(CLI_LOG_PATH, cli_command) if subdir else CLI_LOG_PATH
+    filename: str = utility.ts_data_path(folder, f"{cli_command}_{level}.log")
+    if suffix:
+        filename = utility.path_add_suffix(filename, suffix=f"_{suffix.strip('_')}")
+    logger.add(filename, filter=lambda record: record["level"].name == level, level=level)
 
 
 def log_arguments(
