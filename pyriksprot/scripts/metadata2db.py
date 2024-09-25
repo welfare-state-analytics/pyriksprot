@@ -2,6 +2,7 @@ import os
 import sys
 from os.path import join
 from typing import Any
+import warnings
 
 import click
 from loguru import logger
@@ -12,6 +13,7 @@ from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.workflows import create_database_workflow
 
 # pylint: disable=too-many-arguments
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
@@ -78,7 +80,6 @@ def create_corpus_indexes(corpus_folder: str, target_folder: str, tag: str) -> N
 
 
 @click.command()
-@click.argument('target', type=str)
 @click.argument('config_filename', type=str)
 @click.option('--target-filename', type=str, help='Sqlite target filename', default=None)
 @click.option('--tag', type=str, help='Metadata version', default=None)
@@ -94,7 +95,7 @@ def create_corpus_indexes(corpus_folder: str, target_folder: str, tag: str) -> N
 )
 @click.option('--skip-load-scripts', type=bool, is_flag=True, help='Skip loading SQL scripts', default=False)
 @click.option(
-    '--skip-download-metadata', type=bool, is_flag=False, help='Skip download of Github metadata', default=False
+    '--skip-download-metadata', type=bool, is_flag=True, help='Skip download of Github metadata', default=False
 )
 def create_database(
     config_filename: str,
