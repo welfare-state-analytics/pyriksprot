@@ -229,15 +229,14 @@ metadata-corpus-index:
 	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index $(CORPUS_FOLDER) $(LOCAL_METADATA_FOLDER) $(VERSION)
 
-
 metadata-database:
 	@echo "info: generating metadata/$(METADATA_DATABASE_NAME) using source $(LOCAL_METADATA_FOLDER)"
 	@rm -f metadata/$(METADATA_DATABASE_NAME)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database $(CONFIG_FILENAME) \
-		metadata/$(METADATA_DATABASE_NAME) \
+		--target-filename metadata/$(METADATA_DATABASE_NAME) \
 		--force \
-		--tag "$(VERSION)" \
-		--load-index \
+		--skip-create-index \
+		--skip-download-metadata \
 		--source-folder $(LOCAL_METADATA_FOLDER)
 
 # --scripts-folder ./metadata/sql
