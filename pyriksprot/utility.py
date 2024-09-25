@@ -197,7 +197,7 @@ def path_add_date(path: str, fmt: str = "%Y%m%d") -> str:
     return path_add_suffix(path, f'_{time.strftime(fmt)}')
 
 
-def ts_data_path(directory: str, filename: str):
+def ts_data_path(directory: str, filename: str) -> str:
     return jj(directory, f'{time.strftime("%Y%m%d%H%M")}_{filename}')
 
 
@@ -240,7 +240,7 @@ def lookup(data, *keys):
 @contextlib.contextmanager
 def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
     if filename is None:
-        filename: str = tempfile.mktemp(**mktemp)
+        filename = tempfile.mktemp(**mktemp)
 
     path: pathlib.Path = pathlib.Path(filename)
 
@@ -270,7 +270,7 @@ def fetch_text_by_url(url: str, errors: Literal['raise', 'ignore'] = 'ignore') -
 def download_url_to_file(
     url: str, target_name: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'ignore'
 ) -> None:
-    target_name: str = expanduser(target_name)
+    target_name = expanduser(target_name)
 
     if os.path.isfile(target_name):
         if not force:

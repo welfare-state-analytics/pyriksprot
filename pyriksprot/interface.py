@@ -84,7 +84,8 @@ class IDispatchItem(abc.ABC):
     @property
     def text(self) -> str: ...
 
-    def to_dict(self): ...
+    def to_dict(self) -> dict:
+        return {}
 
 
 class IProtocol(abc.ABC):

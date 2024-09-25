@@ -58,14 +58,14 @@ def to_speeches(
 class IMergeStrategy(abc.ABC):
     """Abstract strategy for merging a protocol into speeches"""
 
-    def cluster(self, utterances: Protocol) -> list[list[Utterance]]:
+    def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         return [utterances]
 
 
 class MergeByWho(IMergeStrategy):
     """Merge all uterrances for a unique `who` into a single speech"""
 
-    def cluster(self, utterances: Protocol) -> list[list[Utterance]]:
+    def cluster(self, utterances: list[Utterance]) -> list[list[Utterance]]:
         """Create a speech for each unique `who`. Return list of Speech."""
         data = defaultdict(list)
         for u in utterances or []:
