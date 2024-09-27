@@ -73,6 +73,8 @@ def update_arguments_from_options_file(
 
     if log_args:
         log_arguments(arguments, suffix=suffix)
+        
+    setup_log_to_file()
 
     return arguments
 
