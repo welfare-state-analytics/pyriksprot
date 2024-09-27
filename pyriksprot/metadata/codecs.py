@@ -18,16 +18,15 @@ CODE_TABLES: dict[str, str] = {
     'office_type': 'office_type_id',
     'party': 'party_id',
     'sub_office_type': 'sub_office_type_id',
-    # FIXME: Add more tables
 }
 
 
 @dataclass
 class Codec:
-    type: Literal['encoder', 'decoder']
+    type: Literal['encode', 'decode']
     from_column: str
     to_column: str
-    get: Callable[[int], str]
+    fx: Callable[[int], str]
     default: str = None
 
 
@@ -43,9 +42,11 @@ class Codecs:
         self.party: pd.DataFrame = null_frame
         self.sub_office_type: pd.DataFrame = null_frame
         self.extra_codecs: list[Codec] = []
+        self.source_filename: str | None = None
         self.code_tables: dict[str, str] = CODE_TABLES
 
     def load(self, source: str | dict) -> Codecs:
+        self.source_filename = source if isinstance(source, str) else None
         if not isfile(source):
             raise FileNotFoundError(f"File not found: {source}")
 
@@ -56,6 +57,10 @@ class Codecs:
             for table_name, table in tables.items():
                 setattr(self, table_name, table)
         return self
+
+    def tablenames(self) -> dict[str, str]:
+        """Returns a mapping from code table name to id column name"""
+        return CODE_TABLES
 
     @cached_property
     def gender2name(self) -> dict:
@@ -103,7 +108,7 @@ class Codecs:
         ]
 
     def lookup_name(self, key: str, key_id: int, default_value: str = "unknown") -> str:
-        return self.decoder(key=key).get(key_id, default_value)
+        return self.decoder(key=key).fx(key_id, default_value)
 
     def decoder(self, key: str) -> Codec:
         return next((x for x in self.decoders if x.from_column == key), {})
@@ -123,7 +128,7 @@ class Codecs:
         for codec in codecs:
             if codec.from_column in df.columns:
                 if codec.to_column not in df:
-                    df[codec.to_column] = df[codec.from_column].apply(codec.get)
+                    df[codec.to_column] = df[codec.from_column].apply(codec.fx)
                 if codec.default is not None:
                     df[codec.to_column] = df[codec.to_column].fillna(codec.default)
             if drop:
