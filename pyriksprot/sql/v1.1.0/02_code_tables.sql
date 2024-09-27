@@ -22,10 +22,12 @@ drop table if exists gender;
 
 create table gender (
     "gender_id" integer primary key,
-    "gender" varchar not null
+    "gender" varchar not null,
+    "gender_abbrev" varchar not null
 );
     
-insert into gender values (0, 'unknown'), (1, 'man'), (2, 'woman');
+insert into gender ("gender_id", "gender", "gender_abbrev")
+    values (0, 'Okänt', '?'), (1, 'Man', 'M'), (2, 'Kvinna', 'K');
 
 /* District */
 
@@ -97,8 +99,8 @@ create table if not exists party (
 insert into party("party_id", "party", "party_abbrev", "party_color")
     with party_data("party_id", "party", "party_abbrev", "party_color") as (
         values
-            (0, 'unknown', '?', '#000000'),
-            (1, 'Other', 'X', '#333333'),
+            (0, 'Okänt', '?', '#000000'),
+            (1, 'Partilös', 'X', '#333333'),
             (2, 'Centerpartiet', 'C', '#009933'),
             (3, 'Kristdemokraterna', 'KD', '#000077'),
             (4, 'Socialistiska partiet', 'SP', '#FF112d'),
