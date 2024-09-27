@@ -2,12 +2,14 @@ import sys
 from glob import glob
 from os import makedirs, remove
 from os.path import basename, dirname, exists, isdir, join
+import warnings
 
 import click
 
 from pyriksprot.metadata import SpeakerInfoService
 from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 @click.command()
 @click.option('--source-folder', '-i', type=str, multiple=False, required=True, help="Source folder.")

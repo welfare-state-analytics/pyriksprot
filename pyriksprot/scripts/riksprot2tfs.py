@@ -1,8 +1,10 @@
+import warnings
 import click
 
 from pyriksprot.utility import ensure_path
 from pyriksprot.workflows.tf import compute_term_frequencies
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 @click.command()
 @click.argument('input-folder', type=click.STRING)

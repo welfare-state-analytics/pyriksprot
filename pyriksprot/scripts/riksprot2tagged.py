@@ -1,6 +1,7 @@
 import sys
 from inspect import currentframe, getargvalues
 from typing import Sequence
+import warnings
 
 import click
 
@@ -12,8 +13,7 @@ from pyriksprot.workflows import extract_tags
 
 sys.path.insert(0, '.')
 
-
-sys.path.insert(0, '.')
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 # pylint: disable=too-many-arguments, unused-argument

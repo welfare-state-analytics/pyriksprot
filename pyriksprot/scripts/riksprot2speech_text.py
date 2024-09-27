@@ -1,6 +1,7 @@
 import sys
 from inspect import currentframe, getargvalues
 from typing import Sequence
+import warnings
 
 import click
 
@@ -11,6 +12,8 @@ from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_speech_text
 
 # pylint: disable=too-many-arguments, unused-argument
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def get_kwargs():

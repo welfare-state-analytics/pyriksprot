@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 
 import click
 
@@ -15,6 +16,7 @@ relpath = os.path.relpath
 
 # pylint: disable=too-many-arguments, W0613
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 @click.command()
 @click.argument('source-folder', type=click.STRING)

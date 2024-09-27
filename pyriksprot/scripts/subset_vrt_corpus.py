@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 
 import click
 
@@ -10,6 +11,7 @@ from pyriksprot.workflows.subset_corpus import subset_vrt_corpus
 jj = os.path.join
 relpath = os.path.relpath
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 @click.command()
 @click.argument('global_vrt_folder', type=click.STRING)

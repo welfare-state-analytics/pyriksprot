@@ -1,3 +1,4 @@
+import warnings
 import click
 
 from pyriksprot import interface, to_speech
@@ -7,6 +8,8 @@ from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_tags
 
 # pylint: disable=too-many-arguments, unused-argument
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 @click.command()
