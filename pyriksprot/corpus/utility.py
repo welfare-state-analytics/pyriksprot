@@ -118,9 +118,34 @@ def copy_protocols(
 
     for pattern in filenames:
         for path in glob.glob(jj(source_folder, '**', pattern), recursive=True):
-            document_name: str = os.path.basename(path)
+            document_name: str = basename(path)
             protocol_year: str = document_name.split('-')[1]
             target_name: str = replace_extension(document_name, 'xml')
             target_sub_folder: str = target_folder if not create_subfolder else jj(target_folder, protocol_year)
             ensure_folder(target_sub_folder)
             shutil.copy(path, jj(target_sub_folder, target_name))
+
+
+def load_chamber_indexes(folder: str) -> dict[str, set[str]]:
+    try:
+        namespaces: dict[str, str] = {'xi': 'http://www.w3.org/2001/XInclude'}
+        pattern: str = jj(folder, "prot-??.xml")
+        chambers: dict[str, set[str]] = {}
+        valid_chambers: set[str] = {'ak', 'fk', 'ek'}
+
+        for filename in glob.glob(pattern):
+            document_name: str = basename(filename)
+            chamber: str = document_name[5:7]
+            if chamber not in valid_chambers:
+                logger.warning(f"illegal chamber: {chamber} in file {filename}")
+
+            root: ET.Element = ET.parse(filename).getroot()
+            chambers[chamber] = {
+                basename(elem.get('href')) for elem in root.findall('.//xi:include', namespaces) if elem.get('href') is not None
+            }
+
+        return chambers
+    except Exception as e:
+        logger.warning(f"failed to load chamber indexes from {folder} {e}")
+        return {}
+
