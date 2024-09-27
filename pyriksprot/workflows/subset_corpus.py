@@ -43,7 +43,7 @@ def subset_corpus_and_metadata(
     documents: list[str] | str = None,
     global_corpus_folder: str | None = None,
     global_metadata_folder: str | None = None,
-    target_folder: str | None = None,
+    target_root_folder: str | None = None,
     scripts_folder: str | None = None,
     gh_metadata_opts: dict[str, str] = None,
     gh_records_opts: dict[str, str] = None,
@@ -54,7 +54,7 @@ def subset_corpus_and_metadata(
 ):
     """Subset metadata to folder `target_folder`/tag"""
 
-    root_folder: str = join(target_folder or "", tag or "")
+    root_folder: str = join(target_root_folder or "", tag or "")
 
     temp_folder: str = join(root_folder, "tmp")
     metadata_temp_folder: str = join(root_folder, "tmp/metadata")
