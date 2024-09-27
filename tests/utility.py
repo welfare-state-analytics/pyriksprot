@@ -140,7 +140,7 @@ def ensure_test_corpora_exist(
             documents=filenames,
             global_corpus_folder=ConfigValue("metadata:folder").resolve(),
             global_metadata_folder=ConfigValue("metadata:folder").resolve(),
-            target_folder=ConfigValue("root_folder").resolve(),
+            target_root_folder=ConfigValue("root_folder").resolve(),
             scripts_folder=None,
             gh_metadata_opts=ConfigValue("metadata:github").resolve(),
             gh_records_opts=ConfigValue("corpus:github").resolve(),
