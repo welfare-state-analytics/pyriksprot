@@ -99,7 +99,7 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
         documents=list_of_test_protocols,
         global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
         global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),
-        target_folder=ConfigValue("data_folder").resolve(),
+        target_root_folder=ConfigValue("data_folder").resolve(),
         scripts_folder=None,
         gh_metadata_opts=ConfigValue("metadata.github").resolve(),
         gh_records_opts=ConfigValue("corpus.github").resolve(),
