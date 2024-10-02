@@ -9,10 +9,21 @@ from typing import Literal
 from urllib.parse import quote as q
 from urllib.request import urlretrieve
 
+from jinja2 import Environment, FileSystemLoader, Template
 from loguru import logger
 
+from pyriksprot.configuration.inject import ConfigValue
+
 from .. import gitchen as gh
-from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder
+from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder, strip_path_and_extension
+
+
+def get_chamber_by_filename(filename: str) -> str:
+    if '-fk-' in filename:
+        return 'fk'
+    if '-ak-' in filename:
+        return 'ak'
+    return 'ek'
 
 
 def _extract_tei_corpus_filenames(tei_filename: str) -> list[str]:
@@ -126,6 +137,29 @@ def copy_protocols(
             shutil.copy(path, jj(target_sub_folder, target_name))
 
 
+def create_tei_corpus_xml(source_folder: str, target_folder: str = None) -> None:
+    """Creates a TEI Corpus XML file in the target folder."""
+
+    target_folder = target_folder or source_folder
+
+    def group_by_chambers(filenames: list[str]) -> dict[str, list[str]]:
+        return {  # type: ignore
+            chamber_abbrev: [(f.split('-')[1], f) for f in filenames if get_chamber_by_filename(f) == chamber_abbrev]
+            for chamber_abbrev in ['ak', 'fk', 'ek']
+        }
+
+    environment = Environment(loader=FileSystemLoader("resources/"))
+    template: Template = environment.get_template("prot-xx.jinja")
+    filenames: list[str] = strip_path_and_extension(ls_corpus_folder(source_folder, pattern='**/prot-*-*.xml'))
+    chamber_protocols: dict[str, list[str]] = group_by_chambers(filenames)
+    for chamber_id in chamber_protocols:
+        filename: str = jj(target_folder, f"prot-{chamber_id}.xml")
+        content: str = template.render(documents=chamber_protocols[chamber_id], chamber_id=chamber_id)
+        with open(filename, mode="w", encoding="utf-8") as message:
+            message.write(content)
+            logger.info(f"... wrote {filename}")
+
+
 def load_chamber_indexes(folder: str) -> dict[str, set[str]]:
     try:
         namespaces: dict[str, str] = {'xi': 'http://www.w3.org/2001/XInclude'}
@@ -141,11 +175,12 @@ def load_chamber_indexes(folder: str) -> dict[str, set[str]]:
 
             root: ET.Element = ET.parse(filename).getroot()
             chambers[chamber] = {
-                basename(elem.get('href')) for elem in root.findall('.//xi:include', namespaces) if elem.get('href') is not None
+                basename(str(elem.get('href')))
+                for elem in root.findall('.//xi:include', namespaces)
+                if elem.get('href') is not None
             }
 
         return chambers
     except Exception as e:
         logger.warning(f"failed to load chamber indexes from {folder} {e}")
         return {}
-

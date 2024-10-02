@@ -93,9 +93,10 @@ def subset_corpus_and_metadata(
                 filenames=documents,
                 target_folder=protocols_target_folder,
             )
+        pc.create_tei_corpus_xml(source_folder=protocols_target_folder)
 
-        for filename in glob(join(root_folder, "resources", "*.xml")):
-            shutil.copy(filename, protocols_target_folder)
+        # for filename in glob(join(root_folder, "resources", "*.xml")):
+        #     shutil.copy(filename, protocols_target_folder)
 
     if force or not exists(tf_filename):
         tf.compute_term_frequencies(source=protocols_target_folder, filename=tf_filename)
