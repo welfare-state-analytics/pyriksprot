@@ -3,6 +3,12 @@ insert into _person (person_id, born, dead, gender, riksdagen_id) values ('unkno
 
 insert into _name values ('unknown', 'unknown', 1);
 
+update _name set "name" = replace("name", '&', '&amp') where "name" like '%&%';
+update _name set "name" = replace("name", '<', '&lt') where "name" like '%<%';
+update _name set "name" = replace("name", '>', '&gt') where "name" like '%>%';
+update _name set "name" = replace("name", '"', '&quot') where "name" like '%"%';
+update _name set "name" = replace("name", '''', '&apos') where "name" like '%''%';
+
 update _party_abbreviation
     set abbreviation = 'FRIS'
         where abbreviation = 'independent';
