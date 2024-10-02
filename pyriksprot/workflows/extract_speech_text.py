@@ -42,7 +42,6 @@ def extract_speech_texts(
     compress_type: sd.CompressType = sd.CompressType.Zip,
     **_,
 ) -> None:
-    
     """Special case of `extract_text.extract_corpus_text` for speech extraction only (no merge).
 
     Adds ability to organize files according to `subfolder_key`.
@@ -73,7 +72,7 @@ def extract_speech_texts(
     )
     lookups: md.Codecs = md.Codecs().load(metadata_filename)
 
-    dehypenator: dehyphenation.SwedishDehyphenator | None = ( # type: ignore
+    dehypenator: dehyphenation.SwedishDehyphenator | None = (  # type: ignore
         dehyphenation.SwedishDehyphenator(data_folder=dehyphen_folder, word_frequencies=None) if dehyphen else None
     )
 

@@ -44,7 +44,7 @@ class ConfigValue(Generic[T]):
     def resolve(self) -> T:
         """Resolve the value from the current store (configuration file)"""
         if isinstance(self.key, Config):
-            return ConfigStore.config() # type: ignore
+            return ConfigStore.config()  # type: ignore
         if isclass(self.key):
             return self.key()
         if self.mandatory and not self.default:

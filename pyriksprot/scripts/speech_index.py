@@ -18,6 +18,7 @@ relpath = os.path.relpath
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)

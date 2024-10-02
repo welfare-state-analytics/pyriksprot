@@ -1,7 +1,7 @@
 import sys
+import warnings
 from inspect import currentframe, getargvalues
 from typing import Sequence
-import warnings
 
 import click
 

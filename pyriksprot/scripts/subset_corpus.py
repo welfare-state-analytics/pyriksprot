@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any
 import warnings
+from typing import Any
 
 import click
 

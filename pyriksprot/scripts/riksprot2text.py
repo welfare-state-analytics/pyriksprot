@@ -1,7 +1,7 @@
 import sys
+import warnings
 from inspect import currentframe, getargvalues
 from typing import Sequence
-import warnings
 
 import click
 
@@ -14,6 +14,7 @@ from pyriksprot.workflows import extract_text
 # pylint: disable=too-many-arguments, unused-argument
 
 warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 def get_kwargs():
     keys, _, _, values = getargvalues(currentframe().f_back)

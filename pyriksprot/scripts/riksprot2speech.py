@@ -1,4 +1,5 @@
 import warnings
+
 import click
 
 from pyriksprot import interface, to_speech

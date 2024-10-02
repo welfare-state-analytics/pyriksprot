@@ -13,6 +13,7 @@ relpath = os.path.relpath
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+
 @click.command()
 @click.argument('global_vrt_folder', type=click.STRING)
 @click.argument('local_xml_folder', type=click.STRING)
