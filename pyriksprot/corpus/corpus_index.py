@@ -30,7 +30,7 @@ class ICorpusSourceItem:
 
     def __post_init__(self):
         self.filename = basename(self.path)
-        self.name = utility.strip_path_and_extension(self.path)
+        self.name = utility.strip_path_and_extension(self.path)  # type: ignore
         self.subfolder = basename(dirname(self.path))
 
         if not self.name.startswith("prot-"):
@@ -141,12 +141,12 @@ class CorpusSourceIndex:
 
     def to_csv(self, filename: str = None) -> Optional[str]:
         """Writes a CSV file with columns path, filename, name, subfolder, year"""
-        return self.to_pandas().to_csv(filename, sep='\t', index=None)
+        return self.to_pandas().to_csv(filename, sep='\t', index=None)  # type: ignore
 
     @staticmethod
     def read_csv(filename: str) -> "CorpusSourceIndex":
         """Reads a CSV file with columns path, filename, name, subfolder, year"""
         df: pd.DataFrame = pd.read_csv(filename, sep="\t", index_col=None)
-        source_items: list[ICorpusSourceItem] = [ICorpusSourceItem(**d) for d in df.to_dict('records')]
+        source_items: list[ICorpusSourceItem] = [ICorpusSourceItem(**d) for d in df.to_dict('records')]  # type: ignore
         source_index: CorpusSourceIndex = CorpusSourceIndex(source_items)
         return source_index
