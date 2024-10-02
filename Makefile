@@ -28,15 +28,15 @@ LEMMA_VRT_SPEECHES_FOLDER=$(ROOT_FOLDER)/$(VERSION)/lemma_vrt_speeches.$(SPEECH_
 WORD_FREQUENCY_FILENAME=$(shell yq '.dehyphen.tf_filename' $(CONFIG_FILENAME))
 
 ifeq ($(wildcard $(CORPUS_FOLDER)/.git),)
-	CHECKED_OUT_TAG := $(VERSION)
+CHECKED_OUT_TAG := $(VERSION)
 else
-	CHECKED_OUT_TAG=$(shell git -C $(CORPUS_FOLDER) describe --tags)
+CHECKED_OUT_TAG=$(shell git -C $(CORPUS_FOLDER) describe --tags)
 endif
 
 ifeq ($(wildcard $(METADATA_GIT_FOLDER)/.git),)
-	CHECKED_OUT_METADATA_TAG := $(VERSION)
+CHECKED_OUT_METADATA_TAG := $(VERSION)
 else
-	CHECKED_OUT_METADATA_TAG=$(shell git -C $(METADATA_GIT_FOLDER) describe --tags)
+CHECKED_OUT_METADATA_TAG=$(shell git -C $(METADATA_GIT_FOLDER) describe --tags)
 endif
 
 REMOTE_HOST=humlabp2.srv.its.umu.se
@@ -70,7 +70,8 @@ endif
 ifneq ($(VERSION),$(CHECKED_OUT_METADATA_TAG))
 	$(error repository tag $(CHECKED_OUT_TAG) and .env tag $(VERSION) mismatch)
 endif
-	@echo "check: using version $(VERSION) which matches checked out version" 
+
+@echo "check: using version $(VERSION) which matches checked out version" 
 
 
 .PHONY: full
