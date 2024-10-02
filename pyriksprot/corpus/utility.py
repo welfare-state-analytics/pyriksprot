@@ -12,8 +12,6 @@ from urllib.request import urlretrieve
 from jinja2 import Environment, FileSystemLoader, Template
 from loguru import logger
 
-from pyriksprot.configuration.inject import ConfigValue
-
 from .. import gitchen as gh
 from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder, strip_path_and_extension
 

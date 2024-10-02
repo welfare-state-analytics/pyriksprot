@@ -96,7 +96,7 @@ def test_load_chambers():
 
     p2c: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
 
-    assert all(p2c[p] == c for c, p in chambers.keys())
+    assert all(p2c[p] == c for c, p in chambers)
 
 
 def test_scan_folder():

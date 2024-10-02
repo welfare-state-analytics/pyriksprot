@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import sys
 import warnings
 from typing import Any
 
@@ -65,9 +64,9 @@ def main(
             force=True,
         )
     except Exception as ex:
-        raise
         click.echo(ex)
-        sys.exit(1)
+        raise
+        # sys.exit(1)
 
 
 if __name__ == "__main__":

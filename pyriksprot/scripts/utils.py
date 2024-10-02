@@ -81,7 +81,6 @@ def update_arguments_from_options_file(
 
 def setup_log_to_file(
     level: str = 'WARNING',
-    log_folder: str = CLI_LOG_PATH,
     subdir: bool = False,
     suffix: str = None,
 ) -> None:

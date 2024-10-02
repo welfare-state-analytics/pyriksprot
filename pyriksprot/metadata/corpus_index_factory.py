@@ -9,7 +9,7 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.corpus.utility import load_chamber_indexes, ls_corpus_folder, get_chamber_by_filename
+from pyriksprot.corpus.utility import get_chamber_by_filename, load_chamber_indexes, ls_corpus_folder
 from pyriksprot.interface import MISSING_SPEAKER_NOTE, IProtocol, IProtocolParser, SpeakerNote
 
 from .schema import MetadataSchema
