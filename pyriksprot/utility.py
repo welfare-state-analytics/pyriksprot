@@ -566,3 +566,32 @@ def xml_unescape(txt: str) -> str:
 #             return fn
 
 #         return decorator
+
+
+def format_protocol_id(document_name: str, chamber_abbrev: Literal['ak', 'fk', 'ek'] = None) -> str:
+    try:
+        if document_name.endswith(".xml"):
+            document_name = document_name[:-4]
+
+        chamber_names: dict[str, str] = {"fk": "Första kammaren", "ak": "Andra kammaren", "ek": ""}
+
+        parts: list[str] = document_name.split("-")
+        p_nr: str = parts[-1]
+        s_nr: str = ""
+
+        if '_' in p_nr:
+            p_nr, s_nr = p_nr.split("_")
+
+        year: str = parts[1]
+        if len(year) == 6:
+            year = f"{year[:4]}/{year[4:]}"
+        elif len(year) == 8:
+            year = f"{year[:4]}/{year[4:]}"
+
+        if chamber_abbrev is None:
+            chamber_abbrev = "fk" if "-fk-" in document_name else "ak" if "-ak-" in document_name else "ek"
+
+        return f"{chamber_names[chamber_abbrev]} {year}:{p_nr.lstrip('0')} {s_nr}".strip()
+
+    except IndexError:
+        return document_name

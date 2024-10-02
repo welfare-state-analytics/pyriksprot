@@ -14,11 +14,29 @@ from pyriksprot import preprocess as pr
 from pyriksprot import utility as pu
 from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.iterate import ProtocolSegment
-from pyriksprot.corpus.utility import ls_corpus_by_tei_corpora, ls_corpus_folder
+from pyriksprot.corpus.utility import get_chamber_by_filename, ls_corpus_by_tei_corpora, ls_corpus_folder
 
 from . import fakes
 
 jj = os.path.join
+
+
+def test_format_protocol_id():
+
+    assert pu.format_protocol_id("prot-199495--011.xml") == "1994/95:11"
+    assert pu.format_protocol_id("prot-199495--011") == "1994/95:11"
+    assert pu.format_protocol_id("prot-199495--11") == "1994/95:11"
+
+    assert pu.format_protocol_id("prot-1945--ak--011.xml") == "Andra kammaren 1945:11"
+    assert pu.format_protocol_id("prot-1945--ak--011") == "Andra kammaren 1945:11"
+
+    assert pu.format_protocol_id("prot-1945--fk--016.xml") == "Första kammaren 1945:16"
+    assert pu.format_protocol_id("prot-1945--fk--016") == "Första kammaren 1945:16"
+
+    assert pu.format_protocol_id("prot-1945--fk--016_099.xml") == "Första kammaren 1945:16 099"
+    assert pu.format_protocol_id("prot-1945--fk--016_99") == "Första kammaren 1945:16 99"
+
+    assert pu.format_protocol_id("prot-19992000--089") == "1999/2000:89"
 
 
 def test_ls_corpus_by_tei_corpora():
@@ -254,3 +272,16 @@ def test_fix_incomplete_datetime_series_extend_not_inplace():
     assert df2.dt0.equals(pd.Series(SAMPLE_DATISH_VALUES))
     assert df2.dt.equals(pd.Series(["2020-12-31", np.nan, "2023-02-28", '2023-03-24']))
     assert df2.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))
+
+
+def test_get_chamber_by_filename():
+    assert get_chamber_by_filename("prot-199495--011.xml") == "ek"
+    assert get_chamber_by_filename("prot-199495--011") == "ek"
+    assert get_chamber_by_filename("prot-199495--11") == "ek"
+    assert get_chamber_by_filename("prot-1945--ak--011.xml") == "ak"
+    assert get_chamber_by_filename("prot-1945--ak--011") == "ak"
+    assert get_chamber_by_filename("prot-1945--fk--016.xml") == "fk"
+    assert get_chamber_by_filename("prot-1945--fk--016") == "fk"
+    assert get_chamber_by_filename("prot-1945--fk--016_099.xml") == "fk"
+    assert get_chamber_by_filename("prot-1945--fk--016_99") == "fk"
+    assert get_chamber_by_filename("prot-19992000--089") == "ek"
