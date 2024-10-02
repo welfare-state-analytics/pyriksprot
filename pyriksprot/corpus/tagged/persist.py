@@ -12,6 +12,7 @@ from tqdm import tqdm
 from pyriksprot.utility import ensure_path, is_empty, strip_path_and_extension, strip_paths, touch
 
 from ... import interface
+from ..parlaclarin.parse import zero_fill_filename_sequence
 
 METADATA_FILENAME: str = 'metadata.json'
 
@@ -61,7 +62,10 @@ def load_metadata(filename: str) -> Optional[dict]:
             if METADATA_FILENAME not in filenames:
                 return None
             json_str = fp.read(METADATA_FILENAME).decode('utf-8')
-            return json.loads(json_str)
+            data: dict[str, str] = json.loads(json_str)
+            # FIXME: #74 Zero-filled sequence number in protocol name
+            data["name"] = zero_fill_filename_sequence(data["name"])
+            return data
     except (zipfile.BadZipFile, FileNotFoundError):
         return None
     except Exception as ex:
@@ -75,8 +79,7 @@ PROTOCOL_LOADERS: dict = dict(
 )
 
 
-class FileIsEmptyError(Exception):
-    ...
+class FileIsEmptyError(Exception): ...
 
 
 def load_protocol(filename: str) -> Optional[interface.Protocol]:
@@ -134,9 +137,7 @@ def glob_protocols(source: str, pattern: str = None, strip_path: bool = False):
     filenames: list[str] = (
         glob.glob(jj(source, pattern), recursive=True)
         if isinstance(source, str)
-        else source
-        if isinstance(source, list)
-        else []
+        else source if isinstance(source, list) else []
     )
     if strip_path:
         filenames = strip_paths(filenames)

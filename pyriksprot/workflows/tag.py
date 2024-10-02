@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import importlib
 from functools import reduce
-from glob import glob
 from os.path import dirname, getmtime, isfile, join, split
 from typing import Any, Mapping, Protocol, Type, Union
 
@@ -12,6 +11,7 @@ from tqdm import tqdm
 
 from pyriksprot.corpus.parlaclarin import parse
 from pyriksprot.corpus.tagged import persist
+from pyriksprot.corpus.utility import ls_corpus_folder
 
 from .. import interface
 from .. import preprocess as pp
@@ -28,18 +28,16 @@ class ITaggerFactory(abc.ABC):
     identifier: str = "undefined"
 
     @abc.abstractmethod
-    def create(self) -> "ITagger":
-        ...
+    def create(self) -> "ITagger": ...
 
 
 class Processor(Protocol):
-    def __call__(self, text: str) -> str:
-        ...
+    def __call__(self, text: str) -> str: ...
 
 
 class ITagger(abc.ABC):
     def __init__(self, preprocessors: Processor = None):
-        self.preprocessors: Processor = ProcessorResolver.resolve_preprocessors(preprocessors)
+        self.preprocessors: list[Processor] | list[str] = ProcessorResolver.resolve_preprocessors(preprocessors)
 
     def tag(self, text: Union[str, list[str]], preprocess: bool = True) -> list[TaggedDocument]:
         """Tag text. Return dict if lists."""
@@ -53,15 +51,14 @@ class ITagger(abc.ABC):
             return []
 
         if preprocess:
-            text: list[str] = [self.preprocess(d) for d in text]
+            text = [self.preprocess(d) for d in text]
 
-        tagged_documents = self._tag(text)
+        tagged_documents: list[Mapping[str, list[str]]] = self._tag(text)
 
         return tagged_documents
 
     @abc.abstractmethod
-    def _tag(self, text: Union[str, list[str]]) -> list[TaggedDocument]:
-        ...
+    def _tag(self, text: Union[str, list[str]]) -> list[TaggedDocument]: ...
 
     @abc.abstractmethod
     def _to_dict(self, tagged_document: Any) -> TaggedDocument:
@@ -88,7 +85,7 @@ class ITagger(abc.ABC):
 
     def preprocess(self, text: str) -> str:
         """Transform `text` with preprocessors."""
-        text: str = reduce(lambda res, f: f(res), self.preprocessors, text)
+        text = reduce(lambda res, f: f(res), self.preprocessors, text)  # type: ignore
         return text
 
 
@@ -99,11 +96,11 @@ class ProcessorResolver:
             preprocessors = preprocessors.split(",")
 
         if not any(isinstance(p, str) for p in preprocessors):
-            return preprocessors
+            return preprocessors  # type: ignore
 
         ProcessorResolver.is_satisfied(preprocessors)
 
-        return [pp.Registry.items.get(p) if isinstance(p, str) else p for p in preprocessors]
+        return [pp.Registry.items.get(p) if isinstance(p, str) else p for p in preprocessors]  # type: ignore
 
     @staticmethod
     def is_satisfied(preprocessors: str | list[Processor | str]) -> bool:
@@ -140,7 +137,7 @@ class TaggerRegistry:
             return factory
 
         if factory.identifier not in TaggerRegistry.instances:
-            TaggerRegistry.instances[factory.identifier] = factory.create()
+            TaggerRegistry.instances[factory.identifier] = factory.create()  # type: ignore
 
         return TaggerRegistry.instances[factory.identifier]
 
@@ -152,8 +149,8 @@ def tag_protocol(tagger: ITagger, protocol: interface.Protocol, preprocess=False
 
     for i, document in enumerate(documents):
         protocol.utterances[i].annotation = tagger.to_csv(document)
-        protocol.utterances[i].num_tokens = document.get("num_tokens")
-        protocol.utterances[i].num_words = document.get("num_words")
+        protocol.utterances[i].num_tokens = document.get("num_tokens")  # type: ignore
+        protocol.utterances[i].num_words = document.get("num_words")  # type: ignore
 
     return protocol
 
@@ -211,12 +208,12 @@ def tag_protocols(
     target_folder: str,
     force: bool,
     recursive: bool = False,
-    pattern: str = "**/prot-*.xml",
+    pattern: str | None = None,
 ):
     """Tags protocols in `source_folder`. Stores result in `target_folder`.
     Note: not used by Snakemake workflow (used by tag CLI script)
     """
-    source_files: list[str] = glob(join(source_folder, pattern), recursive=recursive)
+    source_files: list[str] = ls_corpus_folder(source_folder, pattern=pattern)
     for source_file in tqdm(source_files):
         target_file: str = resolve_target_filename(source_file, target_folder, recursive)
         if force or expired(target_file, source_file):

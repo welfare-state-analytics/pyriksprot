@@ -4,12 +4,13 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pyriksprot
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.workflows.tag import resolve_target_filename
-
-from .utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 
 
 def test_tag_protocol_xml():
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+
     def tag(text: str, preprocess: bool):  # pylint: disable=unused-argument
         return [
             dict(
@@ -26,7 +27,7 @@ def test_tag_protocol_xml():
         spec=pyriksprot.ITagger, tag=tag, to_csv=pyriksprot.ITagger.to_csv, preprocess=lambda x: x
     )
 
-    input_filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
+    input_filename: str = jj(fakes_folder, "prot-1958-fake.xml")
     output_filename: str = jj("tests", "output", f"{str(uuid4())}.zip")
 
     pyriksprot.tag_protocol_xml(input_filename=input_filename, output_filename=output_filename, tagger=tagger)

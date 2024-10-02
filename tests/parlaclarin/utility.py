@@ -5,6 +5,7 @@ from glob import glob
 from typing import Any
 
 from pyriksprot import interface
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import parlaclarin
 from pyriksprot.corpus.parlaclarin.parse import ProtocolMapper
 from pyriksprot.foss import untangle
@@ -87,3 +88,9 @@ def count_utterances(path: str) -> int:
     for _ in (tag for tag in ProtocolMapper().get_content_elements(data) if tag.name == 'u'):
         count += 1
     return count
+
+
+def get_test_filenames() -> list[str]:
+    pattern = os.path.join(ConfigStore.config().get("corpus:folder"), ConfigStore.config().get("corpus:pattern"))
+    filenames: list[str] = glob(pattern, recursive=True)
+    return filenames

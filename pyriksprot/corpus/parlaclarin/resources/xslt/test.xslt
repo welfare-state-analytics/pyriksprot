@@ -5,7 +5,7 @@
   exclude-result-prefixes="tei xi">
 <xsl:output method='xml' version='1.0' encoding='utf-8' indent='yes'/>
 
-<xsl:template match="/tei:teiCorpus/tei:TEI/tei:text/tei:body/tei:div">
+<xsl:template match="/tei:TEI/tei:text/tei:body/tei:div">
     <output>
         <!-- <xsl:apply-templates
         select="tei:u[count(preceding-sibling::tei:u[not(@prev='cont')])

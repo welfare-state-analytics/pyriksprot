@@ -1,22 +1,79 @@
 import os
 from pathlib import Path
 from typing import Iterable
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from pyriksprot import gitchen as gh
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import preprocess as pr
 from pyriksprot import utility as pu
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.iterate import ProtocolSegment
-from pyriksprot.utility import dotexpand
-from tests.utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
+from pyriksprot.corpus.utility import get_chamber_by_filename, ls_corpus_by_tei_corpora, ls_corpus_folder
 
 from . import fakes
 
 jj = os.path.join
+
+
+def test_format_protocol_id():
+
+    assert pu.format_protocol_id("prot-199495--011.xml") == "1994/95:11"
+    assert pu.format_protocol_id("prot-199495--011") == "1994/95:11"
+    assert pu.format_protocol_id("prot-199495--11") == "1994/95:11"
+
+    assert pu.format_protocol_id("prot-1945--ak--011.xml") == "Andra kammaren 1945:11"
+    assert pu.format_protocol_id("prot-1945--ak--011") == "Andra kammaren 1945:11"
+
+    assert pu.format_protocol_id("prot-1945--fk--016.xml") == "Första kammaren 1945:16"
+    assert pu.format_protocol_id("prot-1945--fk--016") == "Första kammaren 1945:16"
+
+    assert pu.format_protocol_id("prot-1945--fk--016_099.xml") == "Första kammaren 1945:16 099"
+    assert pu.format_protocol_id("prot-1945--fk--016_99") == "Första kammaren 1945:16 99"
+
+    assert pu.format_protocol_id("prot-19992000--089") == "1999/2000:89"
+
+
+def test_ls_corpus_by_tei_corpora():
+    folder: str = ConfigStore.config().get("corpus.folder")
+
+    dict_data: dict[str, dict[str, str | list[str]]] = ls_corpus_by_tei_corpora(
+        folder=folder, mode='dict', normalize=False
+    )
+
+    assert isinstance(dict_data, dict)
+    assert len(dict_data) == 3
+    assert set(dict_data.keys()) == {'ak', 'ek', 'fk'}
+    assert len(dict_data['ak']['filenames']) == 1
+    assert len(dict_data['fk']['filenames']) == 1
+    assert len(dict_data['ek']['filenames']) == 4
+
+    filenames: list[str] = ls_corpus_by_tei_corpora(folder=folder, mode='filenames', normalize=False)
+    assert isinstance(filenames, list)
+    assert len(filenames) == 6
+    assert './199192/prot-199192--127.xml' in filenames
+
+    filenames = ls_corpus_by_tei_corpora(folder=folder, mode='filenames', normalize=True)
+    assert isinstance(filenames, list)
+    assert len(filenames) == 6
+    assert all(f.startswith('/') for f in filenames)
+    assert any(f.endswith('199192/prot-199192--127.xml') for f in filenames)
+
+    tuples: list[str] = ls_corpus_by_tei_corpora(folder=folder, mode='tuples', normalize=False)
+    assert isinstance(tuples, list)
+    assert len(tuples) == 6
+    assert ('ek', './199192/prot-199192--127.xml') in tuples
+
+    filenames = ls_corpus_folder(folder=folder)
+    assert isinstance(filenames, list)
+    assert len(filenames) == 6
+    assert all(f.startswith(folder) for f in filenames)
+    assert any(f.endswith('199192/prot-199192--127.xml') for f in filenames)
 
 
 @pytest.mark.parametrize(
@@ -28,7 +85,8 @@ jj = os.path.join
     ],
 )
 def test_load_fakes(document_name: str):
-    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml")
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    filename: str = jj(fakes_folder, f"{document_name}.xml")
 
     utterances: list[interface.Utterance] = fakes.load_sample_utterances(filename)
 
@@ -72,12 +130,18 @@ def test_temporary_file():
 
 
 def test_dotexpand():
-    assert not dotexpand("")
-    assert dotexpand("a") == ["a"]
-    assert dotexpand("a.b") == ["a.b"]
-    assert dotexpand("a.b,c.d") == ["a.b", "c.d"]
-    assert dotexpand("a:b,c.d") == ["a.b", "a_b", "c.d"]
-    assert dotexpand("a:b, c.d") == ["a.b", "a_b", "c.d"]
+    assert not pu.dotexpand("")
+    assert pu.dotexpand("a") == ["a"]
+    assert pu.dotexpand("a.b") == ["a.b"]
+    assert pu.dotexpand("a.b,c.d") == ["a.b", "c.d"]
+    assert pu.dotexpand("a:b,c.d") == ["a.b", "a_b", "c.d"]
+    assert pu.dotexpand("a:b, c.d") == ["a.b", "a_b", "c.d"]
+
+
+def test_dotset():
+    d = {}
+    pu.dotset(d, "a.b", 1)
+    assert d == {"a": {"b": 1}}
 
 
 def test_dotget():
@@ -105,6 +169,42 @@ def test_dotget():
     assert pu.dotget({'olle': {'kalle': 99, 'erik': 98}}, "olle:kalle") == 99
 
 
+@pytest.mark.parametrize(
+    'prefix, mock_env, expected',
+    [
+        (
+            'TEST_PREFIX',
+            {'TEST_PREFIX_KEY1': 'value1', 'TEST_PREFIX_KEY2': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ),
+        (
+            'ABC',
+            {'ABC:KEY1': 'value1', 'ABC:KEY2': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ),
+        (
+            'ABC',
+            {'ABC.KEY1': 'value1', 'ABC.KEY2': 'value2'},
+            {'key1': 'value1', 'key2': 'value2'},
+        ),
+        (
+            '',
+            {'TEST_PREFIX_KEY1': 'value1', 'TEST_PREFIX_KEY2': 'value2'},
+            {},
+        ),
+        (
+            'TEST_PREFIX',
+            {'OTHER_KEY1': 'value1', 'OTHER_KEY2': 'value2'},
+            {},
+        ),
+    ],
+)
+def test_env2dict(prefix: str, mock_env: dict[str, str], expected: dict[str, str]):
+    with patch.dict(os.environ, mock_env):
+        result: dict[str, str] = pu.env2dict(prefix=prefix)
+        assert result == expected
+
+
 def test_dedent():
     assert pr.dedent("") == ""
     assert pr.dedent("apa\napa") == "apa\napa"
@@ -125,7 +225,8 @@ def test_probe_filename():
 
 
 def test_repository_tags():
-    tags = md.gh_tags()
+    folder: str = ConfigStore.config().get("corpus.folder")
+    tags = gh.gh_tags(folder)
     assert len(tags) > 0
 
 
@@ -169,5 +270,18 @@ def test_fix_incomplete_datetime_series_extend_not_inplace():
     assert 'df_flag' not in df.columns
 
     assert df2.dt0.equals(pd.Series(SAMPLE_DATISH_VALUES))
-    assert df2.dt.equals(pd.Series(["2020-12-31", np.NaN, "2023-02-28", '2023-03-24']))
+    assert df2.dt.equals(pd.Series(["2020-12-31", np.nan, "2023-02-28", '2023-03-24']))
     assert df2.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))
+
+
+def test_get_chamber_by_filename():
+    assert get_chamber_by_filename("prot-199495--011.xml") == "ek"
+    assert get_chamber_by_filename("prot-199495--011") == "ek"
+    assert get_chamber_by_filename("prot-199495--11") == "ek"
+    assert get_chamber_by_filename("prot-1945--ak--011.xml") == "ak"
+    assert get_chamber_by_filename("prot-1945--ak--011") == "ak"
+    assert get_chamber_by_filename("prot-1945--fk--016.xml") == "fk"
+    assert get_chamber_by_filename("prot-1945--fk--016") == "fk"
+    assert get_chamber_by_filename("prot-1945--fk--016_099.xml") == "fk"
+    assert get_chamber_by_filename("prot-1945--fk--016_99") == "fk"
+    assert get_chamber_by_filename("prot-19992000--089") == "ek"

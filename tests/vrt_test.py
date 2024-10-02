@@ -7,11 +7,10 @@ import pytest
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import utility
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus.tagged import load_protocol, load_protocols
 from pyriksprot.metadata import SpeakerInfo, SpeakerInfoService
 from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch, VrtExportService
-
-from .utility import RIKSPROT_REPOSITORY_TAG
 
 jj = os.path.join
 
@@ -25,7 +24,8 @@ def speaker_service() -> SpeakerInfoService:
         **{
             'get_speaker_info.return_value': SpeakerInfo(
                 speech_id='dummy-0',
-                person_id='Q123456',
+                person_id='u-123456',
+                wiki_id='Q123456',
                 name='Dummy',
                 gender_id=1,
                 party_id=8,
@@ -43,7 +43,8 @@ def export_service(speaker_service) -> VrtExportService:
 
 
 def test_protocol_to_vrt(export_service: VrtExportService):
-    filename: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/prot-1958-fake.zip'
+    version: str = ConfigStore.config().get("corpus.version")
+    filename: str = f'tests/test_data/fakes/{version}/tagged_frames/prot-1958-fake.zip'
 
     protocol: interface.Protocol = load_protocol(filename)
 
@@ -57,14 +58,15 @@ def test_protocol_to_vrt(export_service: VrtExportService):
 
     assert vrt_str == utility.xml_escape(tagged_str[tagged_str.find('\n') + 1 :])
 
-    vrt_str: str = export_service.to_vrt(protocol, 'protocol', 'speech', 'utterance')
+    vrt_str: str = export_service.to_vrt(protocol, 'protocol', 'speech', 'utterance')  # type: ignore
     assert '<protocol' in vrt_str
     assert '<speech' in vrt_str
     assert '<utterance' in vrt_str
 
 
 def test_fake_protocols_to_vrt(export_service: VrtExportService):
-    filename: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames/prot-1958-fake.zip'
+    version: str = ConfigStore.config().get("corpus.version")
+    filename: str = f'tests/test_data/fakes/{version}/tagged_frames/prot-1958-fake.zip'
 
     protocol: interface.Protocol = load_protocol(filename)
     tagged_str: str = protocol.tagged_text
@@ -72,13 +74,13 @@ def test_fake_protocols_to_vrt(export_service: VrtExportService):
 
     assert protocol is not None
 
-    vrt_str = export_service.to_vrt(protocol)
+    vrt_str: str = export_service.to_vrt(protocol)
 
     assert vrt_str is not None
 
     assert vrt_str == expected_protocol_vrt_str
 
-    vrt_str = export_service.to_vrt(protocol, 'protocol')
+    vrt_str = export_service.to_vrt(protocol, 'protocol')  # type: ignore
 
     assert (
         vrt_str
@@ -87,7 +89,7 @@ def test_fake_protocols_to_vrt(export_service: VrtExportService):
 
     mocked_attributes: str = 'party_id="8" gender_id="1" office_type_id="1" sub_office_type_id="2" name="Dummy"'
 
-    vrt_str = export_service.to_vrt(protocol, 'protocol', 'speech')
+    vrt_str = export_service.to_vrt(protocol, 'protocol', 'speech')  # type: ignore
     expected_vrt_str = f"""<protocol title="prot-1958-fake" date="1958">
 <speech id="u-1" title="prot-1958-fake_001" who="olle" date="1958" {mocked_attributes} page_number="0">
 Hej	hej	IN	IN
@@ -133,7 +135,7 @@ dum	dum	JJ	JJ.POS.UTR.SIN.IND.NOM
 </protocol>"""
     assert vrt_str == expected_vrt_str
 
-    vrt_str = export_service.to_vrt(protocol, 'protocol', 'speech', 'utterance')
+    vrt_str = export_service.to_vrt(protocol, 'protocol', 'speech', 'utterance')  # type: ignore
 
     assert 'protocol' in vrt_str
     assert 'speech' in vrt_str
@@ -143,11 +145,12 @@ dum	dum	JJ	JJ.POS.UTR.SIN.IND.NOM
     #     vrt_str = export_service.to_vrt(protocol, 'protocol', 'speech', 'apa')
 
     with pytest.raises(NotImplementedError):
-        vrt_str = export_service.to_vrt(protocol, 'sentence')
+        vrt_str = export_service.to_vrt(protocol, 'sentence')  # type: ignore
 
 
 def test_protocols_to_vrts(export_service: VrtExportService):
-    folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
+    version: str = ConfigStore.config().get("corpus.version")
+    folder: str = f'tests/test_data/fakes/{version}/tagged_frames'
 
     protocols: interface.Protocol = load_protocols(folder)
 
@@ -221,8 +224,9 @@ def test_protocols_to_vrts(export_service: VrtExportService):
     ],
 )
 def test_export_vrt(target: str | None, tags, speaker_service: VrtExportService):
+    version: str = ConfigStore.config().get("corpus.version")
     exporter = VrtBatchExporter(speaker_service=speaker_service)
-    folder: str = f'tests/test_data/fakes/{RIKSPROT_REPOSITORY_TAG}/tagged_frames'
+    folder: str = f'tests/test_data/fakes/{version}/tagged_frames'
     batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
     exporter.export(batches, *tags)
 

@@ -4,17 +4,15 @@ from typing import List
 import pytest
 
 from pyriksprot import interface, to_speech
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus.parlaclarin import convert, parse
-
-from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER
 
 
 @pytest.mark.skip(reason="deprecated")
 def test_convert_to_xml():
+    fakes_folder: str = ConfigStore.config().get("fakes:folder")
     template_name: str = "speeches.xml.jinja"
-    protocol: interface.Protocol = parse.ProtocolMapper.parse(
-        jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
-    )
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(jj(fakes_folder, "prot-1958-fake.xml"))
 
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='chain')
 
@@ -41,9 +39,7 @@ Olle är snäll.
 
     assert result == expected
 
-    protocol: interface.Protocol = parse.ProtocolMapper.parse(
-        jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml")
-    )
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(jj(fakes_folder, "prot-1958-fake.xml"))
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='chain')
 
     result: str = converter.convert(protocol, speeches, "prot-200203--18.xml")
@@ -65,7 +61,7 @@ Olle är snäll.
     assert result == expected
 
     protocol: interface.Protocol = parse.ProtocolMapper.parse(
-        jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, "prot-1958-fake.xml"),
+        jj(fakes_folder, "prot-1958-fake.xml"),
     )
     speeches: List[interface.Speech] = to_speech.to_speeches(protocol=protocol, merge_strategy='who')
 

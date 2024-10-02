@@ -4,9 +4,12 @@ from collections import defaultdict
 from glob import glob
 from typing import Any, Callable, Dict, Iterable, List, Union
 
+from loguru import logger
 from tqdm.auto import tqdm
 
 from pyriksprot.corpus.parlaclarin import XmlProtocolSegmentIterator, XmlUntangleSegmentIterator
+from pyriksprot.corpus.utility import ls_corpus_folder
+from pyriksprot.utility import ensure_path
 
 from ..foss.sparv_tokenize import default_tokenize
 
@@ -36,9 +39,11 @@ class TermFrequencyCounter:
         texts = (
             value
             if isinstance(value, str)
-            else (x.data for x in value)
-            if isinstance(value, (XmlUntangleSegmentIterator, XmlProtocolSegmentIterator))
-            else value
+            else (
+                (x.data for x in value)
+                if isinstance(value, (XmlUntangleSegmentIterator, XmlProtocolSegmentIterator))
+                else value
+            )
         )
         for text in tqdm(texts, disable=not self._progress):
             if self._do_lower_case:
@@ -90,9 +95,9 @@ def compute_term_frequencies(
         else:
             if isinstance(source, str):
                 if os.path.isfile(source):
-                    filenames = [source]
+                    filenames: List[str] = [source]
                 elif os.path.isdir(source):
-                    filenames = glob(os.path.join(source, "**", "*.xml"), recursive=True)
+                    filenames = ls_corpus_folder(source)
                 else:
                     filenames = glob(source)
             elif isinstance(source, list):
@@ -113,10 +118,11 @@ def compute_term_frequencies(
         counter.ingest(texts)
 
         if filename is not None:
+            ensure_path(filename)
             counter.store(filename)
 
         return counter
 
     except Exception as ex:
-        print(ex)
+        logger.error(ex)
         raise

@@ -4,9 +4,11 @@ import contextlib
 import os
 from glob import glob
 
-from ..utility import strip_path_and_extension
-from .config import MetadataTableConfigs
-from .repository import gh_dl_metadata
+from pyriksprot.metadata.schema import MetadataTable
+
+from ..utility import strip_paths
+from .download import gh_fetch_metadata_folder
+from .schema import MetadataSchema
 
 jj = os.path.join
 
@@ -20,11 +22,17 @@ class ConformBaseSpecification:
         self.right_key: str = "right"
         self.right_tables: dict = {}
         self.errors: list[str] = []
-        self.ignore_tables: set[str] = {'unknowns', 'protocols', 'utterances', 'speaker_notes'}
+        self.schemas: dict[str, MetadataSchema] = {}
+        self.data: dict[str, dict] = {}
+
+    def get_schema(self, tag: str) -> MetadataSchema:
+        if tag not in self.schemas:
+            self.schemas[tag] = MetadataSchema(tag)
+        return self.schemas[tag]
 
     @property
     def all_tablenames(self) -> set[str]:
-        return set(self.left_tables.keys()) | set(self.right_tables.keys()) - self.ignore_tables
+        return set(self.left_tables.keys()) | set(self.right_tables.keys())
 
     def is_satisfied(self, **_) -> bool:
         for tablename in self.all_tablenames:
@@ -45,6 +53,8 @@ class ConformBaseSpecification:
         if self.errors:
             raise ValueError("\n" + ("\n".join(self.errors)))
 
+        return True
+
     def compare_columns(self, tablename: str) -> None:
         left_columns: set[str] = set(self.left_tables.get(tablename, {}))
         right_columns: set[str] = set(self.left_tables.get(tablename, {}))
@@ -59,59 +69,92 @@ class ConformBaseSpecification:
                 f"{tablename}: missing column(s) in {self.right_key}: {' '.join(right_columns.difference(left_columns))}"
             )
 
+    def resolve_tablename(self, filename: str, tag: str) -> str:
+        schema: MetadataSchema = self.get_schema(tag)
+        cfg: MetadataTable | None = schema.get_by_filename(filename)
+        if cfg is None:
+            return filename
+        return cfg.tablename
 
-class TagsConformSpecification(ConformBaseSpecification):
-    """Verifies that tags metadata conform"""
+    def resolve_schema_infos(self, tag: str) -> dict:
+        return {
+            cfg.tablename: cfg.source_columns
+            for cfg in self.get_schema(tag).definitions.values()
+            if not cfg.is_derived and not cfg.is_extra
+        }
 
-    def __init__(self, tag1: str, tag2: str) -> None:
-        super().__init__()
+    def resolve_github_infos(self, tag: str, infos: dict[str, dict]) -> dict:
+        data: dict[str, list[str]] = {}
+        for filename, info in infos.items():
+            cfg: MetadataTable | None = self.get_schema(tag).get_by_filename(filename)
+            if cfg is not None and (cfg.is_derived or cfg.is_extra):
+                continue
+            if cfg is None:
+                data[filename] = info['headers']
+            else:
+                data[cfg.tablename] = info['headers']
+        return data
 
-        self.left_key: str = tag1
-        self.right_key: str = tag2
-
-        tag1_data: dict = gh_dl_metadata(tag=tag1, folder=None)
-        tag2_data: dict = gh_dl_metadata(tag=tag2, folder=None)
-
-        self.left_tables: dict = {n: v['headers'] for n, v in tag1_data.items()}
-        self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
-
-
-class ConfigConformsToTagSpecification(ConformBaseSpecification):
-    """Verifies that current table specification conforms to given tag"""
-
-    def __init__(self, tag: str):
-        super().__init__()
-
-        self.table_configs: MetadataTableConfigs = MetadataTableConfigs()
-
-        self.left_key: str = "config"
-        self.right_key: str = tag
-
-        tag2_data: dict = gh_dl_metadata(tag=tag, folder=None)
-
-        self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
-        self.right_tables: dict = {n: v['headers'] for n, v in tag2_data.items()}
-
-
-class ConfigConformsToFolderSpecification(ConformBaseSpecification):
-    """Verifies that current table specification has same files as in specified folder"""
-
-    def __init__(self, folder: str):
-        super().__init__()
-
-        self.table_configs: MetadataTableConfigs = MetadataTableConfigs()
-
-        self.left_key: str = "config"
-        self.right_key: str = folder
-
-        self.left_tables: dict = {t: self.table_configs[t].source_columns for t in self.table_configs.tablesnames0}
-        self.right_tables: dict = self.get_folder_info(folder)
-
-    def get_folder_info(self, folder: str) -> dict:
-        return {strip_path_and_extension(t): self.load_columns(t) for t in glob(jj(folder, "*.csv"))}
+    def resolve_folder_infos(self, folder: str, tag: str) -> dict:
+        data: dict[str, list[str]] = {}
+        for filename in glob(jj(folder, "*.csv")):
+            cfg: MetadataTable | None = self.get_schema(tag).get_by_filename(strip_paths(filename))
+            if cfg is not None and (cfg.is_derived or cfg.is_extra):
+                continue
+            if cfg is None:
+                data[filename] = self.load_columns(filename)
+            else:
+                data[cfg.tablename] = self.load_columns(filename)
+        return data
 
     def load_columns(self, filename: str) -> list[str]:
         with contextlib.suppress():
             with open(filename, mode="r", encoding="utf-8") as fp:
                 return fp.read().splitlines()[0].split(',')
         return []
+
+
+class TagsConformSpecification(ConformBaseSpecification):
+    """Verifies that tags metadata conform"""
+
+    def __init__(self, user: str, repository: str, path: str, tag1: str, tag2: str) -> None:
+        super().__init__()
+
+        self.left_key: str = tag1
+        self.right_key: str = tag2
+
+        for tag in (tag1, tag2):
+            self.data[tag] = gh_fetch_metadata_folder(
+                user=user, repository=repository, path=path, tag=tag, target_folder=None
+            )
+
+        self.left_tables: dict = self.resolve_github_infos(tag1, self.data[tag1])
+        self.right_tables: dict = self.resolve_github_infos(tag2, self.data[tag2])
+
+
+class ConfigConformsToTagSpecification(ConformBaseSpecification):
+    """Verifies that current table specification conforms to given tag"""
+
+    def __init__(self, user: str, repository: str, path: str, tag: str):
+        super().__init__()
+
+        self.left_key: str = "config"
+        self.right_key: str = tag
+
+        data: dict = gh_fetch_metadata_folder(user=user, repository=repository, path=path, tag=tag, target_folder=None)
+
+        self.left_tables: dict = self.resolve_schema_infos(tag)
+        self.right_tables: dict = self.resolve_github_infos(tag, data)
+
+
+class ConfigConformsToFolderSpecification(ConformBaseSpecification):
+    """Verifies that current table specification has same files as in specified folder"""
+
+    def __init__(self, tag: str, folder: str):
+        super().__init__()
+
+        self.left_key: str = "config"
+        self.right_key: str = folder
+
+        self.left_tables: dict = self.resolve_schema_infos(tag)
+        self.right_tables: dict = self.resolve_folder_infos(folder, tag)

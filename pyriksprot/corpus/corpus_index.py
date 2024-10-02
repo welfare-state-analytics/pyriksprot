@@ -4,7 +4,7 @@ import glob
 from dataclasses import asdict, dataclass
 from os.path import basename, dirname, isdir
 from os.path import join as jj
-from typing import List, Optional, Set
+from typing import Callable, List, Optional, Set
 
 import pandas as pd
 
@@ -74,7 +74,7 @@ class CorpusSourceIndex:
         self.source_items: list[ICorpusSourceItem] = source_items
         self.lookup: dict = {x.name: x for x in self.source_items}
 
-    def __getitem__(self, key: str) -> ICorpusSourceItem:
+    def __getitem__(self, key: str) -> ICorpusSourceItem | None:
         return self.lookup.get(key)
 
     def __contains__(self, key: str) -> bool:
@@ -85,19 +85,27 @@ class CorpusSourceIndex:
 
     @staticmethod
     def load(
-        *, source_folder: str, source_pattern: str, years: Optional[str | Set[int]] = None, skip_empty: bool = True
+        *,
+        source_folder: str,
+        source_pattern: str | Callable,
+        years: Optional[str | Set[int]] = None,
+        skip_empty: bool = True,
     ) -> "CorpusSourceIndex":
         """Loads a CorpusSourceIndex from a folder with files matching a pattern"""
         if not isdir(source_folder):
             raise ValueError(f"folder {source_folder} not found")
 
-        paths: List[str] = glob.glob(jj(source_folder, source_pattern), recursive=True)
+        paths: List[str] = (
+            source_pattern(source_folder)
+            if callable(source_pattern)
+            else glob.glob(jj(source_folder, source_pattern), recursive=True)
+        )
 
         target_years: Set[int] = (
             None if years is None else (set(utility.parse_range_list(years)) if isinstance(years, str) else set(years))
         )
 
-        source_items = [CorpusSourceIndex.create(path=path) for path in paths]
+        source_items: List[ICorpusSourceItem] = [CorpusSourceIndex.create(path=path) for path in paths]
 
         if target_years is not None:
             source_items = [x for x in source_items if x.year in target_years]

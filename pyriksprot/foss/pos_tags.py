@@ -1,4 +1,5 @@
 '''Copied from humlab-penelope'''
+
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import Any, Container, Dict, List, Union
@@ -206,15 +207,15 @@ PD_PennTree_O5_PoS_tags = (
 class PoS_Tag_Scheme:
     def __init__(self, df: pd.DataFrame) -> None:
         self.PD_PoS_tags: pd.DataFrame = df
-        self.PD_PoS_groups: pd.DataFrame = df.groupby('tag_group_name')['tag'].agg(list)
+        self.PD_PoS_groups: pd.DataFrame = df.groupby('tag_group_name')['tag'].agg(list)  # type: ignore
         self.pos_to_id: dict[str, int] = df['pos_id'].to_dict()
         self.id_to_pos: dict[int, str] = {v: k.upper() for k, v in self.pos_to_id.items()}
-        self.groups: Dict[str, List[str]] = self.PD_PoS_groups.to_dict()
+        self.groups: Dict[str, List[str]] = self.PD_PoS_groups.to_dict()  # type: ignore
         self.tag_to_group: Dict[str, str] = self.PD_PoS_tags.set_index('tag')['tag_group_name'].to_dict()
 
         """Add lowercased keys to maps"""
-        self.pos_to_id: dict = self.pos_to_id | {k.lower(): v for k, v in self.pos_to_id.items()}
-        self.tag_to_group: dict = self.tag_to_group | {k.lower(): v for k, v in self.tag_to_group.items()}
+        self.pos_to_id = self.pos_to_id | {k.lower(): v for k, v in self.pos_to_id.items()}
+        self.tag_to_group = self.tag_to_group | {k.lower(): v for k, v in self.tag_to_group.items()}
 
     @property
     def tags(self) -> List[str]:
@@ -338,7 +339,7 @@ PoS_TAGS_SCHEMES = PoS_Tag_Schemes()
 Known_PoS_Tag_Schemes = asdict(PoS_TAGS_SCHEMES)
 
 
-def get_pos_schema(name: str) -> PoS_Tag_Scheme:
+def get_pos_schema(name: str) -> PoS_Tag_Scheme | None:
     return Known_PoS_Tag_Schemes.get(name, None)
 
 

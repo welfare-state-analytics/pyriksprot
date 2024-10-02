@@ -3,11 +3,12 @@ from typing import List
 import pytest
 
 from pyriksprot import interface
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import merge
 from pyriksprot.to_speech import MergeByChain
 
-from .utility import TAGGED_SOURCE_FOLDER, sample_tagged_frames_corpus_exists
+from .utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -32,8 +33,10 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
     source_index: corpus_index.CorpusSourceIndex,
     protocol_segments: List[iterate.ProtocolSegment],
 ):
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+
     """Load source protocols to simplify tests"""
-    protocols: List[interface.Protocol] = list(tagged.load_protocols(source=TAGGED_SOURCE_FOLDER))
+    protocols: List[interface.Protocol] = list(tagged.load_protocols(source=tagged_folder))
 
     """Check that iterator yields all utterances"""
     assert len(protocol_segments) == sum(map(len, protocols))

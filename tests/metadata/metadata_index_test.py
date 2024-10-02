@@ -1,13 +1,11 @@
-import sqlite3
 from dataclasses import asdict
 
 import pandas as pd
 import pytest
 
 from pyriksprot import metadata as md
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.metadata.person import index_of_person_id, swap_rows
-
-from ..utility import SAMPLE_METADATA_DATABASE_NAME
 
 # pylint: disable=redefined-outer-name
 
@@ -15,26 +13,34 @@ from ..utility import SAMPLE_METADATA_DATABASE_NAME
 def dummy() -> md.Person:
     return md.Person(
         pid=45,
-        person_id='Q1347810',
-        name='Kilbom',
+        person_id='i-cNo6XnCMDc2LkrvXc6U2b',
+        wiki_id='Q5719585',
+        name='Gustaf von Essen',
         gender_id=1,
         party_id=0,
-        year_of_birth=1885,
-        year_of_death=1961,
+        year_of_birth=1943,
+        year_of_death=None,
         terms_of_office=[
-            md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_date=1922, end_date=1924),
-            md.TermOfOffice(office_type_id=1, sub_office_type_id=3, start_date=1929, end_date=1944),
+            md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_date="1991-09-30", end_date="1994-10-03"),
+            md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_date="1994-10-03", end_date="1998-10-05"),
+            md.TermOfOffice(office_type_id=1, sub_office_type_id=0, start_date="1998-10-05", end_date="2002-09-30"),
         ],
         alt_parties=[
-            md.PersonParty(party_id=8, start_date=0, end_date=0),
-            md.PersonParty(party_id=1, start_date=0, end_date=0),
-            md.PersonParty(party_id=10, start_date=0, end_date=0),
+            md.PersonParty(party_id=7, start_date="1991-09-30", end_date="1994-10-03"),
+            md.PersonParty(party_id=7, start_date="1994-10-03", end_date="1998-10-05"),
+            md.PersonParty(party_id=7, start_date="1998-10-05", end_date="2002-09-30"),
+            md.PersonParty(party_id=3, start_date=0, end_date=0),
+            md.PersonParty(party_id=7, start_date=0, end_date=0),
         ],
     )
 
 
 def test_code_lookups():
-    lookups: md.Codecs = md.Codecs().load(SAMPLE_METADATA_DATABASE_NAME)
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+
+    assert database is not None
+
+    lookups: md.Codecs = md.Codecs().load(database)
     assert lookups
 
     assert lookups.gender2id.get("woman") == 2
@@ -79,10 +85,12 @@ def test_code_lookups():
 
 
 def test_person_index(person_index: md.PersonIndex):
-    person_id: str = 'Q5556026'
-    pid: int = person_index.person_id2pid.get(person_id)
+    wiki_id: str = 'Q5556026'
+    person_id: str = 'i-84xpErSjuTzEi5hvTA1Jtt'
+    pid: int = person_index.wiki_id2pid.get(wiki_id)
     expected_data: dict = {
         'person_id': person_id,
+        'wiki_id': wiki_id,
         'name': 'Sten Andersson',
         'gender_id': 1,
         'party_id': 0,
@@ -90,13 +98,13 @@ def test_person_index(person_index: md.PersonIndex):
         'year_of_death': 2010,
     }
 
-    person: md.Person = person_index.get_person(person_id)
+    person: md.Person = person_index.get_person(wiki_id)
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
     person: md.Person = person_index.get_person(pid)
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
-    person_lookup = person_index.person_lookup
+    person_lookup: dict[str, md.Person] = person_index.person_lookup
     person: md.Person = person_lookup[person_id]
     assert expected_data == {k: v for k, v in asdict(person).items() if k in expected_data}
 
@@ -172,17 +180,23 @@ def test_person_index(person_index: md.PersonIndex):
                 ),
             ],
             key=lambda x: x.start_year,
-        )
+        )  # type: ignore
     )
 
     assert len(person_index.property_values_specs) == 5
 
 
-def test_overload_by_person(person_index: md.PersonIndex):
-    person_index: md.PersonIndex = md.PersonIndex(SAMPLE_METADATA_DATABASE_NAME).load()
-    person_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
+def test_overload_by_person():
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    assert database is not None
+
+    person_index: md.PersonIndex = md.PersonIndex(database).load()
+    wiki_ids: list[str] = ['Q5715273', 'Q5556026', 'Q5983926', 'unknown']
+    person_ids: list[str] = [person_index.wiki_id2person_id.get(x) for x in wiki_ids]
+
     df: pd.DataFrame = pd.DataFrame(data=dict(person_id=person_ids))
     df_overloaded: pd.DataFrame = person_index.overload_by_person(df)
+
     assert df_overloaded is not None
     assert set(df_overloaded.columns) == {'person_id', 'pid', 'gender_id', 'party_id'}
     assert (df_overloaded.pid == [person_index.person_id2pid.get(x) for x in person_ids]).all()
@@ -241,15 +255,40 @@ def test_person_party_at():
     assert person.party_at(1990) == 1
 
 
-def test_speaker_info_service(person_index: md.PersonIndex):
-    service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
+def test_get_person_by_ids(person_index: md.PersonIndex):
 
-    person: md.Person = service.person_index.get_person('Q5556026')
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    service = md.SpeakerInfoService(database, person_index=person_index)
+
+    wiki_id: str = 'Q5556026'
+    person_id: str = person_index.wiki_id2person_id.get(wiki_id)
+
+    assert person_id == 'i-84xpErSjuTzEi5hvTA1Jtt'
+
+    person_by_wiki_id: md.Person = service.person_index.get_person(wiki_id)
+    person_by_person_id: md.Person = service.person_index.get_person(person_id)
+    person_by_pid: md.Person = service.person_index.get_person(person_by_wiki_id.pid)
+
+    assert person_by_person_id.wiki_id == person_by_wiki_id.wiki_id
+    assert person_by_person_id.person_id == person_by_wiki_id.person_id
+    assert person_by_person_id.pid == person_by_wiki_id.pid
+    assert person_by_pid.wiki_id == person_by_wiki_id.wiki_id
+    assert person_by_pid.person_id == person_by_wiki_id.person_id
+
+
+def test_speaker_info_service(person_index: md.PersonIndex):
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    service = md.SpeakerInfoService(database, person_index=person_index)
+
+    wiki_id: str = 'Q5556026'
+
+    person: md.Person = service.person_index.get_person(wiki_id)
+
     assert person.alt_parties
     assert len(person.alt_parties) == 9
-    assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
     assert set(a.end_year for a in person.alt_parties) == {9999, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
+    assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
     assert person.party_at(1950) == 0
     assert person.party_at(1994) == 7
     assert person.party_at(2000) == 7
@@ -258,7 +297,8 @@ def test_speaker_info_service(person_index: md.PersonIndex):
 
 @pytest.mark.skip("No unknown in test data")
 def test_unknown(person_index: md.PersonIndex):
-    service = md.SpeakerInfoService(SAMPLE_METADATA_DATABASE_NAME, person_index=person_index)
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    service = md.SpeakerInfoService(database, person_index=person_index)
     person: md.Person = service.person_index.get_person('unknown')
 
     assert person
@@ -270,7 +310,7 @@ def test_unknown(person_index: md.PersonIndex):
 
     u_id: str = 'i-b5b6a1f0ed7099a3-4'
 
-    assert service.utterance_index.unknown_gender_lookup.get(u_id) == 1
+    # assert service.utterance_index.unknown_gender_lookup.get(u_id) == 1
 
     speaker: md.SpeakerInfo = service.get_speaker_info(u_id=u_id)
     assert speaker.person_id == "unknown"
@@ -281,15 +321,3 @@ def test_unknown(person_index: md.PersonIndex):
     assert speaker.person_id == "unknown"
     assert speaker.gender_id == 1
     assert speaker.party_id == 8
-
-
-@pytest.mark.skip("infra test")
-def test_load_speaker_index2():
-    database_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.main.db"
-    speech_index_filename: str = (
-        "/data/riksdagen_corpus_data/tagged_frames_v0.4.2_speeches.feather/document_index.feather"
-    )
-    speech_index: pd.DataFrame = pd.read_feather(speech_index_filename)
-
-    with sqlite3.connect(database_filename) as db:
-        speech_index.to_sql("speech_index", db, if_exists="replace")

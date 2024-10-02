@@ -1,20 +1,28 @@
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.metadata import verify
 
-from ..utility import RIKSPROT_REPOSITORY_TAG
 
-SAMPLE_METADATA = f"./tests/test_data/source/{RIKSPROT_REPOSITORY_TAG}/parlaclarin/metadata"
-
-
-def test_config_conforms_to_folder_pecification():
-    verify.ConfigConformsToFolderSpecification(folder=SAMPLE_METADATA).is_satisfied()
+def test_config_conforms_to_folder_specification():
+    tag: str = ConfigValue("version").resolve()
+    folder: str = ConfigValue("metadata:folder").resolve()
+    verify.ConfigConformsToFolderSpecification(tag=tag, folder=folder).is_satisfied()
 
 
-def test_config_conforms_to_tags_pecification():
-    verify.ConfigConformsToTagSpecification(tag=RIKSPROT_REPOSITORY_TAG).is_satisfied()
+def test_config_conforms_to_tags_specification():
+    tag: str = ConfigValue("version").resolve()
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
+    verify.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
 
 
 def test_tags_conform_specification():
-    verify.TagsConformSpecification(tag1="v0.5.0", tag2=RIKSPROT_REPOSITORY_TAG).is_satisfied()
+    tag: str = ConfigValue("version").resolve()
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
+
+    verify.TagsConformSpecification(user=user, repository=repository, path=path, tag1="v1.1.0", tag2=tag).is_satisfied()
 
 
 def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | int]:

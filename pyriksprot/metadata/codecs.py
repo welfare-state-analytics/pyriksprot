@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sqlite3
-from contextlib import nullcontext
 from dataclasses import dataclass
 from functools import cached_property
 from os.path import isfile
@@ -9,8 +7,9 @@ from typing import Callable, Literal, Mapping
 
 import pandas as pd
 
+from pyriksprot.metadata import database
+
 from .. import utility as pu
-from . import utility as mdu
 
 CODE_TABLES: dict[str, str] = {
     'chamber': 'chamber_id',
@@ -24,10 +23,10 @@ CODE_TABLES: dict[str, str] = {
 
 @dataclass
 class Codec:
-    type: Literal['encoder', 'decoder']
+    type: Literal['encode', 'decode']
     from_column: str
     to_column: str
-    get: Callable[[int], str]
+    fx: Callable[[int], str]
     default: str = None
 
 
@@ -43,16 +42,25 @@ class Codecs:
         self.party: pd.DataFrame = null_frame
         self.sub_office_type: pd.DataFrame = null_frame
         self.extra_codecs: list[Codec] = []
+        self.source_filename: str | None = None
+        self.code_tables: dict[str, str] = CODE_TABLES
 
-    def load(self, source: str | sqlite3.Connection | dict) -> Codecs:
+    def load(self, source: str | dict) -> Codecs:
+        self.source_filename = source if isinstance(source, str) else None
         if not isfile(source):
             raise FileNotFoundError(f"File not found: {source}")
 
-        with sqlite3.connect(database=source) if isinstance(source, str) else nullcontext(source) as db:
-            tables: dict[str, pd.DataFrame] = mdu.load_tables(CODE_TABLES, db=db)
+        db: database.DatabaseInterface = database.DefaultDatabaseType(filename=source)
+
+        with db:
+            tables: dict[str, pd.DataFrame] = db.fetch_tables(self.code_tables)
             for table_name, table in tables.items():
                 setattr(self, table_name, table)
         return self
+
+    def tablenames(self) -> dict[str, str]:
+        """Returns a mapping from code table name to id column name"""
+        return CODE_TABLES
 
     @cached_property
     def gender2name(self) -> dict:
@@ -100,7 +108,7 @@ class Codecs:
         ]
 
     def lookup_name(self, key: str, key_id: int, default_value: str = "unknown") -> str:
-        return self.decoder(key=key).get(key_id, default_value)
+        return self.decoder(key=key).fx(key_id, default_value)
 
     def decoder(self, key: str) -> Codec:
         return next((x for x in self.decoders if x.from_column == key), {})
@@ -120,7 +128,7 @@ class Codecs:
         for codec in codecs:
             if codec.from_column in df.columns:
                 if codec.to_column not in df:
-                    df[codec.to_column] = df[codec.from_column].apply(codec.get)
+                    df[codec.to_column] = df[codec.from_column].apply(codec.fx)
                 if codec.default is not None:
                     df[codec.to_column] = df[codec.to_column].fillna(codec.default)
             if drop:

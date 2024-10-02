@@ -1,4 +1,5 @@
 """Convert ParlaClarin XML protocol to other text format using Jinja."""
+
 from __future__ import annotations
 
 import os
@@ -14,7 +15,7 @@ from pyriksprot.utility import strip_paths
 from . import parse
 
 if TYPE_CHECKING:
-    from .. import interface
+    from .. import interface  # type: ignore
 
 
 JINJA_ENV = Environment(

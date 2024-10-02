@@ -8,7 +8,6 @@ from loguru import logger
 from tqdm import tqdm
 
 from pyriksprot.corpus import iterate, tagged
-from pyriksprot.dispatch.item import DispatchItem
 
 from .. import interface
 from .. import metadata as md
@@ -135,7 +134,6 @@ def extract_corpus_tags(
     with dispatch.IDispatcher.dispatcher(target_type)(
         target_name=target_name, compress_type=compress_type, lookups=lookups, **dispatch_opts
     ) as dispatcher:
-        data: t.Iterable[dict[str, DispatchItem]]
         n_total: int = len(source_index.source_items)
 
         for data in tqdm(merger.merge(texts), total=n_total, miniters=10, disable=not progress):

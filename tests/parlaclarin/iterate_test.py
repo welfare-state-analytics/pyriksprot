@@ -1,14 +1,14 @@
-import glob
 import os
-from typing import Iterable, List, Type
+from typing import Iterable, Type
 
 import pytest
 
 from pyriksprot import interface, utility
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import iterate, parlaclarin
+from tests.parlaclarin.utility import get_test_filenames
 
 from .. import fakes
-from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_PATTERN
 
 jj = os.path.join
 
@@ -17,16 +17,14 @@ jj = os.path.join
 @pytest.mark.parametrize(
     'iterator_class, n_speeches, n_missing_intros',
     [
-        (parlaclarin.XmlProtocolSegmentIterator, 475, 2),
-        (parlaclarin.XmlUntangleSegmentIterator, 475, 2),
+        (parlaclarin.XmlProtocolSegmentIterator, 477, 4),
+        (parlaclarin.XmlUntangleSegmentIterator, 477, 4),
     ],
 )
 def test_segment_iterator_when_segment_is_speech(iterator_class, n_speeches: int, n_missing_intros: int):
-    filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
-
     texts: Iterable[iterate.ProtocolSegment] = list(
         iterator_class(
-            filenames=filenames,
+            filenames=get_test_filenames(),
             segment_level=interface.SegmentLevel.Speech,
             segment_skip_size=0,
             multiproc_processes=None,
@@ -52,7 +50,7 @@ def test_segment_iterator_when_segment_is_speech(iterator_class, n_speeches: int
     ],
 )
 def test_segment_iterator_when_segment_is_protocol(iterator_class):
-    filenames = glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True)
+    filenames: list[str] = get_test_filenames()
 
     texts: Iterable[iterate.ProtocolSegment] = list(
         iterator_class(
@@ -77,8 +75,8 @@ def test_segment_iterator_when_segment_is_protocol(iterator_class):
 
 
 def test_xml_protocol_texts_iterator_texts():
-    filenames: List[str] = sorted(glob.glob(RIKSPROT_PARLACLARIN_PATTERN, recursive=True))
-    expected_document_names: List[str] = sorted(utility.strip_path_and_extension(filenames))
+    filenames: list[str] = get_test_filenames()
+    expected_document_names: list[str] = sorted(utility.strip_path_and_extension(filenames))
 
     texts: Iterable[iterate.ProtocolSegment] = list(
         parlaclarin.XmlUntangleSegmentIterator(
@@ -120,14 +118,14 @@ def test_xml_protocol_texts_iterator_texts():
             merge_strategy='chain_consecutive_unknowns',
         )
     )
-    assert len(texts) == 475
+    assert len(texts) == 477
 
     texts = list(
         parlaclarin.XmlUntangleSegmentIterator(
             filenames=filenames, segment_level=interface.SegmentLevel.Who, segment_skip_size=1, multiproc_processes=None
         )
     )
-    assert len(texts) == 149
+    assert len(texts) == 148
 
 
 @pytest.mark.parametrize(
@@ -139,9 +137,10 @@ def test_protocol_texts_iterator(
     document_names: list[str],
     level: interface.SegmentLevel.Protocol,
 ):
-    filenames: List[str] = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
+    fakes_folder: str = ConfigStore.config().get("fakes:folder")
+    filenames: list[str] = [jj(fakes_folder, f"{name}.xml") for name in document_names]
 
-    segments: List[iterate.ProtocolSegment] = list(
+    segments: list[iterate.ProtocolSegment] = list(
         iterator_class(
             filenames=filenames, segment_level=level.name.lower(), segment_skip_size=0, multiproc_processes=None
         )
@@ -150,7 +149,7 @@ def test_protocol_texts_iterator(
     expected_stream: list[iterate.ProtocolSegment] = fakes.load_expected_stream(level, document_names)
     assert segments == expected_stream
 
-    segments: List[iterate.ProtocolSegment] = list(
+    segments: list[iterate.ProtocolSegment] = list(
         iterator_class(
             filenames=filenames, segment_level=level.name.lower(), segment_skip_size=0, multiproc_processes=2
         )
@@ -168,8 +167,9 @@ def test_protocol_texts_iterator(
     ],
 )
 def test_protocol_texts_iterator_levels(iterator_class, segment_level: interface.SegmentLevel):
+    fakes_folder: str = ConfigStore.config().get("fakes:folder")
     document_names: list[str] = ['prot-1958-fake']  # , 'prot-1960-fake']
-    filenames = [jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{name}.xml") for name in document_names]
+    filenames: list[str] = [jj(fakes_folder, f"{name}.xml") for name in document_names]
     texts: list[iterate.ProtocolSegment] = list(
         iterator_class(filenames=filenames, segment_level=segment_level, segment_skip_size=1, multiproc_processes=None)
     )

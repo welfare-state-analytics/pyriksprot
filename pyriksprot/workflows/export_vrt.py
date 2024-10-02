@@ -5,7 +5,8 @@ import sys
 import zipfile
 from collections import namedtuple
 from io import StringIO, TextIOWrapper
-from typing import overload
+from typing import TextIO, overload
+from venv import logger
 
 import tqdm
 
@@ -39,16 +40,13 @@ class VrtExportService:
         self.merge_strategy: str = merge_strategy
 
     @overload
-    def to_vrt(self, entity: interface.Utterance, *tags: tuple[str]) -> str:
-        ...
+    def to_vrt(self, entity: interface.Utterance, *tags: tuple[str]) -> str: ...
 
     @overload
-    def to_vrt(self, entity: interface.Speech, *tags: tuple[str]) -> str:
-        ...
+    def to_vrt(self, entity: interface.Speech, *tags: tuple[str]) -> str: ...
 
     @overload
-    def to_vrt(self, entity: interface.Protocol, *tags: tuple[str]) -> str:
-        ...
+    def to_vrt(self, entity: interface.Protocol, *tags: tuple[str]) -> str: ...
 
     def to_vrt(self, entity: IEntity, *tags: tuple[str]) -> str:
         if 'sentence' in tags:
@@ -93,6 +91,12 @@ class VrtExportService:
 
         vrt_str: str = '\n'.join(self.to_vrt(u, *tags) for u in speech.utterances)
         if 'speech' in tags:
+            # BUGGFICK: This is a bug, the name should be speaker_info.name
+            name: str = speaker_info.name if speaker_info else ''
+            if '=' in name:
+                logger.warning(f"Name contains '=': {name}")
+                name = xml_escape(name)
+
             vrt_str: str = (
                 '<speech '
                 f'id="{speech.speech_id}" '
@@ -103,7 +107,7 @@ class VrtExportService:
                 f'gender_id="{speaker_info.gender_id}" '
                 f'office_type_id="{speaker_info.term_of_office.office_type_id}" '
                 f'sub_office_type_id="{speaker_info.term_of_office.sub_office_type_id}" '
-                f'name="{speaker_info.name}" '
+                f'name="{name}" '
                 f'page_number="{speech.page_number}"'
                 '>\n'
                 f'{vrt_str}\n'
@@ -166,7 +170,7 @@ class VrtExportService:
             return None
 
 
-def _open_output(output: str) -> TextIOWrapper:
+def _open_output(output: str) -> TextIOWrapper | TextIO:
     if output == '-':
         return contextlib.nullcontext(sys.stdout)
     if output is None:
@@ -196,16 +200,13 @@ class VrtBatchExporter:
         self.opts: dict = opts
 
     @overload
-    def export(self, data: tuple, *tags: tuple[str]) -> None:
-        ...
+    def export(self, data: tuple, *tags: tuple[str]) -> None: ...
 
     @overload
-    def export(self, data: VrtExportBatch, *tags: tuple[str]) -> None:
-        ...
+    def export(self, data: VrtExportBatch, *tags: tuple[str]) -> None: ...
 
     @overload
-    def export(self, data: list[VrtExportBatch], *tags: tuple[str]) -> None:
-        ...
+    def export(self, data: list[VrtExportBatch], *tags: tuple[str]) -> None: ...
 
     def export(self, data: tuple | VrtExportBatch | list[VrtExportBatch], *tags: tuple[str]) -> None:
         if isinstance(data, tuple):
