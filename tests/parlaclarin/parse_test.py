@@ -1,12 +1,16 @@
+import glob
 import os
 
 import pytest
 
 from pyriksprot import interface
+from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus import parlaclarin
+from pyriksprot.corpus.parlaclarin.parse import ProtocolMapper
+from pyriksprot.corpus.utility import create_tei_corpus_xml, load_chamber_indexes
+from pyriksprot.metadata.corpus_index_factory import CorpusScanner
 
 from .. import fakes
-from ..utility import RIKSPROT_PARLACLARIN_FAKE_FOLDER, RIKSPROT_PARLACLARIN_FOLDER
 from .utility import count_utterances
 
 jj = os.path.join
@@ -21,7 +25,8 @@ jj = os.path.join
     ],
 )
 def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str):
-    filename: str = jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{protocol_name}.xml")
+    fakes_folder: str = ConfigValue("fakes:folder").resolve()
+    filename: str = jj(fakes_folder, f"{protocol_name}.xml")
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename)
 
     """Load truth"""
@@ -41,16 +46,17 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_nam
 @pytest.mark.parametrize(
     'filename',
     [
-        "prot-1933--fk--5.xml",
-        "prot-1955--ak--22.xml",
-        "prot-197879--14.xml",
+        "prot-1933--fk--005.xml",
+        "prot-1955--ak--022.xml",
+        "prot-197879--014.xml",
         'prot-199192--127.xml',
-        'prot-199192--21.xml',
-        "prot-199596--35.xml",
+        'prot-199192--021.xml',
+        "prot-199596--035.xml",
     ],
 )
 def test_parlaclarin_n_utterances(filename: str):
-    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+    corpus_folder: str = ConfigValue("corpus:folder").resolve()
+    path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(path)
 
@@ -62,18 +68,66 @@ def test_parlaclarin_n_utterances(filename: str):
 @pytest.mark.parametrize(
     'filename, u_count, intro_count',
     [
-        ("prot-1933--fk--5.xml", 0, 1),
-        ("prot-1955--ak--22.xml", 428, 165),
-        ("prot-197879--14.xml", 1, 0),
-        ('prot-199192--21.xml', 113, 21),
-        ('prot-199192--127.xml', 2568, 250),
-        ("prot-199596--35.xml", 393, 54),
+        ("prot-1933--fk--005.xml", 0, 1),
+        ("prot-1955--ak--022.xml", 428, 165),
+        ("prot-197879--014.xml", 1, 0),
+        ('prot-199192--021.xml', 113, 21),
+        ('prot-199192--127.xml', 2568, 249),
+        ("prot-199596--035.xml", 393, 41),
     ],
 )
 def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: int):
-    path: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols", filename.split('-')[1], filename)
+    corpus_folder: str = ConfigValue("corpus:folder").resolve()
+
+    path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
     protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(path)
 
     assert len(protocol.utterances) == u_count
     assert len(protocol.speaker_notes) == intro_count
+
+
+def test_load_chambers():
+
+    chambers: dict[str, set[str]] = load_chamber_indexes(folder=ConfigValue("corpus:folder").resolve())
+
+    assert set(chambers.keys()) == {'ak', 'fk', 'ek'}
+    assert all(len(chambers[chamber]) > 0 for chamber in chambers)
+
+    p2c: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
+
+    assert all(p2c[p] == c for c, p in chambers.items())
+
+
+def test_scan_folder():
+
+    corpus_folder: str = ConfigValue("corpus:folder").resolve()
+
+    scanner = CorpusScanner(parser=ProtocolMapper)
+
+    scan_result: CorpusScanner.ScanResult = scanner.scan(
+        filenames=glob.glob(jj(corpus_folder, '**/prot-*-*.xml'), recursive=True),
+        chambers=load_chamber_indexes(folder=corpus_folder),
+    )
+
+    assert isinstance(scan_result, CorpusScanner.ScanResult)
+    assert isinstance(scan_result.protocols, list)
+    assert len(scan_result.protocols) > 0
+    assert isinstance(scan_result.protocols[0], tuple)
+    assert len(scan_result.protocols[0]) == 5
+
+
+def test_create_tei_corpus_xml():
+
+    source_folder: str = ConfigValue("corpus.folder").resolve()
+    target_folder: str = 'tests/output'
+
+    create_tei_corpus_xml(source_folder=source_folder, target_folder=target_folder)
+
+    assert os.path.isfile(jj(target_folder, 'prot-ak.xml'))
+    assert os.path.isfile(jj(target_folder, 'prot-fk.xml'))
+    assert os.path.isfile(jj(target_folder, 'prot-ek.xml'))
+
+    assert os.path.getsize(jj(target_folder, 'prot-ak.xml')) > 0
+    assert os.path.getsize(jj(target_folder, 'prot-fk.xml')) > 0
+    assert os.path.getsize(jj(target_folder, 'prot-ek.xml')) > 0

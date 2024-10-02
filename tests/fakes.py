@@ -5,15 +5,11 @@ from typing import Iterable, Literal
 
 import numpy as np
 import pandas as pd
-from dotenv import load_dotenv
 
 from pyriksprot import interface
 from pyriksprot import utility as pu
+from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import iterate
-
-from .utility import RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER, RIKSPROT_PARLACLARIN_FAKE_FOLDER
-
-load_dotenv()
 
 
 def load_sample_utterances(filename: str) -> list[interface.Utterance]:
@@ -126,11 +122,13 @@ def load_speech_stream(filename: str, strategy: str) -> Iterable[interface.Speec
 
 
 def _expected_sample_filename(path: str, suffix: str, extension: str = "csv") -> str:
+    expected_folder: str = ConfigStore.config().get("fakes.expected_folder")
+
     if path.endswith(f'{suffix}.{extension}'):
         return path
 
     basename, _ = splitext(split(path)[1])
-    return jj(RIKSPROT_PARLACLARIN_FAKE_EXPECTED_FOLDER, f'{basename}-{suffix}.{extension}')
+    return jj(expected_folder, f'{basename}-{suffix}.{extension}')
 
 
 def expected_tagged_sample_filename(filename: str) -> str:
@@ -242,10 +240,10 @@ def sample_compute_expected_counts(filename: str, kind: Literal['token', 'lemma'
 def load_expected_stream(
     level: interface.SegmentLevel.Protocol, document_names: list[str]
 ) -> list[iterate.ProtocolSegment]:
-    return pu.flatten(
-        load_segment_stream(jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{d}.xml"), level) for d in document_names
-    )
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    return pu.flatten(load_segment_stream(jj(fakes_folder, f"{d}.xml"), level) for d in document_names)
 
 
 def load_expected_speeches(strategy: str, document_name: str) -> list[iterate.ProtocolSegment]:
-    return load_speech_stream(jj(RIKSPROT_PARLACLARIN_FAKE_FOLDER, f"{document_name}.xml"), strategy)
+    fakes_folder: str = ConfigStore.config().get("fakes.folder")
+    return load_speech_stream(jj(fakes_folder, f"{document_name}.xml"), strategy)

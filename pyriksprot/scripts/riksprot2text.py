@@ -1,4 +1,5 @@
 import sys
+import warnings
 from inspect import currentframe, getargvalues
 from typing import Sequence
 
@@ -11,6 +12,8 @@ from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_text
 
 # pylint: disable=too-many-arguments, unused-argument
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def get_kwargs():
@@ -79,12 +82,6 @@ if __name__ == "__main__":
     # print("NOTE! click.testing.CliRunner")
     # source_folder: str = "/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols/"
     # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
-
-    # # source_folder: str = "tests/test_data/source/v0.4.6/parlaclarin/protocols/"
-    # # metadata_filename: str = "tests/test_data/source/v0.4.6/riksprot_metadata.db"
-
-    # # source_folder: str = "tests/test_data/tmp/"
-    # # metadata_filename: str = "/data/riksdagen_corpus_data/metadata/riksprot_metadata.v0.4.6.db"
 
     # runner = CliRunner()
     # result = runner.invoke(

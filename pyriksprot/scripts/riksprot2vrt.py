@@ -1,4 +1,5 @@
 import sys
+import warnings
 from glob import glob
 from os import makedirs, remove
 from os.path import basename, dirname, exists, isdir, join
@@ -7,6 +8,8 @@ import click
 
 from pyriksprot.metadata import SpeakerInfoService
 from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 @click.command()

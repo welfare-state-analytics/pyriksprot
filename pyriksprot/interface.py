@@ -11,7 +11,7 @@ from io import StringIO
 from typing import Any, Callable, Literal, Mapping, Optional, Union
 
 import pandas as pd
-from pandas.io import json
+from pandas.io.json import ujson_dumps, ujson_loads  # type: ignore
 
 from .utility import flatten, merge_csv_strings, strip_extensions
 
@@ -20,8 +20,7 @@ from .utility import flatten, merge_csv_strings, strip_extensions
 MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 
-class ParlaClarinError(ValueError):
-    ...
+class ParlaClarinError(ValueError): ...
 
 
 class TemporalKey(str, Enum):
@@ -80,43 +79,36 @@ class IDispatchItem(abc.ABC):
     n_tokens: int
 
     @property
-    def filename(self) -> str:
-        ...
+    def filename(self) -> str: ...
 
     @property
-    def text(self) -> str:
-        ...
+    def text(self) -> str: ...
 
-    def to_dict(self):
-        ...
+    def to_dict(self) -> dict:
+        return {}
 
 
 class IProtocol(abc.ABC):
     date: str
     name: str
     utterances: list[Utterance]
-    speaker_notes: dict[str, str]
+    speaker_notes: dict[str, SpeakerNote]
     page_references: list[PageReference] = []
 
     @abc.abstractmethod
-    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
-        ...
+    def get_year(self, which: Literal["filename", "date"] = "filename") -> int: ...
 
     @abc.abstractmethod
-    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
-        ...
+    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol": ...
 
     @abc.abstractmethod
-    def checksum(self) -> Optional[str]:
-        ...
+    def checksum(self) -> Optional[str]: ...
 
     @abc.abstractmethod
-    def get_content(self, content_type: ContentType) -> str:
-        ...
+    def get_content(self, content_type: ContentType) -> str: ...
 
     @abc.abstractmethod
-    def get_speaker_notes(self) -> dict[str, str]:
-        ...
+    def get_speaker_notes(self) -> dict[str, SpeakerNote]: ...
 
 
 @dataclass
@@ -155,8 +147,8 @@ class Utterance:
     ):
         self.u_id: str = u_id
         self.who: str = who
-        self.prev_id: str = prev_id if isinstance(prev_id, str) else None
-        self.next_id: str = next_id if isinstance(next_id, str) else None
+        self.prev_id: str | None = prev_id if isinstance(prev_id, str) else None
+        self.next_id: str | None = next_id if isinstance(next_id, str) else None
         self.paragraphs: list[str] = (
             [] if not paragraphs else paragraphs if isinstance(paragraphs, list) else paragraphs.split(PARAGRAPH_MARKER)
         )
@@ -173,7 +165,7 @@ class Utterance:
         return f'{self.who}_{self.u_id}'
 
     @property
-    def tagged_text(self) -> str:
+    def tagged_text(self) -> str | None:
         return self.annotation
 
     @property
@@ -185,7 +177,7 @@ class Utterance:
         """Compute checksum of utterance text."""
         return UtteranceHelper.compute_checksum(self.text)
 
-    def to_str(self, what: ContentType) -> str:
+    def to_str(self, what: ContentType) -> str | None:
         return self.tagged_text if what == ContentType.TaggedFrame else self.text
 
     def to_dict(self) -> dict:
@@ -243,7 +235,7 @@ class UtteranceHelper:
                 StringIO(utterances) if isinstance(utterances, str) else utterances,
                 **UtteranceHelper.CSV_OPTS,
                 index_col='u_id',
-            )
+            )  # type: ignore
             df.drop(columns='checksum')
         else:
             df: pd.DataFrame = pd.DataFrame(UtteranceHelper.to_dicts(utterances)).set_index('u_id')
@@ -252,30 +244,30 @@ class UtteranceHelper:
     @staticmethod
     def to_vrt(utterances: list[Utterance], structural_tags: str = "") -> str:
         """Convert list of utterances to a VRT string. Return VRT string."""
-        return '\n'.join(u.to_vrt(structural_tags) for u in utterances)
+        return '\n'.join(u.to_vrt(structural_tags) for u in utterances)  # type: ignore
 
     @staticmethod
     def to_csv(utterances: list[Utterance]) -> str:
         """Convert list of utterances to a CSV string. Return CSV string."""
-        return UtteranceHelper.to_dataframe(utterances=utterances).to_csv(**UtteranceHelper.CSV_OPTS, index=True)
+        return UtteranceHelper.to_dataframe(utterances=utterances).to_csv(**UtteranceHelper.CSV_OPTS, index=True)  # type: ignore
 
     @staticmethod
     def from_csv(csv_str: str) -> list[Utterance]:
         """Convert CSV string to list of utterances. Return list."""
         df: pd.DataFrame = UtteranceHelper.to_dataframe(StringIO(csv_str))
-        utterances: list[Utterance] = [Utterance(**d) for d in df.reset_index().to_dict(orient='records')]
+        utterances: list[Utterance] = [Utterance(**d) for d in df.reset_index().to_dict(orient='records')]  # type: ignore
         return utterances
 
     @staticmethod
     def to_json(utterances: list[Utterance]) -> str:
         """Convert list of utterances to a JSON string. Return JSON string."""
-        json_str = json.dumps([u.__dict__ for u in utterances])
+        json_str: str = ujson_dumps([u.__dict__ for u in utterances])
         return json_str
 
     @staticmethod
     def from_json(json_str: str) -> list[Utterance]:
         """Convert JSON string to list of utterances. Return list."""
-        data: list[Utterance] = list(map(lambda x: Utterance(**x), json.loads(json_str)))
+        data: list[Utterance] = list(map(lambda x: Utterance(**x), ujson_loads(json_str)))  # type: ignore
         return data
 
     @staticmethod
@@ -290,7 +282,7 @@ class UtteranceHelper:
 
 class UtteranceMixIn:
     def to_text(self, *, sep: str = '\n', require_letter: bool = False) -> str:
-        t: str = sep.join(t for t in (u.text for u in self.utterances) if t != '')
+        t: str = sep.join(t for t in (u.text for u in self.utterances) if t != '')  # type: ignore
         if require_letter and not re.search('[a-zåäöA-ZÅÄÖ]', t):
             """Empty string if no letter in text"""
             return ""
@@ -304,33 +296,33 @@ class UtteranceMixIn:
     @property
     def has_text(self) -> bool:
         """Check if any utterance actually has any uttered words."""
-        return any(bool(u.text) for u in self.utterances)
+        return any(bool(u.text) for u in self.utterances)  # type: ignore
 
     @property
     def tagged_text(self) -> str:
         """Merge tagged texts for entire speech into a single CSV string."""
-        return UtteranceHelper.merge_tagged_texts(self.utterances, sep='\n')
+        return UtteranceHelper.merge_tagged_texts(self.utterances, sep='\n')  # type: ignore
 
     @property
     def has_tagged_text(self) -> bool:
         """Check if any utterance actually has any uttered words."""
-        return any(bool(u.tagged_text) for u in self.utterances)
+        return any(bool(u.tagged_text) for u in self.utterances)  # type: ignore
 
     def to_dict(self) -> list[Mapping[str, Any]]:
         """Convert utterances to list of dict."""
-        return UtteranceHelper.to_dicts(self.utterances)
+        return UtteranceHelper.to_dicts(self.utterances)  # type: ignore
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert utterances to dataframe"""
-        return UtteranceHelper.to_dataframe(self.utterances)
+        return UtteranceHelper.to_dataframe(self.utterances)  # type: ignore
 
     def to_csv(self) -> str:
         """Convert utterances to CSV string"""
-        return UtteranceHelper.to_csv(self.utterances)
+        return UtteranceHelper.to_csv(self.utterances)  # type: ignore
 
     def to_json(self) -> str:
         """Convert utterances to JSON string"""
-        return UtteranceHelper.to_json(self.utterances)
+        return UtteranceHelper.to_json(self.utterances)  # type: ignore
 
     def to_content_str(self, what: ContentType) -> str:
         return self.tagged_text if what == ContentType.TaggedFrame else self.text
@@ -338,15 +330,15 @@ class UtteranceMixIn:
     @property
     def paragraphs(self) -> Optional[str]:
         """Flatten sequence of segments into a single text"""
-        return flatten(u.paragraphs for u in self.utterances)
+        return flatten(u.paragraphs for u in self.utterances)  # type: ignore
 
     def __len__(self):
-        return len(self.utterances)
+        return len(self.utterances)  # type: ignore
 
     def __contains__(self, item: Union[str, Utterance]) -> bool:
         if isinstance(item, Utterance):
             item = item.u_id
-        return any(u.u_id == item for u in self.utterances)
+        return any(u.u_id == item for u in self.utterances)  # type: ignore
 
 
 @dataclass
@@ -406,7 +398,7 @@ class Protocol(UtteranceMixIn, IProtocol):
         date: str,
         name: str,
         utterances: list[Utterance],
-        speaker_notes: dict[str, str],
+        speaker_notes: dict[str, SpeakerNote],
         page_references: list[PageReference],
         **_,
     ):
@@ -414,13 +406,20 @@ class Protocol(UtteranceMixIn, IProtocol):
         self.name: str = name
         self.utterances: list[Utterance] = utterances
         self.page_references: list[PageReference] = page_references
-        self.speaker_notes: dict[str, str] = speaker_notes or {}
+        self.speaker_notes: dict[str, SpeakerNote] = speaker_notes or {}
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
         """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
         if which != "filename":
+            if not self.date.isdigit():
+                raise ParlaClarinError(f"cannot extract year from {which}: {self.date}")
             return int(self.date[:4])
-        return int(self.name.split("-")[1][:4])
+
+        parts: list[str] = self.name.split("-")
+        if len(parts) < 2 or not parts[1][:4].isdigit():
+            raise ParlaClarinError(f"cannot extract year from {which}: {self.name}")
+
+        return int(parts[1][:4])
 
     def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
         """Apply text transforms. Return self."""
@@ -442,7 +441,7 @@ class Protocol(UtteranceMixIn, IProtocol):
     def get_content(self, content_type: ContentType) -> str:
         return self.text if content_type == ContentType.Text else self.tagged_text
 
-    def get_speaker_notes(self) -> dict[str, str]:
+    def get_speaker_notes(self) -> dict[str, SpeakerNote]:
         return self.speaker_notes
 
 

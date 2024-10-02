@@ -9,11 +9,12 @@ import pandas as pd
 import pytest
 
 from pyriksprot import CorpusSourceIndex, interface, to_speech, workflows
+from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.dispatch import dispatch
 from pyriksprot.utility import touch
 
-from ..utility import SAMPLE_METADATA_DATABASE_NAME, TAGGED_SOURCE_FOLDER, sample_tagged_frames_corpus_exists
+from ..utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name,no-member
 
@@ -77,16 +78,18 @@ def test_fix_extra_subfolders():
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_glob_protocols():
-    corpus_source: str = TAGGED_SOURCE_FOLDER
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    corpus_source: str = tagged_folder
     filenames: list[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip', strip_path=True)
     assert len(filenames) == 6
     """Empty files should be included"""
-    assert 'prot-1955--ak--22.zip' in filenames
+    assert 'prot-1955--ak--022.zip' in filenames
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_create_source_index_for_tagged_corpus():
-    corpus_source: str = TAGGED_SOURCE_FOLDER
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    corpus_source: str = tagged_folder
     source_index = CorpusSourceIndex.load(source_folder=corpus_source, source_pattern='**/prot-*.zip')
     assert isinstance(source_index, CorpusSourceIndex)
     assert len(source_index) == 5
@@ -97,7 +100,8 @@ def test_create_source_index_for_tagged_corpus():
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 def test_load_protocols():
-    corpus_source: str = TAGGED_SOURCE_FOLDER
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    corpus_source: str = tagged_folder
     filenames: list[str] = tagged_corpus.glob_protocols(corpus_source, pattern='**/prot-*.zip')
 
     protocol_iter: Iterable[interface.Protocol] = tagged_corpus.load_protocols(corpus_source)
@@ -118,12 +122,15 @@ def test_load_protocols():
     ],
 )
 def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
-    target_name = f'tests/output/{temporal_key}_{"_".join(group_keys)}_{uuid.uuid1()}.zip'
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+
+    target_name: str = f'tests/output/{temporal_key}_{"_".join(group_keys)}_{uuid.uuid1()}.zip'
 
     opts = {
         **dict(
-            source_folder=TAGGED_SOURCE_FOLDER,
-            metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+            source_folder=tagged_folder,
+            metadata_filename=database,
             target_type='files-in-zip',
             content_type=interface.ContentType.TaggedFrame,
             segment_level=interface.SegmentLevel.Speech,
@@ -157,11 +164,13 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     ],
 )
 def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
+    tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'tests/output/speech_{str(uuid.uuid1())[:6]}_{merge_strategy}'
 
     fixed_opts: dict = dict(
-        source_folder=TAGGED_SOURCE_FOLDER,
-        metadata_filename=SAMPLE_METADATA_DATABASE_NAME,
+        source_folder=tagged_folder,
+        metadata_filename=database,
         segment_level=interface.SegmentLevel.Speech,
         temporal_key=interface.TemporalKey.NONE,
         content_type=interface.ContentType.TaggedFrame,
@@ -196,9 +205,7 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
     document_index: pd.DataFrame = (
         pd.read_csv(target_filename, sep='\t')
         if compress_type == 'csv'
-        else pd.read_feather(target_filename)
-        if compress_type == 'feather'
-        else None
+        else pd.read_feather(target_filename) if compress_type == 'feather' else None
     )
     assert 'party_id' in document_index.columns
     assert 'gender_id' in document_index.columns

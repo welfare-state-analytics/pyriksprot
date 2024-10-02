@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 
 import click
 
@@ -14,6 +15,8 @@ jj = os.path.join
 relpath = os.path.relpath
 
 # pylint: disable=too-many-arguments, W0613
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 @click.command()
@@ -48,7 +51,6 @@ def main(
             multiproc_chunksize=10,
         ),
     }
-    # print(arguments)
     try:
         extract_speech_index(**arguments)
     except Exception as ex:

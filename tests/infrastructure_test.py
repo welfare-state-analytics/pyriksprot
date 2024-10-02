@@ -1,23 +1,20 @@
 import os
-from posixpath import splitext
+from os.path import splitext
 
 import pytest
 import requests
 
 from pyriksprot import corpus as pc
+from pyriksprot import gitchen as gh
 from pyriksprot import metadata as md
-from pyriksprot.metadata.config import table_url
+from pyriksprot.configuration.inject import ConfigValue
+from pyriksprot.metadata.database import DatabaseInterface
+from pyriksprot.workflows.create_metadata import resolve_backend
 
 from .utility import (
-    RIKSPROT_PARLACLARIN_FOLDER,
-    RIKSPROT_REPOSITORY_TAG,
-    ROOT_FOLDER,
-    SAMPLE_METADATA_DATABASE_NAME,
-    TAGGED_SOURCE_FOLDER,
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
-    load_test_documents,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
     subset_corpus_and_metadata,
@@ -25,65 +22,136 @@ from .utility import (
 
 jj = os.path.join
 
-FORCE_RUN_SKIPS = os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
+FORCE_RUN_SKIPS = False  # os.environ.get("PYTEST_FORCE_RUN_SKIPS") is not None
 
 
 @pytest.mark.skipif(condition=sample_parlaclarin_corpus_exists(), reason="Test data found")
-def test_setup_sample_xml_corpus():
-    protocols: list[str] = load_test_documents()
-    target_folder: str = jj(RIKSPROT_PARLACLARIN_FOLDER, "protocols")
+def test_setup_sample_xml_corpus(list_of_test_protocols: list[str]):
+    target_folder: str = ConfigValue("corpus.folder").resolve()
+    version: str = ConfigValue("corpus.version").resolve()
+    opts: dict = ConfigValue("corpus.github").resolve()
+
     pc.download_protocols(
-        filenames=protocols, target_folder=target_folder, create_subfolder=True, tag=RIKSPROT_REPOSITORY_TAG
+        filenames=list_of_test_protocols, target_folder=target_folder, create_subfolder=True, tag=version, **opts
     )
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_to_folder():
-    target_folder: str = jj('./metadata/data/', RIKSPROT_REPOSITORY_TAG)
-    configs: md.MetadataTableConfigs = md.MetadataTableConfigs()
-    md.gh_dl_metadata_by_config(configs=configs, tag=RIKSPROT_REPOSITORY_TAG, folder=target_folder, force=True)
-    assert all(os.path.isfile(jj(target_folder, f"{basename}.csv")) for basename in configs.tablesnames0)
+def test_gh_fetch_metadata_by_config():
+    version: str = ConfigValue("metadata.version").resolve()
+    target_folder: str = jj('./metadata/data/', version)
+    schema: md.MetadataSchema = md.MetadataSchema(version)
+    md.gh_fetch_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True, errors='raise')
+    assert all(
+        os.path.isfile(jj(target_folder, cfg.basename)) for cfg in schema.definitions.values() if not cfg.is_derived
+    )
+
+
+def test_gh_fetch_metadata_folder():
+    version: str = ConfigValue("metadata.version").resolve()
+    user: str = ConfigValue("metadata.github.user").resolve()
+    repository: str = ConfigValue("metadata.github.repository").resolve()
+    path: str = ConfigValue("metadata.github.path").resolve()
+
+    target_folder: str = jj('./metadata/data/', version)
+
+    md.gh_fetch_metadata_folder(
+        target_folder=target_folder, user=user, repository=repository, path=path, tag=version, force=True
+    )
+
+    assert True
+
+
+def test_gh_fetch_metadata_folder_old():
+    version: str = "v0.14.0"
+    user: str = "welfare-state-analytics"
+    repository: str = "riksdagen-corpus"
+    path: str = "corpus/metadata"
+
+    target_folder: str = jj('./metadata/data/full', version)
+
+    md.gh_fetch_metadata_folder(
+        target_folder=target_folder, user=user, repository=repository, path=path, tag=version, force=True
+    )
+
+    assert True
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
-def test_setup_sample_tagged_frames_corpus():
-    data_folder: str = os.environ["RIKSPROT_DATA_FOLDER"]
-    riksprot_tagged_folder: str = jj(data_folder, RIKSPROT_REPOSITORY_TAG, 'tagged_frames')
+def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
+    version: str = ConfigValue("version").resolve()
+    data_folder: str = ConfigValue("data_folder").resolve()
+    tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
+    riksprot_tagged_folder: str = jj(data_folder, version, 'tagged_frames')
+
     create_test_tagged_frames_corpus(
-        protocols=load_test_documents(),
+        protocols=list_of_test_protocols,
         source_folder=riksprot_tagged_folder,
-        target_folder=TAGGED_SOURCE_FOLDER,
+        target_folder=tagged_folder,
     )
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
-def test_subset_corpus_and_metadata():
-    subset_corpus_and_metadata(tag=RIKSPROT_REPOSITORY_TAG, target_folder=ROOT_FOLDER, documents=load_test_documents())
+def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
+
+    subset_corpus_and_metadata(
+        tag=ConfigValue("metadata.version").resolve(),
+        documents=list_of_test_protocols,
+        global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
+        global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),
+        target_root_folder=ConfigValue("data_folder").resolve(),
+        scripts_folder=None,
+        gh_metadata_opts=ConfigValue("metadata.github").resolve(),
+        gh_records_opts=ConfigValue("corpus.github").resolve(),
+        db_opts=ConfigValue("metadata.database").resolve(),
+        tf_filename=ConfigValue("dehyphen.tf_filename").resolve(),
+        skip_download=True,
+        force=True,
+    )
+
+    db: DatabaseInterface = resolve_backend(ConfigValue("metadata.database").resolve())
+
+    assert db is not None
+
+    assert db.fetch_scalar("SELECT COUNT(*) FROM _person") > 0
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
-    create_test_speech_corpus(
-        source_folder=TAGGED_SOURCE_FOLDER,
-        tag=RIKSPROT_REPOSITORY_TAG,
-        database_name=SAMPLE_METADATA_DATABASE_NAME,
-    )
+    version: str = ConfigValue("version").resolve()
+    tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
+    database: str = ConfigValue("metadata.database.options.filename").resolve()
+    create_test_speech_corpus(source_folder=tagged_folder, tag=version, database_name=database)
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_test_corpora():
-    ensure_test_corpora_exist(force=True)
+    ensure_test_corpora_exist(only_check=True)
 
 
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_gh_tables_data():
-    tag: str = RIKSPROT_REPOSITORY_TAG
-    items: list[dict] = md.gh_ls("welfare-state-analytics", "riksdagen-corpus", "corpus/metadata", tag)
+    tag: str = ConfigValue("metadata.version").resolve()
+    cfg: dict[str, str] = ConfigValue("metadata.github").resolve() or {}
+
+    user: str = cfg.get('user')
+    repository: str = cfg.get('repository')
+    path: str = cfg.get('path')
+
+    items: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
+
     infos: dict[str, dict] = {}
     for item in items:
-        table, extension = splitext(item.get("name"))
+        table, extension = splitext(item.get("name", ""))
         if not extension.endswith("csv"):
             continue
-        url: str = item.get("download_url", table_url(table, tag))
+        url: str = gh.gh_create_url(
+            user=cfg.get('user'),
+            repository=cfg.get('repository'),
+            path=cfg.get('path'),
+            filename=f"{item.get('name')}.csv",
+            tag=tag,
+        )
         data: str = requests.get(url, timeout=10).content.decode("utf-8")
         headers: list[str] = data.splitlines()[0].split(sep=',')
         infos['table'] = {'name': table, 'headers': headers, 'content': data}

@@ -154,3 +154,4 @@ metadata/**/*.db
 *.jar
 *.session.sql
 docs
+configs/config_postgres.yml

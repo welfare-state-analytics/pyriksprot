@@ -18,18 +18,31 @@ import time
 import unicodedata
 import warnings
 import zlib
+from importlib import import_module
 from itertools import chain
 from os.path import basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
 from types import ModuleType
-from typing import Any, Callable, List, Literal, Sequence, Set, Type, TypeVar
+from typing import Any, Callable, Literal, Sequence, Type, TypeVar
 from urllib.request import urlopen
 
 import requests
 import unidecode  # pylint: disable=import-error
 import yaml
 from loguru import logger
+
+
+def create_class(class_or_function_path: str) -> Callable | Type:
+    try:
+        module_path, cls_or_function_name = class_or_function_path.rsplit('.', 1)
+        module: ModuleType = import_module(module_path)
+        return getattr(module, cls_or_function_name)
+    except (ImportError, AttributeError, ValueError) as e:
+        try:
+            return eval(class_or_function_path)  # pylint: disable=eval-used
+        except NameError:
+            raise ImportError(f"fatal: config error: unable to load {class_or_function_path}") from e
 
 
 def norm_join(a: str, *paths: str):
@@ -100,9 +113,37 @@ def dotget(data: dict, path: str, default: Any = None) -> Any:
     return default
 
 
+def dotset(data: dict, path: str, value: Any) -> dict:
+    """Sets element in dict using dot notation x.y.z or x_y_z or x:y:z"""
+
+    d: dict = data
+    attrs: list[str] = path.replace(":", ".").split('.')
+    for attr in attrs[:-1]:
+        if not attr:
+            continue
+        d: dict = d.setdefault(attr, {})
+    d[attrs[-1]] = value
+
+    return data
+
+
+def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = True) -> dict[str, str]:
+    """Loads environment variables starting with prefix into."""
+    if data is None:
+        data = {}
+    if not prefix:
+        return data
+    for key, value in os.environ.items():
+        if lower_key:
+            key = key.lower()
+        if key.startswith(prefix.lower()):
+            dotset(data, key[len(prefix) + 1 :], value)
+    return data
+
+
 def sync_delta_names(
     source_folder: str, source_extension: str, target_folder: str, target_extension: str, delete: bool = False
-) -> Set(str):
+) -> set[str]:
     """Returns basenames in targat_folder that doesn't exist in source folder (with respectively extensions)"""
 
     source_names = strip_paths(glob.glob(jj(source_folder, "*", f"*.{source_extension}")))
@@ -123,14 +164,14 @@ def sync_delta_names(
     return delta_names
 
 
-def strip_path_and_extension(filename: str | List[str]) -> str | List[str]:
+def strip_path_and_extension(filename: str | list[str]) -> str | list[str]:
     """Remove path and extension from filename(s). Return list."""
     if isinstance(filename, str):
         return splitext(basename(filename))[0]
     return [splitext(basename(x))[0] for x in filename]
 
 
-def strip_extensions(filename: str | List[str]) -> str | List[str]:
+def strip_extensions(filename: str | list[str]) -> str | list[str]:
     if isinstance(filename, str):
         return splitext(filename)[0]
     return [splitext(x)[0] for x in filename]
@@ -156,7 +197,7 @@ def path_add_date(path: str, fmt: str = "%Y%m%d") -> str:
     return path_add_suffix(path, f'_{time.strftime(fmt)}')
 
 
-def ts_data_path(directory: str, filename: str):
+def ts_data_path(directory: str, filename: str) -> str:
     return jj(directory, f'{time.strftime("%Y%m%d%H%M")}_{filename}')
 
 
@@ -164,7 +205,7 @@ def path_add_sequence(path: str, i: int, j: int = 0) -> str:
     return path_add_suffix(path, f"_{str(i).zfill(j)}")
 
 
-def strip_paths(filenames: str | List[str]) -> str | List[str]:
+def strip_paths(filenames: str | list[str]) -> str | list[str]:
     if isinstance(filenames, str):
         return basename(filenames)
     return [basename(filename) for filename in filenames]
@@ -173,7 +214,7 @@ def strip_paths(filenames: str | List[str]) -> str | List[str]:
 T = TypeVar("T")
 
 
-def flatten(lofl: List[List[T]]) -> List[T]:
+def flatten(lofl: list[list[T]]) -> list[T]:
     """Returns a flat single list out of supplied list of lists."""
 
     return [item for sublist in lofl for item in sublist]
@@ -199,7 +240,7 @@ def lookup(data, *keys):
 @contextlib.contextmanager
 def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
     if filename is None:
-        filename: str = tempfile.mktemp(**mktemp)
+        filename = tempfile.mktemp(**mktemp)
 
     path: pathlib.Path = pathlib.Path(filename)
 
@@ -217,8 +258,19 @@ def temporary_file(*, filename: str = None, content: Any = None, **mktemp):
             path.unlink()
 
 
-def download_url_to_file(url: str, target_name: str, force: bool = False) -> None:
-    target_name: str = expanduser(target_name)
+def fetch_text_by_url(url: str, errors: Literal['raise', 'ignore'] = 'ignore') -> str:
+    response: requests.Response = requests.get(url, allow_redirects=True, timeout=10)
+    if response.status_code == 200:
+        return response.content.decode("utf-8")
+    if errors == 'raise':
+        raise ValueError(f"Failed to download {url}")
+    return ""
+
+
+def download_url_to_file(
+    url: str, target_name: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'ignore'
+) -> None:
+    target_name = expanduser(target_name)
 
     if os.path.isfile(target_name):
         if not force:
@@ -229,8 +281,7 @@ def download_url_to_file(url: str, target_name: str, force: bool = False) -> Non
 
     logger.info(f'downloading: {target_name}')
     with open(target_name, 'w', encoding="utf-8") as fp:
-        data: str = requests.get(url, allow_redirects=True, timeout=10).content.decode("utf-8")
-        fp.write(data)
+        fp.write(fetch_text_by_url(url, errors=errors))
 
 
 def deprecated(func):
@@ -271,7 +322,7 @@ def ensure_folder(path: str) -> str:
     return path
 
 
-def reset_folder(folder: str, force: bool = False) -> str:
+def reset_folder(folder: str, force: bool = False) -> None:
     if os.path.isdir(folder) and not force:
         raise FileExistsError(folder)
 
@@ -382,11 +433,11 @@ def strip_csv_header(csv_str: str, sep: str = '\n') -> str:
     return csv_str[idx + 1 :]
 
 
-def merge_csv_strings(csv_strings: List[str], sep: str = '\n') -> str:
+def merge_csv_strings(csv_strings: list[str], sep: str = '\n') -> str:
     """Merge tagged CSV strings into a single tagged CSV string"""
     if len(csv_strings or []) == 0:
         return ''
-    texts: List[str] = [csv_strings[0]]
+    texts: list[str] = [csv_strings[0]]
     for csv_string in csv_strings[1:]:
         text = strip_csv_header(csv_string, sep=sep)
         if text:
@@ -410,7 +461,7 @@ def store_str(filename: str, text: str, compress_type: Literal['csv', 'gzip', 'b
         raise ValueError(f"unknown mode {compress_type}")
 
 
-def find_subclasses(module: ModuleType, parent: Type) -> List[Type]:
+def find_subclasses(module: ModuleType, parent: Type) -> list[Type]:
     return [
         cls
         for _, cls in inspect.getmembers(module)
@@ -423,7 +474,7 @@ def read_yaml(file: Any) -> dict:
     if isinstance(file, str) and any(file.endswith(x) for x in ('.yml', '.yaml')):
         with open(file, "r", encoding='utf-8') as fp:
             return yaml.load(fp, Loader=yaml.FullLoader)
-    data: List[dict] = yaml.load(file, Loader=yaml.FullLoader)
+    data: list[dict] = yaml.load(file, Loader=yaml.FullLoader)
     return {} if len(data) == 0 else data[0]
 
 
@@ -446,11 +497,16 @@ def load_json(url: str) -> list[dict]:
     return json.loads(urlopen(url).read())
 
 
-def probe_filename(filename: list[str], exts: list[str] = None) -> str | None:
+def probe_filename(filename: str, exts: list[str] = None) -> str:
     """Probes existence of filename with any of given extensions in folder"""
-    for probe_name in set([filename] + ([replace_extension(filename, ext) for ext in exts] if exts else [])):
+
+    for probe_name in [filename] + [replace_extension(filename, ext) for ext in (exts or [])]:
         if isfile(probe_name):
             return probe_name
+
+    if exts:
+        raise FileNotFoundError(f"{filename} tested with extensions {exts} not found")
+
     raise FileNotFoundError(filename)
 
 
@@ -510,3 +566,32 @@ def xml_unescape(txt: str) -> str:
 #             return fn
 
 #         return decorator
+
+
+def format_protocol_id(document_name: str, chamber_abbrev: Literal['ak', 'fk', 'ek'] = None) -> str:
+    try:
+        if document_name.endswith(".xml"):
+            document_name = document_name[:-4]
+
+        chamber_names: dict[str, str] = {"fk": "Första kammaren", "ak": "Andra kammaren", "ek": ""}
+
+        parts: list[str] = document_name.split("-")
+        p_nr: str = parts[-1]
+        s_nr: str = ""
+
+        if '_' in p_nr:
+            p_nr, s_nr = p_nr.split("_")
+
+        year: str = parts[1]
+        if len(year) == 6:
+            year = f"{year[:4]}/{year[4:]}"
+        elif len(year) == 8:
+            year = f"{year[:4]}/{year[4:]}"
+
+        if chamber_abbrev is None:
+            chamber_abbrev = "fk" if "-fk-" in document_name else "ak" if "-ak-" in document_name else "ek"
+
+        return f"{chamber_names[chamber_abbrev]} {year}:{p_nr.lstrip('0')} {s_nr}".strip()
+
+    except IndexError:
+        return document_name

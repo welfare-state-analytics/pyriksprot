@@ -2,22 +2,55 @@ from __future__ import annotations
 
 import datetime
 import os
+import re
+from fnmatch import fnmatch
 from typing import Literal
 
 import pygit2
 import requests
 from more_itertools import first
 
-from pyriksprot.utility import read_yaml, write_yaml
+from .utility import load_json, read_yaml, write_yaml
 
 ts = datetime.datetime.fromtimestamp
 
 
-class GitInfo:
-    API_URL: str = "https://api.github.com/repos/welfare-state-analytics/riksdagen-corpus/git"
+def gh_create_url(*, user: str, repository: str, path: str, filename: str, tag: str) -> str:
+    if not user or not repository or not filename or not tag:
+        raise ValueError("Missing required parameter")
+    filename = (filename or "").lstrip("/")
+    return f"https://raw.githubusercontent.com/{user}/{repository}/{tag}/{path}/{filename}"
 
-    def __init__(self, source: str):
-        self.repository: pygit2.Repository = pygit2.Repository(source)
+
+def gh_repository_url(*, user: str, repository: str) -> str:
+    return f"https://github.com/{user}/{repository}"
+
+
+def gh_ls(user: str, repository: str, path: str = "", tag: str = "main", pattern: str | None = None) -> list[dict]:
+    url: str = f"https://api.github.com/repos/{user}/{repository}/contents/{path}?ref={tag}"
+    data: list[dict] = load_json(url)
+    if isinstance(data, dict):
+        if 'status' in data:
+            raise Exception(f"Github API error: {data.get('message')}")
+    if not isinstance(data, list):
+        raise Exception(f"Github API error: expected list {url} got {type(data)}")
+    if data and pattern is not None:
+        data = [x for x in data if fnmatch(x.get("name"), pattern)]
+    return data
+
+
+def gh_tags(folder: str) -> list[str]:
+    """Returns tags in given local git repository"""
+    repo: pygit2.Repository = pygit2.Repository(path=folder)
+    rx: re.Pattern = re.compile(r'^refs/tags/v\d+\.\d+\.\d+$')
+    tags: list[str] = sorted([r.removeprefix('refs/tags/') for r in repo.references if rx.match(r)])
+    return tags
+
+
+class GitInfo:
+    def __init__(self, organisation: str, repository: str, source_folder: str):
+        self.api_url: str = f"https://api.github.com/repos/{organisation}/{repository}/git"
+        self.repository: pygit2.Repository = pygit2.Repository(source_folder)
 
     @property
     def head(self) -> dict:
@@ -34,8 +67,8 @@ class GitInfo:
             "ref": f"refs/tags/{tag}" if tag else "",
             "sha": sha,
             "sha8": sha[:8],
-            "tag_url": f"{GitInfo.API_URL}/{head_tag.name}" if head_tag is not None else "",
-            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
+            "tag_url": f"{self.api_url}/{head_tag.name}" if head_tag is not None else "",
+            "commit_url": f"{self.api_url}/commits/{sha}",
         }
         return data
 
@@ -53,17 +86,16 @@ class GitInfo:
             "ref": tag_object.name,
             "sha": sha,
             "sha8": sha[:8],
-            "tag_url": f"{GitInfo.API_URL}/{tag}",
-            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
+            "tag_url": f"{self.api_url}/{tag}",
+            "commit_url": f"{self.api_url}/commits/{sha}",
         }
         return data
 
-    @staticmethod
-    def origin_tag_info(tag: str) -> dict:
+    def origin_tag_info(self, tag: str) -> dict:
         if not tag.startswith("refs/tags"):
             tag = f"refs/tags/{tag}"
 
-        tag_url: str = f"{GitInfo.API_URL}/{tag}"
+        tag_url: str = f"{self.api_url}/{tag}"
 
         response: requests.Response = requests.get(tag_url, timeout=10)
         if response.status_code != 200:
@@ -80,7 +112,7 @@ class GitInfo:
             "sha": sha,
             "sha8": sha[:8],
             "tag_url": tag_url,
-            "commit_url": f"{GitInfo.API_URL}/commits/{sha}",
+            "commit_url": f"{self.api_url}/commits/{sha}",
         }
         return data
 
@@ -111,5 +143,4 @@ class GitInfo:
         write_yaml(data, filename)
 
 
-class TagNotFoundError(Exception):
-    ...
+class TagNotFoundError(Exception): ...

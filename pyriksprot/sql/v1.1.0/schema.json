@@ -1,0 +1,261 @@
+{
+    "chairs": {
+        "chair_id": "text primary key",
+        "chamber": "text",
+        "chair_nr": "int",
+        ":filename:": "chairs.csv"
+    },
+    "chair_mp": {
+        "chair_id": "text not null",
+        "parliament_year": "int",
+        "start": "date",
+        "end": "date",
+        "person_id": "text",
+        ":constraints:": [
+            "-- foreign key (person_id) references person (person_id) deferrable initially deferred",
+            "foreign key (chair_id) references chairs (chair_id) deferrable initially deferred"
+        ],
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ]
+    },
+    "described_by_source": {
+        "person_id": "text not null",
+        "source": "text not null",
+        "volume": "text",
+        ":constraints:":[
+            "primary key (person_id, source)",
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "explicit_no_party": {
+        "person_id": "text",
+        "wiki_id": "text",
+        "pages": "int",
+        "ref": "text",
+        ":constraints:":[
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+       ]
+    },
+    "external_identifiers": {
+        "person_id": "text not null",
+        "authority": "text not null",
+        "identifier": "text not null",
+        ":constraints:": [
+            "primary key (person_id, authority, identifier)",
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "location_specifier": {
+        "person_id": "text",
+        "location": "text",
+        ":constraints:":[
+            "-- foreign key (person_id) references person (person_id) deferrable initially deferred"
+       ]
+    },
+    "government": {
+        "government_id": "text not null",
+        "government": "text primary key",
+        "start": "text",
+        "end": "text",
+        ":index:": {},
+        ":drop_duplicates:": "government",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ]
+    },
+    "member_of_parliament": {
+        "person_id": "text not null",
+        "district": "text",
+        "role": "text",
+        "start": "date",
+        "end": "date",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ],
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "minister": {
+        "person_id": "text not null",
+        "government": "text",
+        "role": "text",
+        "start": "date",
+        "end": "date",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ],
+        ":constraints:": [
+            "-- foreign key (person_id) references person (person_id) deferrable initially deferred",
+            "foreign key (government) references government (government) deferrable initially deferred"
+        ]
+    },
+    "name": {
+        "person_id": "text not null",
+        "name": "text not null",
+        "primary_name": "integer not null",
+        ":constraints:": [
+            "-- foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "party_abbreviation": {
+        "party": "text primary key",
+        "abbreviation": "text not null",
+        "ocr_correction": "text"
+    },
+    "party_affiliation": {
+        "person_id": "text not null",
+        "start": "date",
+        "end": "date",
+        "party": "text",
+        "party_id": "text",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ],
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "person": {
+        "person_id": "text primary key",
+        "born": "date",
+        "dead": "date",
+        "gender": "text",
+        "riksdagen_id": "text",
+        ":compute:": [
+            ["fix_ts_config", "born", "truncate"],
+            ["fix_ts_config", "dead", "extend"]
+        ]
+    },
+    "place_of_birth": {
+        "person_id": "text not null",
+        "link": "text",
+        "place": "text",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },    
+    "place_of_death": {
+        "person_id": "text not null",
+        "link": "text",
+        "place": "text",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },   
+    "portraits": {
+        "person_id": "text not null",
+        "portrait": "text not null",
+        ":constraints:": [
+            "primary key (person_id, portrait)",
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },   
+    "references_map": {
+        "person_id": "text not null",
+        "bibtex_key": "text not null",
+        "wiki_id": "text",
+        "page": "int",
+        ":drop_duplicates:": ["person_id", "bibtex_key", "wiki_id"],
+        ":constraints:": [
+            "primary key (person_id, wiki_id, bibtex_key)",
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "riksdag_year": {
+        "parliament_year": "int not null",
+        "specifier": "text",
+        "chamber": "text not null",
+        "start": "date",
+        "end": "date",
+        ":constraints:": [],
+        ":filename:": "riksdag-year.csv",
+        ":index:": {
+            "parliament_year": "parliament_year",
+            "specifier": "specifier",
+            "chamber": "chamber"
+        },
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ]
+    },
+    "speaker": {
+        "person_id": "text not null",
+        "role": "text",
+        "start": "date",
+        "end": "date",
+        ":compute:": [
+            ["fix_ts_config", "start", "truncate"],
+            ["fix_ts_config", "end", "extend"]
+        ],
+        ":constraints:": "foreign key (person_id) references person (person_id) deferrable initially deferred"
+    },
+    "twitter": {
+        "twitter": "text primary key",
+        "person_id": "text not null",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "wiki_id": {
+        "person_id": "text not null",
+        "wiki_id": "text not null",
+        ":constraints:": [
+            "primary key (person_id, wiki_id)",
+            "-- foreign key (person_id) references person (person_id) deferrable initially deferred"
+        ]
+    },
+    "protocols": {
+        "document_id": "int primary key",
+        "document_name": "text",
+        "date": "text not null",
+        "year": "integer",
+        ":derived:": true,
+        ":filename:": "protocols.csv.gz",
+        ":sep:": "\t"
+    },
+    "utterances": {
+        "u_id": "text primary key",
+        "document_id": "int not null",
+        "speaker_note_id": "text not null",
+        "person_id": "text not null",
+        "page_number": "int not null",
+        ":derived:": true,
+        ":filename:": "utterances.csv.gz",
+        ":sep:": "\t",
+        ":constraints:": [
+            "foreign key (person_id) references person (person_id) deferrable initially deferred",
+            "foreign key (speaker_note_id) references speaker_notes (speaker_note_id) deferrable initially deferred"
+        ]
+    },
+    "speaker_notes": {
+        "speaker_note_id": "text primary key",
+        "speaker_note": "text null",
+        ":filename:": "speaker_notes.csv.gz",
+        ":sep:": "\t",
+        ":derived:": true
+    },
+
+    ":config:" : {
+        "github": {
+            "user": "swerik-project",
+            "repository": "riksdagen-persons",
+            "path": "data"
+        },
+        "code_tables": {
+            "chamber": "chamber_id",
+            "gender": "gender_id",
+            "government": "government_id",
+            "office_type": "office_type_id",
+            "party": "party_id",
+            "sub_office_type": "sub_office_type_id"
+        }
+    }
+}

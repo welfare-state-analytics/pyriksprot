@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import Sequence
 
 from loguru import logger
@@ -18,6 +19,9 @@ from ..corpus import corpus_index
 # pylint: disable=too-many-arguments
 
 jj = os.path.join
+
+# FIXME: Fix Pandas FutureWarning!
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def extract_speech_texts(
@@ -64,11 +68,11 @@ def extract_speech_texts(
         compress_type (CompressType, optional): Target file compression type. Defaults to CompressType.zip.
     """
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
-        source_folder=source_folder, source_pattern='**/prot-*.xml', years=years
+        source_folder=source_folder, source_pattern="**/prot-*-*.xml", years=years
     )
     lookups: md.Codecs = md.Codecs().load(metadata_filename)
 
-    dehypenator: dehyphenation.SwedishDehyphenator = (
+    dehypenator: dehyphenation.SwedishDehyphenator | None = (  # type: ignore
         dehyphenation.SwedishDehyphenator(data_folder=dehyphen_folder, word_frequencies=None) if dehyphen else None
     )
 

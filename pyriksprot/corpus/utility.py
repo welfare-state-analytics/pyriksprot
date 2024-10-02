@@ -1,14 +1,79 @@
 import glob
 import os
+import re
 import shutil
-from os.path import expanduser
+import xml.etree.ElementTree as ET
+from os.path import abspath, basename, expanduser
 from os.path import join as jj
+from typing import Literal
 from urllib.parse import quote as q
 from urllib.request import urlretrieve
 
+from jinja2 import Environment, FileSystemLoader, Template
 from loguru import logger
 
-from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder
+from .. import gitchen as gh
+from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder, strip_path_and_extension
+
+
+def get_chamber_by_filename(filename: str) -> str:
+    if '-fk-' in filename:
+        return 'fk'
+    if '-ak-' in filename:
+        return 'ak'
+    return 'ek'
+
+
+def _extract_tei_corpus_filenames(tei_filename: str) -> list[str]:
+    """Extracts filenames from a TEI Corpus file."""
+    # root: ET.Element = ET.fromstring(source)
+    tree: ET.ElementTree = ET.parse(tei_filename)
+    root = tree.getroot()
+    namespaces: dict[str, str] = {'xi': 'http://www.w3.org/2001/XInclude'}
+    filenames: list[str] = [
+        element.get('href') for element in root.findall('.//xi:include', namespaces) if element.get('href') is not None
+    ]
+    return filenames
+
+
+def ls_corpus_by_tei_corpora(
+    folder: str, mode: Literal['dict', 'filenames', 'tuples'] = 'dict', normalize: bool = True
+) -> dict[str, dict[str, str | list[str]]] | list[str] | list[tuple[str, str]]:
+    """Returns a list of XML documents as specified in teiCorpus files that reside in `folder`."""
+    tei_corpora_filenames: list[str] = glob.glob(jj(folder, 'prot-*.xml'), recursive=False)
+    data: dict[str, dict[str, str | list[str]]] = {}
+    for tei_filename in tei_corpora_filenames:
+        chamber: str = basename(tei_filename).split('-')[1].split('.')[0]
+        if chamber not in ['ak', 'fk', 'ek']:
+            raise ValueError(f"illegal chamber: {chamber}")
+        filenames: str = [replace_extension(f, 'xml') for f in _extract_tei_corpus_filenames(tei_filename)]
+        if normalize:
+            filenames = [abspath(jj(folder, filename)) for filename in filenames]
+        data[chamber] = {
+            'chamber': chamber,
+            'filenames': filenames,
+        }
+    if mode == 'dict':
+        return data
+    if mode == 'filenames':
+        return [filename for item in data.values() for filename in item['filenames']]
+    if mode == 'tuples':
+        return [(item['chamber'], filename) for item in data.values() for filename in item['filenames']]
+    return data
+
+
+def ls_corpus_folder(folder: str, pattern: str = None) -> list[str]:
+    """List all ParlaCLARIN files in a folder and it's subfolders."""
+
+    if pattern is not None:
+        if pattern.startswith('**/'):
+            pattern = pattern[3:]
+        return glob.glob(jj(folder, '**', pattern), recursive=True)
+
+    regex_pattern: str = r'prot-\d*-.*-\d*\.xml'
+    rx: re.Pattern[str] = re.compile(regex_pattern)
+    candidates: list[str] = glob.glob(jj(folder, '**', 'prot-*.xml'), recursive=True)
+    return [f for f in candidates if rx.match(basename(f))]
 
 
 def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
@@ -18,11 +83,17 @@ def _download_to_folder(*, url: str, target_folder: str, filename: str) -> None:
     logger.info(f'downloaded: {filename}')
 
 
-def _protocol_uri(filename: str, subfolder: str, tag: str) -> str:
-    return f"https://github.com/welfare-state-analytics/riksdagen-corpus/raw/{q(tag)}/corpus/protocols/{q(subfolder)}/{q(filename)}"
+def _protocol_uri(filename: str, subfolder: str, tag: str, **opts) -> str:
+    return gh.gh_create_url(
+        user=opts.get("user"),
+        repository=opts.get("repository"),
+        path=f'{opts.get("path")}/{q(subfolder)}',
+        filename=q(filename),
+        tag=q(tag),
+    )
 
 
-def download_protocols(*, filenames: list[str], target_folder: str, create_subfolder: bool, tag: str) -> None:
+def download_protocols(*, filenames: list[str], target_folder: str, create_subfolder: bool, tag: str, **opts) -> None:
     """Downloads protocols, used when subsetting corpus. Does not accept wildcards."""
 
     reset_folder(target_folder, force=True)
@@ -36,7 +107,7 @@ def download_protocols(*, filenames: list[str], target_folder: str, create_subfo
         protocol_year: str = filename.split('-')[1]
         target_name: str = replace_extension(filename, 'xml')
         _download_to_folder(
-            url=_protocol_uri(filename=target_name, subfolder=protocol_year, tag=tag),
+            url=_protocol_uri(filename=target_name, subfolder=protocol_year, tag=tag, **opts),
             target_folder=target_folder if not create_subfolder else jj(target_folder, protocol_year),
             filename=target_name,
         )
@@ -50,20 +121,64 @@ def copy_protocols(
     if not os.path.isdir(source_folder):
         raise ValueError(f"source_folder {source_folder} is not a folder")
 
-    protocol_source_folder: str = jj(source_folder, 'corpus', 'protocols')
-
-    if not os.path.isdir(protocol_source_folder):
-        raise ValueError(f"source_folder {protocol_source_folder} is not a riksprot repository folder")
-
     reset_folder(target_folder, force=True)
 
     logger.info(f"copying protocols from {source_folder}.")
 
     for pattern in filenames:
-        for path in glob.glob(jj(protocol_source_folder, '**', pattern), recursive=True):
-            document_name: str = os.path.basename(path)
+        for path in glob.glob(jj(source_folder, '**', pattern), recursive=True):
+            document_name: str = basename(path)
             protocol_year: str = document_name.split('-')[1]
             target_name: str = replace_extension(document_name, 'xml')
             target_sub_folder: str = target_folder if not create_subfolder else jj(target_folder, protocol_year)
             ensure_folder(target_sub_folder)
             shutil.copy(path, jj(target_sub_folder, target_name))
+
+
+def create_tei_corpus_xml(source_folder: str, target_folder: str = None) -> None:
+    """Creates a TEI Corpus XML file in the target folder."""
+
+    target_folder = target_folder or source_folder
+
+    def group_by_chambers(filenames: list[str]) -> dict[str, list[str]]:
+        return {  # type: ignore
+            chamber_abbrev: [(f.split('-')[1], f) for f in filenames if get_chamber_by_filename(f) == chamber_abbrev]
+            for chamber_abbrev in ['ak', 'fk', 'ek']
+        }
+
+    environment = Environment(loader=FileSystemLoader("resources/"))
+    template: Template = environment.get_template("prot-xx.jinja")
+    filenames: list[str] = strip_path_and_extension(ls_corpus_folder(source_folder, pattern='**/prot-*-*.xml'))
+    chamber_protocols: dict[str, list[str]] = group_by_chambers(filenames)
+    for chamber_id in chamber_protocols:
+        filename: str = jj(target_folder, f"prot-{chamber_id}.xml")
+        content: str = template.render(documents=chamber_protocols[chamber_id], chamber_id=chamber_id)
+        with open(filename, mode="w", encoding="utf-8") as message:
+            message.write(content)
+            logger.info(f"... wrote {filename}")
+
+
+def load_chamber_indexes(folder: str) -> dict[str, set[str]]:
+    try:
+        namespaces: dict[str, str] = {'xi': 'http://www.w3.org/2001/XInclude'}
+        pattern: str = jj(folder, "prot-??.xml")
+        chambers: dict[str, set[str]] = {}
+        valid_chambers: set[str] = {'ak', 'fk', 'ek'}
+
+        for filename in glob.glob(pattern):
+            document_name: str = basename(filename)
+            chamber: str = document_name[5:7]
+            if chamber not in valid_chambers:
+                logger.warning(f"illegal chamber: {chamber} in file {filename}")
+
+            root: ET.Element = ET.parse(filename).getroot()
+            chambers[chamber] = {
+                basename(str(elem.get('href')))
+                for elem in root.findall('.//xi:include', namespaces)
+                if elem.get('href') is not None
+            }
+
+        return chambers
+    except Exception as e:
+        logger.warning(f"failed to load chamber indexes from {folder} {e}")
+        return {}
