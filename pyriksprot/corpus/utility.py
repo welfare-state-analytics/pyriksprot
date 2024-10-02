@@ -9,10 +9,11 @@ from typing import Literal
 from urllib.parse import quote as q
 from urllib.request import urlretrieve
 
-from jinja2 import Environment, FileSystemLoader, Template
+from jinja2 import Environment, FileSystemLoader, Template, TemplateNotFound
 from loguru import logger
 
 from .. import gitchen as gh
+from .. import templates as tp
 from ..utility import ensure_folder, ensure_path, replace_extension, reset_folder, strip_path_and_extension
 
 
@@ -146,8 +147,14 @@ def create_tei_corpus_xml(source_folder: str, target_folder: str = None) -> None
             for chamber_abbrev in ['ak', 'fk', 'ek']
         }
 
-    environment = Environment(loader=FileSystemLoader("resources/"))
-    template: Template = environment.get_template("prot-xx.jinja")
+    template_dir: str = os.path.dirname(tp.__file__)
+
+    try:
+        template: Template = Environment(loader=FileSystemLoader(template_dir)).get_template("prot-xx.jinja")
+    except TemplateNotFound as e:
+        logger.error(f"template not found: {e}")
+        return
+
     filenames: list[str] = strip_path_and_extension(ls_corpus_folder(source_folder, pattern='**/prot-*-*.xml'))
     chamber_protocols: dict[str, list[str]] = group_by_chambers(filenames)
     for chamber_id in chamber_protocols:

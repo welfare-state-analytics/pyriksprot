@@ -1,5 +1,7 @@
 import glob
 import os
+import shutil
+import uuid
 
 import pytest
 
@@ -120,7 +122,9 @@ def test_scan_folder():
 def test_create_tei_corpus_xml():
 
     source_folder: str = ConfigValue("corpus.folder").resolve()
-    target_folder: str = 'tests/output'
+    target_folder: str = f'tests/output/{str(uuid.uuid4())[8]}'
+
+    os.makedirs(target_folder, exist_ok=True)
 
     create_tei_corpus_xml(source_folder=source_folder, target_folder=target_folder)
 
@@ -131,3 +135,5 @@ def test_create_tei_corpus_xml():
     assert os.path.getsize(jj(target_folder, 'prot-ak.xml')) > 0
     assert os.path.getsize(jj(target_folder, 'prot-fk.xml')) > 0
     assert os.path.getsize(jj(target_folder, 'prot-ek.xml')) > 0
+
+    shutil.rmtree(target_folder)
