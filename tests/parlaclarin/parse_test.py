@@ -1,3 +1,4 @@
+import glob
 import os
 
 import pytest
@@ -5,6 +6,9 @@ import pytest
 from pyriksprot import interface
 from pyriksprot.configuration import ConfigValue
 from pyriksprot.corpus import parlaclarin
+from pyriksprot.corpus.parlaclarin.parse import ProtocolMapper
+from pyriksprot.corpus.utility import create_tei_corpus_xml, load_chamber_indexes
+from pyriksprot.metadata.corpus_index_factory import CorpusScanner
 
 from .. import fakes
 from .utility import count_utterances
@@ -81,3 +85,49 @@ def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: i
 
     assert len(protocol.utterances) == u_count
     assert len(protocol.speaker_notes) == intro_count
+
+
+def test_load_chambers():
+
+    chambers: dict[str, set[str]] = load_chamber_indexes(folder=ConfigValue("corpus:folder").resolve())
+
+    assert set(chambers.keys()) == {'ak', 'fk', 'ek'}
+    assert all(len(chambers[chamber]) > 0 for chamber in chambers)
+
+    p2c: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
+
+    assert all(p2c[p] == c for c, p in chambers.keys())
+
+
+def test_scan_folder():
+
+    corpus_folder: str = ConfigValue("corpus:folder").resolve()
+
+    scanner = CorpusScanner(parser=ProtocolMapper)
+
+    scan_result: CorpusScanner.ScanResult = scanner.scan(
+        filenames=glob.glob(jj(corpus_folder, '**/prot-*-*.xml'), recursive=True),
+        chambers=load_chamber_indexes(folder=corpus_folder),
+    )
+
+    assert isinstance(scan_result, CorpusScanner.ScanResult)
+    assert isinstance(scan_result.protocols, list)
+    assert len(scan_result.protocols) > 0
+    assert isinstance(scan_result.protocols[0], tuple)
+    assert len(scan_result.protocols[0]) == 5
+
+
+def test_create_tei_corpus_xml():
+
+    source_folder: str = ConfigValue("corpus.folder").resolve()
+    target_folder: str = 'tests/output'
+
+    create_tei_corpus_xml(source_folder=source_folder, target_folder=target_folder)
+
+    assert os.path.isfile(jj(target_folder, 'prot-ak.xml'))
+    assert os.path.isfile(jj(target_folder, 'prot-fk.xml'))
+    assert os.path.isfile(jj(target_folder, 'prot-ek.xml'))
+
+    assert os.path.getsize(jj(target_folder, 'prot-ak.xml')) > 0
+    assert os.path.getsize(jj(target_folder, 'prot-fk.xml')) > 0
+    assert os.path.getsize(jj(target_folder, 'prot-ek.xml')) > 0

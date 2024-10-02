@@ -9,7 +9,7 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.corpus.utility import ls_corpus_folder
+from pyriksprot.corpus.utility import load_chamber_indexes, ls_corpus_folder, get_chamber_by_filename
 from pyriksprot.interface import MISSING_SPEAKER_NOTE, IProtocol, IProtocolParser, SpeakerNote
 
 from .schema import MetadataSchema
@@ -21,7 +21,7 @@ class CorpusScanner:
 
     @dataclass
     class ScanResult:
-        protocols: list[tuple[int, str]] = field(default_factory=list)
+        protocols: list[tuple[int, str, str, str, str]] = field(default_factory=list)
         utterances: list[tuple] = field(default_factory=list)
         page_references: list[tuple] = field(default_factory=list)
         speaker_notes: dict[str, SpeakerNote] = field(default_factory=dict)
@@ -29,13 +29,18 @@ class CorpusScanner:
     def __init__(self, parser: IProtocolParser | Type[IProtocolParser]) -> None:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
 
-    def scan(self, filenames: Sequence[str]) -> CorpusScanner.ScanResult:
+    def scan(self, filenames: Sequence[str], chambers: dict[str, set[str]]) -> CorpusScanner.ScanResult:
+
+        protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
 
         data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
-
+        # FIXME: #77 change: Add chamber_abbrev to the protocol index
         for document_id, filename in tqdm(enumerate(filenames)):
             protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
-            data.protocols.append((document_id, protocol.name, protocol.date, int(protocol.date[:4])))
+            chamber_id: str = protocol_to_chamber.get(protocol.name)
+            if not chamber_id:
+                chamber_id = get_chamber_by_filename(filename)
+            data.protocols.append((document_id, protocol.name, protocol.date, int(protocol.date[:4]), chamber_id))
             data.utterances.extend(
                 tuple([document_id, u.u_id, u.who, u.speaker_note_id, u.page_number]) for u in protocol.utterances
             )
@@ -86,7 +91,7 @@ class CorpusScanner:
         """Store enough source reference data to reconstruct source urls."""
 
         protocols: pd.DataFrame = pd.DataFrame(
-            data=result.protocols, columns=['document_id', 'document_name', 'date', 'year']
+            data=result.protocols, columns=['document_id', 'document_name', 'date', 'year', 'chamber']
         ).set_index("document_id")
 
         utterances: pd.DataFrame = pd.DataFrame(
@@ -145,13 +150,14 @@ class CorpusIndexFactory:
         logger.info(f"     Pattern: {target_folder}")
 
         filenames: list[str] = ls_corpus_folder(corpus_folder)
+        chambers: dict[str, set[str]] = load_chamber_indexes(corpus_folder)
 
-        return self.collect(filenames).to_csv(target_folder)
+        return self.collect(filenames, chambers).to_csv(target_folder)
 
-    def collect(self, filenames) -> CorpusIndexFactory:
+    def collect(self, filenames: list[str], chambers: dict[str, set[str]]) -> CorpusIndexFactory:
 
         service: CorpusScanner = CorpusScanner(self.parser)
-        self.data = service.to_dataframes(service.scan(filenames))
+        self.data = service.to_dataframes(service.scan(filenames, chambers))
         return self
 
     def to_csv(self, folder: str) -> CorpusIndexFactory:
