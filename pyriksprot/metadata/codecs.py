@@ -151,7 +151,9 @@ class Codecs:
     def encoders(self) -> list[Codec]:
         return [c for c in self.codecs if c.type == 'encode']
 
-    def apply_codec(self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True, keeps: list[str] = None) -> pd.DataFrame:
+    def apply_codec(
+        self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True, keeps: list[str] = None
+    ) -> pd.DataFrame:
 
         for codec in codecs:
             df = codec.apply(df)
