@@ -23,11 +23,14 @@ drop table if exists gender;
 create table gender (
     "gender_id" integer primary key,
     "gender" varchar not null,
-    "gender_abbrev" varchar not null
+    "gender_abbrev" varchar not null,
+    "gender_source" varchar not null
 );
     
-insert into gender ("gender_id", "gender", "gender_abbrev")
-    values (0, 'Okänt', '?'), (1, 'Man', 'M'), (2, 'Kvinna', 'K');
+insert into gender ("gender_id", "gender", "gender_abbrev", "gender_source")
+    values (0, 'Okänt', '?', 'unknown'),
+           (1, 'Man', 'M', 'man'),
+           (2, 'Kvinna', 'K', "woman");
 
 /* District */
 
