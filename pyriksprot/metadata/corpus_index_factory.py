@@ -9,7 +9,12 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from pyriksprot.corpus.utility import get_chamber_by_filename, load_chamber_indexes, ls_corpus_folder
+from pyriksprot.corpus.utility import (
+    format_protocol_name,
+    get_chamber_by_filename,
+    load_chamber_indexes,
+    ls_corpus_folder,
+)
 from pyriksprot.interface import MISSING_SPEAKER_NOTE, IProtocol, IProtocolParser, SpeakerNote
 
 from .schema import MetadataSchema
@@ -37,10 +42,15 @@ class CorpusScanner:
         # FIXME: #77 change: Add chamber_abbrev to the protocol index
         for document_id, filename in tqdm(enumerate(filenames)):
             protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
-            chamber_id: str = protocol_to_chamber.get(protocol.name)
-            if not chamber_id:
-                chamber_id = get_chamber_by_filename(filename)
-            data.protocols.append((document_id, protocol.name, protocol.date, int(protocol.date[:4]), chamber_id))
+            chamber_abbrev: str = protocol_to_chamber.get(protocol.name)
+            if not chamber_abbrev:
+                chamber_abbrev = get_chamber_by_filename(filename)
+
+            formatted_name: str = format_protocol_name(protocol.name, chamber_abbrev=chamber_abbrev)
+
+            data.protocols.append(
+                (document_id, protocol.name, protocol.date, int(protocol.date[:4]), chamber_abbrev, formatted_name)
+            )
             data.utterances.extend(
                 tuple([document_id, u.u_id, u.who, u.speaker_note_id, u.page_number]) for u in protocol.utterances
             )
@@ -91,7 +101,8 @@ class CorpusScanner:
         """Store enough source reference data to reconstruct source urls."""
 
         protocols: pd.DataFrame = pd.DataFrame(
-            data=result.protocols, columns=['document_id', 'document_name', 'date', 'year', 'chamber']
+            data=result.protocols,
+            columns=['document_id', 'document_name', 'date', 'year', 'chamber_abbrev', 'protocol_name'],
         ).set_index("document_id")
 
         utterances: pd.DataFrame = pd.DataFrame(
