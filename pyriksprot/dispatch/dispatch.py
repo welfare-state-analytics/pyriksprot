@@ -178,7 +178,7 @@ class IDispatcher(abc.ABC):
         group_name: str = ""
         for key, key_id in item.group_values.items():
             try:
-                value_name: str = self.lookups.lookup_name(key, int(key_id), None)
+                value_name: str = self.lookups.decode_any_id(key, int(key_id), default_value=None)
                 group_name = (
                     f"{group_name}_{key_id}"
                     if value_name is None
@@ -273,7 +273,7 @@ class SortedSpeechesInZipDispatcher(FilesInZipDispatcher):
             raise ValueError(f"{type(self).__name__}: requires speech segment level")
 
         if issubclass(type(item), ProtocolSegment):
-            return item
+            return item  # type: ignore
 
         if hasattr(item, "protocol_segments"):
             segments: list[ProtocolSegment] = getattr(item, "protocol_segments")
@@ -358,7 +358,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
     def _dispatch_item(self, item: IDispatchItem) -> None:
         return
 
-    def _dispatch_index_item(self, item: IDispatchItem) -> None:
+    def _dispatch_index_item(self, item: IDispatchItem) -> None:  # type: ignore
         item: DispatchItem = item
 
         if item.segment_level != SegmentLevel.Speech:
@@ -412,7 +412,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             self.flush(total_frame, dispatch_items)
 
     def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
-        temporal_value: str = dispatch_items[0].group_temporal_value
+        temporal_value: str = dispatch_items[0].group_temporal_value  # type: ignore
         subfolder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, subfolder)
         os.makedirs(path, exist_ok=True)
@@ -467,11 +467,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
 
         document_index: pd.DataFrame = self.document_index()
 
-        for column_name in [
-            'Unnamed: 0',
-            'period',
-            'protocol_name',
-        ]:
+        for column_name in ['Unnamed: 0', 'period', 'protocol_name']:
             if column_name in document_index.columns:
                 document_index.drop(columns=column_name, inplace=True)
 

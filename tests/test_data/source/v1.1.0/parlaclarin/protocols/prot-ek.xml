@@ -3,7 +3,7 @@
   <teiHeader>
     <fileDesc>
       <titleStmt>
-        <title>Riksdagens protocols 1970</title>
+        <title>Riksdagens protocols ek</title>
       </titleStmt>
       <editionStmt>
         <edition>0.13.0</edition>
@@ -16,7 +16,7 @@
       </publicationStmt>
       <sourceDesc>
         <bibl>
-          <title>Riksdagens protocols 1970</title>
+          <title>Riksdagens protocols ek</title>
         </bibl>
       </sourceDesc>
     </fileDesc>
@@ -32,4 +32,4 @@
   <xi:include href="./199192/prot-199192--021"/>
   <xi:include href="./199192/prot-199192--127"/>
   <xi:include href="./199596/prot-199596--035"/>
-</teiCorpus>
+  </teiCorpus>

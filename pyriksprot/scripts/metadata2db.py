@@ -20,10 +20,10 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 def main(): ...
 
 
-@click.command()
+@main.command()
 @click.argument('config_filename', type=str)
 @click.argument('tag', type=str)
-def verify_metadata_filenames(config_filename: str, tag: str):
+def check_filenames(config_filename: str, tag: str):
     try:
         ConfigStore().configure_context(source=config_filename)
 
@@ -39,10 +39,10 @@ def verify_metadata_filenames(config_filename: str, tag: str):
         sys.exit(-1)
 
 
-@click.command()
+@main.command()
 @click.argument('config_filename', type=str)
 @click.argument('tags', nargs=-1, type=str)
-def verify_metadata_columns(config_filename: str, tags: str):
+def check_columns(config_filename: str, tags: str):
     try:
         ConfigStore().configure_context(source=config_filename)
 
@@ -63,23 +63,24 @@ def verify_metadata_columns(config_filename: str, tags: str):
         sys.exit(-1)
 
 
-@click.command()
+@main.command()
 @click.argument('target_folder', type=str)
 @click.argument('tag', type=str)
-def download_metadata(target_folder: str, tag: str):
-    md.gh_fetch_metadata_by_config(schema=md.MetadataSchema(tag=tag), tag=tag, folder=target_folder, force=True)
+def download(target_folder: str, tag: str):
+    schema: md.MetadataSchema = md.MetadataSchema(tag=tag)
+    md.gh_fetch_metadata_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
 
 
-@click.command()
+@main.command()
 @click.argument('corpus_folder', type=str)
 @click.argument('target_folder', type=str)
 @click.argument('tag', type=str)
-def create_corpus_indexes(corpus_folder: str, target_folder: str, tag: str) -> None:
+def index(corpus_folder: str, target_folder: str, tag: str) -> None:
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(tag=tag))
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
-@click.command()
+@main.command()
 @click.argument('config_filename', type=str)
 @click.option('--target-filename', type=str, help='Sqlite target filename', default=None)
 @click.option('--tag', type=str, help='Metadata version', default=None)
@@ -97,7 +98,7 @@ def create_corpus_indexes(corpus_folder: str, target_folder: str, tag: str) -> N
 @click.option(
     '--skip-download-metadata', type=bool, is_flag=True, help='Skip download of Github metadata', default=False
 )
-def create_database(
+def database(
     config_filename: str,
     target_filename: str = None,
     tag: str = None,
@@ -117,8 +118,7 @@ def create_database(
         source_folder = source_folder or ConfigValue("metadata.folder").resolve()
         target_filename = target_filename or ConfigValue("metadata.database.options.filename").resolve()
         corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
-
-        gh_opts: dict[str, Any] | None = corpus_folder or ConfigValue("metadata.github").resolve()
+        gh_opts: dict[str, Any] | None = ConfigValue("metadata.github").resolve()
 
         create_database_workflow(
             tag=tag,
@@ -144,18 +144,10 @@ def create_database(
 
 def setup_logs(log_folder: str = "./metadata/logs"):
     os.makedirs(log_folder, exist_ok=True)
-
     logger.remove(0)
     logger.add(join(log_folder, "{time:YYYYMMDDHHmmss}_metadata.log"), backtrace=True, diagnose=True)
 
 
 if __name__ == "__main__":
-    main.add_command(verify_metadata_filenames, "filenames")
-    main.add_command(verify_metadata_columns, "columns")
-    main.add_command(create_corpus_indexes, "index")
-    main.add_command(create_database, "database")
-    main.add_command(download_metadata, "download")
-
     setup_logs()
-
     main()  # pylint: disable=no-value-for-parameter

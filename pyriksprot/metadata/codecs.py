@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import cached_property
 from os.path import isfile
-from typing import Callable, Literal, Mapping
+from typing import Any, Callable, Literal, Mapping
 
 import pandas as pd
 
@@ -26,8 +26,24 @@ class Codec:
     type: Literal['encode', 'decode']
     from_column: str
     to_column: str
-    fx: Callable[[int], str]
+    fx: Callable[[int], str] | Callable[[str], int] | dict[str, int] | dict[int, str]
     default: str = None
+
+    def apply(self, df: pd.DataFrame) -> pd.DataFrame:
+        if self.from_column in df.columns:
+            if self.to_column not in df:
+                if isinstance(self.fx, dict):
+                    df[self.to_column] = df[self.from_column].map(self.fx)
+                else:
+                    df[self.to_column] = df[self.from_column].apply(self.fx)
+            if self.default is not None:
+                df[self.to_column] = df[self.to_column].fillna(self.default)
+        return df
+
+    def apply_scalar(self, value: int | str, default: Any) -> str | int:
+        if isinstance(self.fx, dict):
+            return self.fx.get(value, default or self.default)  # type: ignore
+        return self.fx(value)
 
 
 null_frame: pd.DataFrame = pd.DataFrame()
@@ -67,6 +83,10 @@ class Codecs:
         return self.gender['gender'].to_dict()
 
     @cached_property
+    def gender2abbrev(self) -> dict:
+        return self.gender['gender_abbrev'].to_dict()
+
+    @cached_property
     def gender2id(self) -> dict:
         return pu.revdict(self.gender2name)
 
@@ -97,49 +117,58 @@ class Codecs:
     @property
     def codecs(self) -> list[Codec]:
         return self.extra_codecs + [
-            Codec('decode', 'gender_id', 'gender', self.gender2name.get),
-            Codec('decode', 'office_type_id', 'office_type', self.office_type2name.get),
-            Codec('decode', 'party_id', 'party_abbrev', self.party_abbrev2name.get),
-            Codec('decode', 'sub_office_type_id', 'sub_office_type', self.sub_office_type2name.get),
-            Codec('encode', 'gender', 'gender_id', self.gender2id.get),
-            Codec('encode', 'office_type', 'office_type_id', self.office_type2id.get),
-            Codec('encode', 'party', 'party_id', self.party_abbrev2id.get),
-            Codec('encode', 'sub_office_type', 'sub_office_type_id', self.sub_office_type2id.get),
+            Codec("decode", "gender_id", "gender", self.gender2name),
+            Codec("decode", "gender_id", "gender_abbrev", self.gender2abbrev),
+            Codec("decode", "office_type_id", "office_type", self.office_type2name),
+            Codec("decode", "party_id", "party_abbrev", self.party_abbrev2name),
+            Codec("decode", "sub_office_type_id", "sub_office_type", self.sub_office_type2name),
+            Codec("encode", "gender", "gender_id", self.gender2id),
+            Codec("encode", "office_type", "office_type_id", self.office_type2id),
+            Codec("encode", "party", "party_id", self.party_abbrev2id),
+            Codec("encode", "sub_office_type", "sub_office_type_id", self.sub_office_type2id),
         ]
 
-    def lookup_name(self, key: str, key_id: int, default_value: str = "unknown") -> str:
-        return self.decoder(key=key).fx(key_id, default_value)
+    def decode_any_id(self, from_name: str, value: int, *, default_value: str = "unknown", to_name: str = None) -> str:
+        codec: Codec | None = self.decoder(from_name, to_name)
+        if codec is None:
+            return default_value
+        return str(codec.apply_scalar(value, default_value))
 
-    def decoder(self, key: str) -> Codec:
-        return next((x for x in self.decoders if x.from_column == key), {})
+    def decoder(self, from_name: str, to_name: str = None) -> Codec | None:
+        for codec in self.decoders:
+            if codec.from_column == from_name and (to_name is None or codec.to_column == to_name):
+                return codec
+        return None
 
-    def encoder(self, key: str) -> Codec:
-        return next((x for x in self.encoders if x.from_column == key), lambda _: 0)
+    # def encoder(self, key: str) -> Codec | None:
+    #     return next((x for x in self.encoders if x.from_column == key), lambda _: 0)
 
     @property
     def decoders(self) -> list[Codec]:
         return [c for c in self.codecs if c.type == 'decode']
 
     @property
-    def encoders(self) -> list[dict]:
+    def encoders(self) -> list[Codec]:
         return [c for c in self.codecs if c.type == 'encode']
 
-    def apply_codec(self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True) -> pd.DataFrame:
+    def apply_codec(self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True, keeps: list[str] = None) -> pd.DataFrame:
+
         for codec in codecs:
-            if codec.from_column in df.columns:
-                if codec.to_column not in df:
-                    df[codec.to_column] = df[codec.from_column].apply(codec.fx)
-                if codec.default is not None:
-                    df[codec.to_column] = df[codec.to_column].fillna(codec.default)
-            if drop:
+            df = codec.apply(df)
+
+        if drop:
+            for codec in codecs:
+                if keeps and codec.from_column in keeps:
+                    continue
                 df.drop(columns=[codec.from_column], inplace=True, errors='ignore')
+
         return df
 
-    def decode(self, df: pd.DataFrame, drop: bool = True) -> pd.DataFrame:
-        return self.apply_codec(df, self.decoders, drop=drop)
+    def decode(self, df: pd.DataFrame, drop: bool = True, keeps: list[str] = None) -> pd.DataFrame:
+        return self.apply_codec(df, self.decoders, drop=drop, keeps=keeps)
 
-    def encode(self, df: pd.DataFrame, drop: bool = True) -> pd.DataFrame:
-        return self.apply_codec(df, self.encoders, drop=drop)
+    def encode(self, df: pd.DataFrame, drop: bool = True, keeps: list[str] = None) -> pd.DataFrame:
+        return self.apply_codec(df, self.encoders, drop=drop, keeps=keeps)
 
     @cached_property
     def property_values_specs(self) -> list[Mapping[str, str | Mapping[str, int]]]:

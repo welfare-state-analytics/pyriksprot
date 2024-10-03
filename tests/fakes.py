@@ -29,6 +29,7 @@ def load_segment_stream(filename: str, level: interface.SegmentLevel) -> Iterabl
         """Return each utterance"""
         for i, u in enumerate(utterances):
             yield iterate.ProtocolSegment(
+                chamber_abbrev="fk",
                 content_type=interface.ContentType.Text,
                 data=u.text,
                 id=u.u_id,
@@ -49,6 +50,7 @@ def load_segment_stream(filename: str, level: interface.SegmentLevel) -> Iterabl
             content_type=interface.ContentType.Text,
             data='\n'.join(u.text for u in utterances),
             id=protocol_name,
+            chamber_abbrev="ek",
             n_tokens=0,
             n_utterances=len(utterances),
             name=protocol_name,
@@ -76,6 +78,7 @@ def load_segment_stream(filename: str, level: interface.SegmentLevel) -> Iterabl
 
             yield iterate.ProtocolSegment(
                 content_type=interface.ContentType.Text,
+                chamber_abbrev="ek",
                 data='\n'.join(u.text for u in segment_utterences),
                 id=segment_id,
                 n_tokens=0,
@@ -102,11 +105,11 @@ def load_speech_stream(filename: str, strategy: str) -> Iterable[interface.Speec
         return
 
     data_frame: pd.DataFrame = load_sample_speech_dataframe(filename, strategy=strategy)
-    groups: list[str, dict] = data_frame.groupby('speech_id', sort=False).agg(list).reset_index().to_dict('records')
+    groups: dict[str, dict] = data_frame.groupby('speech_id', sort=False).agg(list).reset_index().to_dict('records')
 
     for i, group in enumerate(groups):
         # speech_id: str = group.get("speech_id")
-        u_ids: str = group.get("u_id")
+        u_ids: str = group.get("u_id")  # type: ignore
         speech_utterences: list[interface.Utterance] = [u for u in utterances if u.u_id in u_ids]
 
         yield interface.Speech(

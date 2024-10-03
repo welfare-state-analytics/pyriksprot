@@ -14,7 +14,12 @@ from pyriksprot import preprocess as pr
 from pyriksprot import utility as pu
 from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus.iterate import ProtocolSegment
-from pyriksprot.corpus.utility import get_chamber_by_filename, ls_corpus_by_tei_corpora, ls_corpus_folder
+from pyriksprot.corpus.utility import (
+    format_protocol_name,
+    get_chamber_by_filename,
+    ls_corpus_by_tei_corpora,
+    ls_corpus_folder,
+)
 
 from . import fakes
 
@@ -23,20 +28,20 @@ jj = os.path.join
 
 def test_format_protocol_id():
 
-    assert pu.format_protocol_id("prot-199495--011.xml") == "1994/95:11"
-    assert pu.format_protocol_id("prot-199495--011") == "1994/95:11"
-    assert pu.format_protocol_id("prot-199495--11") == "1994/95:11"
+    assert format_protocol_name("prot-199495--011.xml") == "1994/95:11"
+    assert format_protocol_name("prot-199495--011") == "1994/95:11"
+    assert format_protocol_name("prot-199495--11") == "1994/95:11"
 
-    assert pu.format_protocol_id("prot-1945--ak--011.xml") == "Andra kammaren 1945:11"
-    assert pu.format_protocol_id("prot-1945--ak--011") == "Andra kammaren 1945:11"
+    assert format_protocol_name("prot-1945--ak--011.xml") == "Andra kammaren 1945:11"
+    assert format_protocol_name("prot-1945--ak--011") == "Andra kammaren 1945:11"
 
-    assert pu.format_protocol_id("prot-1945--fk--016.xml") == "Första kammaren 1945:16"
-    assert pu.format_protocol_id("prot-1945--fk--016") == "Första kammaren 1945:16"
+    assert format_protocol_name("prot-1945--fk--016.xml") == "Första kammaren 1945:16"
+    assert format_protocol_name("prot-1945--fk--016") == "Första kammaren 1945:16"
 
-    assert pu.format_protocol_id("prot-1945--fk--016_099.xml") == "Första kammaren 1945:16 099"
-    assert pu.format_protocol_id("prot-1945--fk--016_99") == "Första kammaren 1945:16 99"
+    assert format_protocol_name("prot-1945--fk--016_099.xml") == "Första kammaren 1945:16 099"
+    assert format_protocol_name("prot-1945--fk--016_99") == "Första kammaren 1945:16 99"
 
-    assert pu.format_protocol_id("prot-19992000--089") == "1999/2000:89"
+    assert format_protocol_name("prot-19992000--089") == "1999/2000:89"
 
 
 def test_ls_corpus_by_tei_corpora():

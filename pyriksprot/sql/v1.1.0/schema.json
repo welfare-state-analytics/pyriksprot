@@ -217,6 +217,8 @@
         "document_name": "text",
         "date": "text not null",
         "year": "integer",
+        "chamber_abbrev": "text not null",
+        "protocol_name": "text not null",
         ":derived:": true,
         ":filename:": "protocols.csv.gz",
         ":sep:": "\t"

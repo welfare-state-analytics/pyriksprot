@@ -31,23 +31,23 @@ insert into persons_of_interest ("person_id")
     select distinct "person_id"
     from utterances;
 
-insert into persons_of_interest (
-	"person_id",
-    "gender_id",
-    "year_of_birth",
-    "year_of_death"
-)
-    select  persons_of_interest."person_id",
-            gender."gender_id",
-            cast(substr(cast(_person."born" as text), 1, 4) as integer) as "year_of_birth",
-            cast(substr(cast(_person."dead" as text), 1, 4) as integer) as "year_of_death"
+insert into persons_of_interest("person_id", "gender_id")
+    select persons_of_interest."person_id", gender."gender_id"
     from persons_of_interest
     join _person using ("person_id")
-    join gender using ("gender")
-		on conflict("person_id") do update
-			set "gender_id"     = excluded."gender_id",
-				"year_of_birth" = excluded."year_of_birth",
-				"year_of_death" = excluded."year_of_death";
+    join gender on _person."gender" = gender."gender_source"
+	  on conflict("person_id") do update
+        set "gender_id" = excluded."gender_id";
+
+insert into persons_of_interest("person_id", "year_of_birth", "year_of_death")
+    select persons_of_interest."person_id",
+           cast(substr(cast(_person."born" as text), 1, 4) as integer) as "year_of_birth",
+           cast(substr(cast(_person."dead" as text), 1, 4) as integer) as "year_of_death"
+    from persons_of_interest
+    join _person using ("person_id")
+      on conflict("person_id") do update
+        set "year_of_birth" = excluded."year_of_birth",
+            "year_of_death" = excluded."year_of_death";
 
 insert into persons_of_interest ("person_id", "name")
     select persons_of_interest."person_id", person_name."name"

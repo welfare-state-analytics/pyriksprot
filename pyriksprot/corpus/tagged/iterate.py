@@ -27,10 +27,10 @@ def multiprocessing_load(args) -> Iterable[iterate.ProtocolSegment]:
 class ProtocolIterator(iterate.ProtocolSegmentIterator):
     """Reads xml files and returns a stream of `ProtocolSegment`"""
 
-    def load(self, filename: str) -> List[Tuple[str, str, int]]:
+    def load(self, filename: str) -> List[Tuple[str, str, int]]:  # type: ignore
         protocol: iterate.Protocol = persist.load_protocol(filename=filename)
 
-        return (
+        return (  # type: ignore
             []
             if protocol is None
             else iterate.to_segments(

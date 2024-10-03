@@ -6,6 +6,8 @@ ifndef CONFIG_FILENAME
 $(error CONFIG_FILENAME is undefined)
 endif
 
+$(info "generating default data using config " $(CONFIG_FILENAME))
+
 ROOT_FOLDER=$(shell yq '.root_folder' $(CONFIG_FILENAME))
 VERSION=$(shell yq '.version' $(CONFIG_FILENAME))
 
@@ -44,6 +46,9 @@ REMOTE_HOST=humlabp2.srv.its.umu.se
 ifndef ROOT_FOLDER
 $(error ROOT_FOLDER is undefined)
 endif
+
+MERGE_STRATEGY=chain
+SPEECH_INDEX_TARGET_NAME=$(LOCAL_METADATA_FOLDER)/speech_index.$(MERGE_STRATEGY).$(VERSION).csv.gz
 
 SHELL=/bin/bash
 
@@ -88,20 +93,43 @@ metadata: funkis metadata-download metadata-corpus-index metadata-database metad
 	@sqlite3 $(LOCAL_METADATA_DATABASE) "VACUUM;"
 	@echo "info: metadata $(VERSION) has been updated!"
 
-MERGE_STRATEGY=chain
-SPEECH_INDEX_TARGET_NAME=$(LOCAL_METADATA_FOLDER)/speech_index.$(MERGE_STRATEGY).$(VERSION).csv.gz
+metadata-download:
+	@echo "info: downloading $(VERSION) metadata"
+	@rm -rf $(LOCAL_METADATA_DATABASE) $(LOCAL_METADATA_FOLDER)
+	@mkdir -p $(LOCAL_METADATA_FOLDER)
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download $(LOCAL_METADATA_FOLDER) $(VERSION)
+	@echo "info: metadata $(VERSION) stored in $(LOCAL_METADATA_FOLDER)"
+
+metadata-corpus-index:
+	@echo "info: generating index of protocols, utterances and speakers' notes in $(VERSION)"
+	@mkdir -p ./metadata/data
+	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index $(CORPUS_FOLDER) $(LOCAL_METADATA_FOLDER) $(VERSION)
+
+metadata-database:
+	@echo "info: generating metadata/$(METADATA_DATABASE_NAME) using source $(LOCAL_METADATA_FOLDER)"
+	@rm -f metadata/$(METADATA_DATABASE_NAME)
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database $(CONFIG_FILENAME) \
+		--target-filename metadata/$(METADATA_DATABASE_NAME) \
+		--force \
+		--skip-create-index \
+		--skip-download-metadata \
+		--source-folder $(LOCAL_METADATA_FOLDER)
 
 .PHONY: word-frequencies
 word-frequencies:
-	@echo "info: computing word frequencies for $(VERSION)"
+	@echo "info: computing WORD FREQUENCIES for $(VERSION)"
+	@echo "info:    source corpus: " $(CORPUS_FOLDER)
+	@echo "info:      target file: " $(WORD_FREQUENCY_FILENAME)
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2tfs.py \
 		$(CORPUS_FOLDER) $(WORD_FREQUENCY_FILENAME)
 
+.PHONY: speech-index
 speech-index:
-	@echo "info: creating speech index for $(VERSION)"
-	@echo "  Source tagged frames: " $(TAGGED_FRAMES_FOLDER)
-	@echo "       Source metadata: " $(LOCAL_METADATA_DATABASE)
-	@echo "   Target speech index: " $(SPEECH_INDEX_TARGET_NAME)
+	@echo "info: creating SPEECH INDEX for $(VERSION)"
+	@echo "info:    source folder: " $(TAGGED_FRAMES_FOLDER)
+	@echo "info:  source metadata: " $(LOCAL_METADATA_DATABASE)
+	@echo "info:           target: " $(SPEECH_INDEX_TARGET_NAME)
 	@if [ ! -f "$(LOCAL_METADATA_DATABASE)" ]; then \
 		echo "error: metadata file $(LOCAL_METADATA_DATABASE) does not exist"; \
 		exit 1; \
@@ -216,29 +244,6 @@ verify-metadata-filenames:
 
 verify-metadata-columns:
 	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py columns $(CONFIG_FILENAME) $(VERSION)
-
-metadata-download: funkis
-	@echo "info: downloading $(VERSION) metadata"
-	@rm -rf $(LOCAL_METADATA_DATABASE) $(LOCAL_METADATA_FOLDER)
-	@mkdir -p $(LOCAL_METADATA_FOLDER)
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py download $(LOCAL_METADATA_FOLDER) $(VERSION)
-	@echo "info: metadata $(VERSION) stored in $(LOCAL_METADATA_FOLDER)"
-
-metadata-corpus-index:
-	@echo "info: generating index of protocols, utterances and speakers' notes in $(VERSION)"
-	@mkdir -p ./metadata/data
-	@rm -f ./metadata/data/protocols.csv* ./metadata/data/utterances.csv*
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py index $(CORPUS_FOLDER) $(LOCAL_METADATA_FOLDER) $(VERSION)
-
-metadata-database:
-	@echo "info: generating metadata/$(METADATA_DATABASE_NAME) using source $(LOCAL_METADATA_FOLDER)"
-	@rm -f metadata/$(METADATA_DATABASE_NAME)
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/metadata2db.py database $(CONFIG_FILENAME) \
-		--target-filename metadata/$(METADATA_DATABASE_NAME) \
-		--force \
-		--skip-create-index \
-		--skip-download-metadata \
-		--source-folder $(LOCAL_METADATA_FOLDER)
 
 # --scripts-folder ./metadata/sql
 

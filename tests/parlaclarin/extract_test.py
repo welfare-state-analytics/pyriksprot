@@ -20,6 +20,7 @@ def test_create_grouping_hashcoder():
     u_id: str = "d68df3cd45d2eec6-0"
     item: iterate.ProtocolSegment = iterate.ProtocolSegment(
         protocol_name=protocol_name,
+        chamber_abbrev="ak",
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
         id=u_id,

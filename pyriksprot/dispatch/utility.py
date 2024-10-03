@@ -104,7 +104,7 @@ def decode_protocol_segment_filename(lookups: md.Codecs, speech: iterate.Protoco
         else:
             raise ValueError(f"attribute {key} not found")
 
-        key_value_label: str = lookups.lookup_name(key, key_value, "unknown")
+        key_value_label: str = lookups.decode_any_id(key, key_value, default_value="unknown")
 
         suffix = f"{suffix}_{key_value_label}"
 
