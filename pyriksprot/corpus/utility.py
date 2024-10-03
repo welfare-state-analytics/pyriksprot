@@ -25,6 +25,40 @@ def get_chamber_by_filename(filename: str) -> str:
     return 'ek'
 
 
+def format_protocol_name(
+    document_name: str, chamber_abbrev: Literal['ak', 'fk', 'ek'] = None, speech_nr: int | None = None
+) -> str:
+    try:
+        if document_name is None:
+            return ""
+
+        if document_name.endswith(".xml"):
+            document_name = document_name[:-4]
+
+        chamber_names: dict[str, str] = {"fk": "Första kammaren", "ak": "Andra kammaren", "ek": ""}
+
+        parts: list[str] = document_name.split("-")
+        p_nr: str = parts[-1]
+        s_nr: str = f"{speech_nr:03}" if speech_nr is not None else ""
+
+        if '_' in p_nr:
+            p_nr, s_nr = p_nr.split("_")
+
+        year: str = parts[1]
+        if len(year) == 6:
+            year = f"{year[:4]}/{year[4:]}"
+        elif len(year) == 8:
+            year = f"{year[:4]}/{year[4:]}"
+
+        if chamber_abbrev is None:
+            chamber_abbrev = "fk" if "-fk-" in document_name else "ak" if "-ak-" in document_name else "ek"
+
+        return f"{chamber_names[chamber_abbrev]} {year}:{p_nr.lstrip('0')} {s_nr}".strip()
+
+    except IndexError:
+        return document_name
+
+
 def _extract_tei_corpus_filenames(tei_filename: str) -> list[str]:
     """Extracts filenames from a TEI Corpus file."""
     # root: ET.Element = ET.fromstring(source)
@@ -44,14 +78,14 @@ def ls_corpus_by_tei_corpora(
     tei_corpora_filenames: list[str] = glob.glob(jj(folder, 'prot-*.xml'), recursive=False)
     data: dict[str, dict[str, str | list[str]]] = {}
     for tei_filename in tei_corpora_filenames:
-        chamber: str = basename(tei_filename).split('-')[1].split('.')[0]
-        if chamber not in ['ak', 'fk', 'ek']:
-            raise ValueError(f"illegal chamber: {chamber}")
+        chamber_abbrev: str = basename(tei_filename).split('-')[1].split('.')[0]
+        if chamber_abbrev not in ['ak', 'fk', 'ek']:
+            raise ValueError(f"illegal chamber: {chamber_abbrev}")
         filenames: str = [replace_extension(f, 'xml') for f in _extract_tei_corpus_filenames(tei_filename)]
         if normalize:
             filenames = [abspath(jj(folder, filename)) for filename in filenames]
-        data[chamber] = {
-            'chamber': chamber,
+        data[chamber_abbrev] = {
+            'chamber_abbrev': chamber_abbrev,
             'filenames': filenames,
         }
     if mode == 'dict':
@@ -59,7 +93,7 @@ def ls_corpus_by_tei_corpora(
     if mode == 'filenames':
         return [filename for item in data.values() for filename in item['filenames']]
     if mode == 'tuples':
-        return [(item['chamber'], filename) for item in data.values() for filename in item['filenames']]
+        return [(item['chamber_abbrev'], filename) for item in data.values() for filename in item['filenames']]
     return data
 
 
@@ -174,12 +208,12 @@ def load_chamber_indexes(folder: str) -> dict[str, set[str]]:
 
         for filename in glob.glob(pattern):
             document_name: str = basename(filename)
-            chamber: str = document_name[5:7]
-            if chamber not in valid_chambers:
-                logger.warning(f"illegal chamber: {chamber} in file {filename}")
+            chamber_abbrev: str = document_name[5:7]
+            if chamber_abbrev not in valid_chambers:
+                logger.warning(f"illegal chamber: {chamber_abbrev} in file {filename}")
 
             root: ET.Element = ET.parse(filename).getroot()
-            chambers[chamber] = {
+            chambers[chamber_abbrev] = {
                 basename(str(elem.get('href')))
                 for elem in root.findall('.//xi:include', namespaces)
                 if elem.get('href') is not None

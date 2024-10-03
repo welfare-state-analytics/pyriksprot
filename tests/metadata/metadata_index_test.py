@@ -43,8 +43,14 @@ def test_code_lookups():
     lookups: md.Codecs = md.Codecs().load(database)
     assert lookups
 
-    assert lookups.gender2id.get("woman") == 2
-    assert lookups.gender2name.get(2) == "woman"
+    assert lookups.gender2id.get("Kvinna") == 2
+    assert lookups.gender2name.get(2) == "Kvinna"
+
+    assert lookups.gender2abbrev.get(2) == "K"
+    assert lookups.gender2abbrev.get(0) == "?"
+
+    assert lookups.decode_any_id("gender_id", 2) == "Kvinna"
+    assert lookups.decode_any_id("gender_id", 2, to_name="gender_abbrev") == "K"
 
     assert lookups.office_type2id.get("unknown") == 0
     assert lookups.office_type2id.get("Minister") == 2
@@ -69,12 +75,12 @@ def test_code_lookups():
         )
     )
     id_columns: set[str] = {'gender_id', 'party_id', 'office_type_id', 'sub_office_type_id'}
-    name_columns: set[str] = {'gender', 'party_abbrev', 'office_type', 'sub_office_type'}
+    name_columns: set[str] = {'gender', 'gender_abbrev', 'party_abbrev', 'office_type', 'sub_office_type'}
     df_decoded: pd.DataFrame = lookups.decode(df, drop=False)
 
     assert set(df_decoded.columns) == id_columns.union(name_columns)
     assert (df_decoded.party_abbrev == ['?', 'MP', 'KD']).all()
-    assert (df_decoded.gender == ['unknown', 'man', 'woman']).all()
+    assert (df_decoded.gender == ['Okänt', 'Man', 'Kvinna']).all()
     assert (df_decoded.office_type == ['unknown', 'Minister', 'Talman']).all()
     assert (df_decoded.sub_office_type == ['unknown', 'finansminister', 'andra kammarens andre vice talman']).all()
 
@@ -204,7 +210,7 @@ def test_overload_by_person():
     assert (df_overloaded.party_id == [9, 0, 7, 0]).all()
 
     df_decoded: pd.DataFrame = person_index.lookups.decode(df_overloaded)
-    assert set(df_decoded.columns) == {'person_id', 'gender', 'party_abbrev'}
+    assert set(df_decoded.columns) == {'person_id', 'gender', 'gender_abbrev', 'party_abbrev'}
 
 
 def test_swap_rows(person_index: md.PersonIndex):

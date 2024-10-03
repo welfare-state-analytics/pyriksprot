@@ -9,6 +9,7 @@ import numpy as np
 import tqdm
 
 from .. import to_speech as mu
+from ..corpus.utility import format_protocol_name, get_chamber_by_filename
 from ..interface import ContentType, IDispatchItem, Protocol, SegmentLevel
 from ..utility import compress
 
@@ -23,6 +24,7 @@ class ProtocolSegment(IDispatchItem):
     """Container for a subset of utterances within a single protocol."""
 
     protocol_name: str
+    chamber_abbrev: str
     name: str
     who: str
     id: str
@@ -34,6 +36,7 @@ class ProtocolSegment(IDispatchItem):
     speaker_info: SpeakerInfo = None
     speaker_note_id: str = None
     speech_index: int = None
+    speech_name: str = None
 
     def __len__(self) -> int:
         """IDispatchItem interface"""
@@ -51,12 +54,14 @@ class ProtocolSegment(IDispatchItem):
             'period': self.year,
             'who': self.who,
             'protocol_name': self.protocol_name,
+            'chamber_abbrev': self.chamber_abbrev,
             'document_name': self.name,
             'filename': self.filename,
             'n_tokens': self.n_tokens,
             'n_utterances': self.n_utterances,
             'speaker_note_id': self.speaker_note_id,
             'speech_index': self.speech_index,
+            'speech_name': self.speech_name,
             'page_number': self.page_number,
             **(
                 {}
@@ -100,6 +105,7 @@ def to_protocol_segment(
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
+            chamber_abbrev=get_chamber_by_filename(protocol.name),
             content_type=content_type,
             segment_level=SegmentLevel.Protocol,
             year=protocol.get_year(which=which_year),
@@ -113,6 +119,7 @@ def to_protocol_segment(
             n_utterances=len(protocol.utterances),
             speaker_info=None,
             speaker_note_id=None,
+            speech_name=None,
         )
     ]
 
@@ -126,9 +133,11 @@ def to_speech_segments(
     which_year: Literal["filename", "date"] = "filename",
     **_,
 ) -> list[ProtocolSegment]:
+    chamber_abbrev: str = get_chamber_by_filename(protocol.name)
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
+            chamber_abbrev=chamber_abbrev,
             content_type=content_type,
             segment_level=SegmentLevel.Speech,
             year=protocol.get_year(which=which_year),
@@ -142,6 +151,7 @@ def to_speech_segments(
             n_utterances=len(s),
             speaker_note_id=s.speaker_note_id,
             speech_index=s.speech_index,
+            speech_name=format_protocol_name(protocol.name, chamber_abbrev, s.speech_index),
         )
         for s in mu.to_speeches(protocol=protocol, merge_strategy=merge_strategy, skip_size=segment_skip_size)
     ]
@@ -158,6 +168,7 @@ def to_who_segments(
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
+            chamber_abbrev=get_chamber_by_filename(protocol.name),
             content_type=content_type,
             segment_level=SegmentLevel.Who,
             year=protocol.get_year(which=which_year),
@@ -180,6 +191,7 @@ def to_utterance_segments(
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
+            chamber_abbrev=get_chamber_by_filename(protocol.name),
             content_type=content_type,
             segment_level=SegmentLevel.Utterance,
             year=protocol.get_year(which=which_year),
@@ -202,6 +214,7 @@ def to_paragraph_segments(
     return [
         ProtocolSegment(
             protocol_name=protocol.name,
+            chamber_abbrev=get_chamber_by_filename(protocol.name),
             content_type=content_type,
             segment_level=SegmentLevel.Paragraph,
             year=protocol.get_year(which=which_year),
