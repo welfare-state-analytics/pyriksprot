@@ -120,6 +120,18 @@ insert into party("party_id", "party", "party_abbrev", "party_color")
             select "party_id", "party", "party_abbrev", "party_color"
             from party_data
 ;
+insert into party("party_id", "party", "party_abbrev", "party_color")
+    with parties_without_abbreviation as (
+        select distinct _party_affiliation."party" as "party"
+        from _party_affiliation 
+        join _party_abbreviation using ("party")
+        left join party on party."party_abbrev" = _party_abbreviation."abbreviation"
+        where party."party" is null
+        order by 1
+    )
+    select (select max(party_id) from party) + row_number() over () as "party_id",
+        "party", "party", '#000000'
+    from parties_without_abbreviation;
 
 /*
 Create a single table out of:
