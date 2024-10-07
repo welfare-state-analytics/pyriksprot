@@ -84,3 +84,17 @@ insert into _party_abbreviation (party, abbreviation, ocr_correction)
     where TRUE
         on conflict(party) do update set abbreviation = excluded.abbreviation, ocr_correction=excluded.ocr_correction
 ;
+
+/* Add parties to _party_abbreviation that are affiliated with a user but not in the party abbreviation table */
+
+with parties as (
+    select party
+    from  _party_abbreviation
+    group by party
+)
+    insert into _party_abbreviation (party, abbreviation, ocr_correction)
+        select party, party, ''
+        from  _party_affiliation
+        where party not in (select party from parties)
+        and person_id != 'unknown'
+        group by party;
