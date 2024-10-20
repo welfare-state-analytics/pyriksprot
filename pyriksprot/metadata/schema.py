@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterable, Literal
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 import pyriksprot.sql
 
@@ -252,7 +253,13 @@ class MetadataSchema:
 
     def files_exist(self, folder: str) -> bool:
         """Checks that all expected files exist in given location."""
-        return all(isfile(join(folder, x.basename)) for _, x in self.definitions.items())
+        files_status: dict[str, bool] = {
+            x.basename: isfile(join(folder, x.basename)) for _, x in self.definitions.items()
+        }
+        if not all(files_status.values()):
+            logger.error(f"missing files in {folder}: {' '.join([k for k, v in files_status.items() if not v])}")
+            return False
+        return True
 
     def get_by_filename(self, filename: str) -> MetadataTable | None:
         for _, table in self.definitions.items():
