@@ -20,7 +20,7 @@ import warnings
 import zlib
 from importlib import import_module
 from itertools import chain
-from os.path import basename, dirname, expanduser, isfile
+from os.path import abspath, basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
 from types import ModuleType
@@ -312,7 +312,7 @@ def touch(f: str) -> None:
 
 
 def ensure_path(path: str) -> str:
-    os.makedirs(dirname(path), exist_ok=True)
+    os.makedirs(abspath(dirname(path)), exist_ok=True)
     return path
 
 
@@ -324,7 +324,7 @@ def ensure_folder(path: str) -> str:
 
 def reset_folder(folder: str, force: bool = False) -> None:
     if os.path.isdir(folder) and not force:
-        raise FileExistsError(folder)
+        raise FileExistsError(f"cannot reset existing {folder} when `force=False`.")
 
     shutil.rmtree(folder, ignore_errors=True)
     os.makedirs(folder, exist_ok=True)
