@@ -113,6 +113,7 @@ def extract_corpus_tags(
     preprocess: t.Callable[[iterate.ProtocolSegment], None] = (
         get_speaker if segment_level not in ('protocol', None) else None
     )
+
     texts: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=content_type,
