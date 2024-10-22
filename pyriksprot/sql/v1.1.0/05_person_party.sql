@@ -13,6 +13,9 @@ create table if not exists party (
 );
 
 insert into party("party_id", "party", "party_abbrev", "party_color", "sort_order")
+    values (0, 'Okänt', '[?]', '#000000', 5);
+
+insert into party("party_id", "party", "party_abbrev", "party_color", "sort_order")
     select
         row_number() over (order by sort_order, party) as party_id,
         party,
@@ -77,7 +80,7 @@ insert into person_party (
     "end_flag",
     "start_year",
     "end_year"
-)
+) 
   with affiliation as (
         select
             "person_id",
@@ -90,6 +93,8 @@ insert into person_party (
             cast(substr(cast(pa."end" as text), 1, 4) as integer)   as "end_year"
         from _party_affiliation pa
     )
+        select 0, 'unknown', 1, 0, null, 'X', null, 'X', null, null
+        union all
         select
             row_number() over (order by a."person_id" asc),
             a."person_id", 2 as "source_id",
