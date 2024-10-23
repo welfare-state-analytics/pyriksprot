@@ -45,7 +45,6 @@ def main(
         **dict(
             segment_skip_size=1,
             years=None,
-            content_type="tagged_frame",
             segment_level=interface.SegmentLevel.Speech,
             multiproc_keep_order=True,
             multiproc_chunksize=10,
