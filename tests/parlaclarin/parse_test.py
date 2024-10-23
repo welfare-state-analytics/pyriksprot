@@ -117,6 +117,7 @@ def test_scan_folder():
     assert len(scan_result.protocols) > 0
     assert isinstance(scan_result.protocols[0], tuple)
     assert len(scan_result.protocols[0]) == 6
+    assert len(scan_result.speeches) > 0
 
 
 def test_create_tei_corpus_xml():
