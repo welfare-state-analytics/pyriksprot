@@ -13,7 +13,7 @@ create table if not exists party (
 );
 
 insert into party("party_id", "party", "party_abbrev", "party_color", "sort_order")
-    values (0, 'Okänt', '[?]', '#000000', 5);
+    values (0, 'Okänt', '[-]', '#000000', 5);
 
 insert into party("party_id", "party", "party_abbrev", "party_color", "sort_order")
     select
