@@ -23,7 +23,6 @@ def extract_speech_index(
     source_folder: str,
     metadata_filename: str,
     target_name: str = 'speech_index.csv.gz',
-    content_type: interface.ContentType = interface.ContentType.TaggedFrame,
     segment_level: interface.SegmentLevel = None,
     segment_skip_size: int = 1,
     years: str = None,
@@ -39,7 +38,6 @@ def extract_speech_index(
         source_folder (str): Source folder
         metadata_filename (str): Metadata database filename (Sqlite3)
         target_names (str): Target filename(s).
-        content_type (interface.ContentType, optional): Text or PoS-tagged. Defaults to interface.ContentType.TaggedFrame.
         segment_level (interface.SegmentLevel, optional): Document level. Defaults to None.
         segment_skip_size (int, optional): Size of text to include. Defaults to 1.
         years (str, optional): Years filter. Defaults to None.
@@ -66,7 +64,7 @@ def extract_speech_index(
 
     speeches: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
-        content_type=content_type,
+        content_type=interface.ContentType.TaggedFrame,
         segment_level=segment_level,
         segment_skip_size=segment_skip_size,
         multiproc_keep_order=multiproc_keep_order,
