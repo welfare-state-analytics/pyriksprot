@@ -43,7 +43,7 @@ def subset_to_folder(
 
     person_ids: list[str] = set(utterances.person_id.unique().tolist())
 
-    logger.info(f"found {len(person_ids)} unqiue persons in subsetted utterances.")
+    logger.info(f"found {len(person_ids)} unique persons in subsetted utterances.")
 
     schema: MetadataSchema = MetadataSchema(tag)
 
@@ -52,7 +52,8 @@ def subset_to_folder(
     schema_filenames: set[str] = {x.basename for x in schema.definitions.values() if not x.is_derived}
 
     if not set(schema_filenames).issubset(filenames):
-        raise Exception("subset_to_folder: not all metadata tables defined in config found in source")
+        missing_files: set[str] = schema_filenames - filenames
+        raise Exception(f"subset_to_folder: missing schema files: {', '.join(missing_files)}")
 
     for filename in filenames:
         source_name: str = jj(source_folder, filename)
