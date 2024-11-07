@@ -68,7 +68,7 @@ def check_columns(config_filename: str, tags: str):
 @click.argument('tag', type=str)
 def download(target_folder: str, tag: str):
     schema: md.MetadataSchema = md.MetadataSchema(tag=tag)
-    md.gh_fetch_metadata_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
+    md.gh_download_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
 
 
 @main.command()

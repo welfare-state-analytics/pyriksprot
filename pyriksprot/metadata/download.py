@@ -1,5 +1,4 @@
 import os
-from os.path import basename
 from os.path import join as jj
 from typing import Any, Literal
 
@@ -11,9 +10,7 @@ from ..utility import dotget, download_url_to_file, fetch_text_by_url, reset_fol
 from .schema import MetadataSchema, MetadataTable
 
 
-def gh_fetch_metadata_item(
-    table: str, tag: str, errors: Literal['raise', 'ignore'] = 'raise', **opts
-) -> dict[str, Any]:
+def gh_download_file(filename: str, tag: str, errors: Literal['raise', 'ignore'] = 'raise', **opts) -> dict[str, Any]:
     """Fetches data from Github and returns name, headers and content for metadata CSV file for given tag"""
     url: str = (
         opts.get('url')
@@ -22,7 +19,7 @@ def gh_fetch_metadata_item(
             user=opts.get('user'),
             repository=opts.get('repository'),
             path=opts.get('path'),
-            filename=f"{table}.csv",
+            filename=filename,
             tag=tag,
         )
     )
@@ -31,20 +28,32 @@ def gh_fetch_metadata_item(
 
     headers: list[str] = data.splitlines()[0].split(sep=',')
 
-    return {'name': table, 'headers': headers, 'content': data}
+    return {'name': filename, 'headers': headers, 'content': data}
 
 
-def gh_store_metadata_item(target_folder: str, item):
+def gh_store_file(target_folder: str, filename: str, content: str) -> None:
     if not target_folder:
         return
-    target_name: str = jj(target_folder, item['name'])
+    target_name: str = jj(target_folder, filename)
     if target_name is not None:
         with open(target_name, 'w', encoding="utf-8") as fp:
-            logger.info(f' -> downloaded {item.get("name", "")}')
-            fp.write(item['content'])
+            logger.info(f' -> downloaded {filename}')
+            fp.write(content)
 
 
-def gh_fetch_metadata_folder(
+def gh_download_files(
+    target_folder: str, tag: str, errors: Literal['raise', 'ignore'], items: dict[str, str]
+) -> dict[str, dict[str, str]]:
+    infos: dict[str, dict] = {}
+
+    for filename, url in items.items():
+        infos[filename] = gh_download_file(filename, tag, errors, url=url)
+        gh_store_file(target_folder, filename, infos[filename].get('content'))
+
+    return infos
+
+
+def gh_download_folder(
     *,
     target_folder: str,
     user: str,
@@ -53,31 +62,26 @@ def gh_fetch_metadata_folder(
     path: str = None,
     force: bool = False,
     errors: Literal['raise', 'ignore'] = 'raise',
+    extras: dict[str, str] = None,
     **_,
-) -> dict[str, dict]:
+) -> dict[str, dict[str, str]]:
     """Returns name, headers and content for each metadata CSV file for given tag. Optionally stores content in folder"""
 
     if target_folder is not None:
-
         reset_folder(target_folder, force=force)
-
         with open(jj(target_folder, 'version'), 'w', encoding="utf-8") as fp:
             fp.write(tag)
 
-    items: list[dict] = gh_ls(user, repository, path, tag, pattern="*.csv")
-    infos: dict[str, dict] = {}
+    items: dict[str, str] = {
+        item.get("name"): item.get("download_url") for item in gh_ls(user, repository, path, tag, pattern="*.csv")
+    } | (extras or {})
 
-    for item in items:
-        filename = basename(item["name"])
-
-        infos[filename] = gh_fetch_metadata_item(filename, tag, errors, url=item.get("download_url"))
-
-        gh_store_metadata_item(target_folder, infos[filename])
+    infos: dict[str, dict[str, str]] = gh_download_files(target_folder, tag, errors, items)
 
     return infos
 
 
-def gh_fetch_metadata_by_config(
+def gh_download_by_config(
     *, schema: MetadataSchema, tag: str, folder: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'raise'
 ) -> None:
     """Downloads metadata files based on tables specified in `specifications`"""
@@ -107,6 +111,6 @@ def _resolve_url(cfg: MetadataTable, tag: str, **opts) -> str:
         return gh_create_url(filename=cfg.basename, tag=tag, **opts)
 
     if callable(url):
-        return url(tag)
+        return str(url(tag))
 
     return url
