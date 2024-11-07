@@ -64,18 +64,21 @@ def subset_corpus_and_metadata(
     if isinstance(documents, str):
         documents = load_document_patterns(documents, extension='xml')
 
-    if force or not exists(metadata_temp_folder):
+    schema: md.MetadataSchema = md.MetadataSchema(tag)
+
+    if force or not schema.files_exist(metadata_temp_folder):
+
         if not skip_download:
-            md.gh_fetch_metadata_folder(
-                target_folder=metadata_temp_folder,
-                **gh_metadata_opts,
-                tag=tag,
-                force=True,
+            schema: md.MetadataSchema = md.MetadataSchema(tag)
+            md.gh_download_folder(
+                target_folder=metadata_temp_folder, **gh_metadata_opts, tag=tag, force=True, extras=schema.extras_urls
             )
         else:
             reset_folder(temp_folder, force=True)
             shutil.rmtree(metadata_temp_folder, ignore_errors=True)
             shutil.copytree(global_metadata_folder, metadata_temp_folder)
+
+            md.gh_download_files(metadata_temp_folder, tag, errors='raise', items=schema.extras_urls)
 
     if not files_existst(documents, protocols_target_folder):
         if not skip_download:

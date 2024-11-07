@@ -51,7 +51,10 @@ def create_database_workflow(  # pylint: disable=too-many-arguments
         if not skip_download_metadata:
 
             """Fetch metadata from github"""
-            md.gh_fetch_metadata_folder(target_folder=metadata_folder, **gh_opts, tag=tag, force=force)
+
+            md.gh_download_folder(
+                target_folder=metadata_folder, **gh_opts, tag=tag, force=force, extras=schema.extras_urls
+            )
 
         if not skip_create_index:
 

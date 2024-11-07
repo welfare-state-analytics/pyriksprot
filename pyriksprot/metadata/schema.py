@@ -1,7 +1,7 @@
 import json
 from functools import cached_property
 from importlib import import_module
-from os.path import isfile, join
+from os.path import exists, isfile, join
 from pathlib import Path
 from typing import Any, Callable, Iterable, Literal
 
@@ -126,7 +126,7 @@ class MetadataTable:
 
     @property
     def has_url(self) -> bool:
-        return ':url:' in self.data
+        return ':url:' in self.data and self.data.get(':url:', False)
 
     @property
     def has_constraints(self) -> bool:
@@ -251,8 +251,19 @@ class MetadataSchema:
     def items(self) -> Iterable[tuple[str, MetadataTable]]:
         return self.definitions.items()
 
+    @property
+    def extras(self) -> dict[str, MetadataTable]:
+        return {k: d for k, d in self.definitions.items() if d.is_extra}
+
+    @property
+    def extras_urls(self) -> dict[str, str]:
+        return {d.basename: str(d.url) for d in self.definitions.values() if d.is_extra and d.has_url}
+
     def files_exist(self, folder: str) -> bool:
         """Checks that all expected files exist in given location."""
+        if not exists(folder):
+            return False
+
         files_status: dict[str, bool] = {
             x.basename: isfile(join(folder, x.basename)) for _, x in self.definitions.items()
         }

@@ -76,9 +76,6 @@ class MetadataFactory:
         with self.db:
             self.db.set_deferred(True)
             for _, cfg in schema.items():
-                if cfg.is_extra:
-                    logger.info(f"Skipping extra table: {cfg.tablename}")
-                    continue
                 self._import_table(cfg, folder=folder)
         return self
 
