@@ -381,7 +381,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
                 raise ValueError(
                     f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
                 )
-                item_data |= speech_data
+            item_data |= speech_data
         else:
             if 'who' in item.group_values:
                 """If `who` in grouping attributes => add person attribute from first speech"""
