@@ -185,7 +185,7 @@ def replace_extension(filename: str, extension: str) -> str:
 
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
-    name, extension = splitext(path)
+    name, _ = splitext(path)
     return f'{name}{suffix}{extension if new_extension is None else new_extension}'
 
 
