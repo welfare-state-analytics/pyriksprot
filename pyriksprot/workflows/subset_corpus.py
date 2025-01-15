@@ -80,7 +80,7 @@ def subset_corpus_and_metadata(
 
             md.gh_download_files(metadata_temp_folder, tag, errors='raise', items=schema.extras_urls)
 
-    if not files_existst(documents, protocols_target_folder):
+    if not files_exist(documents, protocols_target_folder):
         if not skip_download:
             pc.download_protocols(
                 filenames=documents,
@@ -127,7 +127,7 @@ def subset_corpus_and_metadata(
     shutil.rmtree(path=metadata_temp_folder, ignore_errors=True)
 
 
-def files_existst(filenames: list[str], folder: str) -> bool:
+def files_exist(filenames: list[str], folder: str) -> bool:
     return all(exists(join(folder, f)) for f in filenames)
 
 
