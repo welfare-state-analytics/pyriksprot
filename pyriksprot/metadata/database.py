@@ -1,6 +1,5 @@
 import abc
 import sqlite3
-from calendar import c
 from os.path import basename
 from typing import Any, Self, Type
 
