@@ -54,7 +54,7 @@ class MetadataFactory:
         """Creates database based on schema"""
         logger.info(f"Creating database for tag '{self.tag}'.")
 
-        self.db.create_database(tag=self.tag, force=force)
+        self.db.createdb(tag=self.tag, force=force)
 
         with self.db:
             self._create_tables(self.schema)
@@ -85,7 +85,7 @@ class MetadataFactory:
         columns: list[str] = cfg.all_columns
         table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=self.tag, sep=cfg.sep)
         table = cfg.transform(table)[columns]
-        self.db.store(table, tablename=cfg.tablename, columns=columns)
+        self.db.store(table, tablename=cfg.tablename, columns=columns, cfg=cfg)
 
         return self
 

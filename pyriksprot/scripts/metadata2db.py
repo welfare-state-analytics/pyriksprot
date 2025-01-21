@@ -116,14 +116,19 @@ def database(
 
         tag = tag or ConfigValue("version").resolve()
         source_folder = source_folder or ConfigValue("metadata.folder").resolve()
-        target_filename = target_filename or ConfigValue("metadata.database.options.filename").resolve()
         corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
         gh_opts: dict[str, Any] | None = ConfigValue("metadata.github").resolve()
+
+        db_opts: dict[str, str] = (
+            {'type': 'pyriksprot.metadata.database.SqliteDatabase', 'options': {'filename': target_filename}}
+            if target_filename
+            else ConfigValue("metadata.database").resolve()
+        )
 
         create_database_workflow(
             tag=tag,
             metadata_folder=source_folder,
-            db_opts=target_filename,
+            db_opts=db_opts,
             gh_opts=gh_opts,
             corpus_folder=corpus_folder,
             skip_create_index=skip_create_index,

@@ -156,6 +156,23 @@ def test_create_metadata_database_with_workflow():
     )
 
 
+def test_create_postgres_metadata_database_with_workflow():
+    # ConfigStore.configure_context(source='configs/config.yml')
+    # ConfigStore.configure_context(source='configs/config_postgres.yml')
+    os.chdir('/home/roger/source/swedeb/sample-data/data/1867-2020')
+    ConfigStore.configure_context(source='opts/pg-subset-config.yml')
+
+    create_database_workflow(
+        tag=ConfigValue("corpus.version").resolve(),
+        metadata_folder=ConfigValue("metadata.folder").resolve(),
+        db_opts=ConfigValue("metadata.database").resolve(),
+        corpus_folder=ConfigValue("corpus.folder").resolve(),
+        force=False,
+        skip_create_index=True,
+        skip_download_metadata=True,
+        skip_load_scripts=False,
+    )
+
 @pytest.mark.parametrize(
     'corpus_folder',
     [ConfigValue("corpus.folder").resolve(), ConfigValue("fakes.folder").resolve()],
