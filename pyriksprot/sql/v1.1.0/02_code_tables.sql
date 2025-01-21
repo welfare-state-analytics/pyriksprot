@@ -104,15 +104,16 @@ drop table if exists chamber;
 
 create table chamber (
     chamber_id integer primary key,
-    chamber text
+    chamber text not null,
+    chamber_abbrev text not null
 );
 
-insert into chamber (chamber_id, chamber)
+insert into chamber (chamber_id, chamber, chamber_abbrev)
     values
-        (0, 'unknown'),
-        (1, 'Första kammaren'),
-        (2, 'Andra kammaren'),
-        (3, 'Sveriges riksdag')
+        (0, '', ''),
+        (1, 'Första kammaren', 'FK'),
+        (2, 'Andra kammaren', 'AK'),
+        (3, 'Sveriges riksdag', 'EK')
 ;
 
 /* Office types */
