@@ -20,7 +20,7 @@ def resolve_backend(db_opts: dict[str, dict[str, str]] | str | database.Database
         backend = db_opts['type']
         opts: dict = db_opts['options']
     else:
-        raise ValueError(f"Invalid db_opts: {db_opts}")
+        raise ValueError(f"Invalid backend DB options: {db_opts}")
 
     db: database.DatabaseInterface = database.create_backend(backend=backend, **opts)
     return db
@@ -44,7 +44,6 @@ def create_database_workflow(  # pylint: disable=too-many-arguments
         schema: MetadataSchema = MetadataSchema(tag)
 
         if skip_download_metadata or skip_create_index:
-            schema: md.MetadataSchema = md.MetadataSchema(tag)
             if not schema.files_exist(metadata_folder):
                 raise ValueError("metadata files must exist in source folder if download is skipped")
 
