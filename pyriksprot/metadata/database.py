@@ -110,7 +110,7 @@ class DatabaseInterface(abc.ABC):
         return self
 
     @abc.abstractmethod
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable=None) -> Self:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable = None) -> Self:
         """Loads dataframe into the database."""
         ...
 
@@ -137,7 +137,7 @@ class DatabaseInterface(abc.ABC):
 
     @abc.abstractmethod
     def createdb(self, tag: str, force: bool) -> Self: ...
-    
+
     @abc.abstractmethod
     def dropdb(self, tag: str, force: bool) -> Self: ...
 
@@ -147,8 +147,7 @@ class DatabaseInterface(abc.ABC):
         return str(value)
 
     @abc.abstractmethod
-    def set_deferred(self, value: bool) -> None:
-        ...
+    def set_deferred(self, value: bool) -> None: ...
 
     @abc.abstractmethod
     def exists(self, tablename: str) -> bool: ...
@@ -242,7 +241,7 @@ class SqliteDatabase(DatabaseInterface):
         with self:
             return pd.read_sql(sql, self.connection)
 
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable=None) -> Self:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable = None) -> Self:
         """Loads dataframe into the database"""
         try:
             records: np.recarray = data.to_records(index=False)
@@ -307,7 +306,7 @@ class SqliteDatabase(DatabaseInterface):
         """Renoved the database file"""
         reset_file(self.filename, force=force)
         return self
-    
+
     def exists(self, tablename: str) -> bool:
         return (
             self.fetch_scalar(f"select count(name) from sqlite_master where type='table' and name='{tablename}'") == 1
@@ -335,7 +334,12 @@ class PostgresDatabase(DatabaseInterface):
 
     def _get_db_opts(self) -> dict[str, Any]:
 
-        return {k: v for k,v in self.opts.items() if k in {"dsn", "connection_factory", "cursor_factory", "database", "dbname", "user", "password", "host", "port"}}
+        return {
+            k: v
+            for k, v in self.opts.items()
+            if k
+            in {"dsn", "connection_factory", "cursor_factory", "database", "dbname", "user", "password", "host", "port"}
+        }
 
     def _open(self) -> Self:
         if not self.connection:
@@ -352,11 +356,11 @@ class PostgresDatabase(DatabaseInterface):
 
         if self.connection is None:
             return
-        
+
         if self._single_cursor is not None:
             self._single_cursor.close()
             self._single_cursor = None
-            
+
         self.connection.commit()
         self.connection.close()
         self.connection = None
@@ -374,7 +378,7 @@ class PostgresDatabase(DatabaseInterface):
                 yield cursor
             finally:
                 cursor.close()
-    
+
     def commit(self) -> None:
         if self.connection is None:
             return
@@ -424,7 +428,7 @@ class PostgresDatabase(DatabaseInterface):
                     data[c] = data[c].replace('', None)
         return data
 
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable=None) -> Self:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable = None) -> Self:
         """Loads dataframe into the database into the specified existing table"""
         try:
             columns = columns or data.columns.to_list()
@@ -485,16 +489,16 @@ class PostgresDatabase(DatabaseInterface):
         """Resets the database by dropping all tables and creating a version table"""
         if not force:
             return self
-        
+
         if not self.opts.get('database'):
             raise ValueError("Database name not set in configuration.")
-        
+
         self.dropdb(tag, force=force)
         self.pgdb_execute(sql=f"create database {self.opts.get('database')};", **self.opts)
 
         self.version = tag
         return self
-    
+
     def dropdb(self, tag: str, force: bool) -> Self:
         if not force:
             return self
@@ -514,7 +518,6 @@ class PostgresDatabase(DatabaseInterface):
             self.execute_script(f"drop table if exists {tablename} {'cascade' if cascade else ''};")
         return self
 
-
     @staticmethod
     def pgdb_execute(*, sql: str, **opts) -> None:
         connection: pg.connection = psycopg2.connect(**(opts | {'database': 'postgres'}))
@@ -524,7 +527,8 @@ class PostgresDatabase(DatabaseInterface):
                 cursor.execute(f"{sql};")
         finally:
             connection.close()
-    
+
+
 def _map_postgres_types_to_pandas(postgres_type: str):
     """Map PostgreSQL data types to Pandas dtypes."""
     if postgres_type == 'integer':
@@ -579,4 +583,3 @@ def create_backend(
         )
     )
     return db
-
