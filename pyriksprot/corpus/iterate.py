@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import abc
-from collections.abc import Iterator
 from dataclasses import dataclass
 from multiprocessing import get_context
 from typing import TYPE_CHECKING, Callable, Iterable, Literal
