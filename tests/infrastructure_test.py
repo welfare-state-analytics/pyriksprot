@@ -70,7 +70,7 @@ def test_gh_download_items():
 
     assert len(items) == len(urls)
 
-    assert all(os.path.isfile(jj(folder, x)) for x in items.keys())
+    assert all(os.path.isfile(jj(folder, x)) for x in items)
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
