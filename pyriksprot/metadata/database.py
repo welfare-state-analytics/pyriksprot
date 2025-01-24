@@ -1,6 +1,6 @@
 import abc
-from contextlib import contextmanager
 import sqlite3
+from contextlib import contextmanager
 from os.path import basename
 from typing import Any, Self, Type
 
