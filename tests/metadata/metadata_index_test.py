@@ -304,7 +304,7 @@ def test_speaker_info_service(person_index: md.PersonIndex):
     assert len(person.alt_parties) == 9
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
     assert set(a.end_year for a in person.alt_parties) == {9999, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
-    assert set(a.party_id for a in person.alt_parties) == {7,5, 47}
+    assert set(a.party_id for a in person.alt_parties) == {7, 5, 47}
     assert person.party_at(1950) == 0
     assert person.party_at(1994) == 5
     assert person.party_at(2000) == 5
