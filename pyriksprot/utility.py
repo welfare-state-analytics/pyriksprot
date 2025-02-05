@@ -185,7 +185,7 @@ def replace_extension(filename: str, extension: str) -> str:
 
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
-    name, extension = splitext(path) # type: ignore
+    name, extension = splitext(path)  # type: ignore
     return f'{name}{suffix}{extension if new_extension is None else new_extension}'
 
 
@@ -415,7 +415,7 @@ def compose(*fns: Sequence[Callable[[str], str]]) -> None | Callable[[str], str]
     """Create a composed function from a list of function. Return function."""
     if len(fns) == 0:
         return None
-    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns) # type: ignore
+    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)  # type: ignore
 
 
 def is_empty(filename: str) -> bool:
