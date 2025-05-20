@@ -23,14 +23,14 @@ jj = os.path.join
 
 class MetadataFactory:
     def __init__(
-        self, tag: str | None, backend=database.DefaultDatabaseType, schema: MetadataSchema = None, **opts
+        self, version: str | None, backend=database.DefaultDatabaseType, schema: MetadataSchema = None, **opts
     ) -> None:
-        if tag is None:
+        if version is None:
             raise ValueError("tag must be set")
 
         self.opts: dict[str, str] = opts
-        self.tag: str = tag
-        self.schema: MetadataSchema = schema or MetadataSchema(tag)
+        self.version: str = version
+        self.schema: MetadataSchema = schema or MetadataSchema(version)
         self.db: database.DatabaseInterface = (
             backend
             if isinstance(backend, database.DatabaseInterface)
@@ -46,15 +46,15 @@ class MetadataFactory:
         )
 
     def verify_tag(self) -> Self:
-        if self.db.version != (self.tag):
-            raise ValueError(f"metadata version mismatch: db version {self.db.version} differs from {self.tag}")
+        if self.db.version != (self.version):
+            raise ValueError(f"metadata version mismatch: db version {self.db.version} differs from {self.version}")
         return self
 
     def create(self, force: bool = False) -> Self:
         """Creates database based on schema"""
-        logger.info(f"Creating database for tag '{self.tag}'.")
+        logger.info(f"Creating database for tag '{self.version}'.")
 
-        self.db.createdb(tag=self.tag, force=force)
+        self.db.createdb(tag=self.version, force=force)
 
         with self.db:
             self._create_tables(self.schema)
@@ -72,7 +72,7 @@ class MetadataFactory:
 
     def upload(self, schema: MetadataSchema, folder: str) -> Self:
         """Uploads data to database based on schema"""
-        logger.info(f"Uploading data for tag '{self.tag}' using {folder}.")
+        logger.info(f"Uploading data for tag '{self.version}' using {folder}.")
         with self.db:
             self.db.set_deferred(True)
             for _, cfg in schema.items():
@@ -83,7 +83,7 @@ class MetadataFactory:
         logger.info(f"loading table: {cfg.tablename}")
 
         columns: list[str] = cfg.all_columns
-        table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=self.tag, sep=cfg.sep)
+        table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=self.version, sep=cfg.sep)
         table = cfg.transform(table)[columns]
         self.db.store(table, tablename=cfg.tablename, columns=columns, cfg=cfg)
 
@@ -94,13 +94,13 @@ class MetadataFactory:
         logger.info(f"loading scripts from {folder if folder else 'sql module'}...")
 
         with self.db:
-            if not (folder or self.tag):
+            if not (folder or self.version):
                 raise ValueError("Either folder or tag must be specified.")
 
             if folder and not isdir(folder):
                 raise FileNotFoundError(folder)
 
-            filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths(tag=self.tag)
+            filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths(tag=self.version)
 
             with self.db:
                 for filename in filenames:

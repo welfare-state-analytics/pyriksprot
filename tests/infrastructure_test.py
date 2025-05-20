@@ -91,7 +91,8 @@ def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
 def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
 
     subset_corpus_and_metadata(
-        tag=ConfigValue("metadata.version").resolve(),
+        corpus_version=ConfigValue("corpus.version").resolve(),
+        metadata_version=ConfigValue("metadata.version").resolve(),
         documents=list_of_test_protocols,
         global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
         global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),

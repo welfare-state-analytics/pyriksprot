@@ -31,7 +31,8 @@ def main(
     print(locals())
     ConfigStore.configure_context(source=config_filename)
 
-    tag: str = ConfigValue("version", mandatory=True).resolve()
+    corpus_version: str = ConfigValue("corpus:version", mandatory=True).resolve()
+    metadata_version: str = ConfigValue("metadata:version", mandatory=True).resolve()
 
     global_corpus_folder: str = ConfigValue("global.corpus.folder", mandatory=skip_download).resolve()
     global_metadata_folder: str = ConfigValue("global.metadata.folder", mandatory=skip_download).resolve()
@@ -50,7 +51,8 @@ def main(
     try:
         ConfigStore().configure_context(source=config_filename)
         subset_corpus_and_metadata(
-            tag=tag,
+            corpus_version=corpus_version,
+            metadata_version=metadata_version,
             documents=documents,
             global_corpus_folder=global_corpus_folder,
             global_metadata_folder=global_metadata_folder,
@@ -71,7 +73,7 @@ def main(
 
 if __name__ == "__main__":
     # options = {
-    #     'tag': 'v1.1.0',
+    #     'tag': 'v1.4.1',
     #     'target_root_folder': '/home/roger/source/swedeb/sample-data/data/random_sample_10files',
     #     'documents': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/protocols.txt',
     #     'global_corpus_folder': '/data/riksdagen_corpus_data/riksdagen-records/data',
@@ -87,10 +89,10 @@ if __name__ == "__main__":
     #     'db_opts': {
     #         'type': 'pyriksprot.metadata.database.SqliteDatabase',
     #         'options': {
-    #             'filename': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/v1.1.0/riksprot_metadata.db'
+    #             'filename': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/v1.4.1/riksprot_metadata.db'
     #         },
     #     },
-    #     'tf_filename': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/v1.1.0/dehyphen/word-frequencies.pkl',
+    #     'tf_filename': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/v1.4.1/dehyphen/word-frequencies.pkl',
     #     'skip_download': True,
     #     'force': True,
     # }
