@@ -22,7 +22,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 @click.command()
 @click.argument('source-folder', type=click.STRING)
 @click.argument('target-name', type=click.STRING)
-@click.argument('database-filename', type=click.STRING)
+@click.argument('metadata-filename', type=click.STRING)
 @option2('--options-filename')
 @option2('--merge-strategy')
 @option2('--multiproc-processes')
@@ -30,7 +30,7 @@ def main(
     options_filename: str = None,
     source_folder: str = None,
     target_name: str = None,
-    database_filename: str = None,
+    metadata_filename: str = None,
     merge_strategy: str = 'chain',
     multiproc_processes: int = 1,
 ):
@@ -45,7 +45,6 @@ def main(
         **dict(
             segment_skip_size=1,
             years=None,
-            content_type="tagged_frame",
             segment_level=interface.SegmentLevel.Speech,
             multiproc_keep_order=True,
             multiproc_chunksize=10,

@@ -3,7 +3,7 @@
 from .codecs import Codecs
 from .corpus_index_factory import CorpusIndexFactory
 from .database import DatabaseInterface, DefaultDatabaseType, SqliteDatabase, create_backend
-from .download import gh_fetch_metadata_by_config, gh_fetch_metadata_folder
+from .download import gh_download_by_config, gh_download_files, gh_download_folder
 from .metadata_factory import MetadataFactory
 from .person import Person, PersonIndex, PersonParty, SpeakerInfo, SpeakerInfoService, TermOfOffice
 from .schema import (

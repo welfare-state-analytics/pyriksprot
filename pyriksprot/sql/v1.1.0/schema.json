@@ -168,6 +168,16 @@
             "foreign key (person_id) references person (person_id) deferrable initially deferred"
         ]
     },
+    "swedeb_parties": {
+        "swerik_party": "text", 
+        "abbreviation": "text",
+        "party": "text",
+        "sort_order": "int",
+        ":url:": "https://raw.githubusercontent.com/humlab-swedeb/sample-data/refs/heads/main/data/resources/swedeb-parties.csv",
+        ":sep:": "\t",
+        ":filename:": "swedeb-parties.csv",
+        ":is_extra:": true
+    },
     "riksdag_year": {
         "parliament_year": "int not null",
         "specifier": "text",

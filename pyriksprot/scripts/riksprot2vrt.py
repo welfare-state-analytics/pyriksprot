@@ -31,7 +31,7 @@ def export_yearly_folders(
     source_folder: str,
     target_folder: str,
     batch_tag: str = 'year',
-    structural_tag: str = None,
+    structural_tag: list[str] = None,
     metadata_filename: str = None,
     merge_strategy: str = "chain_consecutive_unknowns",
     processes: int = 1,

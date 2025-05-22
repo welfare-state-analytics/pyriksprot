@@ -38,7 +38,8 @@ def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_f
 
 def subset_corpus_and_metadata(
     *,
-    tag: str | None = None,
+    corpus_version: str | None = None,
+    metadata_version: str | None = None,
     documents: list[str] | str = None,
     global_corpus_folder: str | None = None,
     global_metadata_folder: str | None = None,
@@ -53,7 +54,7 @@ def subset_corpus_and_metadata(
 ):
     """Subset metadata to folder `target_folder`/tag"""
 
-    root_folder: str = join(target_root_folder or "", tag or "")
+    root_folder: str = join(target_root_folder or "", corpus_version or "")
 
     temp_folder: str = join(root_folder, "tmp")
     metadata_temp_folder: str = join(root_folder, "tmp/metadata")
@@ -64,26 +65,33 @@ def subset_corpus_and_metadata(
     if isinstance(documents, str):
         documents = load_document_patterns(documents, extension='xml')
 
-    if force or not exists(metadata_temp_folder):
+    schema: md.MetadataSchema = md.MetadataSchema(metadata_version)
+
+    if force or not schema.files_exist(metadata_temp_folder):
+
         if not skip_download:
-            md.gh_fetch_metadata_folder(
+            schema: md.MetadataSchema = md.MetadataSchema(metadata_version)
+            md.gh_download_folder(
                 target_folder=metadata_temp_folder,
                 **gh_metadata_opts,
-                tag=tag,
+                tag=metadata_version,
                 force=True,
+                extras=schema.extras_urls,
             )
         else:
             reset_folder(temp_folder, force=True)
             shutil.rmtree(metadata_temp_folder, ignore_errors=True)
             shutil.copytree(global_metadata_folder, metadata_temp_folder)
 
-    if not files_existst(documents, protocols_target_folder):
+            md.gh_download_files(metadata_temp_folder, tag=metadata_version, errors='raise', items=schema.extras_urls)
+
+    if not files_exist(documents, protocols_target_folder):
         if not skip_download:
             pc.download_protocols(
                 filenames=documents,
                 target_folder=protocols_target_folder,
                 create_subfolder=True,
-                tag=tag,
+                tag=corpus_version,
                 **gh_records_opts,
             )
         else:
@@ -101,19 +109,21 @@ def subset_corpus_and_metadata(
         tf.compute_term_frequencies(source=protocols_target_folder, filename=tf_filename)
 
     md.subset_to_folder(
-        ProtocolMapper,
-        tag=tag,
+        parser=ProtocolMapper,
+        corpus_version=corpus_version,
+        metadata_version=metadata_version,
         protocols_source_folder=parlaclarin_folder,
         source_folder=metadata_temp_folder,
         target_folder=metadata_target_folder,
     )
 
     create_database_workflow(
-        tag=tag,
+        corpus_version=corpus_version,
+        metadata_version=metadata_version,
         metadata_folder=metadata_target_folder,
+        corpus_folder=protocols_target_folder,
         db_opts=db_opts,
         gh_opts=None,
-        corpus_folder=protocols_target_folder,
         scripts_folder=scripts_folder,
         skip_create_index=False,
         skip_download_metadata=True,
@@ -124,7 +134,7 @@ def subset_corpus_and_metadata(
     shutil.rmtree(path=metadata_temp_folder, ignore_errors=True)
 
 
-def files_existst(filenames: list[str], folder: str) -> bool:
+def files_exist(filenames: list[str], folder: str) -> bool:
     return all(exists(join(folder, f)) for f in filenames)
 
 

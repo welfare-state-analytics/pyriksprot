@@ -18,4 +18,10 @@ with reference_constraint_errors(table_name, person_id) as (
 	select '_twitter', person_id from _twitter where person_id not in (select person_id from _person)
 ) select table_name, string_agg('''' || person_id || '''', ', '), count(*)
   from reference_constraint_errors
-  group by table_name
+  group by table_name;
+
+/* Table sizes */
+SELECT name AS table_name, (pgsize / 1024.0 / 1024.0) AS size_in_MB
+FROM dbstat
+WHERE aggregate = 1 AND name IN (SELECT name FROM sqlite_master WHERE type='table');
+

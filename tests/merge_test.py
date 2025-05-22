@@ -24,8 +24,7 @@ def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[iter
         segment_level=segment_level,
         merge_strategy=None,
     )
-    segments = list(segments)
-    return segments
+    return list(segments)
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")

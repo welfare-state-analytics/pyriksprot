@@ -1,149 +1,149 @@
-	document_id	year	document_name	filename	n_tokens	who	party_id	gender_id	office_type_id	sub_office_type_id
-0	0	1955	prot-1955--ak--022_i-6dbbwlmze8r4p7ywmcezly	prot-1955--ak--022_i-6dbbwlmze8r4p7ywmcezly.csv	430	i-6dbbwLmze8R4p7yWmcezLY	9	1	1	1
-1	1	1955	prot-1955--ak--022_i-lhyyn2c3mqaesyunspg5uq	prot-1955--ak--022_i-lhyyn2c3mqaesyunspg5uq.csv	647	i-LhYyN2c3mQaesyUNSPg5Uq	5	1	1	2
-2	2	1955	prot-1955--ak--022_i-m5kfuw2v5b8wxgpdefgs2d	prot-1955--ak--022_i-m5kfuw2v5b8wxgpdefgs2d.csv	275	i-M5KFuw2v5B8wXgpDefGs2d	2	1	1	2
-3	3	1955	prot-1955--ak--022_i-dms16qwn3uggtrab34uw2z	prot-1955--ak--022_i-dms16qwn3uggtrab34uw2z.csv	1619	i-DMs16qwN3uGgTraB34UW2Z	9	1	1	2
-4	4	1955	prot-1955--ak--022_i-xmtstl8n8h7dwxjcielq1r	prot-1955--ak--022_i-xmtstl8n8h7dwxjcielq1r.csv	644	i-XMTSTL8n8H7DwXjCiELq1r	5	1	1	2
-5	5	1955	prot-1955--ak--022_i-3r5c8vqo1fxlqaqx7yyqq8	prot-1955--ak--022_i-3r5c8vqo1fxlqaqx7yyqq8.csv	4499	i-3R5C8vQo1FXLQaqX7yYqq8	7	1	1	2
-6	6	1955	prot-1955--ak--022_i-fooddbstxg6pqwp431p9bu	prot-1955--ak--022_i-fooddbstxg6pqwp431p9bu.csv	1179	i-FooDdbstXg6Pqwp431p9Bu	2	1	1	1
-7	7	1955	prot-1955--ak--022_i-eudlsjc6kknhmzpb1ufjeq	prot-1955--ak--022_i-eudlsjc6kknhmzpb1ufjeq.csv	875	i-EuDLsjc6kknhMzPB1UFjeq	5	1	1	2
-8	8	1955	prot-1955--ak--022_i-184mh7uht7d8tgsavshbsj	prot-1955--ak--022_i-184mh7uht7d8tgsavshbsj.csv	557	i-184mh7uhT7D8tGsavsHbSJ	5	1	1	2
-9	9	1955	prot-1955--ak--022_i-7k8zffy69k9dvxzjwlskxw	prot-1955--ak--022_i-7k8zffy69k9dvxzjwlskxw.csv	3533	i-7k8zFFY69k9DVxZJwLskxW	9	1	1	2
-10	10	1955	prot-1955--ak--022_i-ad4pvxowfj5wk9apntm5vp	prot-1955--ak--022_i-ad4pvxowfj5wk9apntm5vp.csv	2049	i-AD4PVxoWFJ5WK9APNtM5vP	11	1	1	2
-11	11	1955	prot-1955--ak--022_i-2ze5qggjascoqcn8nthhnj	prot-1955--ak--022_i-2ze5qggjascoqcn8nthhnj.csv	762	i-2ze5QGGJAsCoqCn8nthhnj	9	1	1	2
-12	12	1955	prot-1955--ak--022_i-hjkubagoagvf95jxdvvgsa	prot-1955--ak--022_i-hjkubagoagvf95jxdvvgsa.csv	746	i-HJkUbagoaGvf95jXdVvgSA	7	1	1	2
-13	13	1955	prot-1955--ak--022_i-rszkeuyv8emz5l8a5q8fuw	prot-1955--ak--022_i-rszkeuyv8emz5l8a5q8fuw.csv	1527	i-RszKEuYv8eMZ5L8A5Q8Fuw	5	1	1	2
-14	14	1955	prot-1955--ak--022_i-2hyrdnwnjjfppeciq2cg17	prot-1955--ak--022_i-2hyrdnwnjjfppeciq2cg17.csv	2664	i-2HyRdnwNjJfPPeCiQ2cg17	5	1	1	2
-15	15	1955	prot-1955--ak--022_i-tw2v8kvc9bb35jx86j8acc	prot-1955--ak--022_i-tw2v8kvc9bb35jx86j8acc.csv	1685	i-TW2v8kvC9bB35Jx86j8aCC	9	1	1	2
-16	16	1955	prot-1955--ak--022_i-ciy7vnsawtdmyea3zzhgp2	prot-1955--ak--022_i-ciy7vnsawtdmyea3zzhgp2.csv	446	i-CiY7VNsAwtDMYeA3zzhgP2	2	1	1	2
-17	17	1955	prot-1955--ak--022_i-rgpxdguwykq6gvw8emfxxz	prot-1955--ak--022_i-rgpxdguwykq6gvw8emfxxz.csv	304	i-RgPXdGuWYKQ6GVW8emfxxz	9	1	1	2
-18	18	1955	prot-1955--ak--022_i-8xtnmp7cvtcrzuc85xfbv2	prot-1955--ak--022_i-8xtnmp7cvtcrzuc85xfbv2.csv	149	i-8xTNMP7CVTCRZUC85xfBv2	9	1	1	2
-19	19	1955	prot-1955--ak--022_i-uznm618cskfty3jf64hgng	prot-1955--ak--022_i-uznm618cskfty3jf64hgng.csv	3561	i-UzNm618CskFtY3jF64hgNG	5	1	1	2
-20	20	1955	prot-1955--ak--022_i-5qjseuravegvpfv6whts4r	prot-1955--ak--022_i-5qjseuravegvpfv6whts4r.csv	4609	i-5QJsEUravEgVPFV6wHts4r	7	1	1	2
-21	21	1955	prot-1955--ak--022_i-xagqae6y2zc9wu7wvmlctc	prot-1955--ak--022_i-xagqae6y2zc9wu7wvmlctc.csv	3293	i-XagQaE6Y2Zc9wu7WvmLcTC	9	1	1	2
-22	22	1955	prot-1955--ak--022_i-lcd3ulv5zw69tt1s2baqhn	prot-1955--ak--022_i-lcd3ulv5zw69tt1s2baqhn.csv	2651	i-Lcd3uLV5ZW69Tt1s2baQhn	9	1	1	2
-23	23	1955	prot-1955--ak--022_i-wjt9cvn6go2ndhjsmuuchk	prot-1955--ak--022_i-wjt9cvn6go2ndhjsmuuchk.csv	1561	i-WJt9CvN6go2ndHjsmuUcHK	7	1	1	2
-24	24	1955	prot-1955--ak--022_unknown	prot-1955--ak--022_unknown.csv	8516	unknown	0	0	0	0
-25	25	1955	prot-1955--ak--022_i-bqdgkscalhuzhhaffmx5pf	prot-1955--ak--022_i-bqdgkscalhuzhhaffmx5pf.csv	7650	i-BqDGKscaLhUZHhaFFmx5pf	5	1	1	2
-26	26	1955	prot-1955--ak--022_i-7adeuptmddbenmgpp22azb	prot-1955--ak--022_i-7adeuptmddbenmgpp22azb.csv	2130	i-7AdEUptmDDBeNmgpp22aZb	5	1	1	2
-27	27	1955	prot-1955--ak--022_i-4daufxnbqzctaofjumzeaf	prot-1955--ak--022_i-4daufxnbqzctaofjumzeaf.csv	1358	i-4DAUFXnbqzCtaoFJumzEaf	9	1	1	2
-28	28	1955	prot-1955--ak--022_i-tpbmxu1qadouqvh7zwwskc	prot-1955--ak--022_i-tpbmxu1qadouqvh7zwwskc.csv	845	i-TpbmXU1qADouQvh7zWwskC	5	1	1	2
-29	29	1955	prot-1955--ak--022_i-gkvs1edvxvuggyqhoj3lvm	prot-1955--ak--022_i-gkvs1edvxvuggyqhoj3lvm.csv	60	i-GKVS1EDVXVuggYqHoj3LVm	2	1	1	1
-30	30	1955	prot-1955--ak--022_i-f8bsd7jcepay5c3dwyplrs	prot-1955--ak--022_i-f8bsd7jcepay5c3dwyplrs.csv	1512	i-F8bSD7JcePAy5c3DWYPLRs	2	1	1	2
-31	31	1955	prot-1955--ak--022_i-c35yyip4t5v4hbsbwngd7z	prot-1955--ak--022_i-c35yyip4t5v4hbsbwngd7z.csv	5182	i-C35yyip4t5V4hBSBwnGD7Z	9	1	1	2
-32	32	1955	prot-1955--ak--022_i-kaewnq53dsfqzgv8fcpybx	prot-1955--ak--022_i-kaewnq53dsfqzgv8fcpybx.csv	1467	i-KaEwnQ53dsfqZGV8fcpYbX	2	1	1	2
-33	33	1955	prot-1955--ak--022_i-lyd4unv4vnb2hmvp3ldfbd	prot-1955--ak--022_i-lyd4unv4vnb2hmvp3ldfbd.csv	1235	i-Lyd4uNV4VNB2HmVp3LdFbd	2	1	1	2
-34	34	1955	prot-1955--ak--022_i-ltomcvxu3j48yboslk1spq	prot-1955--ak--022_i-ltomcvxu3j48yboslk1spq.csv	2282	i-LToMcVXu3j48yboSLK1sPQ	9	1	1	2
-35	35	1955	prot-1955--ak--022_i-ubdkawthbleb83tf5thapc	prot-1955--ak--022_i-ubdkawthbleb83tf5thapc.csv	1186	i-UbdkaWThBLeb83tF5THaPC	5	1	1	2
-36	36	1955	prot-1955--ak--022_i-llnq8ryvszr7dbi2eaht1c	prot-1955--ak--022_i-llnq8ryvszr7dbi2eaht1c.csv	3552	i-LLnQ8RYVszR7dBi2EAHt1C	2	1	1	2
-37	37	1955	prot-1955--ak--022_i-quvttyfs7dhyejzxw6zyjh	prot-1955--ak--022_i-quvttyfs7dhyejzxw6zyjh.csv	1806	i-QUvttyFs7dHYEJzxW6zyJH	2	1	1	2
-38	38	1955	prot-1955--ak--022_i-9jhvjdksrb87lgguuy4hre	prot-1955--ak--022_i-9jhvjdksrb87lgguuy4hre.csv	313	i-9jhvJdksrB87LGgUuY4HrE	9	1	1	2
-39	39	1955	prot-1955--ak--022_i-fs9kpzyhzp1uu9iojzkh5d	prot-1955--ak--022_i-fs9kpzyhzp1uu9iojzkh5d.csv	600	i-Fs9KpZYHZp1uu9ioJZkH5D	5	1	1	2
-40	40	1955	prot-1955--ak--022_i-xkapddbhxsrxgehj4f98qz	prot-1955--ak--022_i-xkapddbhxsrxgehj4f98qz.csv	1209	i-XkAPddbHxSrxgEhj4f98qz	5	1	1	2
-41	41	1955	prot-1955--ak--022_i-v2gyz8xerx96ztpdhjkdhk	prot-1955--ak--022_i-v2gyz8xerx96ztpdhjkdhk.csv	933	i-V2gYZ8XERX96ZTpdHjKDHk	2	1	1	2
-42	42	1955	prot-1955--ak--022_i-jgrytbr82a6fzxywrddtjv	prot-1955--ak--022_i-jgrytbr82a6fzxywrddtjv.csv	68	i-JgRYTBR82A6fZXYWrDDTJv	5	1	1	2
-43	43	1955	prot-1955--ak--022_i-wpmrqhx63es2bchj5zxczf	prot-1955--ak--022_i-wpmrqhx63es2bchj5zxczf.csv	1465	i-WpmrqhX63Es2BchJ5zXczf	9	1	1	2
-44	44	1955	prot-1955--ak--022_i-pyiwqbpejcpreaaq6bbagf	prot-1955--ak--022_i-pyiwqbpejcpreaaq6bbagf.csv	1914	i-PyiwQBpejCpREAaq6BBAgf	5	1	1	2
-45	45	1955	prot-1955--ak--022_i-ac8rfpqgo4affg6kooa2u5	prot-1955--ak--022_i-ac8rfpqgo4affg6kooa2u5.csv	1458	i-AC8RFPqgo4aFfG6KooA2u5	9	1	1	2
-46	46	1955	prot-1955--ak--022_i-vd3ayfypfgvgszgaimxnrs	prot-1955--ak--022_i-vd3ayfypfgvgszgaimxnrs.csv	556	i-VD3ayfYPfGVgSzgaiMXnrs	9	1	1	2
-47	47	1955	prot-1955--ak--022_i-ysiisujqblt4dhlxm7iu93	prot-1955--ak--022_i-ysiisujqblt4dhlxm7iu93.csv	551	i-YSiiSuJqBLt4dhLxm7iu93	9	1	1	2
-48	48	1955	prot-1955--ak--022_i-lfad1z7d9ynrl6fxtwlygr	prot-1955--ak--022_i-lfad1z7d9ynrl6fxtwlygr.csv	25	i-LFaD1Z7d9YNRL6fxTwLYgr	9	1	1	2
-49	49	1955	prot-1955--ak--022_i-rijfb4cgvg9jt4652tdcv	prot-1955--ak--022_i-rijfb4cgvg9jt4652tdcv.csv	430	i-riJfB4CgvG9jt4652TdCv	5	1	1	2
-50	50	1955	prot-1955--ak--022_i-udh9lhps6vd6f6rxg4ub8n	prot-1955--ak--022_i-udh9lhps6vd6f6rxg4ub8n.csv	725	i-UDh9LhPS6Vd6F6rXG4Ub8N	9	1	1	2
-51	51	1955	prot-1955--ak--022_i-gm1k7ehripg9akbmruthad	prot-1955--ak--022_i-gm1k7ehripg9akbmruthad.csv	348	i-GM1k7EHRipg9AKbMRUTHAd	9	1	1	2
-52	52	1955	prot-1955--ak--022_i-nbpwjaykpxu4u1uu87zkt1	prot-1955--ak--022_i-nbpwjaykpxu4u1uu87zkt1.csv	1093	i-NBpwJayKpXu4u1Uu87zKT1	5	1	1	2
-53	53	1955	prot-1955--ak--022_i-q8gqdc3jjtlrmbkfphpnpq	prot-1955--ak--022_i-q8gqdc3jjtlrmbkfphpnpq.csv	21	i-Q8GqdC3JjTLrmBKfpHpnPQ	5	2	1	2
-54	54	1955	prot-1955--ak--022_i-6oh2fmmy6ew4v5gtufrzdh	prot-1955--ak--022_i-6oh2fmmy6ew4v5gtufrzdh.csv	345	i-6oh2fmMy6eW4v5gtufrZdh	5	2	1	2
-55	55	1955	prot-1955--ak--022_i-hrfkdzvtmmr7za25xt1lgw	prot-1955--ak--022_i-hrfkdzvtmmr7za25xt1lgw.csv	858	i-HrFkdZvTMMR7zA25xt1Lgw	5	2	1	2
-56	56	1955	prot-1955--ak--022_i-cbtntzgjtzpbbsm4fxdhsn	prot-1955--ak--022_i-cbtntzgjtzpbbsm4fxdhsn.csv	724	i-CBtNTZGJtZPBBSm4FxdhSN	5	2	1	2
-57	57	1955	prot-1955--ak--022_i-xnr1rnnkbmvqemxhbj1afa	prot-1955--ak--022_i-xnr1rnnkbmvqemxhbj1afa.csv	351	i-XNR1rnnKBMVQeMxhbj1afA	11	2	1	2
-58	58	1955	prot-1955--ak--022_i-n5dux7a68df9ywbsdffwp1	prot-1955--ak--022_i-n5dux7a68df9ywbsdffwp1.csv	48	i-N5DuX7A68dF9YwBSdFfwP1	9	1	1	2
-59	59	1955	prot-1955--ak--022_i-4yqfyczptewzxirejfjbj6	prot-1955--ak--022_i-4yqfyczptewzxirejfjbj6.csv	36	i-4YQFYCZptEWZxiREjfJbJ6	2	1	1	2
-60	60	1955	prot-1955--ak--022_i-mw31btf7uoxhtwx5x3k5qd	prot-1955--ak--022_i-mw31btf7uoxhtwx5x3k5qd.csv	47	i-Mw31BTf7uoxHTWx5X3k5QD	5	1	1	2
-61	61	1978	prot-197879--014_unknown	prot-197879--014_unknown.csv	18	unknown	0	0	0	0
-62	62	1991	prot-199192--021_i-cacgimsswywta9yiowxprc	prot-199192--021_i-cacgimsswywta9yiowxprc.csv	160	i-CACgimSSwyWTa9yioWxPRC	3	1	1	0
-63	63	1991	prot-199192--021_i-3spbyiczy7gfbq8rdvtqmb	prot-199192--021_i-3spbyiczy7gfbq8rdvtqmb.csv	345	i-3sPbyicZy7gfbq8RdVTQMb	9	2	1	0
-64	64	1991	prot-199192--021_i-tvpy9zequj2jkt7pqxs85w	prot-199192--021_i-tvpy9zequj2jkt7pqxs85w.csv	267	i-TVpY9zEquJ2jKT7pqxS85w	2	2	1	0
-65	65	1991	prot-199192--021_i-sftjzkfkccewbwrmjebd7c	prot-199192--021_i-sftjzkfkccewbwrmjebd7c.csv	241	i-SftjZkfkccEWbWRMJEbd7c	9	2	1	0
-66	66	1991	prot-199192--021_i-rrg9t2xukhe4iajaykgpb	prot-199192--021_i-rrg9t2xukhe4iajaykgpb.csv	542	i-rrg9t2XUkHE4iAjAykgpb	11	2	1	0
-67	67	1991	prot-199192--021_i-rctjiwptwsdbhu76zmccur	prot-199192--021_i-rctjiwptwsdbhu76zmccur.csv	21	i-RCTjiWPTWsdbhU76ZmcCUr	2	1	1	0
-68	68	1991	prot-199192--021_i-ta35zzcd9azayrg33klbte	prot-199192--021_i-ta35zzcd9azayrg33klbte.csv	97	i-TA35ZZCd9AZayRg33KLBtE	9	1	1	0
-69	69	1991	prot-199192--021_i-9bfqsfvcltvhzijqpxnmkr	prot-199192--021_i-9bfqsfvcltvhzijqpxnmkr.csv	135	i-9bfQSfVCLTvHZiJQpxNMkR	7	1	1	0
-70	70	1991	prot-199192--021_i-9gkzmwa6j3axtpskudvbz	prot-199192--021_i-9gkzmwa6j3axtpskudvbz.csv	65	i-9GkZmWA6j3AXTPSkudVbZ	2	1	1	0
-71	71	1991	prot-199192--021_i-aqxtwztqejiysickvrft1u	prot-199192--021_i-aqxtwztqejiysickvrft1u.csv	177	i-AQXTwzTQEJiySickVRFT1U	2	2	1	0
-72	72	1991	prot-199192--021_i-pdjw8xpqqjv6cbpbbrhsqt	prot-199192--021_i-pdjw8xpqqjv6cbpbbrhsqt.csv	60	i-PdJw8xPqQjV6cBPBbRhsqT	9	1	1	0
-73	73	1991	prot-199192--021_i-8rjvavtfp7ujly1rbrhnia	prot-199192--021_i-8rjvavtfp7ujly1rbrhnia.csv	84	i-8rjVavTFp7UjLy1RbrHnia	9	1	1	0
-74	74	1991	prot-199192--021_i-ptwgnmfqaftxvr8sbylqzu	prot-199192--021_i-ptwgnmfqaftxvr8sbylqzu.csv	137	i-PTwgnmFQaFTXvr8SByLQzu	11	1	1	0
-75	75	1991	prot-199192--021_i-wvrkggmvwbivxvopqgjuef	prot-199192--021_i-wvrkggmvwbivxvopqgjuef.csv	118	i-WvrkgGMVWbiVxVoPqgJuEF	11	1	1	0
-76	76	1991	prot-199192--021_i-9arlljupp6dkl6wgf6nzuc	prot-199192--021_i-9arlljupp6dkl6wgf6nzuc.csv	322	i-9aRLLJUPp6dkL6wGF6nZuc	8	1	1	0
-77	77	1991	prot-199192--021_i-pyyyjc4bacyhvae5h3ye6g	prot-199192--021_i-pyyyjc4bacyhvae5h3ye6g.csv	155	i-PYyYJc4bAcYHVAE5H3YE6g	2	1	1	0
-78	78	1991	prot-199192--021_i-5bauorewuhedmfstaqqoco	prot-199192--021_i-5bauorewuhedmfstaqqoco.csv	66	i-5BAuoreWuHEDmfStAQQoco	5	1	1	0
-79	79	1991	prot-199192--021_i-jgqdoqfn7lrfwfe8vqvbac	prot-199192--021_i-jgqdoqfn7lrfwfe8vqvbac.csv	14	i-JgqDoQfn7LrFWFe8vQvbAc	9	1	1	0
-80	80	1991	prot-199192--021_i-gmsfh9fmi5xjm5ydcn6r1m	prot-199192--021_i-gmsfh9fmi5xjm5ydcn6r1m.csv	46	i-GmSFH9fmi5xjm5ydcN6R1m	5	2	1	0
-81	81	1991	prot-199192--021_i-k7a3hxruqwaorkthu77uva	prot-199192--021_i-k7a3hxruqwaorkthu77uva.csv	50	i-K7A3HxRuQWaoRkthu77uVa	9	2	1	0
-82	82	1991	prot-199192--127_i-hbefmthdym5gj3a1vqk6pr	prot-199192--127_i-hbefmthdym5gj3a1vqk6pr.csv	3125	i-HBefMTHdym5gJ3a1vqK6pr	9	2	1	0
-83	83	1991	prot-199192--127_i-5oxq9qfxuqekcyb87sfvtp	prot-199192--127_i-5oxq9qfxuqekcyb87sfvtp.csv	1858	i-5oxq9QfXuQEKCyB87SfvtP	8	1	1	0
-84	84	1991	prot-199192--127_i-rrg9t2xukhe4iajaykgpb	prot-199192--127_i-rrg9t2xukhe4iajaykgpb.csv	849	i-rrg9t2XUkHE4iAjAykgpb	11	2	1	0
-85	85	1991	prot-199192--127_i-cno6xncmdc2lkrvxc6u2b	prot-199192--127_i-cno6xncmdc2lkrvxc6u2b.csv	2021	i-cNo6XnCMDc2LkrvXc6U2b	7	1	1	0
-86	86	1991	prot-199192--127_i-jzka6caqdsky8yhuyfejeu	prot-199192--127_i-jzka6caqdsky8yhuyfejeu.csv	4254	i-JZKa6caqdSKy8yhUyfEJeU	5	1	2	33
-87	87	1991	prot-199192--127_i-pdjw8xpqqjv6cbpbbrhsqt	prot-199192--127_i-pdjw8xpqqjv6cbpbbrhsqt.csv	3437	i-PdJw8xPqQjV6cBPBbRhsqT	9	1	1	0
-88	88	1991	prot-199192--127_i-nph9ymbx9f5regmdldf5nm	prot-199192--127_i-nph9ymbx9f5regmdldf5nm.csv	1351	i-NpH9yMBX9F5REgmdLDF5Nm	8	1	1	0
-89	89	1991	prot-199192--127_i-dtxlnvkni8er1muemgychj	prot-199192--127_i-dtxlnvkni8er1muemgychj.csv	1910	i-DtxLnvKNi8eR1muemGYCHj	7	2	1	0
-90	90	1991	prot-199192--127_i-87j9l7kecotvfpdymwufty	prot-199192--127_i-87j9l7kecotvfpdymwufty.csv	1344	i-87J9L7KEcoTvFpdYMWuFTy	3	1	1	0
-91	91	1991	prot-199192--127_i-3m1s36ecjm8aj113tdc85w	prot-199192--127_i-3m1s36ecjm8aj113tdc85w.csv	1458	i-3M1s36ECJm8aj113TDC85w	9	1	1	0
-92	92	1991	prot-199192--127_i-5sxzszsux9klqvrecwz58f	prot-199192--127_i-5sxzszsux9klqvrecwz58f.csv	746	i-5sxzSZSUx9KLqvREcwz58f	7	2	1	0
-93	93	1991	prot-199192--127_i-3qz6cxuz6kggcr1at9mzrb	prot-199192--127_i-3qz6cxuz6kggcr1at9mzrb.csv	2473	i-3Qz6CXUz6kGGCR1aT9MZrB	9	2	1	0
-94	94	1991	prot-199192--127_unknown	prot-199192--127_unknown.csv	1846	unknown	0	0	0	0
-95	95	1991	prot-199192--127_i-3kej4ylp7mio52y4ibmphz	prot-199192--127_i-3kej4ylp7mio52y4ibmphz.csv	463	i-3keJ4YLp7mio52y4ibMPhZ	7	1	1	0
-96	96	1991	prot-199192--127_i-gcjvtrecjgryymfdembnan	prot-199192--127_i-gcjvtrecjgryymfdembnan.csv	3117	i-GCJVTREcJGRyYmFdeMbNaN	9	1	1	0
-97	97	1991	prot-199192--127_i-uwr9atcbsp2fazzbpfb47a	prot-199192--127_i-uwr9atcbsp2fazzbpfb47a.csv	2190	i-UwR9aTcbsp2FAzzbpFB47A	8	1	1	0
-98	98	1991	prot-199192--127_i-kytbd3wzfqektpffxjtepk	prot-199192--127_i-kytbd3wzfqektpffxjtepk.csv	3477	i-Kytbd3WZfQeKTPffXjTEpk	11	2	1	0
-99	99	1991	prot-199192--127_i-nlft4rs4humcgpwx1zb8ag	prot-199192--127_i-nlft4rs4humcgpwx1zb8ag.csv	922	i-NLfT4RS4huMCGpWx1zB8Ag	5	1	1	0
-100	100	1991	prot-199192--127_i-2ggbvfkhrn3s8fvfeplxjs	prot-199192--127_i-2ggbvfkhrn3s8fvfeplxjs.csv	3592	i-2ggBvfkHRn3s8FvFEPLxjs	2	1	1	0
-101	101	1991	prot-199192--127_i-l8fj5uq6dwcoy3cxs1trpk	prot-199192--127_i-l8fj5uq6dwcoy3cxs1trpk.csv	3270	i-L8FJ5Uq6DWCoY3cXS1trPk	9	1	1	0
-102	102	1991	prot-199192--127_i-bkqoi6ka1ekk9eejht16cz	prot-199192--127_i-bkqoi6ka1ekk9eejht16cz.csv	63	i-BkQoi6KA1EKK9EEJhT16Cz	7	2	1	0
-103	103	1991	prot-199192--127_i-vvqvwyrqguiyjtet3cpqcm	prot-199192--127_i-vvqvwyrqguiyjtet3cpqcm.csv	2345	i-VvqVwyrQgUiYjtEt3CpQcM	7	1	1	0
-104	104	1991	prot-199192--127_i-ap6paqn9pzdfdutnp8xyzp	prot-199192--127_i-ap6paqn9pzdfdutnp8xyzp.csv	847	i-Ap6PaQn9pzDFdUtnP8xyzP	3	1	1	0
-105	105	1991	prot-199192--127_i-7sjk192el4vbjkld12xg8y	prot-199192--127_i-7sjk192el4vbjkld12xg8y.csv	1216	i-7SJK192EL4VbjkLD12Xg8y	9	2	1	0
-106	106	1991	prot-199192--127_i-c3sspuv2x6tssewo9qpd5d	prot-199192--127_i-c3sspuv2x6tssewo9qpd5d.csv	992	i-C3ssPUv2X6tsSEWo9qPD5D	2	1	1	0
-107	107	1991	prot-199192--127_i-imlyujzk1umfziqwdny9q	prot-199192--127_i-imlyujzk1umfziqwdny9q.csv	5696	i-imLyujzk1umFZiqwdNY9q	9	1	1	0
-108	108	1991	prot-199192--127_i-gaozvglngcb9vstyp2prqh	prot-199192--127_i-gaozvglngcb9vstyp2prqh.csv	3428	i-GaozvGLNGCb9Vstyp2PrQH	11	1	1	0
-109	109	1991	prot-199192--127_i-lbn95md8hn6zkxhrbcbjbb	prot-199192--127_i-lbn95md8hn6zkxhrbcbjbb.csv	2863	i-LBN95MD8hn6zkXhRBcbJbB	7	1	1	0
-110	110	1991	prot-199192--127_i-2fvusvt1sc2fewmndrmgeb	prot-199192--127_i-2fvusvt1sc2fewmndrmgeb.csv	5398	i-2FVUSVT1SC2fewMNdrmgeb	5	1	1	0
-111	111	1991	prot-199192--127_i-ds7sstfh4eascvdepjuzf3	prot-199192--127_i-ds7sstfh4eascvdepjuzf3.csv	1638	i-Ds7sSTFH4EAscvdepjuZf3	9	2	1	0
-112	112	1991	prot-199192--127_i-szgcxyxyn6gnrblikzly7m	prot-199192--127_i-szgcxyxyn6gnrblikzly7m.csv	1757	i-SZgcxyxYn6GnRBLikzLy7M	2	1	1	0
-113	113	1991	prot-199192--127_i-8kflubhhscwaye3zsbpr3g	prot-199192--127_i-8kflubhhscwaye3zsbpr3g.csv	2143	i-8kfLUBHhscwaye3ZSBPr3G	3	1	1	0
-114	114	1991	prot-199192--127_i-dntstrvt1jenyw6pdmxfzi	prot-199192--127_i-dntstrvt1jenyw6pdmxfzi.csv	4062	i-DnTstrvT1jenyw6pdMxfZi	7	1	1	0
-115	115	1991	prot-199192--127_i-dsa7jdv9xexib7yxfnpcm5	prot-199192--127_i-dsa7jdv9xexib7yxfnpcm5.csv	809	i-DsA7JDV9XexiB7YxfnpCm5	9	2	1	0
-116	116	1991	prot-199192--127_i-wiq5749k7owcaruynxzux7	prot-199192--127_i-wiq5749k7owcaruynxzux7.csv	740	i-Wiq5749k7owcARUynxZuX7	2	2	1	0
-117	117	1991	prot-199192--127_i-wvrkggmvwbivxvopqgjuef	prot-199192--127_i-wvrkggmvwbivxvopqgjuef.csv	1507	i-WvrkgGMVWbiVxVoPqgJuEF	11	1	1	0
-118	118	1991	prot-199192--127_i-vrxw6nqnsc7xr3jonltumw	prot-199192--127_i-vrxw6nqnsc7xr3jonltumw.csv	1309	i-Vrxw6nqNsC7Xr3jonLTumw	3	1	1	0
-119	119	1991	prot-199192--127_i-hf1be62hhhvaxoziyuz2hf	prot-199192--127_i-hf1be62hhhvaxoziyuz2hf.csv	1492	i-HF1be62hHhvaXoZiyUz2HF	11	1	1	0
-120	120	1991	prot-199192--127_i-war7xtq5vm5vhtmxckdzv4	prot-199192--127_i-war7xtq5vm5vhtmxckdzv4.csv	2216	i-WAR7Xtq5vM5vhtMxcKDZv4	9	1	1	0
-121	121	1991	prot-199192--127_i-8tpdmpvgnxjjkwgy9k68ba	prot-199192--127_i-8tpdmpvgnxjjkwgy9k68ba.csv	4202	i-8tpDmPvgnXjJkWGy9k68Ba	9	2	1	0
-122	122	1991	prot-199192--127_i-lvt4xzqrhukrvdh5vnsl5s	prot-199192--127_i-lvt4xzqrhukrvdh5vnsl5s.csv	2122	i-LvT4xzQrHUKrVDH5VNSL5s	8	1	1	0
-123	123	1991	prot-199192--127_i-5q7m7rzyufn9rhagjb6ghh	prot-199192--127_i-5q7m7rzyufn9rhagjb6ghh.csv	3306	i-5q7m7rZyufN9RHaGjB6GHh	11	1	1	0
-124	124	1991	prot-199192--127_i-ukrvdvbmgqtec2ytigz7k5	prot-199192--127_i-ukrvdvbmgqtec2ytigz7k5.csv	3015	i-UkRVDvbmgQTeC2YtiGZ7K5	7	2	1	0
-125	125	1991	prot-199192--127_i-prhkyxgcat2cbjpjjfnrtn	prot-199192--127_i-prhkyxgcat2cbjpjjfnrtn.csv	2912	i-PRHkYxGCaT2cbJpjjfnRtn	7	2	2	34
-126	126	1991	prot-199192--127_i-h6rrzni8wdnewhuxz4ftez	prot-199192--127_i-h6rrzni8wdnewhuxz4ftez.csv	1386	i-H6rrzni8wdNEWHUXz4FTEZ	5	2	1	0
-127	127	1991	prot-199192--127_i-tbwjgk7r6pzse6ap5pieb4	prot-199192--127_i-tbwjgk7r6pzse6ap5pieb4.csv	1375	i-TBWJgK7R6pzsE6Ap5PiEb4	3	2	1	0
-128	128	1991	prot-199192--127_i-ahzryxd2b7najsd37mfhnj	prot-199192--127_i-ahzryxd2b7najsd37mfhnj.csv	664	i-Ahzryxd2b7naJSD37mfHNJ	7	1	1	0
-129	129	1991	prot-199192--127_i-8cfscdwjvpdgozuk8rhzyw	prot-199192--127_i-8cfscdwjvpdgozuk8rhzyw.csv	512	i-8cFSCdWjvpDgozuk8RHZyW	9	1	1	0
-130	130	1991	prot-199192--127_i-kfllbh5cxvpzkuzahy3paz	prot-199192--127_i-kfllbh5cxvpzkuzahy3paz.csv	681	i-KFLLBh5CxVpZkUZaHy3pAz	7	2	1	0
-131	131	1991	prot-199192--127_i-ptwgnmfqaftxvr8sbylqzu	prot-199192--127_i-ptwgnmfqaftxvr8sbylqzu.csv	92	i-PTwgnmFQaFTXvr8SByLQzu	11	1	1	0
-132	132	1991	prot-199192--127_i-8hxdnlw9ngyyqbhg8rczcj	prot-199192--127_i-8hxdnlw9ngyyqbhg8rczcj.csv	15	i-8hxDNLW9NgYYqBHg8RCZcj	7	1	1	0
-133	133	1991	prot-199192--127_i-7a6no7x5aykka9tbjueeea	prot-199192--127_i-7a6no7x5aykka9tbjueeea.csv	190	i-7A6No7x5ayKka9TbjUeeEa	7	1	1	0
-134	134	1991	prot-199192--127_i-fysvuykruvwgfkvy3yhpi7	prot-199192--127_i-fysvuykruvwgfkvy3yhpi7.csv	30	i-FYsVUYKruvwGFkVY3YHpi7	9	1	1	0
-135	135	1991	prot-199192--127_i-pvzh9zhc6sdat87ng4cmcq	prot-199192--127_i-pvzh9zhc6sdat87ng4cmcq.csv	20	i-PvZh9Zhc6sdAt87Ng4CMcQ	8	1	1	0
-136	136	1995	prot-199596--035_unknown	prot-199596--035_unknown.csv	267	unknown	0	0	0	0
-137	137	1995	prot-199596--035_i-4cwynh4xxjhzj5wdbazmsy	prot-199596--035_i-4cwynh4xxjhzj5wdbazmsy.csv	2188	i-4CwyNH4xXJhZj5wdBAzmSY	9	2	2	22
-138	138	1995	prot-199596--035_i-f8qde2eedz12pwfanq3ahv	prot-199596--035_i-f8qde2eedz12pwfanq3ahv.csv	697	i-F8qdE2eedz12PwFanq3ahv	7	2	1	0
-139	139	1995	prot-199596--035_i-c44smee9ocandjeden9flp	prot-199596--035_i-c44smee9ocandjeden9flp.csv	631	i-C44sMEE9ocAndjedeN9fLp	6	2	1	0
-140	140	1995	prot-199596--035_i-84xpersjutzei5hvta1jtt	prot-199596--035_i-84xpersjutzei5hvta1jtt.csv	1202	i-84xpErSjuTzEi5hvTA1Jtt	7	1	1	0
-141	141	1995	prot-199596--035_i-3feh1q844fm3qrdgqmfwsf	prot-199596--035_i-3feh1q844fm3qrdgqmfwsf.csv	1693	i-3FEh1q844FM3qRDgqmfWSF	9	2	2	33
-142	142	1995	prot-199596--035_i-cakst71shecuucwqm5alop	prot-199596--035_i-cakst71shecuucwqm5alop.csv	1581	i-CakSt71sHecUuCwQm5ALoP	2	2	1	0
-143	143	1995	prot-199596--035_i-9inp1mzbdknsrm73feeqmc	prot-199596--035_i-9inp1mzbdknsrm73feeqmc.csv	2621	i-9iNp1MZbdkNsrM73feEQmc	9	1	2	38
-144	144	1995	prot-199596--035_i-prhkyxgcat2cbjpjjfnrtn	prot-199596--035_i-prhkyxgcat2cbjpjjfnrtn.csv	1715	i-PRHkYxGCaT2cbJpjjfnRtn	7	2	1	0
-145	145	1995	prot-199596--035_i-szkutdtcrco58yncqsh76	prot-199596--035_i-szkutdtcrco58yncqsh76.csv	2784	i-SZKUTdtCrCo58yNCQsH76	9	2	2	34
-146	146	1995	prot-199596--035_i-cbuk3dflmhfniqvsushsad	prot-199596--035_i-cbuk3dflmhfniqvsushsad.csv	1601	i-CBuK3dFLMHFNiQVSusHsaD	7	1	1	0
-147	147	1995	prot-199596--035_i-h1avbzexdmwpt4dfvxiya	prot-199596--035_i-h1avbzexdmwpt4dfvxiya.csv	1173	i-h1aVBzexdmWPt4dFvXiYA	3	2	1	0
+	document_id	year	document_name	filename	n_tokens	who	chamber_abbrev	speech_name	gender_id	party_id	office_type_id	sub_office_type_id
+0	0	1955	prot-1955--ak--022_i-6dbbwlmze8r4p7ywmcezly	prot-1955--ak--022_i-6dbbwlmze8r4p7ywmcezly.csv	430	i-6dbbwLmze8R4p7yWmcezLY	ak	Andra kammaren 1955:22 001	1	6	1	1
+1	1	1955	prot-1955--ak--022_i-lhyyn2c3mqaesyunspg5uq	prot-1955--ak--022_i-lhyyn2c3mqaesyunspg5uq.csv	647	i-LhYyN2c3mQaesyUNSPg5Uq	ak	Andra kammaren 1955:22 002	1	3	1	2
+2	2	1955	prot-1955--ak--022_i-m5kfuw2v5b8wxgpdefgs2d	prot-1955--ak--022_i-m5kfuw2v5b8wxgpdefgs2d.csv	275	i-M5KFuw2v5B8wXgpDefGs2d	ak	Andra kammaren 1955:22 003	1	1	1	2
+3	3	1955	prot-1955--ak--022_i-dms16qwn3uggtrab34uw2z	prot-1955--ak--022_i-dms16qwn3uggtrab34uw2z.csv	1619	i-DMs16qwN3uGgTraB34UW2Z	ak	Andra kammaren 1955:22 004	1	6	1	2
+4	4	1955	prot-1955--ak--022_i-xmtstl8n8h7dwxjcielq1r	prot-1955--ak--022_i-xmtstl8n8h7dwxjcielq1r.csv	644	i-XMTSTL8n8H7DwXjCiELq1r	ak	Andra kammaren 1955:22 005	1	3	1	2
+5	5	1955	prot-1955--ak--022_i-3r5c8vqo1fxlqaqx7yyqq8	prot-1955--ak--022_i-3r5c8vqo1fxlqaqx7yyqq8.csv	4499	i-3R5C8vQo1FXLQaqX7yYqq8	ak	Andra kammaren 1955:22 009	1	5	1	2
+6	6	1955	prot-1955--ak--022_i-fooddbstxg6pqwp431p9bu	prot-1955--ak--022_i-fooddbstxg6pqwp431p9bu.csv	1179	i-FooDdbstXg6Pqwp431p9Bu	ak	Andra kammaren 1955:22 012	1	1	1	1
+7	7	1955	prot-1955--ak--022_i-eudlsjc6kknhmzpb1ufjeq	prot-1955--ak--022_i-eudlsjc6kknhmzpb1ufjeq.csv	875	i-EuDLsjc6kknhMzPB1UFjeq	ak	Andra kammaren 1955:22 013	1	3	1	2
+8	8	1955	prot-1955--ak--022_i-184mh7uht7d8tgsavshbsj	prot-1955--ak--022_i-184mh7uht7d8tgsavshbsj.csv	557	i-184mh7uhT7D8tGsavsHbSJ	ak	Andra kammaren 1955:22 018	1	3	1	2
+9	9	1955	prot-1955--ak--022_i-7k8zffy69k9dvxzjwlskxw	prot-1955--ak--022_i-7k8zffy69k9dvxzjwlskxw.csv	3533	i-7k8zFFY69k9DVxZJwLskxW	ak	Andra kammaren 1955:22 023	1	6	1	2
+10	10	1955	prot-1955--ak--022_i-ad4pvxowfj5wk9apntm5vp	prot-1955--ak--022_i-ad4pvxowfj5wk9apntm5vp.csv	2049	i-AD4PVxoWFJ5WK9APNtM5vP	ak	Andra kammaren 1955:22 025	1	8	1	2
+11	11	1955	prot-1955--ak--022_i-2ze5qggjascoqcn8nthhnj	prot-1955--ak--022_i-2ze5qggjascoqcn8nthhnj.csv	762	i-2ze5QGGJAsCoqCn8nthhnj	ak	Andra kammaren 1955:22 026	1	6	1	2
+12	12	1955	prot-1955--ak--022_i-hjkubagoagvf95jxdvvgsa	prot-1955--ak--022_i-hjkubagoagvf95jxdvvgsa.csv	746	i-HJkUbagoaGvf95jXdVvgSA	ak	Andra kammaren 1955:22 027	1	5	1	2
+13	13	1955	prot-1955--ak--022_i-rszkeuyv8emz5l8a5q8fuw	prot-1955--ak--022_i-rszkeuyv8emz5l8a5q8fuw.csv	1527	i-RszKEuYv8eMZ5L8A5Q8Fuw	ak	Andra kammaren 1955:22 028	1	3	1	2
+14	14	1955	prot-1955--ak--022_i-2hyrdnwnjjfppeciq2cg17	prot-1955--ak--022_i-2hyrdnwnjjfppeciq2cg17.csv	2664	i-2HyRdnwNjJfPPeCiQ2cg17	ak	Andra kammaren 1955:22 029	1	3	1	2
+15	15	1955	prot-1955--ak--022_i-tw2v8kvc9bb35jx86j8acc	prot-1955--ak--022_i-tw2v8kvc9bb35jx86j8acc.csv	1685	i-TW2v8kvC9bB35Jx86j8aCC	ak	Andra kammaren 1955:22 033	1	6	1	2
+16	16	1955	prot-1955--ak--022_i-ciy7vnsawtdmyea3zzhgp2	prot-1955--ak--022_i-ciy7vnsawtdmyea3zzhgp2.csv	446	i-CiY7VNsAwtDMYeA3zzhgP2	ak	Andra kammaren 1955:22 034	1	1	1	2
+17	17	1955	prot-1955--ak--022_i-rgpxdguwykq6gvw8emfxxz	prot-1955--ak--022_i-rgpxdguwykq6gvw8emfxxz.csv	304	i-RgPXdGuWYKQ6GVW8emfxxz	ak	Andra kammaren 1955:22 035	1	6	1	2
+18	18	1955	prot-1955--ak--022_i-8xtnmp7cvtcrzuc85xfbv2	prot-1955--ak--022_i-8xtnmp7cvtcrzuc85xfbv2.csv	149	i-8xTNMP7CVTCRZUC85xfBv2	ak	Andra kammaren 1955:22 036	1	6	1	2
+19	19	1955	prot-1955--ak--022_i-uznm618cskfty3jf64hgng	prot-1955--ak--022_i-uznm618cskfty3jf64hgng.csv	3561	i-UzNm618CskFtY3jF64hgNG	ak	Andra kammaren 1955:22 037	1	3	1	2
+20	20	1955	prot-1955--ak--022_i-5qjseuravegvpfv6whts4r	prot-1955--ak--022_i-5qjseuravegvpfv6whts4r.csv	4609	i-5QJsEUravEgVPFV6wHts4r	ak	Andra kammaren 1955:22 038	1	5	1	2
+21	21	1955	prot-1955--ak--022_i-xagqae6y2zc9wu7wvmlctc	prot-1955--ak--022_i-xagqae6y2zc9wu7wvmlctc.csv	3293	i-XagQaE6Y2Zc9wu7WvmLcTC	ak	Andra kammaren 1955:22 039	1	6	1	2
+22	22	1955	prot-1955--ak--022_i-lcd3ulv5zw69tt1s2baqhn	prot-1955--ak--022_i-lcd3ulv5zw69tt1s2baqhn.csv	2651	i-Lcd3uLV5ZW69Tt1s2baQhn	ak	Andra kammaren 1955:22 049	1	6	1	2
+23	23	1955	prot-1955--ak--022_i-wjt9cvn6go2ndhjsmuuchk	prot-1955--ak--022_i-wjt9cvn6go2ndhjsmuuchk.csv	1561	i-WJt9CvN6go2ndHjsmuUcHK	ak	Andra kammaren 1955:22 050	1	5	1	2
+24	24	1955	prot-1955--ak--022_unknown	prot-1955--ak--022_unknown.csv	8516	unknown	ak	Andra kammaren 1955:22 054	0	0	0	0
+25	25	1955	prot-1955--ak--022_i-bqdgkscalhuzhhaffmx5pf	prot-1955--ak--022_i-bqdgkscalhuzhhaffmx5pf.csv	7650	i-BqDGKscaLhUZHhaFFmx5pf	ak	Andra kammaren 1955:22 056	1	3	1	2
+26	26	1955	prot-1955--ak--022_i-7adeuptmddbenmgpp22azb	prot-1955--ak--022_i-7adeuptmddbenmgpp22azb.csv	2130	i-7AdEUptmDDBeNmgpp22aZb	ak	Andra kammaren 1955:22 057	1	3	1	2
+27	27	1955	prot-1955--ak--022_i-4daufxnbqzctaofjumzeaf	prot-1955--ak--022_i-4daufxnbqzctaofjumzeaf.csv	1358	i-4DAUFXnbqzCtaoFJumzEaf	ak	Andra kammaren 1955:22 058	1	6	1	2
+28	28	1955	prot-1955--ak--022_i-tpbmxu1qadouqvh7zwwskc	prot-1955--ak--022_i-tpbmxu1qadouqvh7zwwskc.csv	845	i-TpbmXU1qADouQvh7zWwskC	ak	Andra kammaren 1955:22 062	1	3	1	2
+29	29	1955	prot-1955--ak--022_i-gkvs1edvxvuggyqhoj3lvm	prot-1955--ak--022_i-gkvs1edvxvuggyqhoj3lvm.csv	60	i-GKVS1EDVXVuggYqHoj3LVm	ak	Andra kammaren 1955:22 064	1	1	1	1
+30	30	1955	prot-1955--ak--022_i-f8bsd7jcepay5c3dwyplrs	prot-1955--ak--022_i-f8bsd7jcepay5c3dwyplrs.csv	1512	i-F8bSD7JcePAy5c3DWYPLRs	ak	Andra kammaren 1955:22 065	1	1	1	2
+31	31	1955	prot-1955--ak--022_i-c35yyip4t5v4hbsbwngd7z	prot-1955--ak--022_i-c35yyip4t5v4hbsbwngd7z.csv	5182	i-C35yyip4t5V4hBSBwnGD7Z	ak	Andra kammaren 1955:22 067	1	6	1	2
+32	32	1955	prot-1955--ak--022_i-kaewnq53dsfqzgv8fcpybx	prot-1955--ak--022_i-kaewnq53dsfqzgv8fcpybx.csv	1467	i-KaEwnQ53dsfqZGV8fcpYbX	ak	Andra kammaren 1955:22 077	1	1	1	2
+33	33	1955	prot-1955--ak--022_i-lyd4unv4vnb2hmvp3ldfbd	prot-1955--ak--022_i-lyd4unv4vnb2hmvp3ldfbd.csv	1235	i-Lyd4uNV4VNB2HmVp3LdFbd	ak	Andra kammaren 1955:22 083	1	1	1	2
+34	34	1955	prot-1955--ak--022_i-ltomcvxu3j48yboslk1spq	prot-1955--ak--022_i-ltomcvxu3j48yboslk1spq.csv	2282	i-LToMcVXu3j48yboSLK1sPQ	ak	Andra kammaren 1955:22 091	1	6	1	2
+35	35	1955	prot-1955--ak--022_i-ubdkawthbleb83tf5thapc	prot-1955--ak--022_i-ubdkawthbleb83tf5thapc.csv	1186	i-UbdkaWThBLeb83tF5THaPC	ak	Andra kammaren 1955:22 093	1	3	1	2
+36	36	1955	prot-1955--ak--022_i-llnq8ryvszr7dbi2eaht1c	prot-1955--ak--022_i-llnq8ryvszr7dbi2eaht1c.csv	3552	i-LLnQ8RYVszR7dBi2EAHt1C	ak	Andra kammaren 1955:22 100	1	1	1	2
+37	37	1955	prot-1955--ak--022_i-quvttyfs7dhyejzxw6zyjh	prot-1955--ak--022_i-quvttyfs7dhyejzxw6zyjh.csv	1806	i-QUvttyFs7dHYEJzxW6zyJH	ak	Andra kammaren 1955:22 108	1	1	1	2
+38	38	1955	prot-1955--ak--022_i-9jhvjdksrb87lgguuy4hre	prot-1955--ak--022_i-9jhvjdksrb87lgguuy4hre.csv	313	i-9jhvJdksrB87LGgUuY4HrE	ak	Andra kammaren 1955:22 111	1	6	1	2
+39	39	1955	prot-1955--ak--022_i-fs9kpzyhzp1uu9iojzkh5d	prot-1955--ak--022_i-fs9kpzyhzp1uu9iojzkh5d.csv	600	i-Fs9KpZYHZp1uu9ioJZkH5D	ak	Andra kammaren 1955:22 112	1	3	1	2
+40	40	1955	prot-1955--ak--022_i-xkapddbhxsrxgehj4f98qz	prot-1955--ak--022_i-xkapddbhxsrxgehj4f98qz.csv	1209	i-XkAPddbHxSrxgEhj4f98qz	ak	Andra kammaren 1955:22 116	1	3	1	2
+41	41	1955	prot-1955--ak--022_i-v2gyz8xerx96ztpdhjkdhk	prot-1955--ak--022_i-v2gyz8xerx96ztpdhjkdhk.csv	933	i-V2gYZ8XERX96ZTpdHjKDHk	ak	Andra kammaren 1955:22 117	1	1	1	2
+42	42	1955	prot-1955--ak--022_i-jgrytbr82a6fzxywrddtjv	prot-1955--ak--022_i-jgrytbr82a6fzxywrddtjv.csv	68	i-JgRYTBR82A6fZXYWrDDTJv	ak	Andra kammaren 1955:22 123	1	3	1	2
+43	43	1955	prot-1955--ak--022_i-wpmrqhx63es2bchj5zxczf	prot-1955--ak--022_i-wpmrqhx63es2bchj5zxczf.csv	1465	i-WpmrqhX63Es2BchJ5zXczf	ak	Andra kammaren 1955:22 124	1	6	1	2
+44	44	1955	prot-1955--ak--022_i-pyiwqbpejcpreaaq6bbagf	prot-1955--ak--022_i-pyiwqbpejcpreaaq6bbagf.csv	1914	i-PyiwQBpejCpREAaq6BBAgf	ak	Andra kammaren 1955:22 128	1	3	1	2
+45	45	1955	prot-1955--ak--022_i-ac8rfpqgo4affg6kooa2u5	prot-1955--ak--022_i-ac8rfpqgo4affg6kooa2u5.csv	1458	i-AC8RFPqgo4aFfG6KooA2u5	ak	Andra kammaren 1955:22 129	1	6	1	2
+46	46	1955	prot-1955--ak--022_i-vd3ayfypfgvgszgaimxnrs	prot-1955--ak--022_i-vd3ayfypfgvgszgaimxnrs.csv	556	i-VD3ayfYPfGVgSzgaiMXnrs	ak	Andra kammaren 1955:22 130	1	6	1	2
+47	47	1955	prot-1955--ak--022_i-ysiisujqblt4dhlxm7iu93	prot-1955--ak--022_i-ysiisujqblt4dhlxm7iu93.csv	551	i-YSiiSuJqBLt4dhLxm7iu93	ak	Andra kammaren 1955:22 131	1	6	1	2
+48	48	1955	prot-1955--ak--022_i-lfad1z7d9ynrl6fxtwlygr	prot-1955--ak--022_i-lfad1z7d9ynrl6fxtwlygr.csv	25	i-LFaD1Z7d9YNRL6fxTwLYgr	ak	Andra kammaren 1955:22 144	1	6	1	2
+49	49	1955	prot-1955--ak--022_i-rijfb4cgvg9jt4652tdcv	prot-1955--ak--022_i-rijfb4cgvg9jt4652tdcv.csv	430	i-riJfB4CgvG9jt4652TdCv	ak	Andra kammaren 1955:22 146	1	3	1	2
+50	50	1955	prot-1955--ak--022_i-udh9lhps6vd6f6rxg4ub8n	prot-1955--ak--022_i-udh9lhps6vd6f6rxg4ub8n.csv	725	i-UDh9LhPS6Vd6F6rXG4Ub8N	ak	Andra kammaren 1955:22 151	1	6	1	2
+51	51	1955	prot-1955--ak--022_i-gm1k7ehripg9akbmruthad	prot-1955--ak--022_i-gm1k7ehripg9akbmruthad.csv	348	i-GM1k7EHRipg9AKbMRUTHAd	ak	Andra kammaren 1955:22 152	1	6	1	2
+52	52	1955	prot-1955--ak--022_i-nbpwjaykpxu4u1uu87zkt1	prot-1955--ak--022_i-nbpwjaykpxu4u1uu87zkt1.csv	1093	i-NBpwJayKpXu4u1Uu87zKT1	ak	Andra kammaren 1955:22 153	1	3	1	2
+53	53	1955	prot-1955--ak--022_i-q8gqdc3jjtlrmbkfphpnpq	prot-1955--ak--022_i-q8gqdc3jjtlrmbkfphpnpq.csv	21	i-Q8GqdC3JjTLrmBKfpHpnPQ	ak	Andra kammaren 1955:22 154	2	3	1	2
+54	54	1955	prot-1955--ak--022_i-6oh2fmmy6ew4v5gtufrzdh	prot-1955--ak--022_i-6oh2fmmy6ew4v5gtufrzdh.csv	345	i-6oh2fmMy6eW4v5gtufrZdh	ak	Andra kammaren 1955:22 155	2	3	1	2
+55	55	1955	prot-1955--ak--022_i-hrfkdzvtmmr7za25xt1lgw	prot-1955--ak--022_i-hrfkdzvtmmr7za25xt1lgw.csv	858	i-HrFkdZvTMMR7zA25xt1Lgw	ak	Andra kammaren 1955:22 156	2	3	1	2
+56	56	1955	prot-1955--ak--022_i-cbtntzgjtzpbbsm4fxdhsn	prot-1955--ak--022_i-cbtntzgjtzpbbsm4fxdhsn.csv	724	i-CBtNTZGJtZPBBSm4FxdhSN	ak	Andra kammaren 1955:22 157	2	3	1	2
+57	57	1955	prot-1955--ak--022_i-xnr1rnnkbmvqemxhbj1afa	prot-1955--ak--022_i-xnr1rnnkbmvqemxhbj1afa.csv	351	i-XNR1rnnKBMVQeMxhbj1afA	ak	Andra kammaren 1955:22 158	2	8	1	2
+58	58	1955	prot-1955--ak--022_i-n5dux7a68df9ywbsdffwp1	prot-1955--ak--022_i-n5dux7a68df9ywbsdffwp1.csv	48	i-N5DuX7A68dF9YwBSdFfwP1	ak	Andra kammaren 1955:22 159	1	6	1	2
+59	59	1955	prot-1955--ak--022_i-4yqfyczptewzxirejfjbj6	prot-1955--ak--022_i-4yqfyczptewzxirejfjbj6.csv	36	i-4YQFYCZptEWZxiREjfJbJ6	ak	Andra kammaren 1955:22 161	1	1	1	2
+60	60	1955	prot-1955--ak--022_i-mw31btf7uoxhtwx5x3k5qd	prot-1955--ak--022_i-mw31btf7uoxhtwx5x3k5qd.csv	47	i-Mw31BTf7uoxHTWx5X3k5QD	ak	Andra kammaren 1955:22 162	1	3	1	2
+61	61	1978	prot-197879--014_unknown	prot-197879--014_unknown.csv	18	unknown	ek	1978/79:14 001	0	0	0	0
+62	62	1991	prot-199192--021_i-cacgimsswywta9yiowxprc	prot-199192--021_i-cacgimsswywta9yiowxprc.csv	160	i-CACgimSSwyWTa9yioWxPRC	ek	1991/92:21 001	1	2	1	0
+63	63	1991	prot-199192--021_i-3spbyiczy7gfbq8rdvtqmb	prot-199192--021_i-3spbyiczy7gfbq8rdvtqmb.csv	345	i-3sPbyicZy7gfbq8RdVTQMb	ek	1991/92:21 002	2	6	1	0
+64	64	1991	prot-199192--021_i-tvpy9zequj2jkt7pqxs85w	prot-199192--021_i-tvpy9zequj2jkt7pqxs85w.csv	267	i-TVpY9zEquJ2jKT7pqxS85w	ek	1991/92:21 003	2	1	1	0
+65	65	1991	prot-199192--021_i-sftjzkfkccewbwrmjebd7c	prot-199192--021_i-sftjzkfkccewbwrmjebd7c.csv	241	i-SftjZkfkccEWbWRMJEbd7c	ek	1991/92:21 004	2	6	1	0
+66	66	1991	prot-199192--021_i-rrg9t2xukhe4iajaykgpb	prot-199192--021_i-rrg9t2xukhe4iajaykgpb.csv	542	i-rrg9t2XUkHE4iAjAykgpb	ek	1991/92:21 005	2	8	1	0
+67	67	1991	prot-199192--021_i-rctjiwptwsdbhu76zmccur	prot-199192--021_i-rctjiwptwsdbhu76zmccur.csv	21	i-RCTjiWPTWsdbhU76ZmcCUr	ek	1991/92:21 006	1	1	1	0
+68	68	1991	prot-199192--021_i-ta35zzcd9azayrg33klbte	prot-199192--021_i-ta35zzcd9azayrg33klbte.csv	97	i-TA35ZZCd9AZayRg33KLBtE	ek	1991/92:21 007	1	6	1	0
+69	69	1991	prot-199192--021_i-9bfqsfvcltvhzijqpxnmkr	prot-199192--021_i-9bfqsfvcltvhzijqpxnmkr.csv	135	i-9bfQSfVCLTvHZiJQpxNMkR	ek	1991/92:21 008	1	5	1	0
+70	70	1991	prot-199192--021_i-9gkzmwa6j3axtpskudvbz	prot-199192--021_i-9gkzmwa6j3axtpskudvbz.csv	65	i-9GkZmWA6j3AXTPSkudVbZ	ek	1991/92:21 009	1	1	1	0
+71	71	1991	prot-199192--021_i-aqxtwztqejiysickvrft1u	prot-199192--021_i-aqxtwztqejiysickvrft1u.csv	177	i-AQXTwzTQEJiySickVRFT1U	ek	1991/92:21 010	2	1	1	0
+72	72	1991	prot-199192--021_i-pdjw8xpqqjv6cbpbbrhsqt	prot-199192--021_i-pdjw8xpqqjv6cbpbbrhsqt.csv	60	i-PdJw8xPqQjV6cBPBbRhsqT	ek	1991/92:21 011	1	6	1	0
+73	73	1991	prot-199192--021_i-8rjvavtfp7ujly1rbrhnia	prot-199192--021_i-8rjvavtfp7ujly1rbrhnia.csv	84	i-8rjVavTFp7UjLy1RbrHnia	ek	1991/92:21 012	1	6	1	0
+74	74	1991	prot-199192--021_i-ptwgnmfqaftxvr8sbylqzu	prot-199192--021_i-ptwgnmfqaftxvr8sbylqzu.csv	137	i-PTwgnmFQaFTXvr8SByLQzu	ek	1991/92:21 013	1	8	1	0
+75	75	1991	prot-199192--021_i-wvrkggmvwbivxvopqgjuef	prot-199192--021_i-wvrkggmvwbivxvopqgjuef.csv	118	i-WvrkgGMVWbiVxVoPqgJuEF	ek	1991/92:21 014	1	8	1	0
+76	76	1991	prot-199192--021_i-9arlljupp6dkl6wgf6nzuc	prot-199192--021_i-9arlljupp6dkl6wgf6nzuc.csv	322	i-9aRLLJUPp6dkL6wGF6nZuc	ek	1991/92:21 015	1	45	1	0
+77	77	1991	prot-199192--021_i-pyyyjc4bacyhvae5h3ye6g	prot-199192--021_i-pyyyjc4bacyhvae5h3ye6g.csv	155	i-PYyYJc4bAcYHVAE5H3YE6g	ek	1991/92:21 017	1	1	1	0
+78	78	1991	prot-199192--021_i-5bauorewuhedmfstaqqoco	prot-199192--021_i-5bauorewuhedmfstaqqoco.csv	66	i-5BAuoreWuHEDmfStAQQoco	ek	1991/92:21 018	1	3	1	0
+79	79	1991	prot-199192--021_i-jgqdoqfn7lrfwfe8vqvbac	prot-199192--021_i-jgqdoqfn7lrfwfe8vqvbac.csv	14	i-JgqDoQfn7LrFWFe8vQvbAc	ek	1991/92:21 019	1	6	1	0
+80	80	1991	prot-199192--021_i-gmsfh9fmi5xjm5ydcn6r1m	prot-199192--021_i-gmsfh9fmi5xjm5ydcn6r1m.csv	46	i-GmSFH9fmi5xjm5ydcN6R1m	ek	1991/92:21 020	2	3	1	0
+81	81	1991	prot-199192--021_i-k7a3hxruqwaorkthu77uva	prot-199192--021_i-k7a3hxruqwaorkthu77uva.csv	50	i-K7A3HxRuQWaoRkthu77uVa	ek	1991/92:21 021	2	6	1	0
+82	82	1991	prot-199192--127_i-hbefmthdym5gj3a1vqk6pr	prot-199192--127_i-hbefmthdym5gj3a1vqk6pr.csv	3125	i-HBefMTHdym5gJ3a1vqK6pr	ek	1991/92:127 001	2	6	1	0
+83	83	1991	prot-199192--127_i-5oxq9qfxuqekcyb87sfvtp	prot-199192--127_i-5oxq9qfxuqekcyb87sfvtp.csv	1858	i-5oxq9QfXuQEKCyB87SfvtP	ek	1991/92:127 002	1	45	1	0
+84	84	1991	prot-199192--127_i-rrg9t2xukhe4iajaykgpb	prot-199192--127_i-rrg9t2xukhe4iajaykgpb.csv	849	i-rrg9t2XUkHE4iAjAykgpb	ek	1991/92:127 007	2	8	1	0
+85	85	1991	prot-199192--127_i-cno6xncmdc2lkrvxc6u2b	prot-199192--127_i-cno6xncmdc2lkrvxc6u2b.csv	2021	i-cNo6XnCMDc2LkrvXc6U2b	ek	1991/92:127 010	1	5	1	0
+86	86	1991	prot-199192--127_i-jzka6caqdsky8yhuyfejeu	prot-199192--127_i-jzka6caqdsky8yhuyfejeu.csv	4254	i-JZKa6caqdSKy8yhUyfEJeU	ek	1991/92:127 011	1	3	2	33
+87	87	1991	prot-199192--127_i-pdjw8xpqqjv6cbpbbrhsqt	prot-199192--127_i-pdjw8xpqqjv6cbpbbrhsqt.csv	3437	i-PdJw8xPqQjV6cBPBbRhsqT	ek	1991/92:127 016	1	6	1	0
+88	88	1991	prot-199192--127_i-nph9ymbx9f5regmdldf5nm	prot-199192--127_i-nph9ymbx9f5regmdldf5nm.csv	1351	i-NpH9yMBX9F5REgmdLDF5Nm	ek	1991/92:127 023	1	45	1	0
+89	89	1991	prot-199192--127_i-dtxlnvkni8er1muemgychj	prot-199192--127_i-dtxlnvkni8er1muemgychj.csv	1910	i-DtxLnvKNi8eR1muemGYCHj	ek	1991/92:127 024	2	5	1	0
+90	90	1991	prot-199192--127_i-87j9l7kecotvfpdymwufty	prot-199192--127_i-87j9l7kecotvfpdymwufty.csv	1344	i-87J9L7KEcoTvFpdYMWuFTy	ek	1991/92:127 032	1	2	1	0
+91	91	1991	prot-199192--127_i-3m1s36ecjm8aj113tdc85w	prot-199192--127_i-3m1s36ecjm8aj113tdc85w.csv	1458	i-3M1s36ECJm8aj113TDC85w	ek	1991/92:127 034	1	6	1	0
+92	92	1991	prot-199192--127_i-5sxzszsux9klqvrecwz58f	prot-199192--127_i-5sxzszsux9klqvrecwz58f.csv	746	i-5sxzSZSUx9KLqvREcwz58f	ek	1991/92:127 038	2	5	1	0
+93	93	1991	prot-199192--127_i-3qz6cxuz6kggcr1at9mzrb	prot-199192--127_i-3qz6cxuz6kggcr1at9mzrb.csv	2473	i-3Qz6CXUz6kGGCR1aT9MZrB	ek	1991/92:127 048	2	6	1	0
+94	94	1991	prot-199192--127_unknown	prot-199192--127_unknown.csv	1846	unknown	ek	1991/92:127 049	0	0	0	0
+95	95	1991	prot-199192--127_i-3kej4ylp7mio52y4ibmphz	prot-199192--127_i-3kej4ylp7mio52y4ibmphz.csv	463	i-3keJ4YLp7mio52y4ibMPhZ	ek	1991/92:127 052	1	5	1	0
+96	96	1991	prot-199192--127_i-gcjvtrecjgryymfdembnan	prot-199192--127_i-gcjvtrecjgryymfdembnan.csv	3117	i-GCJVTREcJGRyYmFdeMbNaN	ek	1991/92:127 059	1	6	1	0
+97	97	1991	prot-199192--127_i-uwr9atcbsp2fazzbpfb47a	prot-199192--127_i-uwr9atcbsp2fazzbpfb47a.csv	2190	i-UwR9aTcbsp2FAzzbpFB47A	ek	1991/92:127 060	1	45	1	0
+98	98	1991	prot-199192--127_i-kytbd3wzfqektpffxjtepk	prot-199192--127_i-kytbd3wzfqektpffxjtepk.csv	3477	i-Kytbd3WZfQeKTPffXjTEpk	ek	1991/92:127 061	2	8	1	0
+99	99	1991	prot-199192--127_i-nlft4rs4humcgpwx1zb8ag	prot-199192--127_i-nlft4rs4humcgpwx1zb8ag.csv	922	i-NLfT4RS4huMCGpWx1zB8Ag	ek	1991/92:127 062	1	3	1	0
+100	100	1991	prot-199192--127_i-2ggbvfkhrn3s8fvfeplxjs	prot-199192--127_i-2ggbvfkhrn3s8fvfeplxjs.csv	3592	i-2ggBvfkHRn3s8FvFEPLxjs	ek	1991/92:127 069	1	1	1	0
+101	101	1991	prot-199192--127_i-l8fj5uq6dwcoy3cxs1trpk	prot-199192--127_i-l8fj5uq6dwcoy3cxs1trpk.csv	3270	i-L8FJ5Uq6DWCoY3cXS1trPk	ek	1991/92:127 081	1	6	1	0
+102	102	1991	prot-199192--127_i-bkqoi6ka1ekk9eejht16cz	prot-199192--127_i-bkqoi6ka1ekk9eejht16cz.csv	63	i-BkQoi6KA1EKK9EEJhT16Cz	ek	1991/92:127 092	2	5	1	0
+103	103	1991	prot-199192--127_i-vvqvwyrqguiyjtet3cpqcm	prot-199192--127_i-vvqvwyrqguiyjtet3cpqcm.csv	2345	i-VvqVwyrQgUiYjtEt3CpQcM	ek	1991/92:127 093	1	5	1	0
+104	104	1991	prot-199192--127_i-ap6paqn9pzdfdutnp8xyzp	prot-199192--127_i-ap6paqn9pzdfdutnp8xyzp.csv	847	i-Ap6PaQn9pzDFdUtnP8xyzP	ek	1991/92:127 098	1	2	1	0
+105	105	1991	prot-199192--127_i-7sjk192el4vbjkld12xg8y	prot-199192--127_i-7sjk192el4vbjkld12xg8y.csv	1216	i-7SJK192EL4VbjkLD12Xg8y	ek	1991/92:127 099	2	6	1	0
+106	106	1991	prot-199192--127_i-c3sspuv2x6tssewo9qpd5d	prot-199192--127_i-c3sspuv2x6tssewo9qpd5d.csv	992	i-C3ssPUv2X6tsSEWo9qPD5D	ek	1991/92:127 104	1	1	1	0
+107	107	1991	prot-199192--127_i-imlyujzk1umfziqwdny9q	prot-199192--127_i-imlyujzk1umfziqwdny9q.csv	5696	i-imLyujzk1umFZiqwdNY9q	ek	1991/92:127 112	1	6	1	0
+108	108	1991	prot-199192--127_i-gaozvglngcb9vstyp2prqh	prot-199192--127_i-gaozvglngcb9vstyp2prqh.csv	3428	i-GaozvGLNGCb9Vstyp2PrQH	ek	1991/92:127 113	1	8	1	0
+109	109	1991	prot-199192--127_i-lbn95md8hn6zkxhrbcbjbb	prot-199192--127_i-lbn95md8hn6zkxhrbcbjbb.csv	2863	i-LBN95MD8hn6zkXhRBcbJbB	ek	1991/92:127 118	1	5	1	0
+110	110	1991	prot-199192--127_i-2fvusvt1sc2fewmndrmgeb	prot-199192--127_i-2fvusvt1sc2fewmndrmgeb.csv	5398	i-2FVUSVT1SC2fewMNdrmgeb	ek	1991/92:127 128	1	3	1	0
+111	111	1991	prot-199192--127_i-ds7sstfh4eascvdepjuzf3	prot-199192--127_i-ds7sstfh4eascvdepjuzf3.csv	1638	i-Ds7sSTFH4EAscvdepjuZf3	ek	1991/92:127 137	2	6	1	0
+112	112	1991	prot-199192--127_i-szgcxyxyn6gnrblikzly7m	prot-199192--127_i-szgcxyxyn6gnrblikzly7m.csv	1757	i-SZgcxyxYn6GnRBLikzLy7M	ek	1991/92:127 146	1	1	1	0
+113	113	1991	prot-199192--127_i-8kflubhhscwaye3zsbpr3g	prot-199192--127_i-8kflubhhscwaye3zsbpr3g.csv	2143	i-8kfLUBHhscwaye3ZSBPr3G	ek	1991/92:127 151	1	2	1	0
+114	114	1991	prot-199192--127_i-dntstrvt1jenyw6pdmxfzi	prot-199192--127_i-dntstrvt1jenyw6pdmxfzi.csv	4062	i-DnTstrvT1jenyw6pdMxfZi	ek	1991/92:127 159	1	5	1	0
+115	115	1991	prot-199192--127_i-dsa7jdv9xexib7yxfnpcm5	prot-199192--127_i-dsa7jdv9xexib7yxfnpcm5.csv	809	i-DsA7JDV9XexiB7YxfnpCm5	ek	1991/92:127 164	2	6	1	0
+116	116	1991	prot-199192--127_i-wiq5749k7owcaruynxzux7	prot-199192--127_i-wiq5749k7owcaruynxzux7.csv	740	i-Wiq5749k7owcARUynxZuX7	ek	1991/92:127 165	2	1	1	0
+117	117	1991	prot-199192--127_i-wvrkggmvwbivxvopqgjuef	prot-199192--127_i-wvrkggmvwbivxvopqgjuef.csv	1507	i-WvrkgGMVWbiVxVoPqgJuEF	ek	1991/92:127 171	1	8	1	0
+118	118	1991	prot-199192--127_i-vrxw6nqnsc7xr3jonltumw	prot-199192--127_i-vrxw6nqnsc7xr3jonltumw.csv	1309	i-Vrxw6nqNsC7Xr3jonLTumw	ek	1991/92:127 176	1	2	1	0
+119	119	1991	prot-199192--127_i-hf1be62hhhvaxoziyuz2hf	prot-199192--127_i-hf1be62hhhvaxoziyuz2hf.csv	1492	i-HF1be62hHhvaXoZiyUz2HF	ek	1991/92:127 185	1	8	1	0
+120	120	1991	prot-199192--127_i-war7xtq5vm5vhtmxckdzv4	prot-199192--127_i-war7xtq5vm5vhtmxckdzv4.csv	2216	i-WAR7Xtq5vM5vhtMxcKDZv4	ek	1991/92:127 194	1	6	1	0
+121	121	1991	prot-199192--127_i-8tpdmpvgnxjjkwgy9k68ba	prot-199192--127_i-8tpdmpvgnxjjkwgy9k68ba.csv	4202	i-8tpDmPvgnXjJkWGy9k68Ba	ek	1991/92:127 203	2	6	1	0
+122	122	1991	prot-199192--127_i-lvt4xzqrhukrvdh5vnsl5s	prot-199192--127_i-lvt4xzqrhukrvdh5vnsl5s.csv	2122	i-LvT4xzQrHUKrVDH5VNSL5s	ek	1991/92:127 204	1	45	1	0
+123	123	1991	prot-199192--127_i-5q7m7rzyufn9rhagjb6ghh	prot-199192--127_i-5q7m7rzyufn9rhagjb6ghh.csv	3306	i-5q7m7rZyufN9RHaGjB6GHh	ek	1991/92:127 205	1	8	1	0
+124	124	1991	prot-199192--127_i-ukrvdvbmgqtec2ytigz7k5	prot-199192--127_i-ukrvdvbmgqtec2ytigz7k5.csv	3015	i-UkRVDvbmgQTeC2YtiGZ7K5	ek	1991/92:127 206	2	5	1	0
+125	125	1991	prot-199192--127_i-prhkyxgcat2cbjpjjfnrtn	prot-199192--127_i-prhkyxgcat2cbjpjjfnrtn.csv	2912	i-PRHkYxGCaT2cbJpjjfnRtn	ek	1991/92:127 215	2	5	2	34
+126	126	1991	prot-199192--127_i-h6rrzni8wdnewhuxz4ftez	prot-199192--127_i-h6rrzni8wdnewhuxz4ftez.csv	1386	i-H6rrzni8wdNEWHUXz4FTEZ	ek	1991/92:127 224	2	3	1	0
+127	127	1991	prot-199192--127_i-tbwjgk7r6pzse6ap5pieb4	prot-199192--127_i-tbwjgk7r6pzse6ap5pieb4.csv	1375	i-TBWJgK7R6pzsE6Ap5PiEb4	ek	1991/92:127 233	2	2	1	0
+128	128	1991	prot-199192--127_i-ahzryxd2b7najsd37mfhnj	prot-199192--127_i-ahzryxd2b7najsd37mfhnj.csv	664	i-Ahzryxd2b7naJSD37mfHNJ	ek	1991/92:127 240	1	5	1	0
+129	129	1991	prot-199192--127_i-8cfscdwjvpdgozuk8rhzyw	prot-199192--127_i-8cfscdwjvpdgozuk8rhzyw.csv	512	i-8cFSCdWjvpDgozuk8RHZyW	ek	1991/92:127 241	1	6	1	0
+130	130	1991	prot-199192--127_i-kfllbh5cxvpzkuzahy3paz	prot-199192--127_i-kfllbh5cxvpzkuzahy3paz.csv	681	i-KFLLBh5CxVpZkUZaHy3pAz	ek	1991/92:127 242	2	5	1	0
+131	131	1991	prot-199192--127_i-ptwgnmfqaftxvr8sbylqzu	prot-199192--127_i-ptwgnmfqaftxvr8sbylqzu.csv	92	i-PTwgnmFQaFTXvr8SByLQzu	ek	1991/92:127 245	1	8	1	0
+132	132	1991	prot-199192--127_i-8hxdnlw9ngyyqbhg8rczcj	prot-199192--127_i-8hxdnlw9ngyyqbhg8rczcj.csv	15	i-8hxDNLW9NgYYqBHg8RCZcj	ek	1991/92:127 246	1	5	1	0
+133	133	1991	prot-199192--127_i-7a6no7x5aykka9tbjueeea	prot-199192--127_i-7a6no7x5aykka9tbjueeea.csv	190	i-7A6No7x5ayKka9TbjUeeEa	ek	1991/92:127 247	1	5	1	0
+134	134	1991	prot-199192--127_i-fysvuykruvwgfkvy3yhpi7	prot-199192--127_i-fysvuykruvwgfkvy3yhpi7.csv	30	i-FYsVUYKruvwGFkVY3YHpi7	ek	1991/92:127 248	1	6	1	0
+135	135	1991	prot-199192--127_i-pvzh9zhc6sdat87ng4cmcq	prot-199192--127_i-pvzh9zhc6sdat87ng4cmcq.csv	20	i-PvZh9Zhc6sdAt87Ng4CMcQ	ek	1991/92:127 249	1	45	1	0
+136	136	1995	prot-199596--035_unknown	prot-199596--035_unknown.csv	267	unknown	ek	1995/96:35 001	0	0	0	0
+137	137	1995	prot-199596--035_i-4cwynh4xxjhzj5wdbazmsy	prot-199596--035_i-4cwynh4xxjhzj5wdbazmsy.csv	2188	i-4CwyNH4xXJhZj5wdBAzmSY	ek	1995/96:35 004	2	6	2	22
+138	138	1995	prot-199596--035_i-f8qde2eedz12pwfanq3ahv	prot-199596--035_i-f8qde2eedz12pwfanq3ahv.csv	697	i-F8qdE2eedz12PwFanq3ahv	ek	1995/96:35 005	2	5	1	0
+139	139	1995	prot-199596--035_i-c44smee9ocandjeden9flp	prot-199596--035_i-c44smee9ocandjeden9flp.csv	631	i-C44sMEE9ocAndjedeN9fLp	ek	1995/96:35 011	2	4	1	0
+140	140	1995	prot-199596--035_i-84xpersjutzei5hvta1jtt	prot-199596--035_i-84xpersjutzei5hvta1jtt.csv	1202	i-84xpErSjuTzEi5hvTA1Jtt	ek	1995/96:35 016	1	5	1	0
+141	141	1995	prot-199596--035_i-3feh1q844fm3qrdgqmfwsf	prot-199596--035_i-3feh1q844fm3qrdgqmfwsf.csv	1693	i-3FEh1q844FM3qRDgqmfWSF	ek	1995/96:35 021	2	6	2	33
+142	142	1995	prot-199596--035_i-cakst71shecuucwqm5alop	prot-199596--035_i-cakst71shecuucwqm5alop.csv	1581	i-CakSt71sHecUuCwQm5ALoP	ek	1995/96:35 022	2	1	1	0
+143	143	1995	prot-199596--035_i-9inp1mzbdknsrm73feeqmc	prot-199596--035_i-9inp1mzbdknsrm73feeqmc.csv	2621	i-9iNp1MZbdkNsrM73feEQmc	ek	1995/96:35 028	1	6	2	38
+144	144	1995	prot-199596--035_i-prhkyxgcat2cbjpjjfnrtn	prot-199596--035_i-prhkyxgcat2cbjpjjfnrtn.csv	1715	i-PRHkYxGCaT2cbJpjjfnRtn	ek	1995/96:35 029	2	5	1	0
+145	145	1995	prot-199596--035_i-szkutdtcrco58yncqsh76	prot-199596--035_i-szkutdtcrco58yncqsh76.csv	2784	i-SZKUTdtCrCo58yNCQsH76	ek	1995/96:35 035	2	6	2	34
+146	146	1995	prot-199596--035_i-cbuk3dflmhfniqvsushsad	prot-199596--035_i-cbuk3dflmhfniqvsushsad.csv	1601	i-CBuK3dFLMHFNiQVSusHsaD	ek	1995/96:35 036	1	5	1	0
+147	147	1995	prot-199596--035_i-h1avbzexdmwpt4dfvxiya	prot-199596--035_i-h1avbzexdmwpt4dfvxiya.csv	1173	i-h1aVBzexdmWPt4dFvXiYA	ek	1995/96:35 037	2	2	1	0

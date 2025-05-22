@@ -15,7 +15,8 @@ from pyriksprot.corpus.utility import (
     load_chamber_indexes,
     ls_corpus_folder,
 )
-from pyriksprot.interface import MISSING_SPEAKER_NOTE, IProtocol, IProtocolParser, SpeakerNote
+from pyriksprot.interface import MISSING_SPEAKER_NOTE, IProtocol, IProtocolParser, SpeakerNote, Speech
+from pyriksprot.to_speech import to_speeches
 
 from .schema import MetadataSchema
 
@@ -30,6 +31,7 @@ class CorpusScanner:
         utterances: list[tuple] = field(default_factory=list)
         page_references: list[tuple] = field(default_factory=list)
         speaker_notes: dict[str, SpeakerNote] = field(default_factory=dict)
+        speeches: list[Speech] = field(default_factory=list)
 
     def __init__(self, parser: IProtocolParser | Type[IProtocolParser]) -> None:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
@@ -57,6 +59,7 @@ class CorpusScanner:
             data.page_references.extend(
                 tuple([document_id, p.source_id, p.page_number, p.reference]) for p in protocol.page_references
             )
+            data.speeches.extend(to_speeches(protocol=protocol, merge_strategy='chain') or [])
 
             data.speaker_notes.update(protocol.get_speaker_notes())
 
@@ -133,13 +136,46 @@ class CorpusScanner:
             .set_index('speaker_note_id')
             .fillna("")
         )
-
+        speeches: pd.DataFrame = (
+            pd.DataFrame(
+                itertools.chain(
+                    (
+                        (
+                            x.speech_id,
+                            x.who,
+                            x.get_year(),
+                            x.document_name,
+                            x.protocol_name,
+                            x.speech_index,
+                            x.page_number,
+                            x.num_tokens,
+                            x.num_words,
+                        )
+                        for x in result.speeches
+                    )
+                ),
+                columns=[
+                    'speech_id',
+                    'person_id',
+                    'year',
+                    'document_name',
+                    'protocol_name',
+                    'speech_index',
+                    'page_number',
+                    'num_tokens',
+                    'num_words',
+                ],
+            )
+            .set_index('speech_id')
+            .fillna("")
+        )
         protocol_ids: set[int] = set(utterances.document_id.unique())
         empty_protocols: pd.DataFrame = protocols[~protocols.index.isin(protocol_ids)]
 
         return {
             "protocols": protocols,
             "utterances": utterances,
+            "speeches": speeches,
             "page_references": page_references,
             "source_references": source_references,
             "speaker_notes": speaker_notes_data,
@@ -168,7 +204,8 @@ class CorpusIndexFactory:
     def collect(self, filenames: list[str], chambers: dict[str, set[str]]) -> CorpusIndexFactory:
 
         service: CorpusScanner = CorpusScanner(self.parser)
-        self.data = service.to_dataframes(service.scan(filenames, chambers))
+        scan_result: CorpusScanner.ScanResult = service.scan(filenames, chambers)
+        self.data = service.to_dataframes(scan_result)
         return self
 
     def to_csv(self, folder: str) -> CorpusIndexFactory:

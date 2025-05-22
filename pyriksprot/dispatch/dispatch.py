@@ -38,7 +38,15 @@ TargetTypeKey = Literal[
     'sorted-speeches-in-zip',
 ]
 
-PERSON_ATTRIBUTES = {'sub_office_type_id', 'office_type_id', 'protocol_name', 'gender_id', 'party_id'}
+SPEECH_ATTRIBUTES: set[str] = {
+    'sub_office_type_id',
+    'office_type_id',
+    'protocol_name',
+    'gender_id',
+    'party_id',
+    "speech_name",
+    "chamber_abbrev",
+}
 
 
 class CompressType(str, Enum):
@@ -364,22 +372,20 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
         if item.segment_level != SegmentLevel.Speech:
             raise ValueError(f"TaggedFramePerGroupDispatcher: expected Speech, found {item.segment_level}")
 
+        item_data: dict = {**{'document_id': self.document_id}, **item.to_dict()}
+        speech_data: dict[str, str] = item.protocol_segments[0].to_dict()
+
         if item.group_values == {}:
             """Speech level segments and no grouping => Add all speech metadata to index"""
             if len(item.protocol_segments) > 1:
                 raise ValueError(
                     f"TaggedFramePerGroupDispatcher: expected exacly one Speech, found {len(item.protocol_segments)}"
                 )
-            speech_data: dict = item.protocol_segments[0].to_dict()
-            item_data: dict = {**{'document_id': self.document_id}, **item.to_dict(), **speech_data}
+            item_data |= speech_data
         else:
-            item_data: dict = {**{'document_id': self.document_id}, **item.to_dict()}
-            speech_data: dict = item.protocol_segments[0].to_dict()
             if 'who' in item.group_values:
                 """If `who` in grouping attributes => add person attribute from first speech"""
-                for key in PERSON_ATTRIBUTES:
-                    if key in speech_data:
-                        item_data[key] = speech_data[key]
+                item_data |= {k: v for k, v in speech_data.items() if k in SPEECH_ATTRIBUTES}
             if 'n_tokens' in speech_data:
                 n_tokens: int = 0
                 for sd in item.protocol_segments:

@@ -209,3 +209,5 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
     )
     assert 'party_id' in document_index.columns
     assert 'gender_id' in document_index.columns
+    assert 'chamber_abbrev' in document_index.columns
+    assert 'speech_name' in document_index.columns

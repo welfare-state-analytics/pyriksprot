@@ -41,40 +41,36 @@ def test_gh_fetch_metadata_by_config():
     version: str = ConfigValue("metadata.version").resolve()
     target_folder: str = jj('./metadata/data/', version)
     schema: md.MetadataSchema = md.MetadataSchema(version)
-    md.gh_fetch_metadata_by_config(schema=schema, tag=version, folder=target_folder, force=True, errors='raise')
+    md.gh_download_by_config(schema=schema, tag=version, folder=target_folder, force=True, errors='raise')
     assert all(
         os.path.isfile(jj(target_folder, cfg.basename)) for cfg in schema.definitions.values() if not cfg.is_derived
     )
 
 
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_gh_fetch_metadata_folder():
     version: str = ConfigValue("metadata.version").resolve()
-    user: str = ConfigValue("metadata.github.user").resolve()
-    repository: str = ConfigValue("metadata.github.repository").resolve()
-    path: str = ConfigValue("metadata.github.path").resolve()
-
+    gh_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
     target_folder: str = jj('./metadata/data/', version)
 
-    md.gh_fetch_metadata_folder(
-        target_folder=target_folder, user=user, repository=repository, path=path, tag=version, force=True
-    )
+    md.gh_download_folder(target_folder=target_folder, **gh_opts, tag=version, force=True)
 
     assert True
 
 
-def test_gh_fetch_metadata_folder_old():
-    version: str = "v0.14.0"
-    user: str = "welfare-state-analytics"
-    repository: str = "riksdagen-corpus"
-    path: str = "corpus/metadata"
+def test_gh_download_items():
+    tag: str = ConfigValue("metadata.version").resolve()
+    folder: str = 'tests/output'
 
-    target_folder: str = jj('./metadata/data/full', version)
+    urls: dict[str, str] = {
+        'swedeb-parties.csv': "https://raw.githubusercontent.com/humlab-swedeb/sample-data/refs/heads/main/data/resources/swedeb-parties.csv"
+    }
 
-    md.gh_fetch_metadata_folder(
-        target_folder=target_folder, user=user, repository=repository, path=path, tag=version, force=True
-    )
+    items: dict[str, dict[str, str]] = md.gh_download_files(folder, tag, errors='raise', items=urls)
 
-    assert True
+    assert len(items) == len(urls)
+
+    assert all(os.path.isfile(jj(folder, x)) for x in items)
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
@@ -91,11 +87,12 @@ def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
     )
 
 
-@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
+# @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
 
     subset_corpus_and_metadata(
-        tag=ConfigValue("metadata.version").resolve(),
+        corpus_version=ConfigValue("corpus.version").resolve(),
+        metadata_version=ConfigValue("metadata.version").resolve(),
         documents=list_of_test_protocols,
         global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
         global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),

@@ -112,6 +112,7 @@ def ensure_test_corpora_exist(
     only_check: bool = False,
 ):
     corpus_version = corpus_version or ConfigValue("corpus:version").resolve()
+    metadata_version: str = corpus_version or ConfigValue("metadata:version").resolve()
 
     if not corpus_version:
         logger.warning("ensure_test_corpora_exist: corpus version not set, unable to verify test corpora")
@@ -136,7 +137,8 @@ def ensure_test_corpora_exist(
 
     if force or not sample_metadata_exists():
         subset_corpus_and_metadata(
-            tag=corpus_version,
+            corpus_version=corpus_version,
+            metadata_version=metadata_version,
             documents=filenames,
             global_corpus_folder=ConfigValue("metadata:folder").resolve(),
             global_metadata_folder=ConfigValue("metadata:folder").resolve(),

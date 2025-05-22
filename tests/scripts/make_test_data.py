@@ -48,7 +48,8 @@ def generate_corpus_and_metadata(force: bool = False):
         filenames: list[str] = get_test_documents(extension="xml")
         logger.info(f"filenames: {filenames}")
         subset_corpus_and_metadata(
-            tag=ConfigValue("corpus:version").resolve(),
+            corpus_version=ConfigValue("corpus:version").resolve(),
+            metadata_version=ConfigValue("metadata:version").resolve(),
             documents=filenames,
             global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
             global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),
@@ -120,6 +121,7 @@ def generate_word_frequencies(source_folder: str = None, target_filename: str = 
 def generate_tagged_speech_corpora(
     force: bool = False, tag: str = None, database_filename: str = None, source_folder: str = None
 ):
+    """Generate tagged speech corpora for sample dataset by copying files from existing global tagged frames corpus"""
     tag = tag or ConfigValue("corpus:version").resolve()
     database_filename = database_filename or ConfigValue("metadata:database.options.filename").resolve()
     try:
@@ -169,7 +171,8 @@ if __name__ == "__main__":
     #     filenames: list[str] = get_test_documents(extension="xml")
     #     logger.info(f"filenames: {filenames}")
     #     subset_corpus_and_metadata(
-    #         tag=ConfigValue("corpus:version").resolve(),
+    #         corpus_version=ConfigValue("corpus:version").resolve(),
+    #         metadata_version=ConfigValue("metadata:version").resolve(),
     #         documents=filenames,
     #         global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
     #         global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),

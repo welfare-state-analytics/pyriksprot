@@ -20,7 +20,7 @@ import warnings
 import zlib
 from importlib import import_module
 from itertools import chain
-from os.path import basename, dirname, expanduser, isfile
+from os.path import abspath, basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
 from types import ModuleType
@@ -185,7 +185,7 @@ def replace_extension(filename: str, extension: str) -> str:
 
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
-    name, extension = splitext(path)
+    name, extension = splitext(path)  # type: ignore
     return f'{name}{suffix}{extension if new_extension is None else new_extension}'
 
 
@@ -312,7 +312,7 @@ def touch(f: str) -> None:
 
 
 def ensure_path(path: str) -> str:
-    os.makedirs(dirname(path), exist_ok=True)
+    os.makedirs(abspath(dirname(path)), exist_ok=True)
     return path
 
 
@@ -324,7 +324,7 @@ def ensure_folder(path: str) -> str:
 
 def reset_folder(folder: str, force: bool = False) -> None:
     if os.path.isdir(folder) and not force:
-        raise FileExistsError(folder)
+        raise FileExistsError(f"cannot reset existing {folder} when `force=False`.")
 
     shutil.rmtree(folder, ignore_errors=True)
     os.makedirs(folder, exist_ok=True)
@@ -411,11 +411,11 @@ def slugify(value: str, allow_unicode: bool = False) -> str:
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 
-def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
+def compose(*fns: Sequence[Callable[[str], str]]) -> None | Callable[[str], str]:
     """Create a composed function from a list of function. Return function."""
     if len(fns) == 0:
         return None
-    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)
+    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)  # type: ignore
 
 
 def is_empty(filename: str) -> bool:
