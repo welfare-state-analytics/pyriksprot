@@ -11,7 +11,7 @@ from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_speech_text
 
-# pylint: disable=too-many-arguments, unused-argument
+# pylint: disable=too-many-arguments, unused-argument, no-value-for-parameter, too-many-positional-arguments
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 

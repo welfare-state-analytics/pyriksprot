@@ -30,7 +30,7 @@ def resolve_backend(
 
 def create_database_workflow(  # pylint: disable=too-many-arguments
     *,
-    corpus_version: str | None = None,
+    corpus_version: str | None = None, # pylint: disable=unused-argument
     corpus_folder: str | None = None,
     metadata_version: str | None = None,
     metadata_folder: str | None = None,

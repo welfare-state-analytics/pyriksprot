@@ -14,7 +14,7 @@ from .. import preprocess as pp
 from ..corpus import corpus_index
 from ..dispatch import dispatch, merge
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-positional-arguments
 
 
 def extract_corpus_text(

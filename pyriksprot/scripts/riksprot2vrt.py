@@ -11,6 +11,7 @@ from pyriksprot.workflows.export_vrt import VrtBatchExporter, VrtExportBatch
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+# pylint: disable=too-many-positional-arguments
 
 @click.command()
 @click.option('--source-folder', '-i', type=str, multiple=False, required=True, help="Source folder.")

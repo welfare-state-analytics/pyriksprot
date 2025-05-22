@@ -12,6 +12,7 @@ relpath = os.path.relpath
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+# pylint: disable=no-value-for-parameter
 
 @click.command()
 @click.argument('target_filename', type=str)

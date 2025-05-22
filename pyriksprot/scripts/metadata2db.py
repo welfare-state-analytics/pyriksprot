@@ -12,7 +12,8 @@ from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.workflows import create_database_workflow
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
@@ -67,17 +68,17 @@ def check_columns(config_filename: str, tags: str):
 @main.command()
 @click.argument('target_folder', type=str)
 @click.argument('tag', type=str)
-def download(target_folder: str, tag: str):
-    schema: md.MetadataSchema = md.MetadataSchema(tag=tag)
-    md.gh_download_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
+def download(target_folder: str, version: str):
+    schema: md.MetadataSchema = md.MetadataSchema(version=version)
+    md.gh_download_by_config(schema=schema, version=version, folder=target_folder, force=True)
 
 
 @main.command()
 @click.argument('corpus_folder', type=str)
 @click.argument('target_folder', type=str)
-@click.argument('tag', type=str)
-def index(corpus_folder: str, target_folder: str, tag: str) -> None:
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(tag=tag))
+@click.argument('version', type=str)
+def index(corpus_folder: str, target_folder: str, version: str) -> None:
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(version=version))
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
