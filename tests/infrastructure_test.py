@@ -41,7 +41,7 @@ def test_gh_fetch_metadata_by_config():
     version: str = ConfigValue("metadata.version").resolve()
     target_folder: str = jj('./metadata/data/', version)
     schema: md.MetadataSchema = md.MetadataSchema(version)
-    md.gh_download_by_config(schema=schema, tag=version, folder=target_folder, force=True, errors='raise')
+    md.gh_download_by_config(schema=schema, version=version, folder=target_folder, force=True, errors='raise')
     assert all(
         os.path.isfile(jj(target_folder, cfg.basename)) for cfg in schema.definitions.values() if not cfg.is_derived
     )

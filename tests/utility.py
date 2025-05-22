@@ -68,7 +68,7 @@ def sample_metadata_exists() -> bool:
         logger.info(f"metadata database file not found: {filename}")
         return False
 
-    configs: md.MetadataSchema = md.MetadataSchema(tag=corpus_version)
+    configs: md.MetadataSchema = md.MetadataSchema(version=corpus_version)
     if not configs.files_exist(source_folder):
         logger.info(f"metadata schema files not found in: {source_folder}")
         return False
@@ -104,6 +104,7 @@ def get_test_documents(extension=None) -> list[str]:
 
 
 def ensure_test_corpora_exist(
+    *,
     force: bool = False,
     corpus_version: str = None,
     metadata_version: str = None,
