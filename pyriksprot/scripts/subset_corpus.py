@@ -83,6 +83,8 @@ if __name__ == "__main__":
         print("NOTE! click.testing.CliRunner")
         folder: str = "/home/roger/source/welfare-state-analytics/pyriksprot/tests/test_data/source/5files"
         runner = CliRunner()
-        result = runner.invoke( main, [ f'{folder}/config_v1.4.1.yml', f'{folder}/protocols.txt', f'{folder}', '--skip-download' ] )
+        result = runner.invoke(
+            main, [f'{folder}/config_v1.4.1.yml', f'{folder}/protocols.txt', f'{folder}', '--skip-download']
+        )
     else:
         main()

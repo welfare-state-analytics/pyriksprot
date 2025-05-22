@@ -13,6 +13,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 # pylint: disable=too-many-positional-arguments
 
+
 @click.command()
 @click.option('--source-folder', '-i', type=str, multiple=False, required=True, help="Source folder.")
 @click.option('--target-folder', '-o', type=str, multiple=False, required=True, help="Target folder.")

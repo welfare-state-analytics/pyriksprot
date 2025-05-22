@@ -31,10 +31,12 @@ def check_filenames(config_filename: str, metadata_version: str) -> None:
         user: str = ConfigValue("metadata.github.user").resolve()
         repository: str = ConfigValue("metadata.github.repository").resolve()
         path: str = ConfigValue("metadata.github.path").resolve()
-        
+
         metadata_version = metadata_version or ConfigValue("metadata.version").resolve()
 
-        md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=metadata_version).is_satisfied()
+        md.ConfigConformsToTagSpecification(
+            user=user, repository=repository, path=path, tag=metadata_version
+        ).is_satisfied()
 
     except ValueError as ex:
         logger.error(ex)

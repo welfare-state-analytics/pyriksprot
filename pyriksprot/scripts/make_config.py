@@ -14,6 +14,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 # pylint: disable=no-value-for-parameter
 
+
 @click.command()
 @click.argument('target_filename', type=str)
 @click.option('--corpus-version', type=str, required=True)

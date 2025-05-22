@@ -26,6 +26,7 @@ from .utility import ensure_test_corpora_exist
 TEST_CONFIG_FILENAME = 'tests/output/config.yml'
 TEST_ROOT_FOLDER = 'tests/test_data/source'
 
+
 def bootstrap_testing():
 
     os.makedirs('tests/output', exist_ok=True)
@@ -41,14 +42,16 @@ def bootstrap_testing():
         corpus_version=os.environ.get('CORPUS_VERSION'),
         corpus_folder=f"{TEST_ROOT_FOLDER}/{os.environ.get('CORPUS_VERSION')}/riksdagen-records",
         metadata_version=os.environ.get('METADATA_VERSION'),
-        stanza_datadir='/data/sparv/models/stanza'
+        stanza_datadir='/data/sparv/models/stanza',
     )
 
     ConfigStore.configure_context(source=TEST_CONFIG_FILENAME, env_prefix=None)
 
     ensure_test_corpora_exist(only_check=True)
 
+
 bootstrap_testing()
+
 
 @pytest.fixture(scope='session')
 def list_of_test_protocols() -> list[str]:

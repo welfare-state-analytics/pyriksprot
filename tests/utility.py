@@ -129,7 +129,9 @@ def ensure_test_corpora_exist(
                 sample_tagged_speech_corpus_exists(),
             ]
         ):
-            raise Exception(f"test data for {corpus_version} (corpus) and {metadata_version} (metadata) is not complete")
+            raise Exception(
+                f"test data for {corpus_version} (corpus) and {metadata_version} (metadata) is not complete"
+            )
 
     tagged_source_folder = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder = root_folder or ConfigValue("root_folder").resolve()
