@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
+import sys
 import warnings
 from typing import Any
 
 import click
+from click.testing import CliRunner
 
 from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.workflows import subset_corpus_and_metadata
@@ -33,6 +35,8 @@ def main(
 
     corpus_version: str = ConfigValue("corpus:version", mandatory=True).resolve()
     metadata_version: str = ConfigValue("metadata:version", mandatory=True).resolve()
+    corpus_folder: str = ConfigValue("corpus:folder", mandatory=True).resolve()
+    metadata_folder: str = ConfigValue("metadata:folder", mandatory=True).resolve()
 
     global_corpus_folder: str = ConfigValue("global.corpus.folder", mandatory=skip_download).resolve()
     global_metadata_folder: str = ConfigValue("global.metadata.folder", mandatory=skip_download).resolve()
@@ -53,6 +57,8 @@ def main(
         subset_corpus_and_metadata(
             corpus_version=corpus_version,
             metadata_version=metadata_version,
+            corpus_folder=corpus_folder,
+            metadata_folder=metadata_folder,
             documents=documents,
             global_corpus_folder=global_corpus_folder,
             global_metadata_folder=global_metadata_folder,
@@ -72,29 +78,11 @@ def main(
 
 
 if __name__ == "__main__":
-    # options = {
-    #     'tag': 'v1.4.1',
-    #     'target_root_folder': '/home/roger/source/swedeb/sample-data/data/random_sample_10files',
-    #     'documents': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/protocols.txt',
-    #     'global_corpus_folder': '/data/riksdagen_corpus_data/riksdagen-records/data',
-    #     'global_metadata_folder': '/data/riksdagen_corpus_data/riksdagen-persons/data',
-    #     'scripts_folder': None,
-    #     'gh_metadata_opts': {'user': 'swerik-project', 'repository': 'riksdagen-persons', 'path': 'data'},
-    #     'gh_records_opts': {
-    #         'user': 'swerik-project',
-    #         'repository': 'riksdagen-records',
-    #         'path': 'data',
-    #         'local_folder': '/data/riksdagen_corpus_data/riksdagen-records',
-    #     },
-    #     'db_opts': {
-    #         'type': 'pyriksprot.metadata.database.SqliteDatabase',
-    #         'options': {
-    #             'filename': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/v1.4.1/riksprot_metadata.db'
-    #         },
-    #     },
-    #     'tf_filename': '/home/roger/source/swedeb/sample-data/data/random_sample_10files/v1.4.1/dehyphen/word-frequencies.pkl',
-    #     'skip_download': True,
-    #     'force': True,
-    # }
-    # subset_corpus_and_metadata(**options)
-    main()
+
+    if sys.gettrace() is not None:
+        print("NOTE! click.testing.CliRunner")
+        folder: str = "/home/roger/source/welfare-state-analytics/pyriksprot/tests/test_data/source/5files"
+        runner = CliRunner()
+        result = runner.invoke( main, [ f'{folder}/config_v1.4.1.yml', f'{folder}/protocols.txt', f'{folder}', '--skip-download' ] )
+    else:
+        main()

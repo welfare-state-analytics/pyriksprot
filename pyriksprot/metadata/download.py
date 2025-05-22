@@ -82,7 +82,7 @@ def gh_download_folder(
 
 
 def gh_download_by_config(
-    *, schema: MetadataSchema, tag: str, folder: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'raise'
+    *, schema: MetadataSchema, version: str, folder: str, force: bool = False, errors: Literal['raise', 'ignore'] = 'raise'
 ) -> None:
     """Downloads metadata files based on tables specified in `specifications`"""
 
@@ -100,7 +100,7 @@ def gh_download_by_config(
         if cfg.is_derived:
             continue
 
-        url: str = _resolve_url(cfg, tag, **gh_opts)
+        url: str = _resolve_url(cfg, version, **gh_opts)
         download_url_to_file(url, jj(folder, cfg.basename), force, errors=errors)
 
 

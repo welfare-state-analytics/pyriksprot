@@ -75,10 +75,10 @@ def test_gh_download_items():
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
-    version: str = ConfigValue("version").resolve()
+    corpus_version: str = ConfigValue("corpus:version").resolve()
     data_folder: str = ConfigValue("data_folder").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
-    riksprot_tagged_folder: str = jj(data_folder, version, 'tagged_frames')
+    riksprot_tagged_folder: str = jj(data_folder, corpus_version, 'tagged_frames')
 
     create_test_tagged_frames_corpus(
         protocols=list_of_test_protocols,
@@ -93,6 +93,8 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
     subset_corpus_and_metadata(
         corpus_version=ConfigValue("corpus.version").resolve(),
         metadata_version=ConfigValue("metadata.version").resolve(),
+        corpus_folder=ConfigValue("corpus.folder").resolve(),
+        metadata_folder=ConfigValue("metadata.folder").resolve(),
         documents=list_of_test_protocols,
         global_corpus_folder=ConfigValue("global.corpus.folder").resolve(),
         global_metadata_folder=ConfigValue("global.metadata.folder").resolve(),
@@ -115,15 +117,15 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
-    version: str = ConfigValue("version").resolve()
+    corpus_version: str = ConfigValue("corpus:version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
     database: str = ConfigValue("metadata.database.options.filename").resolve()
-    create_test_speech_corpus(source_folder=tagged_folder, tag=version, database_name=database)
+    create_test_speech_corpus(source_folder=tagged_folder, corpus_version=corpus_version, database_name=database)
 
 
 @pytest.mark.skip(reason="Test infrastructure test")
 def test_setup_test_corpora():
-    ensure_test_corpora_exist(only_check=True)
+    ensure_test_corpora_exist(only_check=False)
 
 
 @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")

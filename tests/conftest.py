@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import logging
+import os
 
+import dotenv
 import pytest
 from _pytest.logging import caplog as _caplog  # pylint: disable=unused-import, # type: ignore
 from loguru import logger
@@ -14,16 +16,39 @@ from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, tagged
 from pyriksprot.dispatch import merge as sg
 from pyriksprot.dispatch.item import DispatchItem
+from pyriksprot.utility import generate_default_config
 from pyriksprot.workflows.subset_corpus import load_document_patterns
 
 from .utility import ensure_test_corpora_exist
 
-ConfigStore.configure_context(source='tests/config.yml', env_prefix=None)
-
 # pylint: disable=redefined-outer-name
 
-ensure_test_corpora_exist(only_check=True)
+TEST_CONFIG_FILENAME = 'tests/output/config.yml'
+TEST_ROOT_FOLDER = 'tests/test_data/source'
 
+def bootstrap_testing():
+
+    os.makedirs('tests/output', exist_ok=True)
+
+    dotenv.load_dotenv('.env')
+
+    assert os.environ.get('CORPUS_VERSION') is not None, "CORPUS_VERSION must be set in .env file"
+    assert os.environ.get('METADATA_VERSION') is not None, "METADATA_VERSION must be set in .env file"
+
+    generate_default_config(
+        target_filename=TEST_CONFIG_FILENAME,
+        root_folder=TEST_ROOT_FOLDER,
+        corpus_version=os.environ.get('CORPUS_VERSION'),
+        corpus_folder=f"{TEST_ROOT_FOLDER}/{os.environ.get('CORPUS_VERSION')}/riksdagen-records",
+        metadata_version=os.environ.get('METADATA_VERSION'),
+        stanza_datadir='/data/sparv/models/stanza'
+    )
+
+    ConfigStore.configure_context(source=TEST_CONFIG_FILENAME, env_prefix=None)
+
+    ensure_test_corpora_exist(only_check=True)
+
+bootstrap_testing()
 
 @pytest.fixture(scope='session')
 def list_of_test_protocols() -> list[str]:

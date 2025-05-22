@@ -189,17 +189,17 @@ class MetadataTable:
 class MetadataSchema:
     """Configuration for all tables in metadata"""
 
-    def __init__(self, tag: str | None):
-        if tag is None:
+    def __init__(self, version: str | None):
+        if version is None:
             raise ValueError("Tag must be defined")
 
-        sql_folder: Path = pyriksprot.sql.sql_folder(tag=tag)
+        sql_folder: Path = pyriksprot.sql.sql_folder(tag=version)
 
         if not sql_folder.is_dir():
-            raise FileNotFoundError(f"sql folder for {tag} not found")
+            raise FileNotFoundError(f"sql folder for {version} not found")
 
         if not sql_folder.joinpath("schema.json").is_file():
-            raise FileNotFoundError(f"sql schema.json for {tag} not found")
+            raise FileNotFoundError(f"sql schema.json for {version} not found")
 
         with sql_folder.joinpath("schema.json").open() as f:
             self.data: dict = json.load(f)

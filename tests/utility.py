@@ -106,13 +106,14 @@ def get_test_documents(extension=None) -> list[str]:
 def ensure_test_corpora_exist(
     force: bool = False,
     corpus_version: str = None,
+    metadata_version: str = None,
     tagged_source_folder: str = None,
     root_folder: str = None,
     database: str = None,
     only_check: bool = False,
 ):
     corpus_version = corpus_version or ConfigValue("corpus:version").resolve()
-    metadata_version: str = corpus_version or ConfigValue("metadata:version").resolve()
+    metadata_version = metadata_version or ConfigValue("metadata:version").resolve()
 
     if not corpus_version:
         logger.warning("ensure_test_corpora_exist: corpus version not set, unable to verify test corpora")
@@ -127,7 +128,7 @@ def ensure_test_corpora_exist(
                 sample_tagged_speech_corpus_exists(),
             ]
         ):
-            raise Exception(f"test data for version {corpus_version} is not complete")
+            raise Exception(f"test data for {corpus_version} (corpus) and {metadata_version} (metadata) is not complete")
 
     tagged_source_folder = tagged_source_folder or ConfigValue("tagged_frames:folder").resolve()
     root_folder = root_folder or ConfigValue("root_folder").resolve()
@@ -139,8 +140,10 @@ def ensure_test_corpora_exist(
         subset_corpus_and_metadata(
             corpus_version=corpus_version,
             metadata_version=metadata_version,
+            corpus_folder=ConfigValue("corpus:folder").resolve(),
+            metadata_folder=ConfigValue("metadata:folder").resolve(),
             documents=filenames,
-            global_corpus_folder=ConfigValue("metadata:folder").resolve(),
+            global_corpus_folder=ConfigValue("corpus:folder").resolve(),
             global_metadata_folder=ConfigValue("metadata:folder").resolve(),
             target_root_folder=ConfigValue("root_folder").resolve(),
             scripts_folder=None,
@@ -164,7 +167,7 @@ def ensure_test_corpora_exist(
     if force or not sample_tagged_speech_corpus_exists():
         create_test_speech_corpus(
             source_folder=tagged_source_folder,
-            tag=corpus_version,
+            corpus_version=corpus_version,
             database_name=database,
         )
 
@@ -200,7 +203,7 @@ def create_test_tagged_frames_corpus(
         logger.info(f"  copied: {source_filename} to {jj(target_folder, filename)}")
 
 
-def create_test_speech_corpus(*, source_folder: str, tag: str, database_name: str) -> None:
+def create_test_speech_corpus(*, source_folder: str, corpus_version: str, database_name: str) -> None:
     """Creates a tagged frames speech corpus from tagged frames corpus"""
     # target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
     target_type: str = 'single-id-tagged-frame-per-group'
@@ -212,7 +215,7 @@ def create_test_speech_corpus(*, source_folder: str, tag: str, database_name: st
     logger.info(f"  metadata: {database_name}")
 
     for compress_type in compress_types:
-        target_name: str = jj("tests/test_data/source/", tag, f"tagged_frames_speeches.{compress_type}")
+        target_name: str = jj("tests/test_data/source/", corpus_version, f"tagged_frames_speeches.{compress_type}")
 
         logger.info(f"    target: {target_name}")
 

@@ -76,13 +76,13 @@ def test_get_and_set_db_version():
 
 def test_create_metadata_database():
 
-    version: str = ConfigValue("metadata.version").resolve()
-    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{version}.db"
-    metadata_folder: str = f"./tests/test_data/source/{version}/parlaclarin/metadata"
+    metadata_version: str = ConfigValue("metadata.version").resolve()
+    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{metadata_version}.db"
+    metadata_folder: str = f"./tests/test_data/source/metadata/{metadata_version}"
 
-    schema = MetadataSchema(version)
+    schema = MetadataSchema(metadata_version)
 
-    service: md.MetadataFactory = md.MetadataFactory(version=version, filename=target_filename)
+    service: md.MetadataFactory = md.MetadataFactory(version=metadata_version, filename=target_filename)
 
     service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
 
@@ -122,7 +122,9 @@ def test_create_metadata_database_DEVELOP():
         corpus_folder=corpus_folder, target_folder=metadata_folder
     )
 
-    service: md.MetadataFactory = md.MetadataFactory(version=metadata_version, schema=schema, backend=opts['type'], **opts['options'])
+    service: md.MetadataFactory = md.MetadataFactory(
+        version=metadata_version, schema=schema, backend=opts['type'], **opts['options']
+    )
     service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
     service.verify_tag()
 

@@ -62,6 +62,8 @@ def test_code_lookups():
 
     assert lookups.party_abbrev2name.get(0) == "[-]"
 
+    assert lookups.protocol_name2chamber_abbrev.get('prot-1933--fk--005') == 'fk'
+
     df: pd.DataFrame = pd.DataFrame(
         data=dict(
             gender_id=[

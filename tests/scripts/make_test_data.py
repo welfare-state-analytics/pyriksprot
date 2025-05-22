@@ -50,6 +50,8 @@ def generate_corpus_and_metadata(force: bool = False):
         subset_corpus_and_metadata(
             corpus_version=ConfigValue("corpus:version").resolve(),
             metadata_version=ConfigValue("metadata:version").resolve(),
+            corpus_folder=ConfigValue("corpus:folder").resolve(),
+            metadata_folder=ConfigValue("metadata:folder").resolve(),
             documents=filenames,
             global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
             global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),
@@ -131,7 +133,7 @@ def generate_tagged_speech_corpora(
 
         create_test_speech_corpus(
             source_folder=source_folder or ConfigValue("tagged_frames:folder").resolve(),
-            tag=tag,
+            corpus_version=tag,
             database_name=database_filename,
         )
 
