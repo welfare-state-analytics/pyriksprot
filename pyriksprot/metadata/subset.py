@@ -61,7 +61,7 @@ def subset_to_folder(
 
     if not set(schema_filenames).issubset(filenames):
         missing_files: set[str] = schema_filenames - filenames
-        raise Exception(f"subset_to_folder: missing schema files: {', '.join(missing_files)}")
+        raise Exception(f"subset_to_folder: missing schema files in {source_folder}: {', '.join(missing_files)}")
 
     for filename in filenames:
         source_name: str = jj(source_folder, filename)
