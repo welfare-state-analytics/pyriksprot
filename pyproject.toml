@@ -4,7 +4,7 @@ version = "2024.10.3"
 description = "Python API for Riksdagens Protokoll"
 authors = ["Roger Mähler <roger.mahler@hotmail.com>"]
 packages = [
-    { include = "pyriksprot" },
+    { include = "pyriksprot" }
 ]
 classifiers = [
     'License :: OSI Approved :: Apache Software License',
@@ -39,6 +39,7 @@ psycopg2-binary = "^2.9.5"
 nltk = "^3.8.1"
 dynaconf = "^3.1.12"
 pathvalidate = "^2.5.2"
+jinja2-cli = {extras = ["yaml"], version = "^0.8.2"}
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -54,12 +55,12 @@ pytest = "*"
 pytest-cov = "*"
 pyinstrument = "*"
 pytest-codeblocks = "*"
-pdoc = "^13.1.1"
+pdoc = "*"
 
 [tool.poetry.group.dev.dependencies]
-sphinx = "^7.0.1"
-pydata-sphinx-theme = "^0.13.3"
-recommonmark = "^0.7.1"
+sphinx = "*"
+pydata-sphinx-theme = "*"
+recommonmark = "*"
 
 [tool.poetry.scripts]
 riksprot2any = "pyriksprot.scripts.riksprot2any:main"
@@ -73,13 +74,14 @@ subset-corpus = "pyriksprot.scripts.subset_corpus:main"
 subset-vrt-corpus = "pyriksprot.scripts.subset_vrt_corpus:main"
 metadata2db = "pyriksprot.scripts.metadata2db:main"
 make-test-data = "pyriksprot.tests.scripts.make_test_data:main"
+make-config = "pyriksprot.scripts.make_config:main"
 # legacy (renamed):
 speech-index = "pyriksprot.scripts.riksprot2speech_index:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = ["-rfE", "-q", "-s"]
-log_cli = "False"
+log_cli = false
 testpaths = ["tests"]
 python_files = "*_test.py"
 python_functions = "test_*"
