@@ -6,8 +6,6 @@ ifndef CONFIG_FILENAME
 $(error CONFIG_FILENAME is undefined)
 endif
 
-$(info "generating default data using config " $(CONFIG_FILENAME))
-
 ROOT_FOLDER=$(shell yq '.root_folder' $(CONFIG_FILENAME))
 CORPUS_VERSION=$(shell yq '.corpus.version' $(CONFIG_FILENAME))
 METADATA_VERSION=$(shell yq '.metadata.version' $(CONFIG_FILENAME))
