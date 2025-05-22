@@ -37,7 +37,7 @@ def gh_store_file(target_folder: str, filename: str, content: str) -> None:
     target_name: str = jj(target_folder, filename)
     if target_name is not None:
         with open(target_name, 'w', encoding="utf-8") as fp:
-            logger.info(f' -> downloaded {filename}')
+            logger.info(f' -> downloaded {target_name}')
             fp.write(content)
 
 
