@@ -80,23 +80,3 @@ def main(
 
 if __name__ == "__main__":
     main()
-
-    # args: dict = {
-    #     'source_folder': '/data/riksdagen_corpus_data/riksdagen-corpus/corpus/protocols',
-    #     'metadata_filename': './metadata/riksprot_metadata.v0.10.0.db',
-    #     'target_name': '/data/riksdagen_corpus_data/v0.10.0/plain_text_speeches.zip',
-    #     'target_type': 'single-id-tagged-frame-per-group',
-    #     'compress_type': dispatch.CompressType.Zip,
-    #     'subfolder_key': None,
-    #     'merge_strategy': 'chain',
-    #     'years': None,
-    #     'skip_size': 1,
-    #     'multiproc_processes': 1,
-    #     'multiproc_keep_order': False,
-    #     'dedent': True,
-    #     'dehyphen': True,
-    #     'force': True,
-    #     'dehyphen_folder': './metadata/data/v0.10.0',
-    #     'naming_keys': (),
-    # }
-    # extract_speech_text.extract_speech_texts(**args)
