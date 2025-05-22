@@ -183,15 +183,3 @@ def test_generate_corpus_indexes(corpus_folder: str):
     assert data.get('protocols') is not None
     assert data.get('utterances') is not None
     assert data.get('speaker_notes') is not None
-
-
-# def test_load_scripts():
-
-#     version: str = ConfigValue("metadata:version").resolve()
-#     source_folder: str = f"./tests/test_data/source/{version}/parlaclarin/metadata"
-#     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
-#     script_folder: str = None
-#     service: md.MetadataFactory = md.MetadataFactory(version=version, filename=database_filename)
-#     service.create(folder=source_folder, force=True)
-#     # service.load_corpus_indexes(folder=source_folder)
-#     # service.load_scripts(folder=script_folder)
