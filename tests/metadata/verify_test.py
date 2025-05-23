@@ -3,13 +3,13 @@ from pyriksprot.metadata import verify
 
 
 def test_config_conforms_to_folder_specification():
-    tag: str = ConfigValue("version").resolve()
+    tag: str = ConfigValue("metadata.version").resolve()
     folder: str = ConfigValue("metadata:folder").resolve()
     verify.ConfigConformsToFolderSpecification(tag=tag, folder=folder).is_satisfied()
 
 
 def test_config_conforms_to_tags_specification():
-    tag: str = ConfigValue("version").resolve()
+    tag: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()
     repository: str = ConfigValue("metadata.github.repository").resolve()
     path: str = ConfigValue("metadata.github.path").resolve()
@@ -17,12 +17,12 @@ def test_config_conforms_to_tags_specification():
 
 
 def test_tags_conform_specification():
-    tag: str = ConfigValue("version").resolve()
+    tag: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()
     repository: str = ConfigValue("metadata.github.repository").resolve()
     path: str = ConfigValue("metadata.github.path").resolve()
 
-    verify.TagsConformSpecification(user=user, repository=repository, path=path, tag1="v1.4.1", tag2=tag).is_satisfied()
+    verify.TagsConformSpecification(user=user, repository=repository, path=path, tag1=tag, tag2=tag).is_satisfied()
 
 
 def collapse_consecutive_integers(numbers: list[int]) -> list[tuple[int, int] | int]:
