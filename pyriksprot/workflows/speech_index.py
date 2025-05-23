@@ -77,7 +77,6 @@ def extract_speech_index(
     df: pd.DataFrame = pd.DataFrame(data=(speech.to_dict() for speech in tqdm(speeches)))
 
     if not target_name.endswith('feather'):
-
         df.to_csv(target_name, sep='\t')
 
     df.to_feather(f"{target_name.rstrip('.gz').rstrip('.zip').rstrip('.csv').rstrip('.feather')}.feather")

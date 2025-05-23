@@ -18,7 +18,7 @@ jj = os.path.join
 
 
 @pytest.fixture
-def speaker_service() -> SpeakerInfoService:
+def vrt_speaker_service() -> SpeakerInfoService:
     speaker_service: SpeakerInfoService = MagicMock(
         spec=SpeakerInfoService,
         **{
@@ -37,8 +37,8 @@ def speaker_service() -> SpeakerInfoService:
 
 
 @pytest.fixture
-def export_service(speaker_service) -> VrtExportService:
-    service: VrtExportService = VrtExportService(speaker_service)
+def export_service(vrt_speaker_service) -> VrtExportService:
+    service: VrtExportService = VrtExportService(vrt_speaker_service)
     return service
 
 
@@ -223,11 +223,40 @@ def test_protocols_to_vrts(export_service: VrtExportService):
         ('tests/output/fakes.vrt.gz', []),
     ],
 )
-def test_export_vrt(target: str | None, tags, speaker_service: VrtExportService):
+def test_export_vrt(target: str | None, tags, vrt_speaker_service: VrtExportService):
     version: str = ConfigStore.config().get("corpus.version")
-    exporter = VrtBatchExporter(speaker_service=speaker_service)
+    exporter = VrtBatchExporter(speaker_service=vrt_speaker_service)
     folder: str = f'tests/test_data/fakes/{version}/tagged_frames'
     batches: list[VrtExportBatch] = [VrtExportBatch(folder, target, "year", {'year': '2020', 'title': '202021'})]
     exporter.export(batches, *tags)
 
     assert target == "-" or os.path.exists(target)
+
+
+def test_protocols_to_vrts_with_chamber(speaker_service: SpeakerInfoService):
+    # speaker_service: SpeakerInfoService = SpeakerInfoService("tests/test_data/fakes/riksdagen-2020.db")
+
+    export_service: VrtExportService = VrtExportService(speaker_service)
+
+    version: str = ConfigStore.config().get("corpus.version")
+    folder: str = f'tests/test_data/source/{version}/tagged_frames'
+
+    protocols: interface.Protocol = load_protocols(folder)
+
+    """Test returning VRT as string."""
+    vrt_str = export_service.to_vrts(
+        protocols,
+        "protocol",
+        "speech",
+        "utterance",
+        output=None,
+        outer_tag="corpus",
+        title="test-corpus",
+        date="2020-01-01",
+    )
+    assert vrt_str
+
+    assert '<corpus title="test-corpus" date="2020-01-01">' in vrt_str
+    assert '<protocol title="prot-199192--127" date="1992-06-09" chamber="ek">' in vrt_str
+    assert 'speech' in vrt_str
+    assert 'utterance' in vrt_str

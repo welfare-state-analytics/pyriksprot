@@ -24,7 +24,6 @@ jj = os.path.join
 
 
 class CorpusScanner:
-
     @dataclass
     class ScanResult:
         protocols: list[tuple[int, str, str, str, str]] = field(default_factory=list)
@@ -37,7 +36,6 @@ class CorpusScanner:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
 
     def scan(self, filenames: Sequence[str], chambers: dict[str, set[str]]) -> CorpusScanner.ScanResult:
-
         protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
 
         data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
@@ -202,7 +200,6 @@ class CorpusIndexFactory:
         return self.collect(filenames, chambers).to_csv(target_folder)
 
     def collect(self, filenames: list[str], chambers: dict[str, set[str]]) -> CorpusIndexFactory:
-
         service: CorpusScanner = CorpusScanner(self.parser)
         scan_result: CorpusScanner.ScanResult = service.scan(filenames, chambers)
         self.data = service.to_dataframes(scan_result)

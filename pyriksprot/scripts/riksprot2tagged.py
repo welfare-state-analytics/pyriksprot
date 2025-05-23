@@ -16,7 +16,7 @@ sys.path.insert(0, '.')
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
-# pylint: disable=too-many-arguments, unused-argument
+# pylint: disable=too-many-arguments, unused-argument, too-many-positional-arguments
 
 
 def get_kwargs():

@@ -154,7 +154,6 @@ class Codecs:
     def apply_codec(
         self, df: pd.DataFrame, codecs: list[Codec], drop: bool = True, keeps: list[str] = None
     ) -> pd.DataFrame:
-
         for codec in codecs:
             df = codec.apply(df)
 

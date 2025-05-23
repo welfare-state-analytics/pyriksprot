@@ -17,7 +17,7 @@ from .create_metadata import create_database_workflow
 
 
 def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_folder: str) -> None:
-    """Given a local parlaclarin folder, copy the global VRT (tagged frame) for all protocols that exists in the local parlaclarin folder"""
+    """Given a local XML folder, copy the global VRT (tagged frame) for all protocols that exists in the local parlaclarin folder"""
 
     for filename in ls_corpus_folder(local_xml_folder):
         subfolder: str = basename(dirname(filename))
@@ -38,7 +38,10 @@ def subset_vrt_corpus(global_vrt_folder: str, local_xml_folder: str, local_vrt_f
 
 def subset_corpus_and_metadata(
     *,
-    tag: str | None = None,
+    corpus_version: str | None = None,
+    metadata_version: str | None = None,
+    corpus_folder: str | None = None,
+    metadata_folder: str | None = None,
     documents: list[str] | str = None,
     global_corpus_folder: str | None = None,
     global_metadata_folder: str | None = None,
@@ -52,71 +55,78 @@ def subset_corpus_and_metadata(
     force: bool = True,
 ):
     """Subset metadata to folder `target_folder`/tag"""
-
-    root_folder: str = join(target_root_folder or "", tag or "")
+    root_folder: str = join(target_root_folder or "", corpus_version or "")
 
     temp_folder: str = join(root_folder, "tmp")
     metadata_temp_folder: str = join(root_folder, "tmp/metadata")
-    parlaclarin_folder: str = join(root_folder, "parlaclarin")
-    metadata_target_folder: str = join(parlaclarin_folder, "metadata")
-    protocols_target_folder: str = join(parlaclarin_folder, "protocols")
+
+    logger.info(f"Temp metadata folder {metadata_temp_folder}")
+    logger.info(f"Global metadata folder {global_metadata_folder}")
 
     if isinstance(documents, str):
         documents = load_document_patterns(documents, extension='xml')
 
-    schema: md.MetadataSchema = md.MetadataSchema(tag)
+    schema: md.MetadataSchema = md.MetadataSchema(metadata_version)
 
     if force or not schema.files_exist(metadata_temp_folder):
-
         if not skip_download:
-            schema: md.MetadataSchema = md.MetadataSchema(tag)
+            logger.info(f"Downloading metadata from Github to {metadata_temp_folder}")
+            schema: md.MetadataSchema = md.MetadataSchema(metadata_version)
             md.gh_download_folder(
-                target_folder=metadata_temp_folder, **gh_metadata_opts, tag=tag, force=True, extras=schema.extras_urls
+                target_folder=metadata_temp_folder,
+                **gh_metadata_opts,
+                tag=metadata_version,
+                force=True,
+                extras=schema.extras_urls,
             )
         else:
+            logger.info(f"Copying metadata from {global_metadata_folder} to {metadata_temp_folder}")
             reset_folder(temp_folder, force=True)
             shutil.rmtree(metadata_temp_folder, ignore_errors=True)
             shutil.copytree(global_metadata_folder, metadata_temp_folder)
 
-            md.gh_download_files(metadata_temp_folder, tag, errors='raise', items=schema.extras_urls)
+            logger.info(f"Downloading extra URLs {schema.extras_urls} to {metadata_temp_folder}")
+            md.gh_download_files(metadata_temp_folder, tag=metadata_version, errors='raise', items=schema.extras_urls)
 
-    if not files_exist(documents, protocols_target_folder):
+    if not files_exist(documents, corpus_folder):
         if not skip_download:
             pc.download_protocols(
                 filenames=documents,
-                target_folder=protocols_target_folder,
+                target_folder=corpus_folder,
                 create_subfolder=True,
-                tag=tag,
+                tag=corpus_version,
                 **gh_records_opts,
             )
         else:
             pc.copy_protocols(
                 source_folder=global_corpus_folder,
                 filenames=documents,
-                target_folder=protocols_target_folder,
+                target_folder=corpus_folder,
             )
-        pc.create_tei_corpus_xml(source_folder=protocols_target_folder)
+        pc.create_tei_corpus_xml(source_folder=corpus_folder)
 
         # for filename in glob(join(root_folder, "resources", "*.xml")):
         #     shutil.copy(filename, protocols_target_folder)
 
     if force or not exists(tf_filename):
-        tf.compute_term_frequencies(source=protocols_target_folder, filename=tf_filename)
+        tf.compute_term_frequencies(source=corpus_folder, filename=tf_filename)
 
     md.subset_to_folder(
-        ProtocolMapper,
-        tag=tag,
-        protocols_source_folder=parlaclarin_folder,
+        parser=ProtocolMapper,
+        corpus_version=corpus_version,
+        metadata_version=metadata_version,
+        protocols_source_folder=corpus_folder,
         source_folder=metadata_temp_folder,
-        target_folder=metadata_target_folder,
+        target_folder=metadata_folder,
     )
 
     create_database_workflow(
-        tag=tag,
-        metadata_folder=metadata_target_folder,
+        corpus_version=corpus_version,
+        metadata_version=metadata_version,
+        metadata_folder=metadata_folder,
+        corpus_folder=corpus_folder,
         db_opts=db_opts,
         gh_opts=None,
-        corpus_folder=protocols_target_folder,
         scripts_folder=scripts_folder,
         skip_create_index=False,
         skip_download_metadata=True,

@@ -12,7 +12,8 @@ from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.workflows import create_database_workflow
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
@@ -23,16 +24,19 @@ def main(): ...
 @main.command()
 @click.argument('config_filename', type=str)
 @click.argument('tag', type=str)
-def check_filenames(config_filename: str, tag: str):
+def check_filenames(config_filename: str, metadata_version: str) -> None:
     try:
         ConfigStore().configure_context(source=config_filename)
 
         user: str = ConfigValue("metadata.github.user").resolve()
         repository: str = ConfigValue("metadata.github.repository").resolve()
         path: str = ConfigValue("metadata.github.path").resolve()
-        tag = tag or ConfigValue("version").resolve()
 
-        md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
+        metadata_version = metadata_version or ConfigValue("metadata.version").resolve()
+
+        md.ConfigConformsToTagSpecification(
+            user=user, repository=repository, path=path, tag=metadata_version
+        ).is_satisfied()
 
     except ValueError as ex:
         logger.error(ex)
@@ -66,17 +70,17 @@ def check_columns(config_filename: str, tags: str):
 @main.command()
 @click.argument('target_folder', type=str)
 @click.argument('tag', type=str)
-def download(target_folder: str, tag: str):
-    schema: md.MetadataSchema = md.MetadataSchema(tag=tag)
-    md.gh_download_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
+def download(target_folder: str, version: str):
+    schema: md.MetadataSchema = md.MetadataSchema(version=version)
+    md.gh_download_by_config(schema=schema, version=version, folder=target_folder, force=True)
 
 
 @main.command()
 @click.argument('corpus_folder', type=str)
 @click.argument('target_folder', type=str)
-@click.argument('tag', type=str)
-def index(corpus_folder: str, target_folder: str, tag: str) -> None:
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(tag=tag))
+@click.argument('version', type=str)
+def index(corpus_folder: str, target_folder: str, version: str) -> None:
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(version=version))
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
@@ -114,18 +118,25 @@ def database(
     try:
         ConfigStore().configure_context(source=config_filename)
 
-        tag = tag or ConfigValue("version").resolve()
+        corpus_version = tag or ConfigValue("corpus.version").resolve()
+        metadata_version: str = ConfigValue("metadata.version").resolve()
         source_folder = source_folder or ConfigValue("metadata.folder").resolve()
-        target_filename = target_filename or ConfigValue("metadata.database.options.filename").resolve()
         corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
         gh_opts: dict[str, Any] | None = ConfigValue("metadata.github").resolve()
 
+        db_opts: dict[str, str] = (
+            {'type': 'pyriksprot.metadata.database.SqliteDatabase', 'options': {'filename': target_filename}}
+            if target_filename
+            else ConfigValue("metadata.database").resolve()
+        )
+
         create_database_workflow(
-            tag=tag,
-            metadata_folder=source_folder,
-            db_opts=target_filename,
-            gh_opts=gh_opts,
+            corpus_version=corpus_version,
             corpus_folder=corpus_folder,
+            metadata_version=metadata_version,
+            metadata_folder=source_folder,
+            db_opts=db_opts,
+            gh_opts=gh_opts,
             skip_create_index=skip_create_index,
             scripts_folder=scripts_folder,
             skip_download_metadata=skip_download_metadata,

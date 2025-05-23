@@ -39,7 +39,6 @@ def generate_complete_sample_data(force: bool):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_corpus_and_metadata(force: bool = False):
-
     try:
         if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
             if not force:
@@ -48,7 +47,10 @@ def generate_corpus_and_metadata(force: bool = False):
         filenames: list[str] = get_test_documents(extension="xml")
         logger.info(f"filenames: {filenames}")
         subset_corpus_and_metadata(
-            tag=ConfigValue("corpus:version").resolve(),
+            corpus_version=ConfigValue("corpus:version").resolve(),
+            metadata_version=ConfigValue("metadata:version").resolve(),
+            corpus_folder=ConfigValue("corpus:folder").resolve(),
+            metadata_folder=ConfigValue("metadata:folder").resolve(),
             documents=filenames,
             global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
             global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),
@@ -120,6 +122,7 @@ def generate_word_frequencies(source_folder: str = None, target_filename: str = 
 def generate_tagged_speech_corpora(
     force: bool = False, tag: str = None, database_filename: str = None, source_folder: str = None
 ):
+    """Generate tagged speech corpora for sample dataset by copying files from existing global tagged frames corpus"""
     tag = tag or ConfigValue("corpus:version").resolve()
     database_filename = database_filename or ConfigValue("metadata:database.options.filename").resolve()
     try:
@@ -129,7 +132,7 @@ def generate_tagged_speech_corpora(
 
         create_test_speech_corpus(
             source_folder=source_folder or ConfigValue("tagged_frames:folder").resolve(),
-            tag=tag,
+            corpus_version=tag,
             database_name=database_filename,
         )
 
@@ -139,7 +142,6 @@ def generate_tagged_speech_corpora(
 
 
 if __name__ == "__main__":
-
     main.add_command(generate_complete_sample_data, "complete")
     main.add_command(generate_corpus_and_metadata, "corpus-and-metadata")
     main.add_command(generate_word_frequencies, "word-frequencies")
@@ -169,7 +171,8 @@ if __name__ == "__main__":
     #     filenames: list[str] = get_test_documents(extension="xml")
     #     logger.info(f"filenames: {filenames}")
     #     subset_corpus_and_metadata(
-    #         tag=ConfigValue("corpus:version").resolve(),
+    #         corpus_version=ConfigValue("corpus:version").resolve(),
+    #         metadata_version=ConfigValue("metadata:version").resolve(),
     #         documents=filenames,
     #         global_corpus_folder=ConfigValue("global:corpus:folder").resolve(),
     #         global_metadata_folder=ConfigValue("global:metadata:folder").resolve(),

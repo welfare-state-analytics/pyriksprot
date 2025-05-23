@@ -27,7 +27,6 @@ jj = os.path.join
 
 
 def test_format_protocol_id():
-
     assert format_protocol_name("prot-199495--011.xml") == "1994/95:11"
     assert format_protocol_name("prot-199495--011") == "1994/95:11"
     assert format_protocol_name("prot-199495--11") == "1994/95:11"

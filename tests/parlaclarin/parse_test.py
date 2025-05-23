@@ -71,10 +71,10 @@ def test_parlaclarin_n_utterances(filename: str):
     'filename, u_count, intro_count',
     [
         ("prot-1933--fk--005.xml", 0, 1),
-        ("prot-1955--ak--022.xml", 428, 165),
+        ("prot-1955--ak--022.xml", 447, 165),
         ("prot-197879--014.xml", 1, 0),
-        ('prot-199192--021.xml', 113, 21),
-        ('prot-199192--127.xml', 2568, 249),
+        ('prot-199192--021.xml', 159, 21),
+        ('prot-199192--127.xml', 2639, 249),
         ("prot-199596--035.xml", 393, 41),
     ],
 )
@@ -90,7 +90,6 @@ def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: i
 
 
 def test_load_chambers():
-
     chambers: dict[str, set[str]] = load_chamber_indexes(folder=ConfigValue("corpus:folder").resolve())
 
     assert set(chambers.keys()) == {'ak', 'fk', 'ek'}
@@ -102,7 +101,6 @@ def test_load_chambers():
 
 
 def test_scan_folder():
-
     corpus_folder: str = ConfigValue("corpus:folder").resolve()
 
     scanner = CorpusScanner(parser=ProtocolMapper)
@@ -121,7 +119,6 @@ def test_scan_folder():
 
 
 def test_create_tei_corpus_xml():
-
     source_folder: str = ConfigValue("corpus.folder").resolve()
     target_folder: str = f'tests/output/{str(uuid.uuid4())[8]}'
 

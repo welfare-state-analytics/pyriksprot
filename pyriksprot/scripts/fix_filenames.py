@@ -7,7 +7,6 @@ from loguru import logger
 
 
 def rename_tagged_filename(zip_path: str):
-
     protocol_name: str = splitext(basename(zip_path))[0]
 
     try:
@@ -24,7 +23,6 @@ def rename_tagged_filename(zip_path: str):
     temp_dir: str = f"/tmp/{protocol_name}"
 
     try:
-
         with zipfile.ZipFile(zip_path, 'r') as fp:
             fp.extractall(temp_dir)
 
@@ -41,7 +39,7 @@ def rename_tagged_filename(zip_path: str):
 
 
 def main():
-    folder: str = "/data/riksdagen_corpus_data/v1.1.0/tagged_frames"
+    folder: str = "/data/riksdagen_corpus_data/v1.4.1/tagged_frames"
     for subfolder in listdir(folder):
         tagged_folder: str = join(folder, subfolder)
         if not isdir(tagged_folder):

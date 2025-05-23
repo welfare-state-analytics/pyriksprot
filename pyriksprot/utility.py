@@ -19,10 +19,12 @@ import unicodedata
 import warnings
 import zlib
 from importlib import import_module
+from importlib.resources import as_file, files
 from itertools import chain
 from os.path import abspath, basename, dirname, expanduser, isfile
 from os.path import join as jj
 from os.path import normpath, splitext
+from pathlib import Path
 from types import ModuleType
 from typing import Any, Callable, Literal, Sequence, Type, TypeVar
 from urllib.request import urlopen
@@ -30,6 +32,7 @@ from urllib.request import urlopen
 import requests
 import unidecode  # pylint: disable=import-error
 import yaml
+from jinja2 import Environment, PackageLoader, Template
 from loguru import logger
 
 
@@ -105,7 +108,7 @@ def dotget(data: dict, path: str, default: Any = None) -> Any:
     for key in dotexpand(path):
         d: dict = data
         for attr in key.split('.'):
-            d: dict = d.get(attr) if isinstance(d, dict) else None
+            d = d.get(attr) if isinstance(d, dict) else None
             if d is None:
                 break
         if d is not None:
@@ -185,7 +188,7 @@ def replace_extension(filename: str, extension: str) -> str:
 
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
-    name, _ = splitext(path)
+    name, extension = splitext(path)  # type: ignore
     return f'{name}{suffix}{extension if new_extension is None else new_extension}'
 
 
@@ -411,11 +414,11 @@ def slugify(value: str, allow_unicode: bool = False) -> str:
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 
-def compose(*fns: Sequence[Callable[[str], str]]) -> Callable[[str], str]:
+def compose(*fns: Sequence[Callable[[str], str]]) -> None | Callable[[str], str]:
     """Create a composed function from a list of function. Return function."""
     if len(fns) == 0:
         return None
-    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)
+    return functools.reduce(lambda f, g: lambda *args: f(g(*args)), fns)  # type: ignore
 
 
 def is_empty(filename: str) -> bool:
@@ -541,6 +544,44 @@ def xml_unescape(txt: str) -> str:
         .replace("&apos;", "'")
         .replace("&quot;", '"')
     )
+
+
+def get_template_path(name: str) -> Path:
+    """
+    Returns a pathlib.Path to the resource `name` inside the
+    pyriksprot.templates package, using the new Traversable API.
+    """
+    resource = files("pyriksprot.templates") / name
+    with as_file(resource) as p:
+        return p
+
+
+def get_template(template_filename: str) -> Template:
+    template_filename = "config-template.yml.j2"
+    env = Environment(
+        loader=PackageLoader("pyriksprot", "templates"),
+        # autoescape=select_autoescape()
+    )
+    template: Template = env.get_template(template_filename)
+    return template
+
+
+def get_config_template():
+    return get_template("config-template.yml.j2")
+
+
+def generate_template_to_file(*, template_filename: str, target_filename: str, **opts) -> None:
+    """Generate a config file by jinja2 template"""
+    template: Template = get_template(template_filename)
+    os.makedirs(os.path.dirname(target_filename), exist_ok=True)
+    with open(target_filename, "w", encoding="utf-8") as f:
+        f.write(template.render(**opts))
+
+
+def generate_default_config(target_filename: str, **opts) -> None:
+    """Generate a default config file"""
+    template_filename = "config-template.yml.j2"
+    generate_template_to_file(template_filename=template_filename, target_filename=target_filename, **opts)
 
 
 # def register(registry: dict | Type[Any], key: str = None):

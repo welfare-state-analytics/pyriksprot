@@ -62,6 +62,8 @@ def test_code_lookups():
 
     assert lookups.party_abbrev2name.get(0) == "[-]"
 
+    assert lookups.protocol_name2chamber_abbrev.get('prot-1933--fk--005') == 'fk'
+
     df: pd.DataFrame = pd.DataFrame(
         data=dict(
             gender_id=[
@@ -271,8 +273,28 @@ def test_person_party_at():
     assert person.party_at(1990) == 1
 
 
-def test_get_person_by_ids(person_index: md.PersonIndex):
+def test_id_mappings(person_index: md.PersonIndex):
 
+    database: str = ConfigStore.config().get("metadata.database.options.filename")
+    service = md.SpeakerInfoService(database, person_index=person_index)
+
+    wiki_id: str = 'Q5556026'
+    person_id: str = person_index.wiki_id2person_id.get(wiki_id)
+
+    assert person_id == 'i-84xpErSjuTzEi5hvTA1Jtt'
+
+    person_by_wiki_id: md.Person = service.person_index.get_person(wiki_id)
+    person_by_person_id: md.Person = service.person_index.get_person(person_id)
+    person_by_pid: md.Person = service.person_index.get_person(person_by_wiki_id.pid)
+
+    assert person_by_person_id.wiki_id == person_by_wiki_id.wiki_id
+    assert person_by_person_id.person_id == person_by_wiki_id.person_id
+    assert person_by_person_id.pid == person_by_wiki_id.pid
+    assert person_by_pid.wiki_id == person_by_wiki_id.wiki_id
+    assert person_by_pid.person_id == person_by_wiki_id.person_id
+
+
+def test_get_person_by_ids(person_index: md.PersonIndex):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     service = md.SpeakerInfoService(database, person_index=person_index)
 
@@ -304,7 +326,7 @@ def test_speaker_info_service(person_index: md.PersonIndex):
     assert len(person.alt_parties) == 9
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
     assert set(a.end_year for a in person.alt_parties) == {9999, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
-    assert set(a.party_id for a in person.alt_parties) == {7,5, 47}
+    assert set(a.party_id for a in person.alt_parties) == {7, 5, 47}
     assert person.party_at(1950) == 0
     assert person.party_at(1994) == 5
     assert person.party_at(2000) == 5
