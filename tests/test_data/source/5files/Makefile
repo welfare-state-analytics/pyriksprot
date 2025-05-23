@@ -4,7 +4,6 @@ SHELL := /bin/bash
 
 DATA_FOLDER="$(shell pwd)"
 PROJECT_FOLDER=$(shell bash -c 'echo "$$1" |{ p="$$1"; echo "$${p%/pyriksprot*}"; }' _ $(DATA_FOLDER))/pyriksprot
-SCRIPTS_FOLDER=$(PROJECT_FOLDER)/pyriksprot/scripts/
 CONFIG_FILENAME=./config_$(CORPUS_VERSION).yml
 CORPUS_FOLDER=$(CORPUS_VERSION)/riksdagen-records
 METADATA_FOLDER=metadata/$(METADATA_VERSION)
@@ -12,7 +11,7 @@ METADATA_FOLDER=metadata/$(METADATA_VERSION)
 dataset: parlaclarin-corpus word-frequencies tag-protocols tagged-speech-corpora text-corpora dtm-corpora
 
 $(CONFIG_FILENAME):
-	@PYTHONPATH=$(PROJECT_FOLDER) python $(SCRIPTS_FOLDER)/make_config.py $(CONFIG_FILENAME) \
+	@make-config $(CONFIG_FILENAME) \
 		--corpus-version $(CORPUS_VERSION) \
 		--metadata-version $(METADATA_VERSION) \
 		--root-folder . \
@@ -22,7 +21,7 @@ $(CONFIG_FILENAME):
 parlaclarin-corpus: $(CONFIG_FILENAME)
 	@echo "Target(s): 1) subset of Parla-CLARIN corpus 2) processed metadata"
 	@echo "Script(s): pyriksprot.scripts.subset-corpus:main"
-	@PYTHONPATH=$(PROJECT_FOLDER) python $(SCRIPTS_FOLDER)/subset_corpus.py --skip-download $(CONFIG_FILENAME) ./protocols.txt ./ 
+	@subset-corpus --skip-download $(CONFIG_FILENAME) ./protocols.txt ./ 
 	@mv -f $(CONFIG_FILENAME) $(CORPUS_VERSION)/config.yml
 
 word-frequencies:
