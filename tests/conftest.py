@@ -28,7 +28,6 @@ TEST_ROOT_FOLDER = 'tests/test_data/source'
 
 
 def bootstrap_testing():
-
     os.makedirs('tests/output', exist_ok=True)
 
     dotenv.load_dotenv('.env')
