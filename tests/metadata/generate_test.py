@@ -75,7 +75,6 @@ def test_get_and_set_db_version():
 
 
 def test_create_metadata_database():
-
     metadata_version: str = ConfigValue("metadata.version").resolve()
     target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{metadata_version}.db"
     metadata_folder: str = f"./tests/test_data/source/metadata/{metadata_version}"

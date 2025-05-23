@@ -274,7 +274,6 @@ def test_person_party_at():
 
 
 def test_get_person_by_ids(person_index: md.PersonIndex):
-
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     service = md.SpeakerInfoService(database, person_index=person_index)
 

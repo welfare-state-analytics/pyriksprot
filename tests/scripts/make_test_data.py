@@ -39,7 +39,6 @@ def generate_complete_sample_data(force: bool):
 @click.command()
 @click.option('--force', is_flag=True, help='Force overwrite', default=False)
 def generate_corpus_and_metadata(force: bool = False):
-
     try:
         if sample_parlaclarin_corpus_exists() and sample_metadata_exists():
             if not force:
@@ -143,7 +142,6 @@ def generate_tagged_speech_corpora(
 
 
 if __name__ == "__main__":
-
     main.add_command(generate_complete_sample_data, "complete")
     main.add_command(generate_corpus_and_metadata, "corpus-and-metadata")
     main.add_command(generate_word_frequencies, "word-frequencies")

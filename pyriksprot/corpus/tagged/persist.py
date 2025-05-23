@@ -79,7 +79,8 @@ PROTOCOL_LOADERS: dict = dict(
 )
 
 
-class FileIsEmptyError(Exception): ...
+class FileIsEmptyError(Exception):
+    ...
 
 
 def load_protocol(filename: str) -> Optional[interface.Protocol]:
@@ -137,7 +138,9 @@ def glob_protocols(source: str, pattern: str = None, strip_path: bool = False):
     filenames: list[str] = (
         glob.glob(jj(source, pattern), recursive=True)
         if isinstance(source, str)
-        else source if isinstance(source, list) else []
+        else source
+        if isinstance(source, list)
+        else []
     )
     if strip_path:
         filenames = strip_paths(filenames)

@@ -28,11 +28,13 @@ class ITaggerFactory(abc.ABC):
     identifier: str = "undefined"
 
     @abc.abstractmethod
-    def create(self) -> "ITagger": ...
+    def create(self) -> "ITagger":
+        ...
 
 
 class Processor(Protocol):
-    def __call__(self, text: str) -> str: ...
+    def __call__(self, text: str) -> str:
+        ...
 
 
 class ITagger(abc.ABC):
@@ -58,7 +60,8 @@ class ITagger(abc.ABC):
         return tagged_documents
 
     @abc.abstractmethod
-    def _tag(self, text: Union[str, list[str]]) -> list[TaggedDocument]: ...
+    def _tag(self, text: Union[str, list[str]]) -> list[TaggedDocument]:
+        ...
 
     @abc.abstractmethod
     def _to_dict(self, tagged_document: Any) -> TaggedDocument:

@@ -255,7 +255,9 @@ class BetterWordSentenceTokenizer(ISegmenter):
             return [(s[x:y], x, y) for x, y in self.tokenizer.span_tokenize(s)]
         return [[(t[x:y], x, y) for x, y in self.tokenizer.span_tokenize(t)] for t in self.sentenizer.tokenize(s)]  # type: ignore
 
-    def create_tokenize(self, sentenize: bool = False, return_spans: bool = False) -> Callable[
+    def create_tokenize(
+        self, sentenize: bool = False, return_spans: bool = False
+    ) -> Callable[
         [str],
         Iterable[str | list[str] | tuple[str, int, int] | Iterable[tuple[str, int, int]]] | Iterable[tuple[int, int]],
     ]:
@@ -332,7 +334,8 @@ class SegmenterRepository:
         return SegmenterRepository.sentenizer().tokenize(text)
 
 
-class ModelNotFoundError(Exception): ...
+class ModelNotFoundError(Exception):
+    ...
 
 
 create_tokenize = SegmenterRepository.create_tokenize

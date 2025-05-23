@@ -40,13 +40,16 @@ class VrtExportService:
         self.merge_strategy: str = merge_strategy
 
     @overload
-    def to_vrt(self, entity: interface.Utterance, *tags: tuple[str]) -> str: ...
+    def to_vrt(self, entity: interface.Utterance, *tags: tuple[str]) -> str:
+        ...
 
     @overload
-    def to_vrt(self, entity: interface.Speech, *tags: tuple[str]) -> str: ...
+    def to_vrt(self, entity: interface.Speech, *tags: tuple[str]) -> str:
+        ...
 
     @overload
-    def to_vrt(self, entity: interface.Protocol, *tags: tuple[str]) -> str: ...
+    def to_vrt(self, entity: interface.Protocol, *tags: tuple[str]) -> str:
+        ...
 
     def to_vrt(self, entity: IEntity, *tags: tuple[str]) -> str:
         if 'sentence' in tags:
@@ -200,13 +203,16 @@ class VrtBatchExporter:
         self.opts: dict = opts
 
     @overload
-    def export(self, data: tuple, *tags: tuple[str]) -> None: ...
+    def export(self, data: tuple, *tags: tuple[str]) -> None:
+        ...
 
     @overload
-    def export(self, data: VrtExportBatch, *tags: tuple[str]) -> None: ...
+    def export(self, data: VrtExportBatch, *tags: tuple[str]) -> None:
+        ...
 
     @overload
-    def export(self, data: list[VrtExportBatch], *tags: tuple[str]) -> None: ...
+    def export(self, data: list[VrtExportBatch], *tags: tuple[str]) -> None:
+        ...
 
     def export(self, data: tuple | VrtExportBatch | list[VrtExportBatch], *tags: tuple[str]) -> None:
         if isinstance(data, tuple):

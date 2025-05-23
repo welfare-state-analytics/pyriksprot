@@ -393,7 +393,6 @@ class PersonIndex:
     def overload_by_person(
         self, df: pd.DataFrame, *, encoded: bool = True, drop: bool = True, columns: list[str] = None
     ) -> pd.DataFrame:
-
         persons: pd.DataFrame = self.persons
 
         join_column: str = next((x for x in df.columns if x in ['wiki_id', 'who', 'person_id']), None)

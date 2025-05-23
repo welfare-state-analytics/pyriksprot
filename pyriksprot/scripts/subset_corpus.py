@@ -78,7 +78,6 @@ def main(
 
 
 if __name__ == "__main__":
-
     if sys.gettrace() is not None:
         print("NOTE! click.testing.CliRunner")
         folder: str = "/home/roger/source/welfare-state-analytics/pyriksprot/tests/test_data/source/5files"

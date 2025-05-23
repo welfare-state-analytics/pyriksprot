@@ -234,7 +234,6 @@ def test_export_vrt(target: str | None, tags, vrt_speaker_service: VrtExportServ
 
 
 def test_protocols_to_vrts_with_chamber(speaker_service: SpeakerInfoService):
-
     # speaker_service: SpeakerInfoService = SpeakerInfoService("tests/test_data/fakes/riksdagen-2020.db")
 
     export_service: VrtExportService = VrtExportService(speaker_service)

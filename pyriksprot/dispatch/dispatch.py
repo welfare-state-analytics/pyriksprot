@@ -127,7 +127,8 @@ class IDispatcher(abc.ABC):
         self.document_id += 1
 
     @abc.abstractmethod
-    def _dispatch_item(self, item: IDispatchItem) -> None: ...
+    def _dispatch_item(self, item: IDispatchItem) -> None:
+        ...
 
     def document_index(self) -> pd.DataFrame:
         document_index: pd.DataFrame = pd.DataFrame(self.document_data)
@@ -190,7 +191,9 @@ class IDispatcher(abc.ABC):
                 group_name = (
                     f"{group_name}_{key_id}"
                     if value_name is None
-                    else f"{group_name}_unknown" if value_name == "?" else f"{group_name}_{value_name}"
+                    else f"{group_name}_unknown"
+                    if value_name == "?"
+                    else f"{group_name}_{value_name}"
                 )
             except Exception as _:
                 group_name = f"{group_name}_{key_id}"

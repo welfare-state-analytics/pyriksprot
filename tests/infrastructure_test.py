@@ -89,7 +89,6 @@ def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
 
 # @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
-
     subset_corpus_and_metadata(
         corpus_version=ConfigValue("corpus.version").resolve(),
         metadata_version=ConfigValue("metadata.version").resolve(),

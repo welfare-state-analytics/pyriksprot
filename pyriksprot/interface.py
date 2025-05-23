@@ -20,7 +20,8 @@ from .utility import flatten, merge_csv_strings, strip_extensions
 MISSING_SPEAKER_NOTE_ID: str = "missing"
 
 
-class ParlaClarinError(ValueError): ...
+class ParlaClarinError(ValueError):
+    ...
 
 
 class TemporalKey(str, Enum):
@@ -79,10 +80,12 @@ class IDispatchItem(abc.ABC):
     n_tokens: int
 
     @property
-    def filename(self) -> str: ...
+    def filename(self) -> str:
+        ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        ...
 
     def to_dict(self) -> dict:
         return {}
@@ -96,19 +99,24 @@ class IProtocol(abc.ABC):
     page_references: list[PageReference] = []
 
     @abc.abstractmethod
-    def get_year(self, which: Literal["filename", "date"] = "filename") -> int: ...
+    def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
+        ...
 
     @abc.abstractmethod
-    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol": ...
+    def preprocess(self, preprocess: Callable[[str], str] = None) -> "Protocol":
+        ...
 
     @abc.abstractmethod
-    def checksum(self) -> Optional[str]: ...
+    def checksum(self) -> Optional[str]:
+        ...
 
     @abc.abstractmethod
-    def get_content(self, content_type: ContentType) -> str: ...
+    def get_content(self, content_type: ContentType) -> str:
+        ...
 
     @abc.abstractmethod
-    def get_speaker_notes(self) -> dict[str, SpeakerNote]: ...
+    def get_speaker_notes(self) -> dict[str, SpeakerNote]:
+        ...
 
 
 @dataclass

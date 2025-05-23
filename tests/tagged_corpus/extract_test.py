@@ -205,7 +205,9 @@ def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrat
     document_index: pd.DataFrame = (
         pd.read_csv(target_filename, sep='\t')
         if compress_type == 'csv'
-        else pd.read_feather(target_filename) if compress_type == 'feather' else None
+        else pd.read_feather(target_filename)
+        if compress_type == 'feather'
+        else None
     )
     assert 'party_id' in document_index.columns
     assert 'gender_id' in document_index.columns
