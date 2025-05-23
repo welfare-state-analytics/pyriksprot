@@ -46,7 +46,12 @@ def bootstrap_testing():
 
     ConfigStore.configure_context(source=TEST_CONFIG_FILENAME, env_prefix=None)
 
-    ensure_test_corpora_exist(only_check=True)
+    try:
+        ensure_test_corpora_exist(only_check=True)
+    except Exception:
+        logger.error(
+            "Test corpora not found. Please run `pytest --setup-only` to download the test data."
+        )
 
 
 bootstrap_testing()
@@ -58,12 +63,15 @@ def list_of_test_protocols() -> list[str]:
 
 
 @pytest.fixture(scope='session')
-def source_index() -> csi.CorpusSourceIndex:
+def source_index() -> csi.CorpusSourceIndex | None:
     tagged_source_folder: str = ConfigStore.config().get("tagged_frames.folder")
-    return csi.CorpusSourceIndex.load(
-        source_folder=tagged_source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
-    )
-
+    try:
+        return csi.CorpusSourceIndex.load(
+            source_folder=tagged_source_folder, source_pattern='**/prot-*.zip', years=None, skip_empty=True
+        )
+    except FileNotFoundError:
+        logger.error(f"tagged source folder {tagged_source_folder} not found")
+        return None
 
 @pytest.fixture(scope='session')
 def xml_source_index() -> csi.CorpusSourceIndex:

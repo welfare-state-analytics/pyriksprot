@@ -55,7 +55,7 @@ def sample_parlaclarin_corpus_exists() -> bool:
     test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt', extension='xml')
     is_complete: bool = all(isfile(jj(source_folder, x.split('-')[1], x)) for x in test_protocols)
     if not is_complete:
-        logger.info(f"ParlaClarin corpus in {source_folder} is not complete!")
+        logger.error(f"ParlaClarin corpus in {source_folder} is not complete!")
     return is_complete
 
 
@@ -65,17 +65,17 @@ def sample_metadata_exists() -> bool:
 
     filename: str = ConfigValue("metadata.database.options.filename").resolve()
     if not isfile(filename):
-        logger.info(f"metadata database file not found: {filename}")
+        logger.error(f"metadata database file not found: {filename}")
         return False
 
     configs: md.MetadataSchema = md.MetadataSchema(version=corpus_version)
     if not configs.files_exist(source_folder):
-        logger.info(f"metadata schema files not found in: {source_folder}")
+        logger.error(f"metadata schema files not found in: {source_folder}")
         return False
 
     tf_filename: str = ConfigValue("dehyphen:tf_filename").resolve()
     if not isfile(tf_filename):
-        logger.info(f"term frequency file not found: {tf_filename}")
+        logger.error(f"term frequency file not found: {tf_filename}")
         return False
 
     return True
@@ -86,7 +86,7 @@ def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
     test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt')
     is_complete: bool = all(isfile(jj(folder, f"{x}.zip")) or jj(folder, x.split('-')[1], x) for x in test_protocols)
     if not is_complete:
-        logger.info(f"tagged frames corpus in {folder} is not complete")
+        logger.error(f"tagged frames corpus in {folder} is not complete")
     return is_complete
 
 
@@ -95,7 +95,7 @@ def sample_tagged_speech_corpus_exists():
     extension: str = splitext(tagged_speech_folder)[1]
     is_at_least_not_empty: bool = len(glob(jj(tagged_speech_folder, "**", f"prot-*{extension}"), recursive=True)) > 0
     if not is_at_least_not_empty:
-        logger.info(f"tagged speech corpus in {tagged_speech_folder} is empty")
+        logger.error(f"tagged speech corpus in {tagged_speech_folder} is empty")
     return is_at_least_not_empty
 
 
