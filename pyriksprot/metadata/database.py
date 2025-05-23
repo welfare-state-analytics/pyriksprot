@@ -59,16 +59,13 @@ class DatabaseInterface(abc.ABC):
             self._close()
 
     @abc.abstractmethod
-    def _open(self) -> Self:
-        ...
+    def _open(self) -> Self: ...
 
     @abc.abstractmethod
-    def _close(self) -> None:
-        ...
+    def _close(self) -> None: ...
 
     @abc.abstractmethod
-    def commit(self) -> None:
-        ...
+    def commit(self) -> None: ...
 
     def __enter__(self) -> Self:
         return self.open()
@@ -77,12 +74,10 @@ class DatabaseInterface(abc.ABC):
         self.close()
 
     @abc.abstractmethod
-    def execute_script(self, sql: str) -> None:
-        ...
+    def execute_script(self, sql: str) -> None: ...
 
     @abc.abstractmethod
-    def fetch_scalar(self, sql: str) -> Any:
-        ...
+    def fetch_scalar(self, sql: str) -> Any: ...
 
     @property
     def version(self) -> str | None:
@@ -133,22 +128,18 @@ class DatabaseInterface(abc.ABC):
             raise
 
     @abc.abstractmethod
-    def drop(self, tablename: str, cascade: bool = False) -> Self:
-        ...
+    def drop(self, tablename: str, cascade: bool = False) -> Self: ...
 
     @abc.abstractmethod
     def fetch_tables(
         self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None
-    ) -> dict[str, pd.DataFrame]:
-        ...
+    ) -> dict[str, pd.DataFrame]: ...
 
     @abc.abstractmethod
-    def createdb(self, tag: str, force: bool) -> Self:
-        ...
+    def createdb(self, tag: str, force: bool) -> Self: ...
 
     @abc.abstractmethod
-    def dropdb(self, tag: str, force: bool) -> Self:
-        ...
+    def dropdb(self, tag: str, force: bool) -> Self: ...
 
     def quote(self, value: Any) -> str:
         if isinstance(value, str):
@@ -156,16 +147,13 @@ class DatabaseInterface(abc.ABC):
         return str(value)
 
     @abc.abstractmethod
-    def set_deferred(self, value: bool) -> None:
-        ...
+    def set_deferred(self, value: bool) -> None: ...
 
     @abc.abstractmethod
-    def exists(self, tablename: str) -> bool:
-        ...
+    def exists(self, tablename: str) -> bool: ...
 
     @abc.abstractmethod
-    def set_foreign_keys(self, value: bool) -> None:
-        ...
+    def set_foreign_keys(self, value: bool) -> None: ...
 
     def create_table(self, cfg: MetadataTable) -> None:
         """Creates table in database based on schema."""

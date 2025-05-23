@@ -18,8 +18,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 @click.group(help="CLI tool to manage riksprot metadata")
-def main():
-    ...
+def main(): ...
 
 
 @main.command()
