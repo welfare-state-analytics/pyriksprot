@@ -49,9 +49,7 @@ def bootstrap_testing():
     try:
         ensure_test_corpora_exist(only_check=True)
     except Exception:
-        logger.error(
-            "Test corpora not found. Please run `pytest --setup-only` to download the test data."
-        )
+        logger.error("Test corpora not complete. Some tests will NOT run!")
 
 
 bootstrap_testing()
@@ -72,6 +70,7 @@ def source_index() -> csi.CorpusSourceIndex | None:
     except FileNotFoundError:
         logger.error(f"tagged source folder {tagged_source_folder} not found")
         return None
+
 
 @pytest.fixture(scope='session')
 def xml_source_index() -> csi.CorpusSourceIndex:
