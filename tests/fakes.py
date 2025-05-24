@@ -215,11 +215,11 @@ def sample_tagged_to_utterance_csv_dict(tagged_data: pd.DataFrame) -> dict:
 def sample_tagged_to_dataframes(tagged_data: pd.DataFrame | dict) -> dict:
     """Converts { u_id: tsv } or df[[u_id, csv]] to { u_id: pd.DataFrame}"""
     if not isinstance(tagged_data, dict):
-        tagged_data: dict = sample_tagged_to_utterance_csv_dict(tagged_data)
+        tagged_data = sample_tagged_to_utterance_csv_dict(tagged_data)
     return {u_id: pd.read_csv(io.StringIO(data), sep='\t') for u_id, data in tagged_data.items()}
 
 
-def sample_tagged_to_merged_dataframe(tagged_data: pd.DataFrame | dict) -> dict:
+def sample_tagged_to_merged_dataframe(tagged_data: pd.DataFrame | dict) -> pd.DataFrame:
     """Converts { u_id: tsv } or df[[u_id, csv]] to df[[u_id, token, lemma, pos]]"""
     tagged_frames: dict[str, pd.DataFrame] = sample_tagged_to_dataframes(tagged_data)
     if len(tagged_frames) == 0:
@@ -241,7 +241,7 @@ def sample_compute_expected_counts(filename: str, kind: Literal['token', 'lemma'
 
 
 def load_expected_stream(
-    level: interface.SegmentLevel.Protocol, document_names: list[str]
+    level: interface.Protocol, document_names: list[str]
 ) -> list[iterate.ProtocolSegment]:
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
     return pu.flatten(load_segment_stream(jj(fakes_folder, f"{d}.xml"), level) for d in document_names)
