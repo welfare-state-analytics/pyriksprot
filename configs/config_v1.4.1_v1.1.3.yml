@@ -28,6 +28,7 @@ metadata:
     user: swerik-project
     repository: riksdagen-persons
     path: data
+    local_folder: /data/riksdagen_corpus_data/riksdagen-persons/
     url: https://github.com/swerik-project/riksdagen-persons.git
 
 tagged_frames:
