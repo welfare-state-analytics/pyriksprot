@@ -1,5 +1,5 @@
 -- This script is outdated and should not be used anymore.
-
+-- FIXME: #88 incorporate this into the main generate database script
 drop table if exists _government;
 drop table if exists _location_specifier;
 drop table if exists _member_of_parliament;
