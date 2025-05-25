@@ -55,13 +55,13 @@ def gh_get_repo_root(path: str) -> Optional[Path]:
     """
     try:
         # discover_repository returns the path to the .git folder (or file)
-        gitdir = pygit2.discover_repository(path)
-    except KeyError:
+        gitdir = pygit2.discover_repository(path)  # pylint: disable=no-member
+    except (KeyError, OSError):
         # not in a git repository
         return None
 
     # Build a Repository object from the discovered gitdir
-    repo = pygit2.Repository(gitdir)
+    repo = pygit2.Repository(gitdir)  # pylint: disable=no-member
 
     # repo.workdir is the absolute path to the working dir (with trailing slash)
     return Path(repo.workdir).resolve()
@@ -77,8 +77,8 @@ def gh_get_workdir_ref(path: str) -> tuple[Optional[str], str]:
     Raises KeyError if `path` isn’t inside a Git repo.
     """
     # 1. Find the .git folder, then open the repo
-    gitdir = pygit2.discover_repository(path)
-    repo = pygit2.Repository(gitdir)
+    gitdir: str | None = pygit2.discover_repository(path)  # pylint: disable=no-member
+    repo = pygit2.Repository(gitdir)  # pylint: disable=no-member type: ignore
 
     # 2. If HEAD is attached to a branch, repo.head_is_detached==False
     if not repo.head_is_detached:
@@ -96,7 +96,7 @@ def gh_get_workdir_ref(path: str) -> tuple[Optional[str], str]:
         #  - a TagObject (annotated tag), whose .target is the underlying commit
         #  - a Commit directly (lightweight tag)
         obj = repo[ref.target]
-        target_id = obj.target if isinstance(obj, pygit2.Tag) else obj.id
+        target_id = obj.target if isinstance(obj, pygit2.Tag) else obj.id  # pylint: disable=no-member type: ignore
 
         if target_id == head_commit:
             tag_name = full_ref.removeprefix("refs/tags/")
@@ -203,3 +203,13 @@ class GitInfo:
 
 
 class TagNotFoundError(Exception): ...
+
+
+class VersionSpecification:
+    @staticmethod
+    def is_satisfied(source_folder: str, version: str) -> bool | None:
+        try:
+            ref_type, value = gh_get_workdir_ref(source_folder)
+            return ref_type == 'tag' and value == version
+        except KeyError:
+            return None
