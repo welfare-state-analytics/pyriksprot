@@ -73,6 +73,7 @@ class ProtocolMapper(interface.IProtocolParser):
 
         page_refs: list[interface.PageReference] = []
         page_ref: interface.PageReference = interface.PageReference(source_id=0, page_number=-1, reference="")
+        page_number: int = 1
 
         """Current Speaker Note"""
         speaker_note: interface.SpeakerNote = None
@@ -81,9 +82,9 @@ class ProtocolMapper(interface.IProtocolParser):
 
         for element in ProtocolMapper.get_content_elements(data):
             if element.name == 'pb':
+                page_number += 1
                 page_ref = ProtocolMapper.decode_page_reference(page_ref, element)
                 page_refs.append(page_ref)
-
             elif element.name == "note" and element['type'] == "speaker":
                 speaker_note = interface.SpeakerNote(element["xml:id"], " ".join(element.cdata.split()))
                 speaker_notes[element["xml:id"]] = speaker_note
@@ -97,7 +98,7 @@ class ProtocolMapper(interface.IProtocolParser):
                 utterance: interface.Utterance = interface.Utterance(
                     u_id=element.get_attribute('xml:id'),
                     who=element.get_attribute('who') or "unknown",
-                    page_number=page_ref.page_number,
+                    page_number=page_number,  # page_ref.page_number,
                     prev_id=element.get_attribute('prev'),
                     next_id=element.get_attribute('next'),
                     paragraphs=ProtocolMapper.to_paragraphs(element, dedent=True),
