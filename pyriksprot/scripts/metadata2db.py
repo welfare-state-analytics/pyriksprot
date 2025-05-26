@@ -102,23 +102,31 @@ def index(corpus_folder: str, target_folder: str, version: str) -> None:
 @click.option(
     '--skip-download-metadata', type=bool, is_flag=True, help='Skip download of Github metadata', default=False
 )
+@click.option(
+    '--load-extra-scripts',
+    type=bool,
+    is_flag=True,
+    help='Load extra scripts from the SQL module. If not specified, only the scripts in the config are loaded.',
+    default=False,
+)
 def database(
     config_filename: str,
     target_filename: str = None,
     tag: str = None,
-    source_folder: str = None,
+    source_folder: str | None= None,
     force: bool = False,
     scripts_folder: str = None,
-    corpus_folder: str = None,
+    corpus_folder: str | None= None,
     skip_create_index: bool = True,
     skip_load_scripts: bool = False,
     skip_download_metadata: bool = False,
+    load_extra_scripts: bool = False,
 ) -> None:
     """Create a database from metadata configuration"""
     try:
         ConfigStore().configure_context(source=config_filename)
 
-        corpus_version = tag or ConfigValue("corpus.version").resolve()
+        corpus_version: str = tag or ConfigValue("corpus.version").resolve()
         metadata_version: str = ConfigValue("metadata.version").resolve()
         source_folder = source_folder or ConfigValue("metadata.folder").resolve()
         corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
@@ -141,6 +149,7 @@ def database(
             scripts_folder=scripts_folder,
             skip_download_metadata=skip_download_metadata,
             skip_load_scripts=skip_load_scripts,
+            load_extra_scripts=load_extra_scripts,
             force=force,
         )
 
