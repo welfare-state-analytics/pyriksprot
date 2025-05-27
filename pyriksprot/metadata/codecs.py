@@ -18,6 +18,7 @@ CODE_TABLES: dict[str, str] = {
     'office_type': 'office_type_id',
     'party': 'party_id',
     'sub_office_type': 'sub_office_type_id',
+    'protocols': 'document_name',
 }
 
 
@@ -57,6 +58,7 @@ class Codecs:
         self.office_type: pd.DataFrame = null_frame
         self.party: pd.DataFrame = null_frame
         self.sub_office_type: pd.DataFrame = null_frame
+        self.protocols: pd.DataFrame = null_frame
         self.extra_codecs: list[Codec] = []
         self.source_filename: str | None = None
         self.code_tables: dict[str, str] = CODE_TABLES

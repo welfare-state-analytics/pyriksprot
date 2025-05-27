@@ -261,6 +261,7 @@ class PersonIndex:
             'persons_of_interest': None,
             'terms_of_office': 'terms_of_office_id',
             'person_party': None,
+            'protocols': None,
             # 'unknown_utterance_gender': 'u_id',
             # 'unknown_utterance_party': 'u_id',
         }
