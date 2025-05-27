@@ -27,7 +27,7 @@ class Codec:
     type: Literal['encode', 'decode']
     from_column: str
     to_column: str
-    fx: Callable[[int], str] | Callable[[str], int] | dict[str, int] | dict[int, str]
+    fx: Callable[[int | str], int | str] | dict[str | int, str | int]
     default: str = None
 
     def apply(self, df: pd.DataFrame) -> pd.DataFrame:
