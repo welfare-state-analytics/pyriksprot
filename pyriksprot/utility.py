@@ -607,4 +607,3 @@ def generate_default_config(target_filename: str, **opts) -> None:
 #             return fn
 
 #         return decorator
-

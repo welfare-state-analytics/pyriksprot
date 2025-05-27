@@ -2,10 +2,14 @@ import warnings
 
 import click
 from loguru import logger
+
 from pyriksprot import configuration
 from pyriksprot.gitchen import VersionSpecification
 from pyriksprot.workflows.tag import ITagger, TaggerProvider, tag_protocols
+
 # from pyriksprot_tagger.utility import VersionSpecification, check_cuda
+
+# pylint: disable=too-many-positional-arguments
 
 
 @click.command()

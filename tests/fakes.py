@@ -240,9 +240,7 @@ def sample_compute_expected_counts(filename: str, kind: Literal['token', 'lemma'
         return {}
 
 
-def load_expected_stream(
-    level: interface.Protocol, document_names: list[str]
-) -> list[iterate.ProtocolSegment]:
+def load_expected_stream(level: interface.Protocol, document_names: list[str]) -> list[iterate.ProtocolSegment]:
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
     return pu.flatten(load_segment_stream(jj(fakes_folder, f"{d}.xml"), level) for d in document_names)
 
