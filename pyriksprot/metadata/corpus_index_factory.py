@@ -35,13 +35,17 @@ class CorpusScanner:
     def __init__(self, parser: IProtocolParser | Type[IProtocolParser]) -> None:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
 
-    def scan(self, filenames: Sequence[str], chambers: dict[str, set[str]]) -> CorpusScanner.ScanResult:
+    def scan(
+        self, filenames: Sequence[str], chambers: dict[str, set[str]], use_preface_name: bool = False
+    ) -> CorpusScanner.ScanResult:
         protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
 
         data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
         # FIXME: #77 change: Add chamber_abbrev to the protocol index
         for document_id, filename in tqdm(enumerate(filenames)):
-            protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
+            protocol: IProtocol = self.parser.parse(
+                filename, use_preface_name=use_preface_name, ignore_tags={"teiHeader"}
+            )
             chamber_abbrev: str = protocol_to_chamber.get(protocol.name)
             if not chamber_abbrev:
                 chamber_abbrev = get_chamber_by_filename(filename)

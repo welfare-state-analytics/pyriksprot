@@ -15,7 +15,7 @@ from pandas.io.json import ujson_dumps, ujson_loads  # type: ignore
 
 from .utility import flatten, merge_csv_strings, strip_extensions
 
-# pylint: disable=too-many-arguments, no-member
+# pylint: disable=too-many-arguments, no-member, too-many-positional-arguments
 
 MISSING_SPEAKER_NOTE_ID: str = "missing"
 
@@ -94,6 +94,7 @@ class IProtocol(abc.ABC):
     utterances: list[Utterance]
     speaker_notes: dict[str, SpeakerNote]
     page_references: list[PageReference] = []
+    preface_name: str
 
     @abc.abstractmethod
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int: ...
@@ -400,6 +401,7 @@ class Protocol(UtteranceMixIn, IProtocol):
         utterances: list[Utterance],
         speaker_notes: dict[str, SpeakerNote],
         page_references: list[PageReference],
+        preface_name: str = "",
         **_,
     ):
         self.date: str = date
@@ -407,6 +409,7 @@ class Protocol(UtteranceMixIn, IProtocol):
         self.utterances: list[Utterance] = utterances
         self.page_references: list[PageReference] = page_references
         self.speaker_notes: dict[str, SpeakerNote] = speaker_notes or {}
+        self.preface_name: str = preface_name or name
 
     def get_year(self, which: Literal["filename", "date"] = "filename") -> int:
         """Returns protocol's year either extracted from filename or from `date` tag in XML header"""
@@ -447,5 +450,6 @@ class Protocol(UtteranceMixIn, IProtocol):
 
 class IProtocolParser(abc.ABC):
     @staticmethod
-    def parse(filename: str, ignore_tags: set[str]) -> IProtocol:  # pylint: disable=unused-argument
-        ...
+    def parse(
+        filename: str, *, use_preface_name: bool = False, ignore_tags: set[str]  # pylint: disable=unused-argument
+    ) -> IProtocol: ...

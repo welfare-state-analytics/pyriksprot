@@ -13,7 +13,7 @@ def multiprocessing_xml_load(args) -> Iterable[iterate.ProtocolSegment]:
     """Load protocol from XML. Aggregate text to `segment_level`. Return (name, who, id, text)."""
     return iterate.to_segments(
         content_type=ContentType.Text,
-        protocol=ProtocolMapper.parse(filename=args[0]),
+        protocol=ProtocolMapper.parse(filename=args[0], use_preface_name=False),
         segment_level=args[2],
         merge_strategy=args[4],
         segment_skip_size=args[3],
@@ -28,7 +28,7 @@ class XmlUntangleSegmentIterator(iterate.ProtocolSegmentIterator):
         """Load protocol from XML. Aggregate text to `segment_level`. Return sequence of segment.ProtocolSegment."""
         return iterate.to_segments(
             content_type=ContentType.Text,
-            protocol=ProtocolMapper.parse(filename=filename),
+            protocol=ProtocolMapper.parse(filename=filename, use_preface_name=False),
             segment_level=self.segment_level,
             merge_strategy=self.merge_strategy,
             segment_skip_size=self.segment_skip_size,
@@ -55,9 +55,9 @@ def multiprocessing_load(args):
 class XmlProtocolSegmentIterator(iterate.ProtocolSegmentIterator):
     """Reads xml files using Protocol entity and returns a stream of `segment.ProtocolSegment`"""
 
-    def load(self, filename: str) -> List[iterate.ProtocolSegment]:
+    def load(self, filename: str) -> Iterable[iterate.ProtocolSegment]:
         return iterate.to_segments(
-            protocol=ProtocolMapper.parse(filename=filename),
+            protocol=ProtocolMapper.parse(filename=filename, use_preface_name=False),
             content_type=self.content_type,
             segment_level=self.segment_level,
             segment_skip_size=self.segment_skip_size,

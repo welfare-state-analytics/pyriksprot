@@ -65,7 +65,7 @@ def convert_protocol(
         output_filename (str, optional): Target file. Defaults to None.
         template_name (str, optional): Template name (found in resource-folder). Defaults to None.
     """
-    protocol: interface.Protocol = parse.ProtocolMapper.parse(input_filename)
+    protocol: interface.Protocol = parse.ProtocolMapper.parse(input_filename, use_preface_name=False)
     content: str = ""
 
     if protocol.has_text:

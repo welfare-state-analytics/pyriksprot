@@ -19,17 +19,17 @@ jj = os.path.join
 
 
 @pytest.mark.parametrize(
-    'protocol_name',
+    'protocol_name, preface_name',
     [
-        "prot-1958-fake",
-        "prot-1960-fake",
-        "prot-1980-empty",
+        ("prot-1958-fake", "prot-1958-fake"),
+        ("prot-1960-fake", "prot-1960-höst-fake"),
+        ("prot-1980-empty", "prot-1980-empty"),
     ],
 )
-def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str):
+def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str, preface_name: str):
     fakes_folder: str = ConfigValue("fakes:folder").resolve()
     filename: str = jj(fakes_folder, f"{protocol_name}.xml")
-    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename)
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename, use_preface_name=False)
 
     """Load truth"""
     utterances: list[interface.Utterance] = fakes.load_sample_utterances(filename)
@@ -43,6 +43,9 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_nam
     assert 'empty' in protocol_name or protocol.has_text
     assert protocol.checksum()
     assert len(protocol.utterances) == len(utterances)
+
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename, use_preface_name=True)
+    assert protocol.name == preface_name
 
 
 @pytest.mark.parametrize(

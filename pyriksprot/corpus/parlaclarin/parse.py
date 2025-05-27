@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from os.path import basename, splitext
 from typing import Any, Iterable
 
 from loguru import logger
@@ -161,13 +162,12 @@ class ProtocolMapper(interface.IProtocolParser):
     def to_paragraphs(element: untangle.Element, dedent: bool = True) -> list[str]:
         texts: Iterable[str] = (p.cdata for p in element.get_elements('seg'))
         if dedent:
-            texts = [dedent_text(t) for t in texts]
-        return texts
+            texts = (dedent_text(t) for t in texts)
+        return list(texts)
 
     @staticmethod
     def parse(
-        filename: str | untangle.Element,
-        ignore_tags: set[str] | str = "teiHeader",
+        filename: str, *, use_preface_name: bool = False, ignore_tags: set[str] | str = "teiHeader"
     ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
         protocol: interface.Protocol = None
@@ -188,12 +188,16 @@ class ProtocolMapper(interface.IProtocolParser):
             if len(parsed_data.get("utterances") or []) == 0:
                 logger.warning(f'no utterances found in {source_name}')
 
+            preface_name: str | None = ProtocolMapper.get_name(data)
+            protocol_name: str | None = preface_name if use_preface_name else splitext(basename(filename))[0]
+
             protocol: interface.Protocol = interface.Protocol(
                 utterances=parsed_data.get("utterances"),
                 speaker_notes=parsed_data.get("speaker_notes"),
                 page_references=parsed_data.get("page_references"),
                 date=ProtocolMapper.get_date(data),
-                name=ProtocolMapper.get_name(data),
+                name=protocol_name,
+                preface_name=preface_name,
             )
         except Exception as ex:
             logger.error(f"error parsing {source_name}: {ex}")

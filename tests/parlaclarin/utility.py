@@ -13,7 +13,7 @@ from pyriksprot.utility import strip_path_and_extension
 
 
 def _load_protocol(data: str | Any) -> interface.Protocol:
-    return parlaclarin.ProtocolMapper.parse(data)
+    return parlaclarin.ProtocolMapper.parse(data, use_preface_name=False)
 
 
 def get_utterance_sequence(filename: str) -> list[tuple]:
