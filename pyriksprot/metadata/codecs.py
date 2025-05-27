@@ -107,6 +107,10 @@ class Codecs:
         return pu.revdict(self.sub_office_type2name)
 
     @cached_property
+    def protocol_name2chamber_abbrev(self) -> dict:
+        return self.protocols['chamber_abbrev'].to_dict()
+
+    @cached_property
     def party_abbrev2name(self) -> dict:
         return self.party['party_abbrev'].to_dict()
 
@@ -122,6 +126,7 @@ class Codecs:
             Codec("decode", "office_type_id", "office_type", self.office_type2name),
             Codec("decode", "party_id", "party_abbrev", self.party_abbrev2name),
             Codec("decode", "sub_office_type_id", "sub_office_type", self.sub_office_type2name),
+            Codec("decode", "document_name", "chamber_abbrev", self.protocol_name2chamber_abbrev),
             Codec("encode", "gender", "gender_id", self.gender2id),
             Codec("encode", "office_type", "office_type_id", self.office_type2id),
             Codec("encode", "party", "party_id", self.party_abbrev2id),
