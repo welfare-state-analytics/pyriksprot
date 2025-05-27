@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.corpus.utility import get_chamber_by_filename
 from pyriksprot.metadata import database
 
 from ..utility import replace_extension, revdict
@@ -512,3 +513,9 @@ class SpeakerInfoService:
             compression=dict(method='zip', archive_name="speaker_index.csv"),
             header=True,
         )
+
+    def get_chamber_abbrev(self, protocol_name: str) -> str:
+        try:
+            return self.person_index.lookups.protocol_name2chamber_abbrev.get(protocol_name, '')
+        except:  # pylint: disable=bare-except
+            return get_chamber_by_filename(protocol_name)
