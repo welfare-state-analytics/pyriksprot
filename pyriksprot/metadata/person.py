@@ -486,10 +486,7 @@ class SpeakerInfoService:
         person = self.person_index[person_id]
         gender_id: int = person.gender_id
         party_id: int = person.party_id
-        # if person.is_unknown:
-        #     gender_id = gender_id or self.utterance_index.unknown_gender_lookup.get(u_id, 0)
-        #     party_id = party_id or self.utterance_index.unknown_party_lookup.get(u_id, 0)
-        # elif not party_id:
+
         if not party_id:
             party_id = person.party_at(year)
 
