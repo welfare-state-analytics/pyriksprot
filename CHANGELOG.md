@@ -4,6 +4,52 @@
 > All notable changes to this project will be documented in this file
 
 
+## [0.6.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.5.0...v0.6.0) (2025-05-28)
+
+### 🍕 Features
+
+* add missing parties to _party_abbreviation and party tables ([2e9f342](https://github.com/welfare-state-analytics/pyriksprot/commit/2e9f34256eddc0dbef470ae79913e2199e95fdfe))
+* add semantic-release configuration and GitHub Actions workflow ([9afa1de](https://github.com/welfare-state-analytics/pyriksprot/commit/9afa1de3a1bd85c6d7e9f864b1a7156f198fb825))
+* add vnew party metadata (from Swedeb) ([4af6c9a](https://github.com/welfare-state-analytics/pyriksprot/commit/4af6c9a5275cd9c8e940bf16ae3e65c70449e03c))
+* generate postgresql metadatabase ([464ded9](https://github.com/welfare-state-analytics/pyriksprot/commit/464ded95aed2cbd73748050ab10099659803865b))
+* Resolves [#85](https://github.com/welfare-state-analytics/pyriksprot/issues/85) ([9fff60d](https://github.com/welfare-state-analytics/pyriksprot/commit/9fff60db86d2e087f57fc9f31829e98032915b88))
+* use of new part data ([#82](https://github.com/welfare-state-analytics/pyriksprot/issues/82)) ([b3130ec](https://github.com/welfare-state-analytics/pyriksprot/commit/b3130ec9bfbc34b27224d543b8e6d010d998b5c6))
+
+### 🐛 Bug Fixes
+
+* add chamber_abbrev column to chamber table and update insert values ([b456aee](https://github.com/welfare-state-analytics/pyriksprot/commit/b456aee44ea972e81c8c2bbae74b6fdf9548c366))
+* changes script name ([51ccee2](https://github.com/welfare-state-analytics/pyriksprot/commit/51ccee26e7f264ad93f891bba186313e74441f18))
+* clean up whitespace and formatting in database.py ([e7494ac](https://github.com/welfare-state-analytics/pyriksprot/commit/e7494ac70841e874e7d5e1cbad98f84820c19b41))
+* correct formatting in metadata_index_test.py ([8d2bf0f](https://github.com/welfare-state-analytics/pyriksprot/commit/8d2bf0f275299a4095d7e7d0af2e431eb6a0d1cd))
+* correct party code for 'De moderata reformvännernas grupp' in swedeb-parties.csv ([3547e5c](https://github.com/welfare-state-analytics/pyriksprot/commit/3547e5cf388991b849aa74a051f1d3ae06d35847))
+* correct typo in files_exist function name and update conditional check ([b08231b](https://github.com/welfare-state-analytics/pyriksprot/commit/b08231b89b4f685495b5377622f6120f6e4dc6c4))
+* correct typo in log message and improve error handling for missing schema files ([c7b556a](https://github.com/welfare-state-analytics/pyriksprot/commit/c7b556ad51fd9ebdf31d244fdf73c0a228304c78))
+* handle empty string cases for start_date and end_date ([69b382c](https://github.com/welfare-state-analytics/pyriksprot/commit/69b382cd67f9a7e10a252acc5c87e994ccfffb4c))
+* improve formatting and consistency in utility.py ([ec0bcb9](https://github.com/welfare-state-analytics/pyriksprot/commit/ec0bcb9a08a0691948bbb0c5ea262484e1f26462))
+* indentation error in TaggedFramePerGroupDispatcher ([90d7745](https://github.com/welfare-state-analytics/pyriksprot/commit/90d77456962e8108982de987622a3948b0020ba1))
+* make tests more resiliant to changed ids ([b087c9c](https://github.com/welfare-state-analytics/pyriksprot/commit/b087c9c11ee64d769f65f2b01b5bd0a593d36021))
+* remove unused import from database.py ([888c6a9](https://github.com/welfare-state-analytics/pyriksprot/commit/888c6a9e97a54904a917538695caa57286ae6a11))
+* remove unused import from iterate.py ([5c25b88](https://github.com/welfare-state-analytics/pyriksprot/commit/5c25b88670d4597b548f12fa9a7990df31e1aa14))
+* remove unused schema variable ([5507bca](https://github.com/welfare-state-analytics/pyriksprot/commit/5507bca4969f3d2d951b0ac1650626a0ea888177))
+* remove unused variable in path_add_suffix function ([f58ed25](https://github.com/welfare-state-analytics/pyriksprot/commit/f58ed251ac5a8dea7b81c9f410e0a9202204184f))
+* reorder import statements in database.py ([331a8f3](https://github.com/welfare-state-analytics/pyriksprot/commit/331a8f32d73a3fdf69b197cea57f4b6ec476309e))
+* update party_id assertions in speaker info tests ([84cef26](https://github.com/welfare-state-analytics/pyriksprot/commit/84cef26a0d8062300e04bc7d9157c12c1d71cd5f))
+* update pylintrc to disable 'too-many-public-methods' warning ([b153285](https://github.com/welfare-state-analytics/pyriksprot/commit/b15328533136380795da2794f835da63e2429d3d))
+* update speaker info retrieval and merge strategy in tagged_speeches ([b186978](https://github.com/welfare-state-analytics/pyriksprot/commit/b1869786d78cbf8172ce219d47b5da52aee02042))
+* update type hint for compose function and improve variable naming in utility.py ([22bbfbd](https://github.com/welfare-state-analytics/pyriksprot/commit/22bbfbdf59f94036fd1c6734171656b8bbebd952))
+* use iterator ([0862e98](https://github.com/welfare-state-analytics/pyriksprot/commit/0862e98697e8481356905ce1d55975e753cee684))
+
+### 🧑‍💻 Code Refactoring
+
+* generate new test data ([#91](https://github.com/welfare-state-analytics/pyriksprot/issues/91)) ([823efc7](https://github.com/welfare-state-analytics/pyriksprot/commit/823efc7ab2fa9cbc4094cccd9a9a6207ce48553f))
+* renamed metadata filename argument ([66e5468](https://github.com/welfare-state-analytics/pyriksprot/commit/66e546894dcfaea59a4ca8ffe466a658ac768411))
+* renamed script ([d0cf840](https://github.com/welfare-state-analytics/pyriksprot/commit/d0cf840997349b7c80f40367ad1de000193de156))
+* simplify return statement in protocol_segments function ([2da0578](https://github.com/welfare-state-analytics/pyriksprot/commit/2da057892362bb062ec4d37db353ea3287215bb6))
+
+### ✅ Tests
+
+* refreshed testdata ([b410914](https://github.com/welfare-state-analytics/pyriksprot/commit/b41091408b8896e08d5c9b7c10c54671adb9a019))
+
 ## [0.5.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.4.6...v0.5.0) (2025-05-22)
 
 ### 🍕 Features
