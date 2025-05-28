@@ -1,6 +1,6 @@
 import abc
 import sqlite3
-from calendar import c
+from contextlib import contextmanager
 from os.path import basename
 from typing import Any, Self, Type
 
@@ -110,7 +110,7 @@ class DatabaseInterface(abc.ABC):
         return self
 
     @abc.abstractmethod
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable = None) -> Self:
         """Loads dataframe into the database."""
         ...
 
@@ -135,7 +135,11 @@ class DatabaseInterface(abc.ABC):
         self, tables: dict[str, str], *, defaults: dict[str, Any] = None, types: dict[str, Any] = None
     ) -> dict[str, pd.DataFrame]: ...
 
-    def create_database(self, tag: str, force: bool) -> Self: ...
+    @abc.abstractmethod
+    def createdb(self, tag: str, force: bool) -> Self: ...
+
+    @abc.abstractmethod
+    def dropdb(self, tag: str, force: bool) -> Self: ...
 
     def quote(self, value: Any) -> str:
         if isinstance(value, str):
@@ -143,9 +147,7 @@ class DatabaseInterface(abc.ABC):
         return str(value)
 
     @abc.abstractmethod
-    def set_deferred(self, value: bool) -> None:
-        with self:
-            self.execute_script(f"pragma defer_foreign_keys = {int(value)};")
+    def set_deferred(self, value: bool) -> None: ...
 
     @abc.abstractmethod
     def exists(self, tablename: str) -> bool: ...
@@ -239,7 +241,7 @@ class SqliteDatabase(DatabaseInterface):
         with self:
             return pd.read_sql(sql, self.connection)
 
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable = None) -> Self:
         """Loads dataframe into the database"""
         try:
             records: np.recarray = data.to_records(index=False)
@@ -291,13 +293,18 @@ class SqliteDatabase(DatabaseInterface):
         with self:
             return self.fetch_sql(f"select * from PRAGMA_TABLE_INFO('{table_name}');")
 
-    def create_database(self, tag: str, force: bool) -> Self:
+    def createdb(self, tag: str, force: bool) -> Self:
         """Resets the database by dropping all tables and creating a version table"""
 
         ensure_path(self.filename)
         reset_file(self.filename, force=force)
 
         self.version = tag
+        return self
+
+    def dropdb(self, tag: str, force: bool) -> Self:
+        """Renoved the database file"""
+        reset_file(self.filename, force=force)
         return self
 
     def exists(self, tablename: str) -> bool:
@@ -315,21 +322,62 @@ class SqliteDatabase(DatabaseInterface):
 
 class PostgresDatabase(DatabaseInterface):
     def __init__(self, **opts):
+
+        self._deferred_constraints: bool = opts.pop('deferred_constraints', True)
+        self._single_transaction: bool = opts.pop('single_transaction', True)
+        self._single_cursor: None | pg.cursor = None
+
         super().__init__(**opts)
+
         self.connection: None | pg.connection = None
         self.quote_chars: str | tuple[str, str] = ('"', '"')
 
+    def _get_db_opts(self) -> dict[str, Any]:
+
+        return {
+            k: v
+            for k, v in self.opts.items()
+            if k
+            in {"dsn", "connection_factory", "cursor_factory", "database", "dbname", "user", "password", "host", "port"}
+        }
+
     def _open(self) -> Self:
         if not self.connection:
-            self.connection = psycopg2.connect(**self.opts)
+            self.connection = psycopg2.connect(**self._get_db_opts())
+            if self._single_transaction:
+                # Create a single cursor if using a single transaction
+                self._single_cursor = self.connection.cursor()
+                if self._deferred_constraints:
+                    self._single_cursor.execute("begin")
+                    self._single_cursor.execute("set constraints all deferred")
         return self
 
     def _close(self):
+
         if self.connection is None:
             return
+
+        if self._single_cursor is not None:
+            self._single_cursor.close()
+            self._single_cursor = None
+
         self.connection.commit()
         self.connection.close()
         self.connection = None
+
+    @contextmanager
+    def _get_cursor(self):
+        """Context manager for getting a cursor based on single_transaction setting"""
+        if self._single_transaction:
+            if not self._single_cursor:
+                raise RuntimeError("Single cursor is not initialized.")
+            yield self._single_cursor
+        else:
+            cursor: pg.cursor = self.connection.cursor()
+            try:
+                yield cursor
+            finally:
+                cursor.close()
 
     def commit(self) -> None:
         if self.connection is None:
@@ -337,11 +385,12 @@ class PostgresDatabase(DatabaseInterface):
         self.connection.commit()
 
     def set_deferred(self, value: bool) -> None:
-        with self.connection.cursor() as cursor:
-            if value:
-                cursor.execute("set constraints all deferred;")
-            else:
-                cursor.execute("set constraints all immediate;")
+        self._deferred_constraints = value
+        # with self._get_cursor() as cursor:
+        #     if value:
+        #         cursor.execute("set constraints all deferred;")
+        #     else:
+        #         cursor.execute("set constraints all immediate;")
 
     def set_foreign_keys(self, value: bool) -> None:
         self.set_deferred(value)
@@ -349,13 +398,13 @@ class PostgresDatabase(DatabaseInterface):
     def execute_script(self, sql: str) -> None:
         """Executes a script in the database"""
         with self:
-            with self.connection.cursor() as cursor:
+            with self._get_cursor() as cursor:
                 cursor.execute(sql)
 
     def fetch_one(self, sql: str) -> list[Any]:
         """Fetches a single row from the database"""
         with self:
-            with self.connection.cursor() as cursor:
+            with self._get_cursor() as cursor:
                 cursor.execute(sql)
                 return list(cursor.fetchone() or [None])
 
@@ -366,22 +415,30 @@ class PostgresDatabase(DatabaseInterface):
     def fetch_sql(self, sql: str) -> pd.DataFrame:
         """Reads a table from the database"""
         with self:
-            with self.connection.cursor() as cursor:
+            with self._get_cursor() as cursor:
                 data: list[tuple[Any, ...]] = cursor.fetchall()
                 columns: list[str] = [desc[0] for desc in cursor.description]
                 df = pd.DataFrame(data, columns=columns)
                 return df
 
-    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None) -> Self:
+    def _transform_data(self, data: pd.DataFrame, cfg: MetadataTable) -> pd.DataFrame:
+        if cfg:
+            for c, t in cfg.data.items():
+                if t == 'date':
+                    data[c] = data[c].replace('', None)
+        return data
+
+    def store(self, data: pd.DataFrame, tablename: str, columns: list[str] = None, cfg: MetadataTable = None) -> Self:
         """Loads dataframe into the database into the specified existing table"""
         try:
             columns = columns or data.columns.to_list()
             data = data[columns].where(pd.notnull(data), None)
+            data = self._transform_data(data, cfg)
 
             data_tuples: list[tuple[Any, ...]] = [tuple(row) for row in data.itertuples(index=False, name=None)]
             insert_query: str = f'insert into {tablename} ({", ".join(map(self.quote, columns))}) values %s'
 
-            with self.connection.cursor() as cursor:
+            with self._get_cursor() as cursor:
                 pgx.execute_values(cursor, insert_query, data_tuples)
 
             return self
@@ -428,19 +485,24 @@ class PostgresDatabase(DatabaseInterface):
             """
             return pd.read_sql(query, self.connection)
 
-    def create_database(self, tag: str, force: bool) -> Self:
+    def createdb(self, tag: str, force: bool) -> Self:
         """Resets the database by dropping all tables and creating a version table"""
-        db: str = f"riksprot_metadata_{tag.replace('.', '_')}"
-        connection: pg.connection = psycopg2.connect(**(self.opts | {'database': 'postgres'}))
-        try:
-            connection.autocommit = True
-            with connection.cursor() as cursor:
-                cursor.execute(f"drop database if exists {db};")
-                cursor.execute(f"create database {db};")
-        finally:
-            connection.close()
+        if not force:
+            return self
+
+        if not self.opts.get('database'):
+            raise ValueError("Database name not set in configuration.")
+
+        self.dropdb(tag, force=force)
+        self.pgdb_execute(sql=f"create database {self.opts.get('database')};", **self.opts)
 
         self.version = tag
+        return self
+
+    def dropdb(self, tag: str, force: bool) -> Self:
+        if not force:
+            return self
+        self.pgdb_execute(sql=f"drop database if exists {self.opts.get('database')};", **self.opts)
         return self
 
     def exists(self, tablename: str) -> bool:
@@ -455,6 +517,16 @@ class PostgresDatabase(DatabaseInterface):
         with self:
             self.execute_script(f"drop table if exists {tablename} {'cascade' if cascade else ''};")
         return self
+
+    @staticmethod
+    def pgdb_execute(*, sql: str, **opts) -> None:
+        connection: pg.connection = psycopg2.connect(**(opts | {'database': 'postgres'}))
+        try:
+            connection.autocommit = True
+            with connection.cursor() as cursor:
+                cursor.execute(f"{sql};")
+        finally:
+            connection.close()
 
 
 def _map_postgres_types_to_pandas(postgres_type: str):

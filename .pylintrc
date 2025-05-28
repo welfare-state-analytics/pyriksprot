@@ -38,7 +38,8 @@ disable=invalid-name,
         unused-private-member,
         bad-option-value,
         use-dict-literal,
-        trailing-whitespace
+        trailing-whitespace,
+        too-many-public-methods
         # apply-builtin,
         # backtick,
         # bad-inline-option,

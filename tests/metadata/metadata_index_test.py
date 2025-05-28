@@ -60,12 +60,20 @@ def test_code_lookups():
     assert lookups.sub_office_type2name.get(1) == "Ledamot av första kammaren"
     assert lookups.sub_office_type2id.get("Ledamot av första kammaren") == 1
 
-    assert lookups.party_abbrev2name.get(0) == "?"
+    assert lookups.party_abbrev2name.get(0) == "[-]"
 
     df: pd.DataFrame = pd.DataFrame(
         data=dict(
-            gender_id=[0, 1, 2],
-            party_id=[0, 6, 3],
+            gender_id=[
+                lookups.gender2id.get('Okänt'),
+                lookups.gender2id.get('Man'),
+                lookups.gender2id.get('Kvinna'),
+            ],
+            party_id=[
+                lookups.party_abbrev2id.get('[-]'),
+                lookups.party_abbrev2id.get('S'),
+                lookups.party_abbrev2id.get('L'),
+            ],
             office_type_id=[0, 2, 3],
             sub_office_type_id=[
                 0,
@@ -79,7 +87,7 @@ def test_code_lookups():
     df_decoded: pd.DataFrame = lookups.decode(df, drop=False)
 
     assert set(df_decoded.columns) == id_columns.union(name_columns)
-    assert (df_decoded.party_abbrev == ['?', 'MP', 'KD']).all()
+    assert (df_decoded.party_abbrev == ['[-]', 'S', 'L']).all()
     assert (df_decoded.gender == ['Okänt', 'Man', 'Kvinna']).all()
     assert (df_decoded.office_type == ['unknown', 'Minister', 'Talman']).all()
     assert (df_decoded.sub_office_type == ['unknown', 'finansminister', 'andra kammarens andre vice talman']).all()
@@ -207,7 +215,9 @@ def test_overload_by_person():
     assert set(df_overloaded.columns) == {'person_id', 'pid', 'gender_id', 'party_id'}
     assert (df_overloaded.pid == [person_index.person_id2pid.get(x) for x in person_ids]).all()
     assert (df_overloaded.gender_id == [1, 1, 1, 0]).all()
-    assert (df_overloaded.party_id == [9, 0, 7, 0]).all()
+
+    px = person_index.lookups.party_abbrev2id.get
+    assert (df_overloaded.party_id == [px('S'), 0, px('M'), 0]).all()
 
     df_decoded: pd.DataFrame = person_index.lookups.decode(df_overloaded)
     assert set(df_decoded.columns) == {'person_id', 'gender', 'gender_abbrev', 'party_abbrev'}
@@ -294,11 +304,11 @@ def test_speaker_info_service(person_index: md.PersonIndex):
     assert len(person.alt_parties) == 9
     assert set(a.start_year for a in person.alt_parties) == {1985, 1988, 1991, 1994, 1998, 1983, 2001, 2002}
     assert set(a.end_year for a in person.alt_parties) == {9999, 1985, 1988, 1991, 1994, 1998, 2001, 2002}
-    assert set(a.party_id for a in person.alt_parties) == {1, 7, 10}
+    assert set(a.party_id for a in person.alt_parties) == {7, 5, 47}
     assert person.party_at(1950) == 0
-    assert person.party_at(1994) == 7
-    assert person.party_at(2000) == 7
-    assert person.party_at(2010) == 10
+    assert person.party_at(1994) == 5
+    assert person.party_at(2000) == 5
+    assert person.party_at(2010) == 7
 
 
 @pytest.mark.skip("No unknown in test data")

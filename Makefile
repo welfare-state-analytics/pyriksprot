@@ -134,7 +134,7 @@ speech-index:
 		echo "error: metadata file $(LOCAL_METADATA_DATABASE) does not exist"; \
 		exit 1; \
 	fi
-	@PYTHONPATH=. poetry run python pyriksprot/scripts/speech_index.py \
+	@PYTHONPATH=. poetry run python pyriksprot/scripts/riksprot2speech_index.py \
 		--merge-strategy $(MERGE_STRATEGY) \
 		$(TAGGED_FRAMES_FOLDER) \
 			$(SPEECH_INDEX_TARGET_NAME) \

@@ -67,13 +67,13 @@ def tagged_speeches(
     speaker_service: md.SpeakerInfoService,
 ) -> list[dict[str, DispatchItem]]:
     def assign_speaker_info(item: iterate.ProtocolSegment) -> None:
-        item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id)
+        item.speaker_info = speaker_service.get_speaker_info(u_id=item.u_id, year=item.year)
 
     segments: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(
         filenames=source_index.paths,
         content_type=interface.ContentType.TaggedFrame,
         segment_level=interface.SegmentLevel.Speech,
-        merge_strategy=to_speech.MergeStrategyType.who_speaker_note_id_sequence,
+        merge_strategy=to_speech.MergeStrategyType.chain,
         segment_skip_size=1,
         preprocess=assign_speaker_info,
     )

@@ -7,7 +7,7 @@ from glob import glob
 from pyriksprot.metadata.schema import MetadataTable
 
 from ..utility import strip_paths
-from .download import gh_fetch_metadata_folder
+from .download import gh_download_folder
 from .schema import MetadataSchema
 
 jj = os.path.join
@@ -33,6 +33,9 @@ class ConformBaseSpecification:
     @property
     def all_tablenames(self) -> set[str]:
         return set(self.left_tables.keys()) | set(self.right_tables.keys())
+
+    def extras_urls(self, tag: str) -> dict[str, str]:
+        return self.get_schema(tag).extras_urls
 
     def is_satisfied(self, **_) -> bool:
         for tablename in self.all_tablenames:
@@ -124,8 +127,8 @@ class TagsConformSpecification(ConformBaseSpecification):
         self.right_key: str = tag2
 
         for tag in (tag1, tag2):
-            self.data[tag] = gh_fetch_metadata_folder(
-                user=user, repository=repository, path=path, tag=tag, target_folder=None
+            self.data[tag] = gh_download_folder(
+                user=user, repository=repository, path=path, tag=tag, target_folder=None, extras=self.extras_urls(tag)
             )
 
         self.left_tables: dict = self.resolve_github_infos(tag1, self.data[tag1])
@@ -141,7 +144,9 @@ class ConfigConformsToTagSpecification(ConformBaseSpecification):
         self.left_key: str = "config"
         self.right_key: str = tag
 
-        data: dict = gh_fetch_metadata_folder(user=user, repository=repository, path=path, tag=tag, target_folder=None)
+        data: dict = gh_download_folder(
+            user=user, repository=repository, path=path, tag=tag, target_folder=None, extras=self.extras_urls(tag)
+        )
 
         self.left_tables: dict = self.resolve_schema_infos(tag)
         self.right_tables: dict = self.resolve_github_infos(tag, data)

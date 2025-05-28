@@ -68,7 +68,7 @@ def check_columns(config_filename: str, tags: str):
 @click.argument('tag', type=str)
 def download(target_folder: str, tag: str):
     schema: md.MetadataSchema = md.MetadataSchema(tag=tag)
-    md.gh_fetch_metadata_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
+    md.gh_download_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
 
 
 @main.command()
@@ -114,18 +114,25 @@ def database(
     try:
         ConfigStore().configure_context(source=config_filename)
 
-        tag = tag or ConfigValue("version").resolve()
+        corpus_version = tag or ConfigValue("corpus.version").resolve()
+        metadata_version: str = ConfigValue("metadata.version").resolve()
         source_folder = source_folder or ConfigValue("metadata.folder").resolve()
-        target_filename = target_filename or ConfigValue("metadata.database.options.filename").resolve()
         corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
         gh_opts: dict[str, Any] | None = ConfigValue("metadata.github").resolve()
 
+        db_opts: dict[str, str] = (
+            {'type': 'pyriksprot.metadata.database.SqliteDatabase', 'options': {'filename': target_filename}}
+            if target_filename
+            else ConfigValue("metadata.database").resolve()
+        )
+
         create_database_workflow(
-            tag=tag,
-            metadata_folder=source_folder,
-            db_opts=target_filename,
-            gh_opts=gh_opts,
+            corpus_version=corpus_version,
             corpus_folder=corpus_folder,
+            metadata_version=metadata_version,
+            metadata_folder=source_folder,
+            db_opts=db_opts,
+            gh_opts=gh_opts,
             skip_create_index=skip_create_index,
             scripts_folder=scripts_folder,
             skip_download_metadata=skip_download_metadata,

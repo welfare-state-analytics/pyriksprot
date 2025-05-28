@@ -48,7 +48,7 @@ def test_gh_fetch_metadata_folder(tmp_path: pathlib.Path):
     data: list[dict] = gh.gh_ls(user=user, repository=repository, path=path, tag=tag)
     assert len(data) > 0
 
-    infos: dict[str, dict] = md.gh_fetch_metadata_folder(
+    infos: dict[str, dict] = md.gh_download_folder(
         target_folder=tmp_path, user=user, repository=repository, path=path, tag=tag, force=True
     )
     assert len(infos) > 0
@@ -58,31 +58,31 @@ def test_gh_fetch_metadata_folder(tmp_path: pathlib.Path):
 
 def test_get_and_set_db_version():
     dummy_db_name: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
-    tag: str = "kurt"
+    version: str = "kurt"
 
-    service: md.MetadataFactory = md.MetadataFactory(tag=tag, schema=MagicMock(), filename=dummy_db_name)
+    service: md.MetadataFactory = md.MetadataFactory(version=version, schema=MagicMock(), filename=dummy_db_name)
 
-    service.db.version = tag
-    stored_tag: str = service.db.version
-    assert tag == stored_tag
+    service.db.version = version
+    stored_version: str = service.db.version
+    assert version == stored_version
     service.verify_tag()
 
-    tag: str = "olle"
-    service.db.version = tag
-    stored_tag: str = service.db.version
-    assert tag == stored_tag
-    assert tag == stored_tag
+    version: str = "olle"
+    service.db.version = version
+    stored_version: str = service.db.version
+    assert version == stored_version
+    assert version == stored_version
 
 
 def test_create_metadata_database():
 
-    tag: str = ConfigValue("metadata.version").resolve()
-    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
-    metadata_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
+    version: str = ConfigValue("metadata.version").resolve()
+    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{version}.db"
+    metadata_folder: str = f"./tests/test_data/source/{version}/parlaclarin/metadata"
 
-    schema = MetadataSchema(tag)
+    schema = MetadataSchema(version)
 
-    service: md.MetadataFactory = md.MetadataFactory(tag=tag, filename=target_filename)
+    service: md.MetadataFactory = md.MetadataFactory(version=version, filename=target_filename)
 
     service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
 
@@ -93,7 +93,7 @@ def test_create_metadata_database():
     os.remove(target_filename)
 
     with pytest.raises(ValueError):
-        md.MetadataFactory(tag=None, schema=MagicMock(), filename=target_filename).create(force=True)
+        md.MetadataFactory(version=None, schema=MagicMock(), filename=target_filename).create(force=True)
 
 
 def store_sql_script(tag: str) -> str:
@@ -109,24 +109,20 @@ def store_sql_script(tag: str) -> str:
 
 @pytest.mark.skip("Infrastructure test only")
 def test_create_metadata_database_DEVELOP():
-    # ConfigStore.configure_context(source='configs/config.yml')
-    # ConfigStore.configure_context(source='configs/config_postgres.yml')
     ConfigStore.configure_context(source='tests/config.yml')
 
     corpus_folder: str = ConfigValue("corpus.folder").resolve()
-
-    tag: str = "v1.1.0"
-
+    metadata_version: str = ConfigValue("metadata.version").resolve()
     opts: dict[str, Any] = ConfigValue("metadata.database").resolve()
     metadata_folder: str = ConfigValue("metadata.folder").resolve()
 
-    schema = MetadataSchema(tag)
+    schema = MetadataSchema(metadata_version)
 
     md.CorpusIndexFactory(ProtocolMapper, schema=schema).generate(
         corpus_folder=corpus_folder, target_folder=metadata_folder
     )
 
-    service: md.MetadataFactory = md.MetadataFactory(tag=tag, schema=schema, backend=opts['type'], **opts['options'])
+    service: md.MetadataFactory = md.MetadataFactory(version=metadata_version, schema=schema, backend=opts['type'], **opts['options'])
     service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
     service.verify_tag()
 
@@ -137,18 +133,17 @@ def test_create_metadata_database_with_workflow():
     # ConfigStore.configure_context(source='configs/config_postgres.yml')
     ConfigStore.configure_context(source='tests/config.yml')
 
-    corpus_folder: str = ConfigValue("corpus.folder").resolve()
-    metadata_folder: str = ConfigValue("metadata.folder").resolve()
-    tag: str = ConfigValue("corpus.version").resolve()
+    metadata_version: str = ConfigValue("metadata.version").resolve()
 
-    db_opts: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{tag}.db"
+    db_opts: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{metadata_version}.db"
     # db_opts: dict[str, Any] = ConfigValue("metadata.database").resolve()
 
     create_database_workflow(
-        tag=tag,
-        metadata_folder=metadata_folder,
+        corpus_version=ConfigValue("corpus.version").resolve(),
+        metadata_version=metadata_version,
+        corpus_folder=ConfigValue("corpus.folder").resolve(),
+        metadata_folder=ConfigValue("metadata.folder").resolve(),
         db_opts=db_opts,
-        corpus_folder=corpus_folder,
         force=True,
         skip_create_index=True,
         skip_download_metadata=True,
@@ -156,13 +151,31 @@ def test_create_metadata_database_with_workflow():
     )
 
 
+# def test_create_postgres_metadata_database_with_workflow():
+#     # ConfigStore.configure_context(source='configs/config.yml')
+#     # ConfigStore.configure_context(source='configs/config_postgres.yml')
+#     os.chdir('/home/roger/source/swedeb/sample-data/data/1867-2020')
+#     ConfigStore.configure_context(source='opts/pg-subset-config.yml')
+
+#     create_database_workflow(
+#         tag=ConfigValue("corpus.version").resolve(),
+#         metadata_folder=ConfigValue("metadata.folder").resolve(),
+#         db_opts=ConfigValue("metadata.database").resolve(),
+#         corpus_folder=ConfigValue("corpus.folder").resolve(),
+#         force=False,
+#         skip_create_index=True,
+#         skip_download_metadata=True,
+#         skip_load_scripts=False,
+#     )
+
+
 @pytest.mark.parametrize(
     'corpus_folder',
     [ConfigValue("corpus.folder").resolve(), ConfigValue("fakes.folder").resolve()],
 )
 def test_generate_corpus_indexes(corpus_folder: str):
-    tag: str = ConfigValue("metadata.version").resolve()
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=tag)
+    version: str = ConfigValue("metadata.version").resolve()
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=version)
     data: dict[str, pd.DataFrame] = factory.generate(corpus_folder=corpus_folder, target_folder="tests/output").data
 
     assert data.get('protocols') is not None
@@ -172,11 +185,11 @@ def test_generate_corpus_indexes(corpus_folder: str):
 
 # def test_load_scripts():
 
-#     tag: str = ConfigValue("version").resolve()
-#     source_folder: str = f"./tests/test_data/source/{tag}/parlaclarin/metadata"
+#     version: str = ConfigValue("metadata:version").resolve()
+#     source_folder: str = f"./tests/test_data/source/{version}/parlaclarin/metadata"
 #     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
 #     script_folder: str = None
-#     service: md.MetadataFactory = md.MetadataFactory(tag=tag, filename=database_filename)
+#     service: md.MetadataFactory = md.MetadataFactory(version=version, filename=database_filename)
 #     service.create(folder=source_folder, force=True)
 #     # service.load_corpus_indexes(folder=source_folder)
 #     # service.load_scripts(folder=script_folder)

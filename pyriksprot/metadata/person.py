@@ -35,8 +35,11 @@ class TimePeriod:
                 self.start_flag = "Y"
         elif isinstance(self.start_date, pd.Timestamp):
             self.start_date = self.start_date.to_pydatetime().date()
-        elif isinstance(self.start_date, str):
+        elif isinstance(self.start_date, str) and self.start_date:
             self.start_date = datetime.date.fromisoformat(self.start_date)
+        else:
+            self.start_date = None
+            self.start_flag = "X"
 
         if isinstance(self.end_date, int):
             if self.end_date == 0:
@@ -45,10 +48,13 @@ class TimePeriod:
             else:
                 self.end_date = datetime.date(self.end_date, 12, 31)
                 self.end_flag = "Y"
-        elif isinstance(self.end_date, str):
-            self.end_date = datetime.date.fromisoformat(self.end_date)
         elif isinstance(self.end_date, pd.Timestamp):
             self.end_date = self.end_date.to_pydatetime().date()
+        elif isinstance(self.end_date, str) and self.end_date:
+            self.end_date = datetime.date.fromisoformat(self.end_date)
+        else:
+            self.end_date = None
+            self.end_flag = "X"
 
     @property
     def start_year(self) -> int:

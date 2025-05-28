@@ -41,7 +41,7 @@ def rename_tagged_filename(zip_path: str):
 
 
 def main():
-    folder: str = "/data/riksdagen_corpus_data/v1.1.0/tagged_frames"
+    folder: str = "/data/riksdagen_corpus_data/v1.4.1/tagged_frames"
     for subfolder in listdir(folder):
         tagged_folder: str = join(folder, subfolder)
         if not isdir(tagged_folder):

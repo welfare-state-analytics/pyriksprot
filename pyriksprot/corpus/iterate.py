@@ -312,7 +312,7 @@ class ProtocolSegmentIterator(abc.ABC):
             which_year (Literal["filename", "date"]): Take year from filename or XML tag `date` in content
         """
         self.filenames: list[str] = sorted(filenames)
-        self.iterator = None
+        self.iterator: Iterable[ProtocolSegment] | None = None
         self.content_type: ContentType = content_type
         self.segment_level: SegmentLevel = segment_level
         self.segment_skip_size: int = segment_skip_size
@@ -320,7 +320,7 @@ class ProtocolSegmentIterator(abc.ABC):
         self.multiproc_processes: int = multiproc_processes or 1
         self.multiproc_chunksize: int = multiproc_chunksize
         self.multiproc_keep_order: bool = multiproc_keep_order
-        self.preprocess: Callable[[ProtocolSegment], str] = preprocess
+        self.preprocess: Callable[[str], str] = preprocess
         self.which_year: str = which_year
 
     def __iter__(self):
@@ -349,7 +349,7 @@ class ProtocolSegmentIterator(abc.ABC):
             ]
             with get_context("spawn").Pool(processes=self.multiproc_processes) as executor:
                 imap = executor.imap if self.multiproc_keep_order else executor.imap_unordered
-                futures = self.map_futures(imap=imap, args=args)
+                futures = self.map_futures(imap=imap, args=args) or []
                 for payload in futures:
                     for item in payload:
                         if fx:
