@@ -215,7 +215,7 @@ class CorpusIndexFactory:
 
             for tablename, df in self.data.items():
                 filename: str = jj(folder, f"{tablename}.csv.gz")
-                df.to_csv(filename, sep=self.sep)
+                df.to_csv(filename, sep=self.sep, compression=dict(method='gzip', mtime=0))
 
             logger.info("Corpus index: stored.")
 
