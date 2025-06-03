@@ -3,17 +3,17 @@
 # pylint: disable=no-else-continue, attribute-defined-outside-init consider-using-f-string
 
 """
- untangle
+untangle
 
- Converts xml to python objects.
+Converts xml to python objects.
 
- The only method you need to call is parse()
+The only method you need to call is parse()
 
- Partially inspired by xml2obj
- (http://code.activestate.com/recipes/149368-xml2obj/)
+Partially inspired by xml2obj
+(http://code.activestate.com/recipes/149368-xml2obj/)
 
- Author: Christian Stefanescu (http://0chris.com)
- License: MIT License - http://www.opensource.org/licenses/mit-license.php
+Author: Christian Stefanescu (http://0chris.com)
+License: MIT License - http://www.opensource.org/licenses/mit-license.php
 """
 import keyword
 import os

@@ -30,7 +30,7 @@ def resolve_backend(
 
 def create_database_workflow(  # pylint: disable=too-many-arguments
     *,
-    corpus_version: str | None = None,
+    corpus_version: str | None = None,  # pylint: disable=unused-argument
     corpus_folder: str | None = None,
     metadata_version: str | None = None,
     metadata_folder: str | None = None,
@@ -40,6 +40,7 @@ def create_database_workflow(  # pylint: disable=too-many-arguments
     skip_download_metadata: bool = False,
     skip_create_index: bool = True,
     skip_load_scripts: bool = False,
+    load_extra_scripts: bool = False,
     force: bool = False,
 ) -> None:
     """Create a database from metadata configuration"""
@@ -87,6 +88,10 @@ def create_database_workflow(  # pylint: disable=too-many-arguments
 
         if not skip_load_scripts:
             service.execute_sql_scripts(folder=scripts_folder)
+
+        extras_folder: str = jj(str(scripts_folder), "extras")
+        if load_extra_scripts and os.path.exists(extras_folder):
+            service.execute_sql_scripts(folder=extras_folder)
 
     except Exception as ex:
         logger.exception(ex)

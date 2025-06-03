@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+from pyriksprot.corpus.utility import get_chamber_by_filename
 from pyriksprot.metadata import database
 
 from ..utility import replace_extension, revdict
@@ -260,6 +261,7 @@ class PersonIndex:
             'persons_of_interest': None,
             'terms_of_office': 'terms_of_office_id',
             'person_party': None,
+            'protocols': None,
             # 'unknown_utterance_gender': 'u_id',
             # 'unknown_utterance_party': 'u_id',
         }
@@ -393,7 +395,6 @@ class PersonIndex:
     def overload_by_person(
         self, df: pd.DataFrame, *, encoded: bool = True, drop: bool = True, columns: list[str] = None
     ) -> pd.DataFrame:
-
         persons: pd.DataFrame = self.persons
 
         join_column: str = next((x for x in df.columns if x in ['wiki_id', 'who', 'person_id']), None)
@@ -486,10 +487,7 @@ class SpeakerInfoService:
         person = self.person_index[person_id]
         gender_id: int = person.gender_id
         party_id: int = person.party_id
-        # if person.is_unknown:
-        #     gender_id = gender_id or self.utterance_index.unknown_gender_lookup.get(u_id, 0)
-        #     party_id = party_id or self.utterance_index.unknown_party_lookup.get(u_id, 0)
-        # elif not party_id:
+
         if not party_id:
             party_id = person.party_at(year)
 
@@ -513,3 +511,9 @@ class SpeakerInfoService:
             compression=dict(method='zip', archive_name="speaker_index.csv"),
             header=True,
         )
+
+    def get_chamber_abbrev(self, protocol_name: str) -> str:
+        try:
+            return self.person_index.lookups.protocol_name2chamber_abbrev.get(protocol_name, '')
+        except:  # pylint: disable=bare-except
+            return get_chamber_by_filename(protocol_name)

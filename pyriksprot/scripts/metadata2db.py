@@ -12,7 +12,8 @@ from pyriksprot.configuration.inject import ConfigStore, ConfigValue
 from pyriksprot.corpus.parlaclarin import ProtocolMapper
 from pyriksprot.workflows import create_database_workflow
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-positional-arguments
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
@@ -23,16 +24,19 @@ def main(): ...
 @main.command()
 @click.argument('config_filename', type=str)
 @click.argument('tag', type=str)
-def check_filenames(config_filename: str, tag: str):
+def check_filenames(config_filename: str, metadata_version: str) -> None:
     try:
         ConfigStore().configure_context(source=config_filename)
 
         user: str = ConfigValue("metadata.github.user").resolve()
         repository: str = ConfigValue("metadata.github.repository").resolve()
         path: str = ConfigValue("metadata.github.path").resolve()
-        tag = tag or ConfigValue("version").resolve()
 
-        md.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
+        metadata_version = metadata_version or ConfigValue("metadata.version").resolve()
+
+        md.ConfigConformsToTagSpecification(
+            user=user, repository=repository, path=path, tag=metadata_version
+        ).is_satisfied()
 
     except ValueError as ex:
         logger.error(ex)
@@ -66,17 +70,17 @@ def check_columns(config_filename: str, tags: str):
 @main.command()
 @click.argument('target_folder', type=str)
 @click.argument('tag', type=str)
-def download(target_folder: str, tag: str):
-    schema: md.MetadataSchema = md.MetadataSchema(tag=tag)
-    md.gh_download_by_config(schema=schema, tag=tag, folder=target_folder, force=True)
+def download(target_folder: str, version: str):
+    schema: md.MetadataSchema = md.MetadataSchema(version=version)
+    md.gh_download_by_config(schema=schema, version=version, folder=target_folder, force=True)
 
 
 @main.command()
 @click.argument('corpus_folder', type=str)
 @click.argument('target_folder', type=str)
-@click.argument('tag', type=str)
-def index(corpus_folder: str, target_folder: str, tag: str) -> None:
-    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(tag=tag))
+@click.argument('version', type=str)
+def index(corpus_folder: str, target_folder: str, version: str) -> None:
+    factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(version=version))
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
 
@@ -98,23 +102,31 @@ def index(corpus_folder: str, target_folder: str, tag: str) -> None:
 @click.option(
     '--skip-download-metadata', type=bool, is_flag=True, help='Skip download of Github metadata', default=False
 )
+@click.option(
+    '--load-extra-scripts',
+    type=bool,
+    is_flag=True,
+    help='Load extra scripts from the SQL module. If not specified, only the scripts in the config are loaded.',
+    default=False,
+)
 def database(
     config_filename: str,
     target_filename: str = None,
     tag: str = None,
-    source_folder: str = None,
+    source_folder: str | None = None,
     force: bool = False,
     scripts_folder: str = None,
-    corpus_folder: str = None,
+    corpus_folder: str | None = None,
     skip_create_index: bool = True,
     skip_load_scripts: bool = False,
     skip_download_metadata: bool = False,
+    load_extra_scripts: bool = False,
 ) -> None:
     """Create a database from metadata configuration"""
     try:
         ConfigStore().configure_context(source=config_filename)
 
-        corpus_version = tag or ConfigValue("corpus.version").resolve()
+        corpus_version: str = tag or ConfigValue("corpus.version").resolve()
         metadata_version: str = ConfigValue("metadata.version").resolve()
         source_folder = source_folder or ConfigValue("metadata.folder").resolve()
         corpus_folder = corpus_folder or ConfigValue("corpus.folder").resolve()
@@ -137,6 +149,7 @@ def database(
             scripts_folder=scripts_folder,
             skip_download_metadata=skip_download_metadata,
             skip_load_scripts=skip_load_scripts,
+            load_extra_scripts=load_extra_scripts,
             force=force,
         )
 

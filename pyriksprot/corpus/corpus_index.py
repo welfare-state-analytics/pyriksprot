@@ -93,7 +93,7 @@ class CorpusSourceIndex:
     ) -> "CorpusSourceIndex":
         """Loads a CorpusSourceIndex from a folder with files matching a pattern"""
         if not isdir(source_folder):
-            raise ValueError(f"folder {source_folder} not found")
+            raise FileNotFoundError(f"folder {source_folder} not found")
 
         paths: List[str] = (
             source_pattern(source_folder)

@@ -74,7 +74,7 @@ class ConfigStore:
     def config(cls) -> "Config":
         if not isinstance(cls.store.get(cls.context), Config):
             raise ValueError(f"Config context {cls.context} not properly initialized")
-        return cls.store.get(cls.context)
+        return cls.store.get(cls.context)  # type: ignore
 
     @classmethod
     def resolve(cls, value: T | ConfigValue) -> T:
@@ -98,7 +98,7 @@ class ConfigStore:
             return cls._set_config(context=context, cfg=source)
 
         if not source and isinstance(cls.store.get(context), Config):
-            return cls.store.get(context)
+            return cls.store.get(context)  # type: ignore
 
         cfg: Config = Config.load(
             source=source or cls.store.get(context),

@@ -160,7 +160,6 @@ class DatabaseInterface(abc.ABC):
         self.create(cfg.tablename, cfg.all_columns_specs, cfg.constraints)
 
     def create_tables(self, schema: MetadataSchema) -> None:
-
         for cfg in filter(lambda x: not x.has_constraints, schema.definitions.values()):
             self.create_table(cfg)
 
@@ -322,7 +321,6 @@ class SqliteDatabase(DatabaseInterface):
 
 class PostgresDatabase(DatabaseInterface):
     def __init__(self, **opts):
-
         self._deferred_constraints: bool = opts.pop('deferred_constraints', True)
         self._single_transaction: bool = opts.pop('single_transaction', True)
         self._single_cursor: None | pg.cursor = None
@@ -333,7 +331,6 @@ class PostgresDatabase(DatabaseInterface):
         self.quote_chars: str | tuple[str, str] = ('"', '"')
 
     def _get_db_opts(self) -> dict[str, Any]:
-
         return {
             k: v
             for k, v in self.opts.items()
@@ -353,7 +350,6 @@ class PostgresDatabase(DatabaseInterface):
         return self
 
     def _close(self):
-
         if self.connection is None:
             return
 

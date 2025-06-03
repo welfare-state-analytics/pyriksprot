@@ -16,6 +16,8 @@ from .utility import sample_tagged_frames_corpus_exists
 @pytest.fixture
 def protocol_segments(source_index: corpus_index.CorpusSourceIndex) -> List[iterate.ProtocolSegment]:
     """Iterate protocols at lowest prossible level that has tagged text (utterance)"""
+    if not source_index:
+        return []
     content_type: interface.ContentType = interface.ContentType.TaggedFrame
     segment_level: interface.SegmentLevel = interface.SegmentLevel.Utterance
     segments: iterate.ProtocolSegmentIterator = tagged.ProtocolIterator(

@@ -1,0 +1,67 @@
+root_folder: {{ root_folder }}
+data_folder: {{ root_folder }}
+version: {{ corpus_version }}
+
+corpus:
+  version: {{ corpus_version }}
+  folder: {{ corpus_folder }}
+  pattern: "**/prot-*-*.xml"
+  github:
+    user: swerik-project
+    repository: riksdagen-records
+    path: data
+    local_folder: /data/riksdagen_corpus_data/riksdagen-records
+    url: https://github.com/swerik-project/riksdagen-records.git
+
+{%- if "test_data" in root_folder %}
+fakes:
+  folder: tests/test_data/fakes/{{ corpus_version }}/riksdagen-records
+  expected_folder: tests/test_data/fakes/{{ corpus_version }}/expected
+{%- endif %}
+
+metadata:
+  version: {{ metadata_version }}
+  folder: {{ root_folder }}/metadata/{{ metadata_version }}
+  database:
+    type: pyriksprot.metadata.database.SqliteDatabase
+    options:
+    {%- if "test_data" in root_folder %}
+      filename: {{ root_folder }}/{{ corpus_version }}/riksprot_metadata.{{ metadata_version }}.db
+    {%- else %}
+      filename: {{ root_folder }}/metadata/riksprot_metadata.{{ metadata_version }}.db
+    {%- endif %}
+  github:
+    user: swerik-project
+    repository: riksdagen-persons
+    path: data
+    local_folder: /data/riksdagen_corpus_data/riksdagen-persons
+    url: https://github.com/swerik-project/riksdagen-persons.git
+
+tagged_frames:
+  folder: {{ root_folder }}/{{ corpus_version }}/tagged_frames/
+  file_pattern: "prot-*.zip"
+  pattern: {{ root_folder }}/{{ corpus_version }}/tagged_frames/**/prot-*.zip
+
+tagged_speeches:
+  folder: {{ root_folder }}/{{ corpus_version }}/tagged_frames_speeches.feather
+
+dehyphen:
+  folder: {{ root_folder }}/{{ corpus_version }}/dehyphen
+  tf_filename: {{ root_folder }}/{{ corpus_version }}/dehyphen/word-frequencies.pkl
+
+tagger:
+  module: pyriksprot_tagger.taggers.stanza_tagger
+  stanza_datadir: {{ stanza_datadir }}
+  preprocessors: dedent,dehyphen,strip,pretokenize
+  lang: "sv"
+  processors: tokenize,lemma,pos
+  tokenize_pretokenized: true
+  tokenize_no_ssplit: true
+  use_gpu: true
+  num_threads: 1
+
+global:
+  corpus:
+    folder: /data/riksdagen_corpus_data/riksdagen-records/data
+  metadata:
+    folder: /data/riksdagen_corpus_data/riksdagen-persons/data

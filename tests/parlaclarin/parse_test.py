@@ -19,17 +19,17 @@ jj = os.path.join
 
 
 @pytest.mark.parametrize(
-    'protocol_name',
+    'protocol_name, preface_name',
     [
-        "prot-1958-fake",
-        "prot-1960-fake",
-        "prot-1980-empty",
+        ("prot-1958-fake", "prot-1958-fake"),
+        ("prot-1960-fake", "prot-1960-höst-fake"),
+        ("prot-1980-empty", "prot-1980-empty"),
     ],
 )
-def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str):
+def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_name: str, preface_name: str):
     fakes_folder: str = ConfigValue("fakes:folder").resolve()
     filename: str = jj(fakes_folder, f"{protocol_name}.xml")
-    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename)
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename, use_preface_name=False)
 
     """Load truth"""
     utterances: list[interface.Utterance] = fakes.load_sample_utterances(filename)
@@ -43,6 +43,9 @@ def test_to_protocol_in_depth_validation_of_correct_parlaclarin_xml(protocol_nam
     assert 'empty' in protocol_name or protocol.has_text
     assert protocol.checksum()
     assert len(protocol.utterances) == len(utterances)
+
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(filename, use_preface_name=True)
+    assert protocol.name == preface_name
 
 
 @pytest.mark.parametrize(
@@ -71,10 +74,10 @@ def test_parlaclarin_n_utterances(filename: str):
     'filename, u_count, intro_count',
     [
         ("prot-1933--fk--005.xml", 0, 1),
-        ("prot-1955--ak--022.xml", 428, 165),
+        ("prot-1955--ak--022.xml", 447, 165),
         ("prot-197879--014.xml", 1, 0),
-        ('prot-199192--021.xml', 113, 21),
-        ('prot-199192--127.xml', 2568, 249),
+        ('prot-199192--021.xml', 159, 21),
+        ('prot-199192--127.xml', 2639, 249),
         ("prot-199596--035.xml", 393, 41),
     ],
 )
@@ -90,7 +93,6 @@ def test_parlaclarin_n_speaker_notes(filename: str, u_count: int, intro_count: i
 
 
 def test_load_chambers():
-
     chambers: dict[str, set[str]] = load_chamber_indexes(folder=ConfigValue("corpus:folder").resolve())
 
     assert set(chambers.keys()) == {'ak', 'fk', 'ek'}
@@ -102,7 +104,6 @@ def test_load_chambers():
 
 
 def test_scan_folder():
-
     corpus_folder: str = ConfigValue("corpus:folder").resolve()
 
     scanner = CorpusScanner(parser=ProtocolMapper)
@@ -121,7 +122,6 @@ def test_scan_folder():
 
 
 def test_create_tei_corpus_xml():
-
     source_folder: str = ConfigValue("corpus.folder").resolve()
     target_folder: str = f'tests/output/{str(uuid.uuid4())[8]}'
 

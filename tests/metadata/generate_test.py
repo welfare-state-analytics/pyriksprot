@@ -75,14 +75,13 @@ def test_get_and_set_db_version():
 
 
 def test_create_metadata_database():
+    metadata_version: str = ConfigValue("metadata.version").resolve()
+    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{metadata_version}.db"
+    metadata_folder: str = f"./tests/test_data/source/metadata/{metadata_version}"
 
-    version: str = ConfigValue("metadata.version").resolve()
-    target_filename: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{version}.db"
-    metadata_folder: str = f"./tests/test_data/source/{version}/parlaclarin/metadata"
+    schema = MetadataSchema(metadata_version)
 
-    schema = MetadataSchema(version)
-
-    service: md.MetadataFactory = md.MetadataFactory(version=version, filename=target_filename)
+    service: md.MetadataFactory = md.MetadataFactory(version=metadata_version, filename=target_filename)
 
     service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
 
@@ -122,7 +121,9 @@ def test_create_metadata_database_DEVELOP():
         corpus_folder=corpus_folder, target_folder=metadata_folder
     )
 
-    service: md.MetadataFactory = md.MetadataFactory(version=metadata_version, schema=schema, backend=opts['type'], **opts['options'])
+    service: md.MetadataFactory = md.MetadataFactory(
+        version=metadata_version, schema=schema, backend=opts['type'], **opts['options']
+    )
     service.create(force=True).upload(schema, metadata_folder).execute_sql_scripts()
     service.verify_tag()
 
@@ -181,15 +182,3 @@ def test_generate_corpus_indexes(corpus_folder: str):
     assert data.get('protocols') is not None
     assert data.get('utterances') is not None
     assert data.get('speaker_notes') is not None
-
-
-# def test_load_scripts():
-
-#     version: str = ConfigValue("metadata:version").resolve()
-#     source_folder: str = f"./tests/test_data/source/{version}/parlaclarin/metadata"
-#     database_filename: str = f'./tests/output/{str(uuid.uuid4())[:10]}.db'
-#     script_folder: str = None
-#     service: md.MetadataFactory = md.MetadataFactory(version=version, filename=database_filename)
-#     service.create(folder=source_folder, force=True)
-#     # service.load_corpus_indexes(folder=source_folder)
-#     # service.load_scripts(folder=script_folder)

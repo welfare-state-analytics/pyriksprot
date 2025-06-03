@@ -145,10 +145,10 @@ Hence it is (for now) commented out.
         ("prot-1955--ak--022.xml", 163, ts.MergeStrategyType.chain),
         ("prot-1955--ak--022.xml", 163, ts.MergeStrategyType.chain_consecutive_unknowns),
         ("prot-1955--ak--022.xml", 160, ts.MergeStrategyType.who_sequence),
-        ('prot-199192--127.xml', 249, ts.MergeStrategyType.chain),
-        ('prot-199192--127.xml', 249, ts.MergeStrategyType.chain_consecutive_unknowns),
+        ('prot-199192--127.xml', 250, ts.MergeStrategyType.chain),
+        ('prot-199192--127.xml', 250, ts.MergeStrategyType.chain_consecutive_unknowns),
         ('prot-199192--127.xml', 54, ts.MergeStrategyType.who),
-        ('prot-199192--127.xml', 248, ts.MergeStrategyType.who_sequence),
+        ('prot-199192--127.xml', 249, ts.MergeStrategyType.who_sequence),
     ],
 )
 def test_protocol_to_speeches_with_different_strategies(filename: str, speech_count: int, strategy: str):
@@ -158,7 +158,7 @@ def test_protocol_to_speeches_with_different_strategies(filename: str, speech_co
 
     xml_path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
-    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(xml_path)
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(xml_path, use_preface_name=False)
 
     speeches: list[interface.Speech] = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
     assert len(speeches) == speech_count
@@ -187,7 +187,7 @@ def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
 
     data = untangle.parse(path)
 
-    protocol = parlaclarin.ProtocolMapper.parse(data)
+    protocol = parlaclarin.ProtocolMapper.parse(data, use_preface_name=False)
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=ts.MergeStrategyType.chain)
     assert len(speeches) != expected_speech_count, "speech length"
 
@@ -273,8 +273,8 @@ def test_load_protocols_from_folder():
     [
         ('prot-1955--ak--022', 'who_sequence', 160),
         ('prot-1955--ak--022', 'chain', 163),
-        ('prot-199192--127', 'who_sequence', 248),
-        ('prot-199192--127', 'chain', 249),
+        ('prot-199192--127', 'who_sequence', 249),
+        ('prot-199192--127', 'chain', 250),
     ],
 )
 def test_protocol_to_items(protocol_name: str, merge_strategy: str, expected_speech_count: int):

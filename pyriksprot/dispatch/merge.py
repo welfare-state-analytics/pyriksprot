@@ -69,7 +69,7 @@ class SegmentMerger:
                 source_item = self.source_index[item.protocol_name]
 
                 if not bool(source_item):
-                    logger.error(f"source item not found: {item.name}")
+                    logger.error(f"source item not found: {item.name} (looked for {item.protocol_name})")
                     continue
 
                 # assert item.speaker_info is not None
