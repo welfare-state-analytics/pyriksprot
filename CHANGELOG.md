@@ -4,6 +4,63 @@
 > All notable changes to this project will be documented in this file
 
 
+## [0.7.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.6.0...v0.7.0) (2025-06-03)
+
+### 🍕 Features
+
+* add binary files for word frequencies and version 1.4.1 data ([d326f54](https://github.com/welfare-state-analytics/pyriksprot/commit/d326f5421836c916f40514755e0dccd7ac69485a))
+* add config.yml for corpus and metadata configuration ([a03e167](https://github.com/welfare-state-analytics/pyriksprot/commit/a03e167001abcc193b5d755ac6046df917ff2b72))
+* add config.yml for corpus and metadata configuration ([d0fdd39](https://github.com/welfare-state-analytics/pyriksprot/commit/d0fdd399536eb65e767fcb4b6ca8aca7792cf242))
+* add make_config script and config template for corpus and metadata generation ([0197e59](https://github.com/welfare-state-analytics/pyriksprot/commit/0197e592c51b35774c4d741ffa98655a0eb8fbd7))
+* add method to retrieve chamber abbreviation from protocol name ([2389280](https://github.com/welfare-state-analytics/pyriksprot/commit/238928022c15e0935d8d7a5fa453bbb904dbedfa))
+* add new configuration file for version v1.4.1 ([0a907ec](https://github.com/welfare-state-analytics/pyriksprot/commit/0a907ecb16e8dd80af5f79c747ceac6e58110696))
+* add option to load extra SQL scripts ([52fcb3a](https://github.com/welfare-state-analytics/pyriksprot/commit/52fcb3a31c9d24d7dde7025791deece165afaadf))
+* added methods for checking git repository tag ([e98b4ab](https://github.com/welfare-state-analytics/pyriksprot/commit/e98b4ab3f020170049b459fe7c04aa18f0cd2834))
+* added tag_info script (moved from tagger project) ([56c0d13](https://github.com/welfare-state-analytics/pyriksprot/commit/56c0d136d29f342a76789adfd8cb34c48d73c256))
+* moved main tagging workflow  command-line interface from pyriksprot_tagger tom pyriksprot ([5bd9a28](https://github.com/welfare-state-analytics/pyriksprot/commit/5bd9a2853c6af1565082c500d5ccbe030325368c))
+* set max positional arguments limit in pylint configuration ([c41aa82](https://github.com/welfare-state-analytics/pyriksprot/commit/c41aa825d3400e8d02232eb5961d5b14e7378d84))
+
+### 🐛 Bug Fixes
+
+* add context passing to main function in riksprot2speech script ([c72969a](https://github.com/welfare-state-analytics/pyriksprot/commit/c72969adbd4adc4c2125dbf751077b6094d4c471))
+* add gzip diff handling for .csv.gz files in .gitattributes ([008f873](https://github.com/welfare-state-analytics/pyriksprot/commit/008f8730285f17391ec91c35578590a15313cc95))
+* add missing newline at the end of utility.py ([49eaee4](https://github.com/welfare-state-analytics/pyriksprot/commit/49eaee430ebe92b1aed2f4776ca938cc32bea530))
+* add script to slim database by dropping original, unprocessed data ([b13ae39](https://github.com/welfare-state-analytics/pyriksprot/commit/b13ae39e60905e4b0540816e511c85bbef7bba69))
+* change config filename to include versions ([b751d1a](https://github.com/welfare-state-analytics/pyriksprot/commit/b751d1a53c772c0f692b677ff70a57ddfb892404))
+* correct type hints and return types in sample_tagged functions ([322759f](https://github.com/welfare-state-analytics/pyriksprot/commit/322759f78f7d54abb9a7c5a50da2e3e117bc67d4))
+* count page number by pb-tag instead of parsing from URL ([647bd44](https://github.com/welfare-state-analytics/pyriksprot/commit/647bd4499efe461bef49a39a0b8b463b86f529b5))
+* enhance error handling and type hints in repository functions ([b903f53](https://github.com/welfare-state-analytics/pyriksprot/commit/b903f533167eb4ff7610913c6bec715a4374bc52))
+* enhance error logging for missing source items ([ee61df3](https://github.com/welfare-state-analytics/pyriksprot/commit/ee61df32c5c6763578be5510d14f62e3af00a436))
+* improve error message for missing schema files in subset_to_folder ([4a34db1](https://github.com/welfare-state-analytics/pyriksprot/commit/4a34db14df7c7dcae181e8ecc28d81d74f56b6e5))
+* improve error message for missing test corpora ([c98beba](https://github.com/welfare-state-analytics/pyriksprot/commit/c98bebafac5a172e8ffbe3f15ba2916f1dd2c0d6))
+* raise FileNotFoundError for missing source folder ([bcb9245](https://github.com/welfare-state-analytics/pyriksprot/commit/bcb92451f69e1b30b65a938ad4f31105e288614f))
+* remove deprecated test data generation from Makefile ([9fc1bbf](https://github.com/welfare-state-analytics/pyriksprot/commit/9fc1bbfee2fa2031c63e2128861d9c63e7f13e20))
+* remove obsolete configuration file v1.4.1.yml ([f22be0c](https://github.com/welfare-state-analytics/pyriksprot/commit/f22be0ce7ceeb9f29b63e3170575352feccb00e7))
+* rename speaker_service to vrt_speaker_service for clarity and consistency ([7b2d244](https://github.com/welfare-state-analytics/pyriksprot/commit/7b2d2449cb9e1372cf2686bbe8daf8e0d377a054))
+* update changed renamed parameter names ([bab4e49](https://github.com/welfare-state-analytics/pyriksprot/commit/bab4e4940246c2ca9fe2a6d4ec5cbd40bf6d0b10))
+* update dev dependencies section in pyproject.toml ([405b405](https://github.com/welfare-state-analytics/pyriksprot/commit/405b405dd9a22cb1567ecca00d6ccf51413919bb))
+* update log message to include full target file path in gh_store_file ([734b43b](https://github.com/welfare-state-analytics/pyriksprot/commit/734b43bf8d22a678519681facd39b77726a0d21a))
+* update parameter type for test_protocol_texts_iterator to use interface.Protocol ([a352baf](https://github.com/welfare-state-analytics/pyriksprot/commit/a352baffa02d97c39cf15dcb928cfb162601fc4b))
+* update poetry.lock ([3e525b6](https://github.com/welfare-state-analytics/pyriksprot/commit/3e525b6d20b0da90514a65e655ea373a3402fcb3))
+* update pylint disable comments ([793e067](https://github.com/welfare-state-analytics/pyriksprot/commit/793e067cd507a3856914179a34eb30bd01b53b87))
+* update type hints for fx and source_folder parameters in Codec and database functions ([7bc51f8](https://github.com/welfare-state-analytics/pyriksprot/commit/7bc51f89fd8b17cc938642b3b4cf93b73fe4997b))
+* updated test metadata ([bb218aa](https://github.com/welfare-state-analytics/pyriksprot/commit/bb218aa890896faac26e8ff2c24aad8c6047051c))
+* use basename of filename as protocol name, not name in XML preface (resolves [#89](https://github.com/welfare-state-analytics/pyriksprot/issues/89)) ([20757b0](https://github.com/welfare-state-analytics/pyriksprot/commit/20757b00414c194ba175737ef29c43c776f369db))
+* use true Github paths in configs ([90bdee5](https://github.com/welfare-state-analytics/pyriksprot/commit/90bdee588e19535d3316e1f398b0ffb5a42acdeb))
+
+### 🧑‍💻 Code Refactoring
+
+* remove commented-out example arguments for cleaner code ([75db818](https://github.com/welfare-state-analytics/pyriksprot/commit/75db8182e3cd2845e783c381f79fb44db6881797))
+* remove commented-out test_load_scripts function for cleaner code ([b4d1940](https://github.com/welfare-state-analytics/pyriksprot/commit/b4d19402c08676a2a8b0405af7d847e2dd591a8b))
+* remove unnecessary info log for cleaner output ([292d1b3](https://github.com/welfare-state-analytics/pyriksprot/commit/292d1b38ee45ab81eface0bb85c661927ab7c810))
+* reverted black formatting ([921ad54](https://github.com/welfare-state-analytics/pyriksprot/commit/921ad543216deae4b489058242aefd9e38b47db4))
+* use c´lick commands instead of calling Python files ([fcb0d9a](https://github.com/welfare-state-analytics/pyriksprot/commit/fcb0d9a20a8c4d964f827ca22adab840cb01e26a))
+
+### ✅ Tests
+
+* allow missing tagged frames folder when running tests ([720b1af](https://github.com/welfare-state-analytics/pyriksprot/commit/720b1af9619d049b19ed2fc16ad539f013f88329))
+* updated test data ([303ae6f](https://github.com/welfare-state-analytics/pyriksprot/commit/303ae6fc7c686b7faf6d55e5fb2b87ebe51962a6))
+
 ## [0.6.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.5.0...v0.6.0) (2025-05-28)
 
 ### 🍕 Features
