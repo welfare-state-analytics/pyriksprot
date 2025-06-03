@@ -133,7 +133,10 @@ class VrtExportService:
             vrt_str: str = '\n'.join(self.to_vrt(u, *tags) for u in protocol.utterances)
 
         if 'protocol' in tags:
-            vrt_str: str = f'<protocol title="{protocol.name}" date="{protocol.date}">\n{vrt_str}\n</protocol>'
+            chamber_abbrev: str = self.speaker_service.get_chamber_abbrev(protocol.name)
+            vrt_str: str = (
+                f'<protocol title="{protocol.name}" date="{protocol.date}" chamber="{chamber_abbrev}">\n{vrt_str}\n</protocol>'
+            )
 
         return vrt_str
 
@@ -172,7 +175,7 @@ class VrtExportService:
 
 def _open_output(output: str) -> TextIOWrapper | TextIO:
     if output == '-':
-        return contextlib.nullcontext(sys.stdout)
+        return contextlib.nullcontext(sys.stdout)  # type: ignore
     if output is None:
         return StringIO('', newline='')
     if output.endswith('.gz'):

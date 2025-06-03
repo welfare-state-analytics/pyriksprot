@@ -94,8 +94,9 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
         return None
 
     with zipfile.ZipFile(filename, 'r') as fp:
-        basename: str = metadata['name']
 
+        preface_name: str = metadata['name']
+        basename: str = strip_path_and_extension(filename)
         filenames: List[str] = [f.filename for f in fp.filelist]
 
         for ext in PROTOCOL_LOADERS:
@@ -110,7 +111,12 @@ def load_protocol(filename: str) -> Optional[interface.Protocol]:
             # Note: Speaker notes and page references are not stored in the protocol file
             # These files are instead stored in separate files in the metadata folder
             protocol: interface.Protocol = interface.Protocol(
-                utterances=utterances, **metadata, speaker_notes={}, page_references=[]
+                utterances=utterances,
+                name=basename,
+                date=metadata.get('date', None),
+                preface_name=preface_name,
+                speaker_notes={},
+                page_references=[],
             )
 
             return protocol

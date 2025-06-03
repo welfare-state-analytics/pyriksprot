@@ -158,7 +158,7 @@ def test_protocol_to_speeches_with_different_strategies(filename: str, speech_co
 
     xml_path: str = jj(corpus_folder, filename.split('-')[1], filename)
 
-    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(xml_path)
+    protocol: interface.Protocol = parlaclarin.ProtocolMapper.parse(xml_path, use_preface_name=False)
 
     speeches: list[interface.Speech] = ts.to_speeches(protocol=protocol, merge_strategy=strategy, skip_size=0)
     assert len(speeches) == speech_count
@@ -187,7 +187,7 @@ def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
 
     data = untangle.parse(path)
 
-    protocol = parlaclarin.ProtocolMapper.parse(data)
+    protocol = parlaclarin.ProtocolMapper.parse(data, use_preface_name=False)
     speeches = ts.to_speeches(protocol=protocol, merge_strategy=ts.MergeStrategyType.chain)
     assert len(speeches) != expected_speech_count, "speech length"
 

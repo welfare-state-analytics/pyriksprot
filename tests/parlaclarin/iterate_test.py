@@ -135,7 +135,7 @@ def test_xml_protocol_texts_iterator_texts():
 def test_protocol_texts_iterator(
     iterator_class: Type[iterate.ProtocolSegmentIterator],
     document_names: list[str],
-    level: interface.SegmentLevel.Protocol,
+    level: interface.Protocol,
 ):
     fakes_folder: str = ConfigStore.config().get("fakes:folder")
     filenames: list[str] = [jj(fakes_folder, f"{name}.xml") for name in document_names]

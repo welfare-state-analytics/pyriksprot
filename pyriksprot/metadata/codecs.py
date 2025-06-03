@@ -18,6 +18,7 @@ CODE_TABLES: dict[str, str] = {
     'office_type': 'office_type_id',
     'party': 'party_id',
     'sub_office_type': 'sub_office_type_id',
+    'protocols': 'document_name',
 }
 
 
@@ -26,7 +27,7 @@ class Codec:
     type: Literal['encode', 'decode']
     from_column: str
     to_column: str
-    fx: Callable[[int], str] | Callable[[str], int] | dict[str, int] | dict[int, str]
+    fx: Callable[[int | str], int | str] | dict[str | int, str | int]
     default: str = None
 
     def apply(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -57,6 +58,7 @@ class Codecs:
         self.office_type: pd.DataFrame = null_frame
         self.party: pd.DataFrame = null_frame
         self.sub_office_type: pd.DataFrame = null_frame
+        self.protocols: pd.DataFrame = null_frame
         self.extra_codecs: list[Codec] = []
         self.source_filename: str | None = None
         self.code_tables: dict[str, str] = CODE_TABLES
@@ -107,6 +109,10 @@ class Codecs:
         return pu.revdict(self.sub_office_type2name)
 
     @cached_property
+    def protocol_name2chamber_abbrev(self) -> dict:
+        return self.protocols['chamber_abbrev'].to_dict()
+
+    @cached_property
     def party_abbrev2name(self) -> dict:
         return self.party['party_abbrev'].to_dict()
 
@@ -122,6 +128,7 @@ class Codecs:
             Codec("decode", "office_type_id", "office_type", self.office_type2name),
             Codec("decode", "party_id", "party_abbrev", self.party_abbrev2name),
             Codec("decode", "sub_office_type_id", "sub_office_type", self.sub_office_type2name),
+            Codec("decode", "document_name", "chamber_abbrev", self.protocol_name2chamber_abbrev),
             Codec("encode", "gender", "gender_id", self.gender2id),
             Codec("encode", "office_type", "office_type_id", self.office_type2id),
             Codec("encode", "party", "party_id", self.party_abbrev2id),

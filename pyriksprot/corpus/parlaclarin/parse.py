@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from os.path import basename, splitext
 from typing import Any, Iterable
 
 from loguru import logger
@@ -73,6 +74,7 @@ class ProtocolMapper(interface.IProtocolParser):
 
         page_refs: list[interface.PageReference] = []
         page_ref: interface.PageReference = interface.PageReference(source_id=0, page_number=-1, reference="")
+        page_number: int = 1
 
         """Current Speaker Note"""
         speaker_note: interface.SpeakerNote = None
@@ -81,9 +83,9 @@ class ProtocolMapper(interface.IProtocolParser):
 
         for element in ProtocolMapper.get_content_elements(data):
             if element.name == 'pb':
+                page_number += 1
                 page_ref = ProtocolMapper.decode_page_reference(page_ref, element)
                 page_refs.append(page_ref)
-
             elif element.name == "note" and element['type'] == "speaker":
                 speaker_note = interface.SpeakerNote(element["xml:id"], " ".join(element.cdata.split()))
                 speaker_notes[element["xml:id"]] = speaker_note
@@ -97,7 +99,7 @@ class ProtocolMapper(interface.IProtocolParser):
                 utterance: interface.Utterance = interface.Utterance(
                     u_id=element.get_attribute('xml:id'),
                     who=element.get_attribute('who') or "unknown",
-                    page_number=page_ref.page_number,
+                    page_number=page_number,  # page_ref.page_number,
                     prev_id=element.get_attribute('prev'),
                     next_id=element.get_attribute('next'),
                     paragraphs=ProtocolMapper.to_paragraphs(element, dedent=True),
@@ -160,13 +162,12 @@ class ProtocolMapper(interface.IProtocolParser):
     def to_paragraphs(element: untangle.Element, dedent: bool = True) -> list[str]:
         texts: Iterable[str] = (p.cdata for p in element.get_elements('seg'))
         if dedent:
-            texts = [dedent_text(t) for t in texts]
-        return texts
+            texts = (dedent_text(t) for t in texts)
+        return list(texts)
 
     @staticmethod
     def parse(
-        filename: str | untangle.Element,
-        ignore_tags: set[str] | str = "teiHeader",
+        filename: str, *, use_preface_name: bool = False, ignore_tags: set[str] | str = "teiHeader"
     ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
         protocol: interface.Protocol = None
@@ -187,12 +188,16 @@ class ProtocolMapper(interface.IProtocolParser):
             if len(parsed_data.get("utterances") or []) == 0:
                 logger.warning(f'no utterances found in {source_name}')
 
+            preface_name: str | None = ProtocolMapper.get_name(data)
+            protocol_name: str | None = preface_name if use_preface_name else splitext(basename(filename))[0]
+
             protocol: interface.Protocol = interface.Protocol(
                 utterances=parsed_data.get("utterances"),
                 speaker_notes=parsed_data.get("speaker_notes"),
                 page_references=parsed_data.get("page_references"),
                 date=ProtocolMapper.get_date(data),
-                name=ProtocolMapper.get_name(data),
+                name=protocol_name,
+                preface_name=preface_name,
             )
         except Exception as ex:
             logger.error(f"error parsing {source_name}: {ex}")

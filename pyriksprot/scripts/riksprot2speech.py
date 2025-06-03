@@ -8,7 +8,7 @@ from pyriksprot.scripts.utils import option2, update_arguments_from_options_file
 from pyriksprot.utility import strip_path_and_extension
 from pyriksprot.workflows import extract_tags
 
-# pylint: disable=too-many-arguments, unused-argument, too-many-positional-arguments
+# pylint: disable=too-many-arguments, unused-argument, too-many-positional-arguments, no-value-for-parameter
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -29,7 +29,9 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 @option2('--skip-stopwords')
 @option2('--lowercase')
 @option2('--force')
+@click.pass_context
 def main(
+    ctx: click.Context,
     options_filename: str = None,
     source_folder: str = None,
     metadata_filename: str = None,
@@ -47,7 +49,7 @@ def main(
     force: bool = False,
 ):
     arguments: dict = update_arguments_from_options_file(
-        arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name)
+        arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(target_name), ctx=ctx
     )
     arguments['content_type'] = interface.ContentType(arguments['content_type'])
     arguments['merge_strategy'] = to_speech.MergeStrategyType(arguments['merge_strategy'])
