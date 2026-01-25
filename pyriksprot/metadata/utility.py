@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Type
+from typing import Any, Callable, Literal, Type
 
 import numpy as np
 import pandas as pd
@@ -90,7 +90,7 @@ def group_to_list_of_records(
     return key_rows.groupby(key)['data'].apply(list).to_dict()
 
 
-def fx_or_url(url: Any, tag: str) -> str:
+def fx_or_url(url: Callable[[str], str] | str, tag: str) -> str:
     return url(tag) if callable(url) else url
 
 

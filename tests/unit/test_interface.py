@@ -20,8 +20,7 @@ from tests import fakes
 jj = os.path.join
 
 
-@pytest.fixture(scope='module')
-def utterances() -> list[interface.Utterance]:
+def get_utterances() -> list[interface.Utterance]:
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
     return fakes.load_sample_utterances(f'{fakes_folder}/prot-1958-fake.xml')
 
@@ -66,26 +65,30 @@ def test_utterances_to_dict():
 
 
 @pytest.mark.unit
-def test_utterances_who_sequences(utterances: list[interface.Utterance]):
+def test_utterances_who_sequences():
+    utterances: list[interface.Utterance] = get_utterances()
     assert [u.who for u in utterances] == ['olle', 'olle', 'kalle', 'unknown', 'unknown', 'olle']
 
 
 @pytest.mark.unit
-def test_utterances_to_csv(utterances: list[interface.Utterance]):
+def test_utterances_to_csv():
+    utterances: list[interface.Utterance] = get_utterances()
     data: str = interface.UtteranceHelper.to_csv(utterances)
     loaded_utterances = interface.UtteranceHelper.from_csv(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
 @pytest.mark.unit
-def test_utterances_to_json(utterances: list[interface.Utterance]):
+def test_utterances_to_json():
+    utterances: list[interface.Utterance] = get_utterances()
     data: str = interface.UtteranceHelper.to_json(utterances)
     loaded_utterances = interface.UtteranceHelper.from_json(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
 @pytest.mark.unit
-def test_utterances_to_pandas(utterances: list[interface.Utterance]):
+def test_utterances_to_pandas():
+    utterances: list[interface.Utterance] = get_utterances()
     data: pd.DataFrame = interface.UtteranceHelper.to_dataframe(utterances)
     # Fill NaN values before comparison since pandas uses NaN for None
     data_dict = data.reset_index().to_dict(orient='records')
@@ -96,7 +99,8 @@ def test_utterances_to_pandas(utterances: list[interface.Utterance]):
 
 
 @pytest.mark.unit
-def test_protocol_create(utterances: list[interface.Utterance]):
+def test_protocol_create():
+    utterances: list[interface.Utterance] = get_utterances()
     protocol: interface.Protocol = interface.Protocol(
         date="1958", name="prot-1958-fake", utterances=utterances, speaker_notes={}, page_references=[]
     )
