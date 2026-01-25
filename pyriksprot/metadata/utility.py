@@ -48,15 +48,25 @@ def slim_table_types(
     types = COLUMN_TYPES if types is None else types
 
     for table in tables:
+        # Fill defaults (NO inplace)
         for column_name, value in defaults.items():
             if column_name in table.columns:
-                table[column_name].fillna(value, inplace=True)
+                table[column_name] = table[column_name].fillna(value)
 
+        # Cast types (after fill)
         for column_name, dt in types.items():
             if column_name in table.columns:
+                # If any missing values remain, fill with default if we have one,
+                # otherwise leave as-is (or raise).
+                if table[column_name].isna().any():
+                    if column_name in defaults:
+                        table[column_name] = table[column_name].fillna(defaults[column_name])
+                    else:
+                        # Safer to fail loudly than silently cast wrong
+                        raise ValueError(f"Column '{column_name}' contains NA but no default provided")
+
                 if table[column_name].dtype != dt:
                     table[column_name] = table[column_name].astype(dt)
-
 
 def group_to_list_of_records2(df: pd.DataFrame, key: str) -> dict[str | int, list[dict]]:
     """Groups `df` by `key` and aggregates each group to list of row records (dicts)"""
