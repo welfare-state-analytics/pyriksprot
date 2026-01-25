@@ -73,13 +73,13 @@ def get_utterance_sequence(filename: str) -> list[tuple]:
     return data
 
 
-def log_utterance_sequences(source: str, target: str) -> list[tuple]:
+def log_utterance_sequences(source: str, target: str):
     filenames = [source] if os.path.isfile(source) else glob(source, recursive=True)
     with open(target, mode="w", encoding="utf8") as fp:
         fp.write("document;page_id;tag;id;prev,next,speaker_note_id;who\n")
         for filename in filenames:
             data = get_utterance_sequence(filename)
-            fp.write(strip_path_and_extension(filename) + ('\n'.join(";".join(x) for x in data)))
+            fp.write(str(strip_path_and_extension(filename)) + ('\n'.join(";".join(x) for x in data)))
 
 
 def count_utterances(path: str) -> int:

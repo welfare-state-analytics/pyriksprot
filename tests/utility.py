@@ -84,7 +84,7 @@ def sample_metadata_exists() -> bool:
 def sample_tagged_frames_corpus_exists(folder: str = None) -> bool:
     folder = folder or ConfigValue("tagged_frames:folder").resolve()
     test_protocols: list[str] = load_document_patterns(filename='tests/test_data/test_documents.txt')
-    is_complete: bool = all(isfile(jj(folder, f"{x}.zip")) or jj(folder, x.split('-')[1], x) for x in test_protocols)
+    is_complete: bool = all(isfile(jj(folder, f"{x}.zip")) or isfile(jj(folder, x.split('-')[1], x)) for x in test_protocols)
     if not is_complete:
         logger.error(f"tagged frames corpus in {folder} is not complete")
     return is_complete

@@ -26,16 +26,19 @@ def utterances() -> list[interface.Utterance]:
     return fakes.load_sample_utterances(f'{fakes_folder}/prot-1958-fake.xml')
 
 
+@pytest.mark.unit
 def test_utterance_text():
     u: interface.Utterance = interface.Utterance(u_id="u", speaker_note_id="x", who="x", paragraphs=["X", "Y", "C"])
     assert u.text == '\n'.join(["X", "Y", "C"])
 
 
+@pytest.mark.unit
 def test_utterance_checksumtext():
     u: interface.Utterance = interface.Utterance(u_id="u", speaker_note_id="x", who="x", paragraphs=["X", "Y", "C"])
     assert u.checksum() == '6060d006e0494206'
 
 
+@pytest.mark.unit
 def test_utterances_to_dict():
     who_sequences: list[list[interface.Utterance]] = to_speech.MergeByWhoSequence().cluster(None)
     assert who_sequences == []

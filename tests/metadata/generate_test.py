@@ -151,6 +151,28 @@ def test_create_metadata_database_with_workflow():
         skip_load_scripts=False,
     )
 
+def test_debug_strange_filenames_create_metadata_database_with_workflow():
+    # ConfigStore.configure_context(source='configs/config.yml')
+    # ConfigStore.configure_context(source='configs/config_postgres.yml')
+    ConfigStore.configure_context(source='tests/config.yml')
+
+    metadata_version: str = ConfigValue("metadata.version").resolve()
+
+    db_opts: str = f"./tests/output/{str(uuid.uuid4())[:8]}_riksprot_metadata.{metadata_version}.db"
+    # db_opts: dict[str, Any] = ConfigValue("metadata.database").resolve()
+
+    create_database_workflow(
+        corpus_version=ConfigValue("corpus.version").resolve(),
+        metadata_version=metadata_version,
+        corpus_folder=ConfigValue("corpus.folder").resolve(),
+        metadata_folder=ConfigValue("metadata.folder").resolve(),
+        db_opts=db_opts,
+        force=True,
+        skip_create_index=True,
+        skip_download_metadata=True,
+        skip_load_scripts=False,
+    )
+
 
 # def test_create_postgres_metadata_database_with_workflow():
 #     # ConfigStore.configure_context(source='configs/config.yml')

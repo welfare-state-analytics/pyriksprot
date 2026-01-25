@@ -18,7 +18,7 @@ from pyriksprot.workflows._extract_speech_ids import extract_speech_ids_by_strat
 from tests import fakes
 from tests.parlaclarin.utility import count_utterances
 
-from .utility import sample_tagged_frames_corpus_exists
+from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name
 
@@ -42,7 +42,7 @@ def utterances() -> list[interface.Utterance]:
         (ts.MergeByWhoSpeakerNoteIdSequence, 'who_speaker_note_id_sequence'),
     ],
 )
-def test_merge_speech_by_strategy(utterances: list[interface.Utterance], strategy: Type, strategy_name: str):
+def test_merge_speech_by_strategy(strategy: Type, strategy_name: str):
     document_name: str = "prot-1958-fake"
     year: int = int(document_name.split("-")[1])
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
@@ -64,12 +64,12 @@ def test_merge_speech_by_strategy(utterances: list[interface.Utterance], strateg
         assert speech.document_name == f'{protocol.name}_{speech.speech_index:03}'
         assert speech.speech_name.startswith(protocol.name)
         assert speech.delimiter == '\n'
-        for interface.utterance in speech.utterances:
-            assert interface.utterance.who == speech.who
+        for utterance in speech.utterances:
+            assert utterance.who == speech.who
 
     assert [s.who for s in speeches] == [s.who for s in expected_speeches]
     assert [s.text for s in speeches] == [s.text for s in expected_speeches]
-    assert [s.speech_id for s in speeches] == [s.speech_id for s in expected_speeches]
+    assert [s.speech_id for s in speeches] == [s.u_id for s in expected_speeches]
 
 
 def test_speech_annotation():

@@ -11,7 +11,7 @@ from pyriksprot.configuration.inject import ConfigValue
 from pyriksprot.metadata.database import DatabaseInterface
 from pyriksprot.workflows.create_metadata import resolve_backend
 
-from .utility import (
+from  tests.utility import (
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,

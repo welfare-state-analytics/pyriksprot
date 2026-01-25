@@ -10,7 +10,7 @@ from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
 
-from .utility import get_test_filenames
+from tests.parlaclarin.utility import get_test_filenames
 
 
 def test_create_grouping_hashcoder():

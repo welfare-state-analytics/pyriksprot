@@ -8,7 +8,7 @@ from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import merge
 from pyriksprot.to_speech import MergeByChain
 
-from .utility import sample_tagged_frames_corpus_exists
+from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -56,6 +56,7 @@ def test_segment_merger_merge_on_protocol_level_group_by_who(
     assert sum(len(g.values()) for g in groups) == sum(len(set(u.who for u in p.utterances)) for p in protocols)
 
 
+@pytest.mark.unit
 def test_merge_by_chain():
     U = interface.Utterance
 

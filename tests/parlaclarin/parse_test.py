@@ -13,7 +13,7 @@ from pyriksprot.corpus.utility import create_tei_corpus_xml, load_chamber_indexe
 from pyriksprot.metadata.corpus_index_factory import CorpusScanner
 
 from .. import fakes
-from .utility import count_utterances
+from tests.parlaclarin.utility import count_utterances
 
 jj = os.path.join
 

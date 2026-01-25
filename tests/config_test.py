@@ -7,6 +7,7 @@ from pyriksprot import ITagger, ITaggerFactory
 from pyriksprot.configuration import Config, ConfigValue
 from pyriksprot.utility import temporary_file
 from pyriksprot.workflows import tag
+import pytest
 
 
 def inject_config(fn_or_cls):
@@ -49,6 +50,7 @@ def test_temporary_file():
     assert not Path(filename).is_file(), "file exists"
 
 
+@pytest.mark.unit
 def test_load_yaml_str():
     config: Config = Config.load(source=SIMPLE_YAML_STR)
     assert isinstance(config, Config)

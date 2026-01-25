@@ -13,7 +13,7 @@ from pyriksprot.corpus import corpus_index
 from pyriksprot.dispatch import dispatch
 from pyriksprot.dispatch import merge as sg
 
-from .utility import sample_tagged_frames_corpus_exists
+from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name
 
@@ -120,7 +120,7 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
     if strip_path:
         files = {basename(x) for x in files}
     if strip_ext:
-        files = {utility.strip_extensions(x) for x in files}
+        files = {str(utility.strip_extensions(x)) for x in files}
     return files
 
 
