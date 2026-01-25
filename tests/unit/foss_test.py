@@ -1,6 +1,10 @@
 from pyriksprot.foss.sparv_tokenize import BetterSentenceTokenizer, BetterWordTokenizer
 
+import pytest
 
+
+
+@pytest.mark.unit
 def test_better_tokenizer():
     tokenizer: BetterWordTokenizer = BetterWordTokenizer.create()
 
@@ -11,6 +15,7 @@ def test_better_tokenizer():
     assert not list(tokenizer.tokenize(""))
 
 
+@pytest.mark.unit
 def test_better_sentencer():
     tokenizer: BetterSentenceTokenizer = BetterSentenceTokenizer.create()
 

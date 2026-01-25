@@ -7,7 +7,11 @@ import pyriksprot
 from pyriksprot.configuration import ConfigStore
 from pyriksprot.workflows.tag import resolve_target_filename
 
+import pytest
 
+
+
+@pytest.mark.unit
 def test_tag_protocol_xml():
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
 
@@ -37,6 +41,7 @@ def test_tag_protocol_xml():
     os.unlink(output_filename)
 
 
+@pytest.mark.unit
 def test_resolve_target_filename():
     source_filename: str = "/source/1956/prot-1956-ak-1.xml"
 

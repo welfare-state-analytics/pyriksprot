@@ -1,6 +1,10 @@
 from pyriksprot.foss import sparv_tokenize as st
 
+import pytest
 
+
+
+@pytest.mark.unit
 def test_better_sentence_tokenizer():
     doc_str: str = "Jag heter Ove. Vad heter du?"
     tokenizer: st.BetterSentenceTokenizer = st.BetterSentenceTokenizer.create()
@@ -34,6 +38,7 @@ def test_better_sentence_tokenizer():
     assert spans == [("Jag heter Ove.", 0, 14), ("Vad heter du?", 15, 28)]
 
 
+@pytest.mark.unit
 def test_better_word_tokenizer():
     doc_str: str = "Jag heter Ove. Vad heter du?"
     tokenizer: st.BetterWordTokenizer = st.BetterWordTokenizer.create()
@@ -59,6 +64,7 @@ def test_better_word_tokenizer():
     assert tokens == ["Jag", "heter", "Ove", ".", "Vad", "heter", "du", "?"]
 
 
+@pytest.mark.unit
 def test_better_combined_tokenizer():
     doc_str: str = "Jag heter Ove. Vad heter du?"
     sentences_str: list[str] = ["Jag heter Ove.", "Vad heter du?"]

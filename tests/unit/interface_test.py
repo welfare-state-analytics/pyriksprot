@@ -13,7 +13,6 @@ from pyriksprot import interface, to_speech
 from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import tagged as tagged_corpus
 
-from pyriksprot.corpus.iterate import to_segments
 from tests import fakes
 
 # pylint: disable=redefined-outer-name
@@ -66,29 +65,37 @@ def test_utterances_to_dict():
     assert set(x.who for x in who_sequences[2]) == {'otto'}
 
 
+@pytest.mark.unit
 def test_utterances_who_sequences(utterances: list[interface.Utterance]):
     assert [u.who for u in utterances] == ['olle', 'olle', 'kalle', 'unknown', 'unknown', 'olle']
 
 
+@pytest.mark.unit
 def test_utterances_to_csv(utterances: list[interface.Utterance]):
     data: str = interface.UtteranceHelper.to_csv(utterances)
     loaded_utterances = interface.UtteranceHelper.from_csv(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
+@pytest.mark.unit
 def test_utterances_to_json(utterances: list[interface.Utterance]):
     data: str = interface.UtteranceHelper.to_json(utterances)
     loaded_utterances = interface.UtteranceHelper.from_json(data)
     assert [x.__dict__ for x in utterances] == [x.__dict__ for x in loaded_utterances]
 
 
+@pytest.mark.unit
 def test_utterances_to_pandas(utterances: list[interface.Utterance]):
-    # FIXME: Diff is prev_id vs prev_id (nan vs None)
-    
     data: pd.DataFrame = interface.UtteranceHelper.to_dataframe(utterances)
-    assert data.reset_index().to_dict(orient='records') == [u.to_dict() for u in utterances]
+    # Fill NaN values before comparison since pandas uses NaN for None
+    data_dict = data.reset_index().to_dict(orient='records')
+    for d in data_dict:
+        d['prev_id'] = None if pd.isna(d.get('prev_id')) else d.get('prev_id')
+        d['next_id'] = None if pd.isna(d.get('next_id')) else d.get('next_id')
+    assert data_dict == [u.to_dict() for u in utterances]
 
 
+@pytest.mark.unit
 def test_protocol_create(utterances: list[interface.Utterance]):
     protocol: interface.Protocol = interface.Protocol(
         date="1958", name="prot-1958-fake", utterances=utterances, speaker_notes={}, page_references=[]
@@ -108,6 +115,7 @@ def test_protocol_create(utterances: list[interface.Utterance]):
     assert protocol.text == '\n'.join(text.text for text in utterances)
 
 
+@pytest.mark.unit
 def test_protocol_preprocess():
     """Modifies utterances:"""
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
@@ -124,11 +132,12 @@ def test_protocol_preprocess():
     assert protocol.text == 'APA\nAPA\nAPA\nAPA\nAPA\nAPA\nAPA'
 
 
+@pytest.mark.unit
 def test_protocols_to_items():
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
     filenames: list[str] = glob.glob(tagged_folder, recursive=True)
     protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
     _ = itertools.chain(
-        to_segments(protocol=p, merge_strategy=to_speech.MergeStrategyType.chain, content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
+        p.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
         for p in protocols
     )
