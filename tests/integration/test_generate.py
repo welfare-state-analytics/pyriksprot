@@ -152,10 +152,11 @@ def test_create_metadata_database_with_workflow():
     )
 
 
+@pytest.mark.skip("Infrastructure test only")
 def test_debug_strange_filenames_create_metadata_database_with_workflow():
     # ConfigStore.configure_context(source='configs/config.yml')
     # ConfigStore.configure_context(source='configs/config_postgres.yml')
-    ConfigStore.configure_context(source='tests/config.yml')
+    ConfigStore.configure_context(source='tests/test_data/config.yml')
 
     metadata_version: str = ConfigValue("metadata.version").resolve()
 

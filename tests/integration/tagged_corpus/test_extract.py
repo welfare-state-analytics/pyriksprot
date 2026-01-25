@@ -131,7 +131,7 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
         **dict(
             source_folder=tagged_folder,
             metadata_filename=database,
-            target_type='files-in-zip',
+            target_type='single-tagged-frame-per-group',
             content_type=interface.ContentType.TaggedFrame,
             segment_level=interface.SegmentLevel.Speech,
             multiproc_keep_order=None,
@@ -147,8 +147,8 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     }
 
     workflows.extract_corpus_tags(**opts, progress=False)
-    assert isfile(opts['target_name'])
-    os.unlink(opts['target_name'])
+    assert isdir(target_name)
+    shutil.rmtree(target_name, ignore_errors=True)
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
