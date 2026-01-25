@@ -1,5 +1,6 @@
 import os
 from os.path import splitext
+from pathlib import Path
 
 import pytest
 import requests
@@ -17,6 +18,7 @@ from tests.utility import (
     ensure_test_corpora_exist,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
+    sample_tagged_speech_corpus_exists,
     subset_corpus_and_metadata,
 )
 
@@ -73,17 +75,15 @@ def test_gh_download_items():
     assert all(os.path.isfile(jj(folder, x)) for x in items)
 
 
-@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
+#@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
-    corpus_version: str = ConfigValue("corpus:version").resolve()
-    data_folder: str = ConfigValue("data_folder").resolve()
-    tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
-    riksprot_tagged_folder: str = jj(data_folder, corpus_version, 'tagged_frames')
+    local_folder: str = ConfigValue("tagged_frames.folder").resolve()
+    global_folder: str = ConfigValue("global.tagged_frames.folder").resolve()
 
     create_test_tagged_frames_corpus(
         protocols=list_of_test_protocols,
-        source_folder=riksprot_tagged_folder,
-        target_folder=tagged_folder,
+        source_folder=global_folder,
+        target_folder=local_folder,
     )
 
 
@@ -114,11 +114,13 @@ def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
     assert db.fetch_scalar("SELECT COUNT(*) FROM _person") > 0
 
 
-@pytest.mark.skip(reason="Test infrastructure test")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_speech_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_speech_corpora():
-    corpus_version: str = ConfigValue("corpus:version").resolve()
+
+    corpus_version: str = ConfigValue("corpus.version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
     database: str = ConfigValue("metadata.database.options.filename").resolve()
+    
     create_test_speech_corpus(source_folder=tagged_folder, corpus_version=corpus_version, database_name=database)
 
 
