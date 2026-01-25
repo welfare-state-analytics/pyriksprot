@@ -681,3 +681,223 @@ pytest -m unit -x  # Stop on first failure
 - [Pytest Fixtures](https://docs.pytest.org/en/stable/fixture.html)
 - [Pytest Markers](https://docs.pytest.org/en/stable/how-to-use-markers.html)
 - [Testing Best Practices](https://docs.pytest.org/en/stable/goodpractices.html)
+
+## Configuration Testing
+
+### Overview
+
+Configuration testing ensures that the ConfigStore, ConfigValue, and Config classes correctly handle:
+- YAML loading and parsing
+- YAML custom constructors (!jj, !join, !path_join)
+- Environment variable integration
+- Configuration precedence rules
+- Nested key resolution
+- Context switching
+
+### YAML Constructors
+
+Pyriksprot supports custom YAML constructors:
+
+```python
+from pyriksprot.configuration import Config
+
+yaml_config = """
+root: &root /data/corpus
+
+paths:
+  simple_join: !join [ "part1", "part2", "part3" ]
+  path_join: !path_join [ *root, subfolder ]
+  jj_alias: !jj [ /home, user, documents ]
+"""
+
+config = Config.load(source=yaml_config, env_prefix=None)
+
+# Constructor results
+assert config.get("paths:simple_join") == "part1part2part3"
+assert "subfolder" in config.get("paths:path_join")
+```
+
+**Supported Constructors**:
+- `!jj` - Path join (alias for !path_join)
+- `!path_join` - Normalize and join paths (uses os.path.join)
+- `!join` - String concatenation (joins sequence elements)
+
+### ConfigValue Resolution
+
+ConfigValue.resolve() retrieves values from the current ConfigStore context:
+
+```python
+from pyriksprot.configuration import ConfigValue, ConfigStore, Config
+
+yaml_config = """
+app:
+  name: test-app
+  version: 1.0.0
+
+database:
+  host: localhost
+  port: 5432
+"""
+
+config = Config.load(source=yaml_config, env_prefix=None)
+ConfigStore.configure_context(context="test", source=config)
+
+# Simple key
+cv_name = ConfigValue(key="app:name")
+assert cv_name.resolve() == "test-app"
+
+# Nested key with colon notation
+cv_port = ConfigValue(key="database:port")
+assert cv_port.resolve() == 5432
+
+# With default
+cv_missing = ConfigValue(key="missing:key", default="default-value")
+assert cv_missing.resolve() == "default-value"
+
+# With post-processor
+cv_upper = ConfigValue(key="app:name", after=lambda x: x.upper())
+assert cv_upper.resolve() == "TEST-APP"
+```
+
+### Unit Tests for Configuration
+
+Examples for testing configuration scenarios:
+
+```python
+import pytest
+from pyriksprot.configuration import Config, ConfigStore, ConfigValue
+
+YAML_CONFIG = """
+app:
+  name: test-app
+  debug: false
+
+features:
+  enable_cache: true
+  cache_ttl: 3600
+"""
+
+@pytest.mark.unit
+def test_yaml_loading():
+    """Test basic YAML config loading."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    assert config.get("app:name") == "test-app"
+    assert config.get("app:debug") is False
+
+@pytest.mark.unit
+def test_nested_key_access():
+    """Test accessing deeply nested keys."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    assert config.get("features:cache_ttl") == 3600
+
+@pytest.mark.unit
+def test_missing_key_with_default():
+    """Test default values for missing keys."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    result = config.get("nonexistent:key", default="fallback")
+    assert result == "fallback"
+
+@pytest.mark.unit
+def test_yaml_constructors():
+    """Test !jj, !join, and !path_join constructors."""
+    yaml_constructors = """
+text_join: !join [ "hello", "-", "world" ]
+path_join: !path_join [ /home, user, documents ]
+"""
+    config = Config.load(source=yaml_constructors, env_prefix=None)
+    assert config.get("text_join") == "hello-world"
+    assert "documents" in config.get("path_join")
+
+@pytest.mark.unit
+def test_config_value_resolve():
+    """Test ConfigValue.resolve() from ConfigStore."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    ConfigStore.configure_context(context="test", source=config)
+    
+    cv = ConfigValue(key="app:name")
+    assert cv.resolve() == "test-app"
+
+@pytest.mark.unit
+def test_config_value_with_post_processor():
+    """Test ConfigValue with after function."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    ConfigStore.configure_context(context="test", source=config)
+    
+    cv = ConfigValue(key="app:name", after=lambda x: f"[{x}]")
+    assert cv.resolve() == "[test-app]"
+
+@pytest.mark.unit
+def test_config_exists():
+    """Test Config.exists() method."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    assert config.exists("app:name")
+    assert not config.exists("missing:key")
+
+@pytest.mark.unit
+def test_config_update():
+    """Test Config.update() method."""
+    config = Config.load(source=YAML_CONFIG, env_prefix=None)
+    config.update({"app:name": "updated-app"})
+    assert config.get("app:name") == "updated-app"
+
+@pytest.mark.unit
+def test_config_store_context_switching():
+    """Test ConfigStore with multiple contexts."""
+    yaml1 = "value: from-config1"
+    yaml2 = "value: from-config2"
+    
+    cfg1 = Config.load(source=yaml1, env_prefix=None)
+    cfg2 = Config.load(source=yaml2, env_prefix=None)
+    
+    ConfigStore.configure_context(context="ctx1", source=cfg1)
+    ConfigStore.configure_context(context="ctx2", source=cfg2)
+    
+    ConfigStore.context = "ctx1"
+    assert ConfigStore.config().get("value") == "from-config1"
+    
+    ConfigStore.context = "ctx2"
+    assert ConfigStore.config().get("value") == "from-config2"
+```
+
+### Integration Tests for Configuration
+
+For testing configuration with actual files:
+
+```python
+import pytest
+from pathlib import Path
+from pyriksprot.configuration import Config
+
+@pytest.mark.integration
+def test_load_config_from_file(tmp_path):
+    """Test loading configuration from YAML file."""
+    config_file = tmp_path / "test-config.yml"
+    config_file.write_text("""
+app:
+  name: file-loaded-app
+  version: 1.0.0
+""")
+    
+    config = Config.load(source=str(config_file), env_prefix=None)
+    assert config.get("app:name") == "file-loaded-app"
+    assert config.filename == str(config_file)
+```
+
+### Mocking Configuration for Unit Tests
+
+When testing code that depends on configuration, mock the ConfigValue:
+
+```python
+import pytest
+from unittest.mock import patch
+
+@pytest.mark.unit
+def test_function_with_mocked_config():
+    """Mock ConfigValue when testing code that depends on config."""
+    with patch('pyriksprot.configuration.ConfigValue.resolve') as mock_resolve:
+        mock_resolve.return_value = '/path/to/corpus'
+        result = my_function()
+        assert result is not None
+```
+
+For comprehensive configuration testing examples, see [tests/unit/test_configuration_advanced.py](tests/unit/test_configuration_advanced.py).
