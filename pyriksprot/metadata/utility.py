@@ -36,8 +36,8 @@ DATE_COLUMNS = ['start_date', 'end_date']
 
 def slim_table_types(
     tables: list[pd.DataFrame] | pd.DataFrame,
-    defaults: dict[str, Any] = None,
-    types: dict[str, Any] = None,
+    defaults: dict[str, Any] | None = None,
+    types: dict[str, Any] | None = None,
 ) -> None:
     """Slims types and sets default value for NaN entries"""
 
