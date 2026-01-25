@@ -39,7 +39,5 @@ def test_create_metadata_validates_versions(tmp_path):
 
     with pytest.raises(ValueError, match="must be defined"):
         create_metadata.create_database_workflow(
-            corpus_version=None,
-            metadata_version=None,
-            metadata_folder=str(tmp_path)
+            corpus_version=None, metadata_version=None, metadata_folder=str(tmp_path)
         )
