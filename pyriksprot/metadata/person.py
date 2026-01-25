@@ -274,7 +274,7 @@ class PersonIndex:
             self.data = db.fetch_tables(self._table_infos)
 
         """ ensure `unknown` has pid = 0 """
-        if self.persons.loc[0]['person_id'] != 'unknown':
+        if self.persons.loc[0]['person_id'] != 'unknown':  # type: ignore
             swap_rows(self.persons, 0, index_of_person_id(self.persons, 'unknown'))
 
         return self

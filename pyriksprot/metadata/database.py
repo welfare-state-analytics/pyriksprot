@@ -7,7 +7,6 @@ from typing import Any, Self, Type
 import numpy as np
 import pandas as pd
 import psycopg2
-import psycopg2.sql
 from loguru import logger
 from psycopg2 import extensions as pg
 from psycopg2 import extras as pgx

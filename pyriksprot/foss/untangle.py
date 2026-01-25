@@ -108,7 +108,7 @@ class Element:
     def __nonzero__(self):
         return self.is_root or self.name is not None
 
-    def __eq__(self, val: str):
+    def __eq__(self, val: str):  # type: ignore
         return self.cdata == val
 
     def __dir__(self):
@@ -135,7 +135,7 @@ class Handler(handler.ContentHandler):
         self.elements: List[Element] = []
         self.ignore_tags: Set[str] = set(ignore_tags or [])
 
-    def startElement(self, name: str, attrs: Mapping[str, str]) -> None:
+    def startElement(self, name: str, attrs: Mapping[str, str]) -> None:  # type: ignore
         if name in self.ignore_tags:
             return
 

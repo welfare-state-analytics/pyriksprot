@@ -23,10 +23,10 @@ def extract_speech_index(
     source_folder: str,
     metadata_filename: str,
     target_name: str = 'speech_index.csv.gz',
-    segment_level: interface.SegmentLevel = None,
+    segment_level: interface.SegmentLevel | None = None,
     segment_skip_size: int = 1,
-    years: str = None,
-    multiproc_keep_order: str = None,
+    years: str | None = None,
+    multiproc_keep_order: str | None = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
     merge_strategy: to_speech.MergeStrategyType = 'chain',
@@ -40,14 +40,17 @@ def extract_speech_index(
         target_names (str): Target filename(s).
         segment_level (interface.SegmentLevel, optional): Document level. Defaults to None.
         segment_skip_size (int, optional): Size of text to include. Defaults to 1.
-        years (str, optional): Years filter. Defaults to None.
-        multiproc_keep_order (str, optional): Multiprocessing option. Defaults to None.
+        years (str | None, optional): Years filter. Defaults to None.
+        multiproc_keep_order (str | None, optional): Multiprocessing option. Defaults to None.
         multiproc_processes (int, optional): Number of processes. Defaults to 1.
         multiproc_chunksize (int, optional): Size of work loads assigned to each process. Defaults to 100.
         merge_strategy (to_speech.MergeStrategyType, optional): Speech merge strategy. Defaults to 'chain'.
     """
     logger.info("extracting corpus speech index...")
 
+    if merge_strategy not in to_speech.MergeStrategyType:
+        raise ValueError(f"invalid merge strategy: {merge_strategy}")
+    
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern=source_pattern, years=years
     )
