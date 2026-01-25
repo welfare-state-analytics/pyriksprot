@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from pyriksprot import gitchen as gh
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import preprocess as pr
@@ -24,6 +25,7 @@ from tests import fakes
 jj = os.path.join
 
 
+@pytest.mark.unit
 def test_format_protocol_id():
     assert format_protocol_name("prot-199495--011.xml") == "1994/95:11"
     assert format_protocol_name("prot-199495--011") == "1994/95:11"
@@ -41,9 +43,10 @@ def test_format_protocol_id():
     assert format_protocol_name("prot-19992000--089") == "1999/2000:89"
 
 
+@pytest.mark.unit
 def test_ls_corpus_by_tei_corpora():
-    pytest.skip("Requires ConfigStore initialization - move to integration tests")
     folder: str = ConfigStore.config().get("corpus.folder")
+
     dict_data: dict[str, dict[str, str | list[str]]] = ls_corpus_by_tei_corpora(
         folder=folder, mode='dict', normalize=False
     )
@@ -86,7 +89,7 @@ def test_ls_corpus_by_tei_corpora():
         'prot-1980-empty',
     ],
 )
-@pytest.mark.skip(reason="Requires ConfigStore initialization - move to integration tests")
+@pytest.mark.unit
 def test_load_fakes(document_name: str):
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
     filename: str = jj(fakes_folder, f"{document_name}.xml")
@@ -110,6 +113,7 @@ def test_load_fakes(document_name: str):
     assert len(utterances) == 0 or len(list(speeches)) > 0
 
 
+@pytest.mark.unit
 def test_temporary_file():
     filename = jj("tests", "output", "trazan.txt")
 
@@ -132,6 +136,7 @@ def test_temporary_file():
     assert not Path(filename).is_file(), "file exists"
 
 
+@pytest.mark.unit
 def test_dotexpand():
     assert not pu.dotexpand("")
     assert pu.dotexpand("a") == ["a"]
@@ -141,12 +146,14 @@ def test_dotexpand():
     assert pu.dotexpand("a:b, c.d") == ["a.b", "a_b", "c.d"]
 
 
+@pytest.mark.unit
 def test_dotset():
     d = {}
     pu.dotset(d, "a.b", 1)
     assert d == {"a": {"b": 1}}
 
 
+@pytest.mark.unit
 def test_dotget():
     assert pu.dget({}, "apa", None) is None
     assert pu.dget({}, "apa", default="olle") == "olle"
@@ -202,12 +209,14 @@ def test_dotget():
         ),
     ],
 )
+@pytest.mark.unit
 def test_env2dict(prefix: str, mock_env: dict[str, str], expected: dict[str, str]):
     with patch.dict(os.environ, mock_env):
         result: dict[str, str] = pu.env2dict(prefix=prefix)
         assert result == expected
 
 
+@pytest.mark.unit
 def test_dedent():
     assert pr.dedent("") == ""
     assert pr.dedent("apa\napa") == "apa\napa"
@@ -216,6 +225,7 @@ def test_dedent():
     assert pr.dedent("\tapa\n\n  \tapa \t\n") == "apa\n\napa\n"
 
 
+@pytest.mark.unit
 def test_probe_filename():
     filename: str = "./tests/output/apa.csv"
     pu.touch(pu.replace_extension(filename, "txt"))
@@ -227,6 +237,13 @@ def test_probe_filename():
     assert pu.probe_filename(filename, exts=[".txt"]) is not None
 
 
+@pytest.mark.unit
+def test_repository_tags():
+    folder: str = ConfigStore.config().get("corpus.folder")
+    tags = gh.gh_tags(folder)
+    assert len(tags) > 0
+
+
 SAMPLE_DATISH_VALUES: list[str | None] = ['2020', None, '2023-02', '2023-03-24']
 
 
@@ -234,6 +251,7 @@ def _sample_datish_dataframe() -> pd.DataFrame:
     return pd.DataFrame(data={'dt': SAMPLE_DATISH_VALUES})
 
 
+@pytest.mark.unit
 def test_fix_incomplete_datetime_series_truncate_inplace():
     df: pd.DataFrame = _sample_datish_dataframe()
 
@@ -250,6 +268,7 @@ def test_fix_incomplete_datetime_series_truncate_inplace():
     assert pd.to_datetime(df.dt).equals(expected_values)
 
 
+@pytest.mark.unit
 def test_fix_incomplete_datetime_series_extend_inplace():
     df: pd.DataFrame = _sample_datish_dataframe()
     md.fix_incomplete_datetime_series(df, "dt", action="extend", inplace=True)
@@ -259,6 +278,7 @@ def test_fix_incomplete_datetime_series_extend_inplace():
     assert df.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))
 
 
+@pytest.mark.unit
 def test_fix_incomplete_datetime_series_extend_not_inplace():
     df: pd.DataFrame = _sample_datish_dataframe()
     df2 = md.fix_incomplete_datetime_series(df, "dt", action="extend", inplace=False)
@@ -271,6 +291,7 @@ def test_fix_incomplete_datetime_series_extend_not_inplace():
     assert df2.dt_flag.equals(pd.Series(['Y', 'X', 'M', 'D']))
 
 
+@pytest.mark.unit
 def test_get_chamber_by_filename():
     assert get_chamber_by_filename("prot-199495--011.xml") == "ek"
     assert get_chamber_by_filename("prot-199495--011") == "ek"

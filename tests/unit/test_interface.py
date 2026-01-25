@@ -12,6 +12,7 @@ import pytest
 from pyriksprot import interface, to_speech
 from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import tagged as tagged_corpus
+from pyriksprot.corpus.iterate import to_segments
 from tests import fakes
 
 # pylint: disable=redefined-outer-name
@@ -137,6 +138,11 @@ def test_protocols_to_items():
     filenames: list[str] = glob.glob(tagged_folder, recursive=True)
     protocols: list[interface.Protocol] = [p for p in tagged_corpus.load_protocols(source=filenames)]
     _ = itertools.chain(
-        p.to_segments(content_type=interface.ContentType.Text, segment_level=interface.SegmentLevel.Who)
+        to_segments(
+            protocol=p,
+            content_type=interface.ContentType.Text,
+            segment_level=interface.SegmentLevel.Who,
+            merge_strategy="chain"
+        )
         for p in protocols
     )

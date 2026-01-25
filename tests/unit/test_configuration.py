@@ -29,6 +29,7 @@ section1:
 """
 
 
+@pytest.mark.unit
 def test_temporary_file():
     filename = jj("tests", "output", "trazan.txt")
 
@@ -62,6 +63,7 @@ def test_load_yaml_str():
     assert config.get("section1:attr3") == "value3"
 
 
+@pytest.mark.unit
 def test_create_tagger_factory():
     yaml_str: str = """
 root_folder: tests/output
@@ -102,6 +104,7 @@ dehyphen:
     assert tagger is not None
 
 
+@pytest.mark.unit
 def test_configure_by_string_and_env():
     config: Config = Config.load(source=SIMPLE_YAML_STR, env_prefix=None)
 
@@ -118,6 +121,7 @@ def test_configure_by_string_and_env():
         assert config.get("abc:xyz") == "apa"
 
 
+@pytest.mark.unit
 def test_configure_by_string_and_update():
     yml_str: str = """
 

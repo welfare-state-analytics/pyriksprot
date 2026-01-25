@@ -373,7 +373,7 @@ class TestConfigStoreContextManagement:
     @pytest.mark.unit
     def test_config_store_context_not_initialized_raises(self):
         """Test accessing unconfigured context raises error."""
-        ConfigStore.store = {"unconfigured": None}
+        ConfigStore.store = {"unconfigured": None}  # type: ignore
         ConfigStore.context = "unconfigured"
 
         with pytest.raises(ValueError, match="not properly initialized"):
