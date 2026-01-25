@@ -186,7 +186,7 @@ def test_protocol_merge(minimal_protocol):
 
 2. **Mock external operations**:
 ```python
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, mock_open
 
 @pytest.mark.unit
 def test_load_protocol_handles_file_error():
@@ -194,6 +194,146 @@ def test_load_protocol_handles_file_error():
     with patch('builtins.open', side_effect=FileNotFoundError):
         with pytest.raises(FileNotFoundError):
             load_protocol('nonexistent.xml')
+
+@pytest.mark.unit
+def test_parse_with_mock_file():
+    """Mock file content for testing."""
+    fake_xml = '<?xml version="1.0"?><protocol></protocol>'
+    with patch('builtins.open', mock_open(read_data=fake_xml)):
+        result = parse_protocol('dummy.xml')
+        assert result is not None
+```
+
+### Mocking Patterns
+
+#### Mock File System Operations
+```python
+from unittest.mock import patch, MagicMock
+
+@pytest.mark.unit
+def test_corpus_loader_creates_output_dir():
+    """Mock os.makedirs to verify it was called."""
+    with patch('os.makedirs') as mock_mkdir:
+        load_corpus(output_dir='/tmp/out')
+        mock_mkdir.assert_called_with('/tmp/out', exist_ok=True)
+
+@pytest.mark.unit
+def test_file_not_found_error():
+    """Mock Path.exists to test missing file handling."""
+    with patch('pathlib.Path.exists', return_value=False):
+        with pytest.raises(FileNotFoundError):
+            load_file('missing.txt')
+```
+
+#### Mock Database Connections
+```python
+from unittest.mock import patch, MagicMock
+
+@pytest.mark.unit
+def test_person_index_queries_database():
+    """Mock SQLite database connection."""
+    mock_db = MagicMock()
+    mock_db.execute.return_value.fetchone.return_value = {
+        'person_id': 1, 'name': 'John Doe', 'party': 'S'
+    }
+    
+    with patch('pyriksprot.metadata.person.sqlite3.connect', return_value=mock_db):
+        index = PersonIndex('dummy.db')
+        result = index.get('john-doe')
+        assert result['name'] == 'John Doe'
+
+@pytest.mark.unit
+def test_database_connection_error():
+    """Mock database connection failure."""
+    with patch('sqlite3.connect', side_effect=sqlite3.OperationalError('Connection failed')):
+        with pytest.raises(sqlite3.OperationalError):
+            PersonIndex('bad.db')
+```
+
+#### Mock External Services/APIs
+```python
+from unittest.mock import patch, MagicMock
+
+@pytest.mark.unit
+def test_github_metadata_fetch():
+    """Mock HTTP requests to GitHub API."""
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        'content': 'base64_encoded_csv_data'
+    }
+    
+    with patch('requests.get', return_value=mock_response):
+        data = fetch_github_metadata('repo/path')
+        assert data is not None
+
+@pytest.mark.unit
+def test_network_timeout_handling():
+    """Mock network timeout."""
+    with patch('requests.get', side_effect=requests.Timeout('Connection timeout')):
+        with pytest.raises(requests.Timeout):
+            fetch_github_metadata('repo/path')
+```
+
+#### Mock Configuration Values
+```python
+from unittest.mock import patch, PropertyMock
+
+@pytest.mark.unit
+def test_config_value_resolution():
+    """Mock ConfigValue to test config-dependent logic."""
+    with patch('pyriksprot.configuration.ConfigValue.resolve') as mock_resolve:
+        mock_resolve.return_value = '/path/to/corpus'
+        
+        path = ConfigValue('corpus.folder').resolve()
+        assert path == '/path/to/corpus'
+
+@pytest.mark.unit
+def test_missing_config_value():
+    """Mock missing configuration."""
+    with patch.dict('os.environ', {}, clear=True):
+        with pytest.raises(KeyError):
+            ConfigValue('nonexistent.key').resolve()
+```
+
+#### Mock Multiprocessing
+```python
+from unittest.mock import patch, MagicMock
+
+@pytest.mark.unit
+def test_dispatch_uses_correct_workers():
+    """Mock multiprocessing dispatch."""
+    with patch('pyriksprot.dispatch.dispatch') as mock_dispatch:
+        mock_dispatch.return_value = [{'result': 'data'}]
+        
+        result = my_parallel_function(data=[1, 2, 3])
+        
+        # Verify dispatch was called with correct parameters
+        mock_dispatch.assert_called()
+        assert len(result) == 1
+```
+
+#### Mock Speaker Service
+```python
+from unittest.mock import MagicMock
+from pyriksprot.metadata import SpeakerInfo
+
+@pytest.mark.unit
+def test_export_service_with_mock_speaker():
+    """Mock SpeakerInfoService to test export logic."""
+    mock_service = MagicMock()
+    mock_service.get_speaker_info.return_value = SpeakerInfo(
+        speech_id='s-1',
+        person_id='p-123',
+        name='Speaker Name',
+        gender_id=1,
+        party_id=8,
+    )
+    
+    export_service = VrtExportService(mock_service)
+    vrt = export_service.to_vrt(protocol)
+    
+    assert 'Speaker Name' in vrt
+    mock_service.get_speaker_info.assert_called()
 ```
 
 3. **Test pure logic**, not side effects:
@@ -323,6 +463,137 @@ def test_custom_scenario():
     assert len(protocol.utterances) == 2
 ```
 
+## Mocking Best Practices
+
+### When to Mock
+
+✅ **DO Mock**:
+- File system operations (open, read, write)
+- Database connections
+- Network requests (HTTP, APIs)
+- External services
+- Configuration loading
+- Time/datetime operations
+- Random number generation
+- Multiprocessing dispatch
+
+❌ **DON'T Mock**:
+- Internal logic (merge strategies, parsing)
+- Pure functions without side effects
+- Domain models (Utterance, Protocol, Speech)
+- Fixtures - use synthetic fixtures instead
+
+### Mock Patterns
+
+**Pattern 1: Context Manager (Recommended)**
+```python
+@pytest.mark.unit
+def test_with_mock_context():
+    """Use 'with' for clear mock scope."""
+    with patch('module.function') as mock_func:
+        mock_func.return_value = 'expected'
+        result = my_code()
+        assert result == 'expected'
+        mock_func.assert_called_once()
+```
+
+**Pattern 2: Decorator (For Multiple Tests)**
+```python
+@pytest.mark.unit
+@patch('module.slow_function', return_value='fast')
+def test_with_mock_decorator(mock_func):
+    """Use decorator to mock for entire test."""
+    result = my_code()
+    assert result == 'fast'
+```
+
+**Pattern 3: Fixture (For Shared Mocks)**
+```python
+@pytest.fixture
+def mock_database():
+    """Reusable mock database."""
+    with patch('sqlite3.connect') as mock_db:
+        yield mock_db
+
+@pytest.mark.unit
+def test_with_mock_fixture(mock_database):
+    """Use fixture for complex or shared mocks."""
+    mock_database.execute.return_value = []
+    result = query_database()
+    assert result == []
+```
+
+### Mock Return Values
+
+```python
+from unittest.mock import MagicMock, PropertyMock
+
+# Simple return value
+mock_func.return_value = 'result'
+
+# Return different values on successive calls
+mock_func.side_effect = ['first', 'second', 'third']
+
+# Raise exception
+mock_func.side_effect = ValueError('Error message')
+
+# Mock property
+type(mock_obj).property_name = PropertyMock(return_value='value')
+
+# Call with arguments
+mock_func('arg1', 'arg2')
+mock_func.assert_called_with('arg1', 'arg2')
+
+# Called at least once
+mock_func.assert_called()
+
+# Called exactly once
+mock_func.assert_called_once()
+
+# Not called
+mock_func.assert_not_called()
+
+# Call count
+assert mock_func.call_count == 5
+```
+
+### Common Gotchas
+
+**Gotcha 1: Patching the wrong location**
+```python
+# ❌ WRONG - patch where it's defined
+with patch('pyriksprot.interface.Utterance'):
+    ...
+
+# ✅ RIGHT - patch where it's used
+with patch('pyriksprot.to_speech.Utterance'):
+    ...
+```
+
+**Gotcha 2: Not mocking dependencies**
+```python
+# ❌ WRONG - FileNotFoundError still raised by open()
+with patch('load_protocol'):
+    result = load_protocol('file.xml')
+
+# ✅ RIGHT - Mock the actual operation
+with patch('builtins.open', side_effect=FileNotFoundError):
+    with pytest.raises(FileNotFoundError):
+        load_protocol('file.xml')
+```
+
+**Gotcha 3: Forgetting to assert mocks were called**
+```python
+# ❌ WEAK - doesn't verify mock was used
+with patch('os.makedirs') as mock_mkdir:
+    my_code()
+
+# ✅ STRONG - verify mock was called as expected
+with patch('os.makedirs') as mock_mkdir:
+    my_code()
+    mock_mkdir.assert_called_once_with('/path', exist_ok=True)
+```
+
 ## Troubleshooting
 
 ### Unit tests fail with "ConfigStore not configured"
@@ -331,10 +602,45 @@ def test_custom_scenario():
 
 **Solution**: Either:
 1. Add test marker and move to integration tests
-2. Mock the configuration in unit test
+2. Mock the configuration in unit test:
+```python
+@pytest.mark.unit
+def test_with_mocked_config():
+    with patch('pyriksprot.configuration.ConfigValue.resolve') as mock_resolve:
+        mock_resolve.return_value = '/path/to/corpus'
+        # Now ConfigValue().resolve() works
+        result = my_function()
+```
 3. Use synthetic fixtures that don't require configuration
 
-### Test data not found
+### Mock is not being called
+
+**Problem**: Mock isn't being used, likely wrong patch path
+
+**Solution**: 
+1. Verify you're patching where the function is used, not defined
+2. Use `assert_called()` or `call_count` to check:
+```python
+with patch('module.function') as mock_f:
+    my_code()
+    print(f"Called {mock_f.call_count} times")
+    if not mock_f.called:
+        print("Mock was never called!")
+```
+3. Check that your code actually calls the function
+
+### "Module has no attribute" error when patching
+
+**Problem**: Path to patch is incorrect
+
+**Solution**:
+1. Use full module path: `patch('pyriksprot.module.function')`
+2. Import and check the function exists:
+```python
+from pyriksprot.module import function
+# Then patch it where it's used:
+with patch('pyriksprot.other_module.function'):
+```
 
 **Problem**: Integration tests skip because external data missing
 
