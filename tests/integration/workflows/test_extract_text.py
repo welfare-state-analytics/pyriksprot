@@ -6,6 +6,8 @@ Tests full end-to-end text extraction with sample corpus data.
 
 import pytest
 
+from pyriksprot import interface
+from pyriksprot.workflows import extract_text
 from tests.utility import sample_parlaclarin_corpus_exists
 
 
@@ -15,9 +17,6 @@ def test_extract_corpus_text_end_to_end(tmp_path, xml_source_index):
     """Test complete extract_text workflow with sample data."""
     if xml_source_index is None or len(xml_source_index.paths) == 0:
         pytest.skip("xml_source_index not available")
-
-    from pyriksprot import interface
-    from pyriksprot.workflows import extract_text
 
     # Execute workflow
     try:
@@ -41,7 +40,6 @@ def test_extract_corpus_text_end_to_end(tmp_path, xml_source_index):
 @pytest.mark.integration
 def test_extract_corpus_text_with_dehyphenation(tmp_path):
     """Test that dehyphenation option is recognized."""
-    from pyriksprot.workflows import extract_text
 
     # Dehyphenation flag should be accepted
     try:

@@ -6,9 +6,9 @@ Tests iteration patterns without file system access.
 
 import pytest
 
-from tests.fixtures.synthetic import minimal_protocol, minimal_utterance  # type: ignore
+from tests.fixtures.synthetic import minimal_protocol, minimal_utterance  # type: ignore ; pylint: disable=unused-import
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, redefined-outer-name
 
 
 @pytest.mark.unit

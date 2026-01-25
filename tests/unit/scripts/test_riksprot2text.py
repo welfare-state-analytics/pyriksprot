@@ -6,6 +6,8 @@ Tests argument parsing and configuration validation.
 
 import pytest
 
+# type: ignore ; pylint: disable=import-outside-toplevel
+
 
 @pytest.mark.unit
 def test_riksprot2text_script_exists():

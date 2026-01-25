@@ -6,6 +6,7 @@ Tests metadata database creation with sample data.
 
 import pytest
 
+from pyriksprot.configuration.inject import ConfigValue
 from pyriksprot.workflows import create_metadata
 from tests.utility import sample_parlaclarin_corpus_exists
 
@@ -17,11 +18,13 @@ def test_create_metadata_database_end_to_end(tmp_path):
 
     try:
         create_metadata.create_database_workflow(
-            corpus_version="v1.4.1",
-            metadata_version="v1.1.3",
-            target_folder=str(tmp_path),
+            corpus_version=ConfigValue("corpus.version").resolve(),
+            metadata_version=ConfigValue("metadata.version").resolve(),
+            corpus_folder=ConfigValue("corpus.folder").resolve(),
+            metadata_folder=tmp_path,  # ConfigValue("metadata.folder").resolve(),
             force=True,
         )
+
         # Workflow should complete
         assert True
     except FileNotFoundError:
@@ -34,12 +37,9 @@ def test_create_metadata_database_end_to_end(tmp_path):
 def test_create_metadata_validates_versions(tmp_path):
     """Test that version parameters are validated."""
 
-    try:
+    with pytest.raises(ValueError, match="must be defined"):
         create_metadata.create_database_workflow(
             corpus_version=None,
             metadata_version=None,
-            target_folder=str(tmp_path),
+            metadata_folder=str(tmp_path)
         )
-    except (TypeError, ValueError):
-        # Expected - invalid versions
-        pass

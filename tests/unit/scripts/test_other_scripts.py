@@ -6,6 +6,8 @@ Tests for subset-corpus, tag-info, and utility scripts.
 
 import pytest
 
+# type: ignore ; pylint: disable=import-outside-toplevel
+
 
 @pytest.mark.unit
 def test_subset_corpus_script_exists():

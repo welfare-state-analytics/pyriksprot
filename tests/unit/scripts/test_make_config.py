@@ -11,7 +11,7 @@ import pytest
 def test_make_config_script_exists():
     """Test that make_config script is accessible."""
     try:
-        from pyriksprot.scripts import make_config
+        from pyriksprot.scripts import make_config  # type: ignore ; pylint: disable=import-outside-toplevel
 
         assert hasattr(make_config, 'main')
     except ImportError:
@@ -22,7 +22,7 @@ def test_make_config_script_exists():
 def test_make_config_generates_yaml():
     """Test that make_config generates YAML configuration."""
     try:
-        from pyriksprot.scripts import make_config
+        from pyriksprot.scripts import make_config  # type: ignore ; pylint: disable=import-outside-toplevel
 
         # Should be able to generate config
         functions = [name for name in dir(make_config) if not name.startswith('_')]

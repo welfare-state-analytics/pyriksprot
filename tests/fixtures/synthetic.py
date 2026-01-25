@@ -11,8 +11,9 @@ from typing import Optional
 import pandas as pd
 import pytest
 
-from pyriksprot import interface
+from pyriksprot import interface, to_speech
 
+# pylint: disable=redefined-outer-name, too-many-positional-arguments
 # ============================================================================
 # Utterance Fixtures
 # ============================================================================
@@ -288,7 +289,6 @@ def protocol_empty() -> interface.Protocol:
 @pytest.fixture
 def speeches_from_minimal_protocol(minimal_protocol: interface.Protocol) -> list[interface.Speech]:
     """Generate speeches from minimal protocol using default merge strategy."""
-    from pyriksprot import to_speech
 
     return to_speech.to_speeches(protocol=minimal_protocol, merge_strategy="chain")
 
@@ -298,7 +298,6 @@ def speeches_from_single_speaker_protocol(
     protocol_single_speaker: interface.Protocol,
 ) -> list[interface.Speech]:
     """Generate speeches from single speaker protocol."""
-    from pyriksprot import to_speech
 
     return to_speech.to_speeches(protocol=protocol_single_speaker, merge_strategy="chain")
 

@@ -5,6 +5,9 @@ This file shows best practices for mocking file I/O, databases,
 configuration, and external services in unit tests.
 """
 
+import glob
+import os
+import sqlite3
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
@@ -20,7 +23,7 @@ class TestFileMocking:
         fake_content = "line1\nline2\nline3"
 
         with patch("builtins.open", mock_open(read_data=fake_content)):
-            with open("dummy.txt") as f:
+            with open("dummy.txt", encoding="utf-8") as f:
                 content = f.read()
 
         assert content == fake_content
@@ -30,7 +33,7 @@ class TestFileMocking:
         """Mock file not found error."""
         with patch("builtins.open", side_effect=FileNotFoundError("File not found")):
             with pytest.raises(FileNotFoundError):
-                with open("missing.txt") as f:
+                with open("missing.txt", encoding="utf-8") as f:
                     f.read()
 
     def test_check_file_exists(self):
@@ -52,10 +55,10 @@ class TestFileMocking:
         mock_file = mock_open()
 
         with patch("builtins.open", mock_file):
-            with open("output.txt", "w") as f:
+            with open("output.txt", "w", encoding="utf-8") as f:
                 f.write("test data")
 
-        mock_file.assert_called_once_with("output.txt", "w")
+        mock_file.assert_called_once_with("output.txt", "w", encoding="utf-8")
         handle = mock_file()
         handle.write.assert_called_with("test data")
 
@@ -76,7 +79,6 @@ class TestConfigurationMocking:
     def test_environment_variable_override(self):
         """Mock environment variable."""
         with patch.dict("os.environ", {"PYRIKSPROT_CORPUS_VERSION": "v1.4.1"}):
-            import os
 
             version = os.environ.get("PYRIKSPROT_CORPUS_VERSION")
             assert version == "v1.4.1"
@@ -84,7 +86,6 @@ class TestConfigurationMocking:
     def test_missing_environment_variable(self):
         """Mock missing environment variable."""
         with patch.dict("os.environ", {}, clear=True):
-            import os
 
             with pytest.raises(KeyError):
                 _ = os.environ["NONEXISTENT_VAR"]
@@ -107,7 +108,6 @@ class TestDatabaseMocking:
 
         with patch("sqlite3.connect", return_value=mock_connection):
             # Simulate code that uses database
-            import sqlite3
 
             conn = sqlite3.connect("test.db")
             cursor = conn.cursor()
@@ -120,7 +120,6 @@ class TestDatabaseMocking:
     def test_database_connection_error(self):
         """Mock database connection failure."""
         with patch("sqlite3.connect", side_effect=Exception("Connection failed")):
-            import sqlite3
 
             with pytest.raises(Exception):
                 sqlite3.connect("bad.db")
@@ -139,7 +138,6 @@ class TestDatabaseMocking:
         }
 
         with patch("sqlite3.connect", return_value=mock_connection):
-            import sqlite3
 
             conn = sqlite3.connect("test.db")
             cursor = conn.cursor()
@@ -154,7 +152,6 @@ class TestServiceMocking:
 
     def test_speaker_service_mock(self):
         """Mock SpeakerInfoService."""
-        from unittest.mock import MagicMock
 
         mock_service = MagicMock()
         mock_service.get_speaker_info.return_value = {
@@ -202,7 +199,6 @@ class TestGlobMocking:
         ]
 
         with patch("glob.glob", return_value=mock_files):
-            import glob
 
             files = glob.glob("*.xml")
 
@@ -212,11 +208,10 @@ class TestGlobMocking:
     def test_no_files_found(self):
         """Mock glob returning empty list."""
         with patch("glob.glob", return_value=[]):
-            import glob
 
             files = glob.glob("*.nonexistent")
 
-        assert files == []
+        assert not files
 
 
 @pytest.mark.unit
@@ -270,8 +265,9 @@ class TestContextManagerMocking:
 
             # Test code that uses both operations
             path = Path("file.txt")
+            content: str = ""
             if path.exists():
-                with open(path) as f:
+                with open(path, encoding="utf-8") as f:
                     content = f.read()
 
             assert content == "content"

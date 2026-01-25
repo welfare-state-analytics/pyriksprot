@@ -6,6 +6,8 @@ Tests metadata database structure without actual file I/O.
 
 import pytest
 
+# type: ignore ; pylint: disable=import-outside-toplevel
+
 
 @pytest.mark.unit
 def test_metadata_schema_exists():

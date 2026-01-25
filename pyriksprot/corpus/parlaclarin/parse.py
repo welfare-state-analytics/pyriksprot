@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import re
-from os.path import basename, splitext
 from pathlib import Path
 from typing import Any, Iterable
 
-from isort import file
 from loguru import logger
 
 from pyriksprot import interface

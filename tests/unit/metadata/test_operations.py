@@ -8,6 +8,8 @@ import pytest
 
 from pyriksprot.metadata import utility
 
+# type: ignore ; pylint: disable=import-outside-toplevel
+
 
 @pytest.mark.unit
 def test_metadata_loaders_exist():

@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pyriksprot import gitchen as gh
 from pyriksprot import interface
 from pyriksprot import metadata as md
 from pyriksprot import preprocess as pr
@@ -44,7 +43,7 @@ def test_format_protocol_id():
 
 def test_ls_corpus_by_tei_corpora():
     pytest.skip("Requires ConfigStore initialization - move to integration tests")
-
+    folder: str = ConfigStore.config().get("corpus.folder")
     dict_data: dict[str, dict[str, str | list[str]]] = ls_corpus_by_tei_corpora(
         folder=folder, mode='dict', normalize=False
     )
@@ -226,12 +225,6 @@ def test_probe_filename():
 
     assert pu.probe_filename(filename, exts=["txt"]) is not None
     assert pu.probe_filename(filename, exts=[".txt"]) is not None
-
-
-def test_repository_tags():
-    pytest.skip("Requires ConfigStore initialization - move to integration tests")
-    tags = gh.gh_tags(folder)
-    assert len(tags) > 0
 
 
 SAMPLE_DATISH_VALUES: list[str | None] = ['2020', None, '2023-02', '2023-03-24']

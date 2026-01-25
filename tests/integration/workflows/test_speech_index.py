@@ -7,6 +7,8 @@ Tests speech index generation with sample data.
 import pandas as pd
 import pytest
 
+from pyriksprot import interface
+from pyriksprot.workflows import speech_index
 from tests.utility import sample_tagged_frames_corpus_exists
 
 
@@ -16,9 +18,6 @@ def test_extract_speech_index_end_to_end(tmp_path, source_index, person_index):
     """Test complete speech index extraction workflow."""
     if source_index is None or person_index is None:
         pytest.skip("Required fixtures not available")
-
-    from pyriksprot import interface
-    from pyriksprot.workflows import speech_index
 
     try:
         result = speech_index.extract_speech_index(

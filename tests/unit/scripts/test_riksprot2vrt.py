@@ -6,6 +6,8 @@ Tests VRT export argument parsing and validation.
 
 import pytest
 
+# type: ignore ; pylint: disable=import-outside-toplevel
+
 
 @pytest.mark.unit
 def test_riksprot2vrt_script_exists():

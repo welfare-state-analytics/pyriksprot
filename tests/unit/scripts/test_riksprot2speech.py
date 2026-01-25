@@ -4,15 +4,19 @@ Unit tests for riksprot2speech CLI script.
 Tests argument parsing and configuration validation.
 """
 
+import inspect
+
 import pytest
 from click.testing import CliRunner
+
+# type: ignore ; pylint: disable=import-outside-toplevel
 
 
 @pytest.mark.unit
 def test_riksprot2speech_script_exists():
     """Test that riksprot2speech script is accessible."""
     try:
-        from pyriksprot.scripts import riksprot2speech
+        from pyriksprot.scripts import riksprot2speech  # type: ignore ; pylint: disable=import-outside-toplevel
 
         assert hasattr(riksprot2speech, 'main')
     except ImportError:
@@ -34,9 +38,8 @@ def test_riksprot2speech_validates_output_folder():
 @pytest.mark.unit
 def test_riksprot2speech_accepts_merge_strategy():
     """Test that merge strategy option is recognized."""
-    import inspect
 
-    from pyriksprot.scripts import riksprot2speech
+    from pyriksprot.scripts import riksprot2speech  # type: ignore ; pylint: disable=import-outside-toplevel
 
     sig = inspect.signature(riksprot2speech.main)
 

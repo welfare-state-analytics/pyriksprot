@@ -10,7 +10,6 @@ This module tests advanced configuration scenarios including:
 """
 
 import os
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -178,9 +177,6 @@ class TestEnvironmentVariableOverrides:
         with mock.patch.dict(os.environ, env_vars, clear=False):
             config = Config.load(source=yaml_minimal, env_prefix="PYRIKSPROT_")
             # Environment variables should be merged with config values
-            app_name = config.get("app:name")
-            new_key = config.get("new:key")
-
             # At minimum, check that env vars can be accessed if added
             assert config.exists("app:name")  # Original key
             # New key from env might be added (behavior depends on env2dict)

@@ -11,7 +11,7 @@ import pytest
 def test_metadata2db_script_exists():
     """Test that metadata2db script is accessible."""
     try:
-        from pyriksprot.scripts import metadata2db
+        from pyriksprot.scripts import metadata2db  # type: ignore ; pylint: disable=import-outside-toplevel
 
         assert hasattr(metadata2db, 'main')
     except ImportError:
@@ -22,7 +22,7 @@ def test_metadata2db_script_exists():
 def test_metadata2db_has_subcommands():
     """Test that metadata2db has database management subcommands."""
     try:
-        from pyriksprot.scripts import metadata2db
+        from pyriksprot.scripts import metadata2db  # type: ignore ; pylint: disable=import-outside-toplevel
 
         # Should have database, download, or index subcommands
         functions = [name for name in dir(metadata2db) if not name.startswith('_')]
@@ -34,9 +34,9 @@ def test_metadata2db_has_subcommands():
 @pytest.mark.unit
 def test_metadata2db_validates_input():
     """Test that metadata2db validates input parameters."""
-    from click.testing import CliRunner
+    from click.testing import CliRunner  # type: ignore ; pylint: disable=import-outside-toplevel
 
-    from pyriksprot.scripts import metadata2db
+    from pyriksprot.scripts import metadata2db  # type: ignore ; pylint: disable=import-outside-toplevel
 
     runner = CliRunner()
     result = runner.invoke(metadata2db.main, [])
