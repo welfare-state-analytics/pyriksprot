@@ -24,14 +24,14 @@ def extract_corpus_tags(
     metadata_filename: str,
     target_name: str,
     content_type: interface.ContentType = interface.ContentType.TaggedFrame,
-    target_type: dispatch.TargetTypeKey = None,
+    target_type: dispatch.TargetTypeKey | None = None,
     compress_type: dispatch.CompressType = dispatch.CompressType.Lzma,
-    segment_level: interface.SegmentLevel = None,
+    segment_level: interface.SegmentLevel | None = None,
     segment_skip_size: int = 1,
-    years: str = None,
-    temporal_key: interface.TemporalKey = None,
-    group_keys: t.Sequence[interface.GroupingKey] = None,
-    multiproc_keep_order: str = None,
+    years: str | None = None,
+    temporal_key: interface.TemporalKey | None = None,
+    group_keys: t.Sequence[interface.GroupingKey] | None = None,
+    multiproc_keep_order: str | None = None,
     multiproc_processes: int = 1,
     multiproc_chunksize: int = 100,
     merge_strategy: to_speech.MergeStrategyType = 'chain',
@@ -70,23 +70,31 @@ def extract_corpus_tags(
     """
     logger.info("extracting tagged corpus...")
 
+    if source_folder is None:
+        raise ValueError("source_folder is required")
+    
+    if not isdir(source_folder):
+        raise FileNotFoundError(f"source folder {source_folder} not found")
+    
     if isdir(target_name):
         if force:
             shutil.rmtree(target_name, ignore_errors=True)
         else:
             raise ValueError(f"target {target_name} exists (use --force to override")
-
+        
+    if target_type not in (
+        'single-tagged-frame-per-group',
+        'single-id-tagged-frame-per-group',
+        'single-id-tagged-frame',
+    ):
+        raise ValueError(f"lemma/text skip not implemented for {target_type}")
+    
     dispatch_opts: dict = {
         'lowercase': lowercase,
     }
 
     if skip_lemma or skip_text:
-        if target_type not in (
-            'single-tagged-frame-per-group',
-            'single-id-tagged-frame-per-group',
-            'single-id-tagged-frame',
-        ):
-            raise ValueError(f"lemma/text skip not implemented for {target_type}")
+
         dispatch_opts = {
             **dispatch_opts,
             **dict(
