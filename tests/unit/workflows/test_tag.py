@@ -5,6 +5,7 @@ Tests tagging pipeline parameter validation.
 """
 
 import pytest
+
 from pyriksprot.workflows import tag
 
 
@@ -14,6 +15,6 @@ def test_tag_workflow_function_exists():
 
     # Check for tagging functions
     functions = [name for name in dir(tag) if not name.startswith('_')]
-    
+
     # Should have at least some public functions
     assert len(functions) > 0

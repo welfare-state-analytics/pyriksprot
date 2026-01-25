@@ -5,6 +5,7 @@ Tests index creation and querying without file system access.
 """
 
 import pytest
+
 from pyriksprot.configuration.inject import ConfigValue
 from pyriksprot.corpus.corpus_index import CorpusSourceIndex  # type: ignore
 

@@ -16,7 +16,6 @@ from pyriksprot.foss import untangle
 from pyriksprot.workflows._extract_speech_ids import extract_speech_ids_by_strategy
 from tests import fakes
 from tests.parlaclarin.utility import count_utterances
-
 from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name
@@ -194,7 +193,7 @@ def test_to_speeches_with_faulty_attribute(filename, expected_speech_count):
 
 @pytest.mark.parametrize('storage_format', [interface.StorageFormat.JSON, interface.StorageFormat.CSV])
 def test_store_protocols(tmp_path, storage_format: interface.StorageFormat):
-    name='prot-1958-fake'
+    name = 'prot-1958-fake'
 
     protocol: interface.Protocol = interface.Protocol(
         name=name,

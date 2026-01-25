@@ -15,10 +15,10 @@ def test_extract_corpus_text_end_to_end(tmp_path, xml_source_index):
     """Test complete extract_text workflow with sample data."""
     if xml_source_index is None or len(xml_source_index.paths) == 0:
         pytest.skip("xml_source_index not available")
-    
-    from pyriksprot.workflows import extract_text
+
     from pyriksprot import interface
-    
+    from pyriksprot.workflows import extract_text
+
     # Execute workflow
     try:
         extract_text.extract_corpus_text(
@@ -38,11 +38,11 @@ def test_extract_corpus_text_end_to_end(tmp_path, xml_source_index):
         pytest.skip(f"Workflow execution skipped: {e}")
 
 
-@pytest.mark.integration  
+@pytest.mark.integration
 def test_extract_corpus_text_with_dehyphenation(tmp_path):
     """Test that dehyphenation option is recognized."""
     from pyriksprot.workflows import extract_text
-    
+
     # Dehyphenation flag should be accepted
     try:
         extract_text.extract_corpus_text(

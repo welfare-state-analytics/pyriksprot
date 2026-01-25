@@ -15,6 +15,7 @@ Partially inspired by xml2obj
 Author: Christian Stefanescu (http://0chris.com)
 License: MIT License - http://www.opensource.org/licenses/mit-license.php
 """
+
 import keyword
 import os
 from io import StringIO

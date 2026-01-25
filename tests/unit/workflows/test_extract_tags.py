@@ -5,11 +5,12 @@ Tests parameter validation, merge strategy handling, and workflow configuration
 without actual corpus processing.
 """
 
+import inspect
+
 import pytest
 
 from pyriksprot.dispatch import dispatch
 from pyriksprot.workflows import extract_tags
-import inspect
 
 
 @pytest.mark.unit

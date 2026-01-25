@@ -20,7 +20,6 @@ from pyriksprot.corpus.utility import (
     ls_corpus_by_tei_corpora,
     ls_corpus_folder,
 )
-
 from tests import fakes
 
 jj = os.path.join

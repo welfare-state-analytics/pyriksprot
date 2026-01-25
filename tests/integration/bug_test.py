@@ -1,8 +1,7 @@
-from pyriksprot.configuration.inject import ConfigStore
-from pyriksprot.corpus.corpus_index import CorpusSourceIndex
-
 import pytest
 
+from pyriksprot.configuration.inject import ConfigStore
+from pyriksprot.corpus.corpus_index import CorpusSourceIndex
 
 
 @pytest.mark.integration

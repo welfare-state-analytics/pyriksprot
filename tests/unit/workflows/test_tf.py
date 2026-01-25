@@ -14,7 +14,7 @@ def test_tf_workflow_function_exists():
 
     # Check for TF functions
     functions = [name for name in dir(tf) if not name.startswith('_')]
-    
+
     # Should have functions available
     assert len(functions) > 0
 

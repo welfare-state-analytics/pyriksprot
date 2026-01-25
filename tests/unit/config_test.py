@@ -3,11 +3,12 @@ from os.path import join as jj
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
 from pyriksprot import ITagger, ITaggerFactory
 from pyriksprot.configuration import Config, ConfigValue
 from pyriksprot.utility import temporary_file
 from pyriksprot.workflows import tag
-import pytest
 
 
 def inject_config(fn_or_cls):

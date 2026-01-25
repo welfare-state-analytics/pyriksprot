@@ -231,7 +231,7 @@ class FilesInZipDispatcher(IDispatcher):
     name: str = 'files-in-zip'
 
     def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
-        self.zup: zipfile.ZipFile | None= None
+        self.zup: zipfile.ZipFile | None = None
         super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
 
     def open_target(self, target_name: Any) -> None:
@@ -331,11 +331,11 @@ class CheckpointPerGroupDispatcher(IDispatcher):
 
         if len(dispatch_items) == 0:
             return
-        
+
         item: DispatchItem = cast(DispatchItem, dispatch_items[0])
-        
+
         checkpoint_name: str = f'{item.group_temporal_value}.zip'
-        subfolder: str = str(item.group_temporal_value).split('-')[1]   
+        subfolder: str = str(item.group_temporal_value).split('-')[1]
         path: str = jj(self.target_name, subfolder)
 
         os.makedirs(path, exist_ok=True)

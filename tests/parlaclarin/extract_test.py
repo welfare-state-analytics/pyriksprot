@@ -9,7 +9,6 @@ from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import corpus_index as csi
 from pyriksprot.corpus import iterate, parlaclarin
 from pyriksprot.dispatch import dispatch, merge
-
 from tests.parlaclarin.utility import get_test_filenames
 
 

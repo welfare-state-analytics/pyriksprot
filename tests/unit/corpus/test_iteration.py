@@ -5,6 +5,7 @@ Tests iteration patterns without file system access.
 """
 
 import pytest
+
 from tests.fixtures.synthetic import minimal_protocol, minimal_utterance  # type: ignore
 
 # pylint: disable=unused-argument

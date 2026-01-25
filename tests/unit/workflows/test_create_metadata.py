@@ -4,10 +4,12 @@ Unit tests for create_metadata workflow.
 Tests metadata creation parameter validation and workflow configuration.
 """
 
-import pytest
-from pyriksprot.workflows import create_metadata
 import inspect
+
+import pytest
+
 from pyriksprot import metadata as md
+from pyriksprot.workflows import create_metadata
 
 
 @pytest.mark.unit

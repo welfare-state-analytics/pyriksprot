@@ -4,12 +4,13 @@ Unit tests for speech_index workflow.
 Tests speech index generation parameter validation and configuration.
 """
 
+import inspect
+
 import pytest
 
 from pyriksprot import interface
 from pyriksprot.workflows import speech_index
 
-import inspect
 
 @pytest.mark.unit
 def test_extract_speech_index_validates_required_parameters():

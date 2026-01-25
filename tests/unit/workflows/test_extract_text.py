@@ -3,7 +3,9 @@ Unit tests for extract_text workflow.
 
 Tests parameter validation and workflow configuration without actual corpus processing.
 """
+
 import inspect
+
 import pytest
 
 from pyriksprot import interface

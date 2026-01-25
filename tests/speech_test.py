@@ -17,7 +17,6 @@ from pyriksprot.foss import untangle
 from pyriksprot.workflows._extract_speech_ids import extract_speech_ids_by_strategy
 from tests import fakes
 from tests.parlaclarin.utility import count_utterances
-
 from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name

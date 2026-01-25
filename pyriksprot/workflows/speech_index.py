@@ -50,7 +50,7 @@ def extract_speech_index(
 
     if merge_strategy not in to_speech.MergeStrategyType:
         raise ValueError(f"invalid merge strategy: {merge_strategy}")
-    
+
     source_index: corpus_index.CorpusSourceIndex = corpus_index.CorpusSourceIndex.load(
         source_folder=source_folder, source_pattern=source_pattern, years=years
     )

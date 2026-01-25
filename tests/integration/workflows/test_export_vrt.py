@@ -6,15 +6,15 @@ Tests corpus export to VRT format.
 
 import pytest
 
-from tests.utility import sample_tagged_frames_corpus_exists
 from pyriksprot.workflows import export_vrt
+from tests.utility import sample_tagged_frames_corpus_exists
 
 
 @pytest.mark.integration
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames corpus not found")
 def test_export_vrt_end_to_end(tmp_path):
     """Test complete VRT export workflow."""
-    
+
     try:
         # VRT export should handle sample data
         result = export_vrt.export_yearly_folders(

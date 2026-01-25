@@ -5,13 +5,16 @@ Tests metadata database queries without external dependencies.
 """
 
 import pytest
+
 from pyriksprot.metadata import utility
+
 
 @pytest.mark.unit
 def test_metadata_loaders_exist():
     """Test that metadata loader modules exist."""
     try:
-        from pyriksprot.metadata import metadata_table_loader  # type: ignore 
+        from pyriksprot.metadata import metadata_table_loader  # type: ignore
+
         assert hasattr(metadata_table_loader, 'MetadataTableLoader')
     except ImportError:
         pytest.skip("metadata_table_loader module not available")
@@ -23,6 +26,7 @@ def test_metadata_person_info():
     try:
         # PersonInfo should be available
         from pyriksprot.metadata.person_info import PersonInfo  # type: ignore
+
         assert PersonInfo is not None
     except ImportError:
         pytest.skip("PersonInfo class not available")
@@ -32,7 +36,7 @@ def test_metadata_person_info():
 def test_metadata_utilities():
     """Test metadata utility functions."""
     try:
-        
+
         # Module should exist and have utilities
         funcs = [name for name in dir(utility) if not name.startswith('_')]
         assert len(funcs) > 0

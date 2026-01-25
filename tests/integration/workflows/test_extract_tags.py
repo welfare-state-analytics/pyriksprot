@@ -6,9 +6,9 @@ Tests full end-to-end tagged corpus extraction with sample data.
 
 import pytest
 
+from pyriksprot.workflows import extract_tags
 from tests.utility import sample_tagged_frames_corpus_exists
 
-from pyriksprot.workflows import extract_tags
 
 @pytest.mark.integration
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames corpus not found")
@@ -16,7 +16,7 @@ def test_extract_corpus_tags_end_to_end(tmp_path, source_index):
     """Test complete extract_tags workflow with sample data."""
     if source_index is None:
         pytest.skip("source_index fixture not available")
-    
+
     # Execute workflow with sample data
     try:
         extract_tags.extract_corpus_tags(
@@ -41,7 +41,7 @@ def test_extract_corpus_tags_end_to_end(tmp_path, source_index):
 @pytest.mark.integration
 def test_extract_corpus_tags_handles_invalid_source(tmp_path):
     """Test that workflow handles invalid source gracefully."""
-    
+
     # Invalid source should be handled gracefully
     try:
         extract_tags.extract_corpus_tags(

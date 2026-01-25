@@ -7,7 +7,6 @@ from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import corpus_index, iterate, tagged
 from pyriksprot.dispatch import merge
 from pyriksprot.to_speech import MergeByChain
-
 from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name

@@ -4,8 +4,8 @@ Integration tests for speech_index workflow.
 Tests speech index generation with sample data.
 """
 
-import pytest
 import pandas as pd
+import pytest
 
 from tests.utility import sample_tagged_frames_corpus_exists
 
@@ -16,10 +16,10 @@ def test_extract_speech_index_end_to_end(tmp_path, source_index, person_index):
     """Test complete speech index extraction workflow."""
     if source_index is None or person_index is None:
         pytest.skip("Required fixtures not available")
-    
-    from pyriksprot.workflows import speech_index
+
     from pyriksprot import interface
-    
+    from pyriksprot.workflows import speech_index
+
     try:
         result = speech_index.extract_speech_index(
             source_folder=str(source_index.paths[0].parent.parent) if source_index.paths else None,
@@ -29,7 +29,7 @@ def test_extract_speech_index_end_to_end(tmp_path, source_index, person_index):
             merge_strategy='chain',
             multiproc_processes=1,
         )
-        
+
         # Should return a DataFrame
         if result is not None:
             assert isinstance(result, pd.DataFrame)

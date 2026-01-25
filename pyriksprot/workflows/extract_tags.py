@@ -72,23 +72,23 @@ def extract_corpus_tags(
 
     if source_folder is None:
         raise ValueError("source_folder is required")
-    
+
     if not isdir(source_folder):
         raise FileNotFoundError(f"source folder {source_folder} not found")
-    
+
     if isdir(target_name):
         if force:
             shutil.rmtree(target_name, ignore_errors=True)
         else:
             raise ValueError(f"target {target_name} exists (use --force to override")
-        
+
     if target_type not in (
         'single-tagged-frame-per-group',
         'single-id-tagged-frame-per-group',
         'single-id-tagged-frame',
     ):
         raise ValueError(f"lemma/text skip not implemented for {target_type}")
-    
+
     dispatch_opts: dict = {
         'lowercase': lowercase,
     }

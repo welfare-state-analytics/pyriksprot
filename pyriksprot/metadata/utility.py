@@ -68,6 +68,7 @@ def slim_table_types(
                 if table[column_name].dtype != dt:
                     table[column_name] = table[column_name].astype(dt)
 
+
 def group_to_list_of_records2(df: pd.DataFrame, key: str) -> dict[str | int, list[dict]]:
     """Groups `df` by `key` and aggregates each group to list of row records (dicts)"""
     return {q: df.loc[ds].to_dict(orient='records') for q, ds in df.groupby(key).groups.items()}  # type: ignore

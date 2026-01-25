@@ -11,7 +11,6 @@ from pyriksprot import metadata as md
 from pyriksprot.configuration.inject import ConfigValue
 from pyriksprot.metadata.database import DatabaseInterface
 from pyriksprot.workflows.create_metadata import resolve_backend
-
 from tests.utility import (
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
@@ -75,7 +74,7 @@ def test_gh_download_items():
     assert all(os.path.isfile(jj(folder, x)) for x in items)
 
 
-#@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
+# @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
     local_folder: str = ConfigValue("tagged_frames.folder").resolve()
     global_folder: str = ConfigValue("global.tagged_frames.folder").resolve()
@@ -120,7 +119,7 @@ def test_setup_sample_speech_corpora():
     corpus_version: str = ConfigValue("corpus.version").resolve()
     tagged_folder: str = ConfigValue("tagged_frames.folder").resolve()
     database: str = ConfigValue("metadata.database.options.filename").resolve()
-    
+
     create_test_speech_corpus(source_folder=tagged_folder, corpus_version=corpus_version, database_name=database)
 
 

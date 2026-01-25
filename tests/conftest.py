@@ -18,7 +18,6 @@ from pyriksprot.dispatch import merge as sg
 from pyriksprot.dispatch.item import DispatchItem
 from pyriksprot.utility import generate_default_config
 from pyriksprot.workflows.subset_corpus import load_document_patterns
-
 from tests.utility import ensure_test_corpora_exist
 
 # pylint: disable=redefined-outer-name

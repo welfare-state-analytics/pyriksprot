@@ -3,9 +3,9 @@ import uuid
 from os.path import basename, isdir, isfile, join
 from typing import List, Set, Type
 
-from click import Path
 import pandas as pd
 import pytest
+from click import Path
 
 from pyriksprot import metadata as md
 from pyriksprot import utility
@@ -13,7 +13,6 @@ from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import corpus_index
 from pyriksprot.dispatch import dispatch
 from pyriksprot.dispatch import merge as sg
-
 from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name

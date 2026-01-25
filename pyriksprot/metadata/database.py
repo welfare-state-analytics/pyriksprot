@@ -87,15 +87,13 @@ class DatabaseInterface(abc.ABC):
     def version(self, tag: str) -> None:
         """Adds a version tag to the database"""
         with self:
-            self.execute_script(
-                f"""
+            self.execute_script(f"""
                 create table if not exists version (
                     version text primary key
                 );
                 delete from version;
                 insert into version(version) values ('{tag}');
-            """
-            )
+            """)
 
     def create(self, tablename: str, columns: dict[str, str], constraints: list[str]) -> Self:
         sql: str = ""

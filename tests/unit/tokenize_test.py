@@ -1,7 +1,6 @@
-from pyriksprot.foss import sparv_tokenize as st
-
 import pytest
 
+from pyriksprot.foss import sparv_tokenize as st
 
 
 @pytest.mark.unit

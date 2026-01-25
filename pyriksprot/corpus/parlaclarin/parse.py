@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import re
 from os.path import basename, splitext
-from typing import Any, Iterable
 from pathlib import Path
+from typing import Any, Iterable
+
 from isort import file
 from loguru import logger
 
@@ -175,9 +176,9 @@ class ProtocolMapper(interface.IProtocolParser):
     ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
         protocol: interface.Protocol | None = None
-        
+
         protocol_name: str | None = None
-        
+
         if isinstance(filename, (str, Path)):
             protocol_name = str(Path(filename).stem)
 

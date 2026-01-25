@@ -12,7 +12,6 @@ from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import corpus_index
 from pyriksprot.dispatch import dispatch
 from pyriksprot.dispatch import merge as sg
-
 from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=unused-variable, redefined-outer-name

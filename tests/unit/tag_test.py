@@ -3,12 +3,11 @@ from os.path import join as jj
 from unittest.mock import Mock
 from uuid import uuid4
 
+import pytest
+
 import pyriksprot
 from pyriksprot.configuration import ConfigStore
 from pyriksprot.workflows.tag import resolve_target_filename
-
-import pytest
-
 
 
 @pytest.mark.unit

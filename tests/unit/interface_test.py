@@ -12,7 +12,6 @@ import pytest
 from pyriksprot import interface, to_speech
 from pyriksprot.configuration.inject import ConfigStore
 from pyriksprot.corpus import tagged as tagged_corpus
-
 from tests import fakes
 
 # pylint: disable=redefined-outer-name

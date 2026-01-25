@@ -1,7 +1,6 @@
-from pyriksprot.foss.sparv_tokenize import BetterSentenceTokenizer, BetterWordTokenizer
-
 import pytest
 
+from pyriksprot.foss.sparv_tokenize import BetterSentenceTokenizer, BetterWordTokenizer
 
 
 @pytest.mark.unit
