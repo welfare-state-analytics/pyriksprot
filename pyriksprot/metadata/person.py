@@ -409,7 +409,7 @@ class PersonIndex:
         if 'pid' not in df.columns and join_column:
             df['pid'] = df[join_column].apply(fg)
         else:
-            if not np.issubdtype(df.index.dtype, np.integer):
+            if not pd.api.types.is_integer_dtype(df.index.dtype):
                 """assume index is person_id"""
                 df['pid'] = pd.Series(df.index).apply(fg)
             else:

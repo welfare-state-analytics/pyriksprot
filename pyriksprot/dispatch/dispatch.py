@@ -568,7 +568,7 @@ def trim_data_frame_typs(frame: pd.DataFrame, columns: list[str] = None) -> pd.D
     for column in columns:
         if not column in frame.columns:
             continue
-        if not np.issubdtype(frame[column].dtype, np.integer):
+        if not pd.api.types.is_integer_dtype(frame[column].dtype):
             continue
         frame[column] = trim_series_type(frame[column])
     return frame
