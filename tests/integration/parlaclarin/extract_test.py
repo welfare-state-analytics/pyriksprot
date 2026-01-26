@@ -59,14 +59,14 @@ def test_create_grouping_hashcoder():
     hashcoder = merge.create_grouping_hashcoder([])
 
     item.speaker_info = speaker
-    parts, hash_str, _ = hashcoder(item=item, source_item=None)
+    parts, hash_str, _ = hashcoder(item=item, source_item=None)  # type: ignore
 
     assert not parts
     assert hash_str == item.name
 
     attributes: list[str] = ["who", "gender_id", "party_id", "office_type_id"]
     hashcoder = merge.create_grouping_hashcoder(attributes)
-    parts, hash_str, _ = hashcoder(item=item, source_item=source_item)
+    parts, hash_str, _ = hashcoder(item=item, source_item=source_item)  # type: ignore
 
     assert parts == {
         'gender_id': speaker.gender_id,

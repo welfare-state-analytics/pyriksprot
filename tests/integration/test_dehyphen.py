@@ -45,7 +45,7 @@ def test_create_dehyphenator_service_succeeds_if_word_frequences_is_set():
 
 def test_dehyphenator_service_flush_creates_expected_files():
     with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
-        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
+        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(  # type: ignore
             data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
         )
 
@@ -62,7 +62,7 @@ def test_dehyphenator_service_flush_creates_expected_files():
 
 def test_dehyphenator_service_can_load_flushed_data():
     with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
-        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
+        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(  # type: ignore
             data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
         )
 
@@ -76,7 +76,7 @@ def test_dehyphenator_service_can_load_flushed_data():
         assert os.path.isfile(dehyphenator.unresolved_filename)
         assert os.path.isfile(dehyphenator.whitelist_log_filename)
 
-        dehyphenator2: SwedishDehyphenator = SwedishDehyphenator(
+        dehyphenator2: SwedishDehyphenator = SwedishDehyphenator(  # type: ignore
             data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
         )
 
@@ -96,7 +96,7 @@ def test_find_dashed_words():
 
 
 def test_dehyphenator_service_dehyphen():
-    dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})
+    dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})  # type: ignore
 
     text = "Detta mening har inget bindestreck."
     result = dehyphenator.dehyphen_text(text)
@@ -119,7 +119,7 @@ def test_dehyphenator_service_dehyphen():
 
 
 def test_dehyphenator_service_dehyphen_by_frequency():
-    dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})
+    dehyphenator: SwedishDehyphenator = SwedishDehyphenator(data_folder=DEHYPHEN_FOLDER, word_frequencies={'a': 1})  # type: ignore
 
     text = "Detta är ett binde-\nstreck. "
     dehyphenator.word_frequencies = {'bindestreck': 1, 'binde-streck': 2}

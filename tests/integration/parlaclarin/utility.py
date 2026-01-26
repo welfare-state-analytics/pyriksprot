@@ -19,9 +19,9 @@ def _load_protocol(data: str | Any) -> interface.Protocol:
 def get_utterance_sequence(filename: str) -> list[tuple]:
     SPEAKER_NOTE_ID_MISSING: str = "missing"
 
-    xml_protocol = untangle.parse(filename)
+    xml_protocol: untangle.Element = untangle.parse(filename)
 
-    if xml_protocol.get_content_root() is None:
+    if xml_protocol.get_content_root() is None:  # type: ignore
         return []
 
     data: list[tuple] = []
@@ -30,7 +30,7 @@ def get_utterance_sequence(filename: str) -> list[tuple]:
     previous_who: str = None
     page_id: int = -1
 
-    for element in xml_protocol.get_content_elements():
+    for element in xml_protocol.get_content_elements():  # type: ignore
         if element.name == "pb":
             page_id += 1
 
