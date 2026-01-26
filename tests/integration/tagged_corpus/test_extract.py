@@ -121,6 +121,8 @@ def test_load_protocols():
         (None, []),
     ],
 )
+@pytest.mark.integration
+@pytest.mark.slow
 def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
     database: str = ConfigStore.config().get("metadata.database.options.filename")
@@ -163,6 +165,8 @@ def test_extract_corpus_tags_with_various_groupings(temporal_key, group_keys):
         ('single-id-tagged-frame-per-group', to_speech.MergeStrategyType.speaker_note_id_sequence, 'feather'),
     ],
 )
+@pytest.mark.integration
+@pytest.mark.slow
 def test_extract_speeches(target_type: str, merge_strategy: to_speech.MergeStrategyType, compress_type: str):
     tagged_folder: str = ConfigStore.config().get("tagged_frames.folder")
     database: str = ConfigStore.config().get("metadata.database.options.filename")

@@ -70,6 +70,8 @@ def test_protocol_to_vrt(export_service: VrtExportService):
     assert '<utterance' in vrt_str
 
 
+@pytest.mark.integration
+@pytest.mark.slow
 def test_fake_protocols_to_vrt(export_service: VrtExportService):
     version: str = ConfigStore.config().get("corpus.version")
     filename: str = f'tests/test_data/fakes/{version}/tagged_frames/prot-1958-fake.zip'

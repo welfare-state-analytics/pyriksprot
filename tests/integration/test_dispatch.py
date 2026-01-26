@@ -25,6 +25,8 @@ def test_find_dispatchers():
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames corpus not found")
+@pytest.mark.integration
+@pytest.mark.slow
 def test_folder_with_zips_dispatch(tagged_speeches: list[dict[str, sg.DispatchItem]]):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     if not Path(database).exists:
@@ -43,6 +45,8 @@ def test_folder_with_zips_dispatch(tagged_speeches: list[dict[str, sg.DispatchIt
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames corpus not found")
+@pytest.mark.integration
+@pytest.mark.slow
 def test_zip_file_dispatch(tagged_speeches: list[dict[str, sg.DispatchItem]]):
     database: str = ConfigStore.config().get("metadata.database.options.filename")
     target_name: str = f'./tests/output/{str(uuid.uuid1())[:8]}.zip'
@@ -102,6 +106,8 @@ def test_find_dispatch_class():
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
+@pytest.mark.integration
+@pytest.mark.slow
 def test_checkpoint_dispatch(
     tagged_speeches: list[dict[str, sg.DispatchItem]], source_index: corpus_index.CorpusSourceIndex
 ):
@@ -134,6 +140,8 @@ def files_in_folder(folder: str, *, pattern: str, strip_path: bool = True, strip
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
+@pytest.mark.integration
+@pytest.mark.slow
 def test_single_feather_per_group_dispatch(
     tagged_speeches: list[dict[str, sg.DispatchItem]],
     source_index: corpus_index.CorpusSourceIndex,
@@ -161,6 +169,8 @@ def test_single_feather_per_group_dispatch(
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")
 @pytest.mark.parametrize('cls', [dispatch.TaggedFramePerGroupDispatcher, dispatch.IdTaggedFramePerGroupDispatcher])
+@pytest.mark.integration
+@pytest.mark.slow
 def test_single_feather_per_group_dispatch_with_skips(
     tagged_speeches: list[dict[str, sg.DispatchItem]],
     source_index: corpus_index.CorpusSourceIndex,
