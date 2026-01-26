@@ -14,6 +14,7 @@ from tests.utility import (
     create_test_speech_corpus,
     create_test_tagged_frames_corpus,
     ensure_test_corpora_exist,
+    sample_metadata_exists,
     sample_parlaclarin_corpus_exists,
     sample_tagged_frames_corpus_exists,
     sample_tagged_speech_corpus_exists,
@@ -47,7 +48,7 @@ def test_gh_fetch_metadata_by_config():
     )
 
 
-@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_metadata_exists(), reason="Test infrastructure test")
 def test_gh_fetch_metadata_folder():
     version: str = ConfigValue("metadata.version").resolve()
     gh_opts: dict[str, str] = ConfigValue("metadata.github").resolve()
@@ -58,7 +59,7 @@ def test_gh_fetch_metadata_folder():
     assert True
 
 
-@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_metadata_exists(), reason="Test infrastructure test")
 def test_gh_download_items():
     tag: str = ConfigValue("metadata.version").resolve()
     folder: str = 'tests/output'
