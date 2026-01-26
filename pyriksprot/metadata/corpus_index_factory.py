@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import itertools
 import os
 from dataclasses import dataclass, field
-from typing import Sequence, Type
+from typing import Any, Optional, Sequence, Type
 
 import pandas as pd
 from loguru import logger
@@ -23,6 +24,56 @@ from .schema import MetadataSchema
 jj = os.path.join
 
 
+def _scan_one_document(
+    document_id: int,
+    filename: str,
+    protocol_to_chamber: dict[str, str],
+    use_preface_name: bool,
+    parser_cls_or_obj: Any,  # IProtocolParser | Type[IProtocolParser]
+) -> dict[str, Any]:
+    """
+    Parse one document and return raw data needed to merge into ScanResult.
+    Returned values are simple picklable structures.
+    """
+    # Create/resolve parser in the worker
+    parser = parser_cls_or_obj() if isinstance(parser_cls_or_obj, type) else parser_cls_or_obj
+
+    protocol = parser.parse(filename, use_preface_name=use_preface_name, ignore_tags={"teiHeader"})
+
+    chamber_abbrev: Optional[str] = protocol_to_chamber.get(protocol.name)
+    if not chamber_abbrev:
+        chamber_abbrev = get_chamber_by_filename(filename)
+
+    formatted_name: str = format_protocol_name(protocol.name, chamber_abbrev=chamber_abbrev)
+
+    protocols_row = (
+        document_id,
+        protocol.name,
+        protocol.date,
+        int(protocol.date[:4]),
+        chamber_abbrev,
+        formatted_name,
+    )
+
+    utterances_rows = [(document_id, u.u_id, u.who, u.speaker_note_id, u.page_number) for u in protocol.utterances]
+
+    page_refs_rows = [(document_id, p.source_id, p.page_number, p.reference) for p in protocol.page_references]
+
+    # NOTE: speeches might be non-trivial objects; they must be picklable to pass from process -> parent.
+    # If Speech is not picklable, see the note below for an alternative.
+    speeches = to_speeches(protocol=protocol, merge_strategy="chain") or []
+
+    speaker_notes = protocol.get_speaker_notes()  # dict[str, SpeakerNote]
+
+    return {
+        "protocols_row": protocols_row,
+        "utterances_rows": utterances_rows,
+        "page_refs_rows": page_refs_rows,
+        "speaker_notes": speaker_notes,
+        "speeches": speeches,
+    }
+
+
 class CorpusScanner:
     @dataclass
     class ScanResult:
@@ -35,7 +86,7 @@ class CorpusScanner:
     def __init__(self, parser: IProtocolParser | Type[IProtocolParser]) -> None:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
 
-    def scan(
+    def scan_simple(
         self, filenames: Sequence[str], chambers: dict[str, set[str]], use_preface_name: bool = False
     ) -> CorpusScanner.ScanResult:
         protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
@@ -67,40 +118,57 @@ class CorpusScanner:
 
         return data
 
-    # def parallel_scan(self, filenames: Sequence[str]) -> CorpusScanner.ScanResult:
-    #     data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
+    def scan(
+        self,
+        filenames: Sequence[str],
+        chambers: dict[str, set[str]],
+        use_preface_name: bool = False,
+        max_workers: Optional[int] = None,
+        chunksize: int = 1,
+    ) -> CorpusScanner.ScanResult:
+        """
+        Parallel scan using multiple processes.
 
-    #     # Function to process a single file
-    #     def process_file(document_id, filename):
-    #         protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
-    #         protocols = (document_id, protocol.name, protocol.date, int(protocol.date[:4]))
-    #         utterances = [
-    #             (document_id, u.u_id, u.who, u.speaker_note_id, u.page_number) for u in protocol.utterances
-    #         ]
-    #         page_references = [
-    #             (document_id, p.source_id, p.page_number, p.reference) for p in protocol.page_references
-    #         ]
-    #         speaker_notes = protocol.get_speaker_notes()
-    #         return protocols, utterances, page_references, speaker_notes
+        - Best when parsing is CPU-bound.
+        - Keeps document_id stable (from enumerate(filenames)).
+        - Progress shown via tqdm.
+        """
+        protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
 
-    #     # Parallel processing with ThreadPoolExecutor
-    #     with ThreadPoolExecutor() as executor:
-    #         futures = {
-    #             executor.submit(process_file, document_id, filename): filename
-    #             for document_id, filename in enumerate(filenames)
-    #         }
+        data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
 
-    #         # Process each future as it completes
-    #         for future in tqdm(as_completed(futures), total=len(futures)):
-    #             protocols, utterances, page_references, speaker_notes = future.result()
+        # Sensible default: leave 1 core for OS / IO
+        if max_workers is None:
+            cpu = os.cpu_count() or 1
+            max_workers = max(1, cpu - 1)
 
-    #             # Append and extend data to the main ScanResult object
-    #             data.protocols.append(protocols)
-    #             data.utterances.extend(utterances)
-    #             data.page_references.extend(page_references)
-    #             data.speaker_notes.update(speaker_notes)
+        futures = []
+        with ProcessPoolExecutor(max_workers=max_workers) as ex:
+            # submit in order; results may return out of order
+            for document_id, filename in enumerate(filenames):
+                futures.append(
+                    ex.submit(
+                        _scan_one_document,
+                        document_id,
+                        filename,
+                        protocol_to_chamber,
+                        use_preface_name,
+                        self.parser,
+                    )
+                )
 
-    #     return data
+            for fut in tqdm(as_completed(futures), total=len(futures)):
+                res = fut.result()
+                data.protocols.append(res["protocols_row"])
+                data.utterances.extend(res["utterances_rows"])
+                data.page_references.extend(res["page_refs_rows"])
+                data.speeches.extend(res["speeches"])
+                data.speaker_notes.update(res["speaker_notes"])
+
+        # Optional: make protocols list deterministic (since as_completed is unordered)
+        data.protocols.sort(key=lambda r: r[0])
+
+        return data
 
     def to_dataframes(self, result: CorpusScanner.ScanResult) -> dict[str, pd.DataFrame]:
         """Store enough source reference data to reconstruct source urls."""
