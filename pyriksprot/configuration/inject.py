@@ -135,10 +135,11 @@ def resolve_arguments(fn_or_cls, args, kwargs):
             kwargs[k] = v.resolve()
     return args, kwargs
 
+S = TypeVar("S")
 
-def inject_config(fn_or_cls: T) -> Callable[..., T]:
+def inject_config(fn_or_cls: S) -> Callable[..., S]:
     @functools.wraps(fn_or_cls)
-    def decorated(*args, **kwargs):
+    def decorated(*args, **kwargs) -> S:
         args, kwargs = resolve_arguments(fn_or_cls, args, kwargs)
         return fn_or_cls(*args, **kwargs)  # type: ignore
 
