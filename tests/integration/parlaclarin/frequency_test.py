@@ -75,7 +75,7 @@ def test_compute_word_frequencies(document_name: str):
 
     target_filename: str = jj("tests", "output", f"{str(uuid.uuid4())[:8]}_word_frequencies.pkl")
 
-    with utility.temporary_file(filename=target_filename) as store_name:
+    with utility.temporary_file(filename=target_filename) as store_name:  # type: ignore
         counts: parlaclarin.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],
             filename=store_name,
@@ -85,7 +85,7 @@ def test_compute_word_frequencies(document_name: str):
 
     assert dict(counts.frequencies) == expected_frequencies
 
-    with utility.temporary_file(filename=target_filename) as store_name:
+    with utility.temporary_file(filename=target_filename) as store_name:  # type: ignore
         counts: parlaclarin.TermFrequencyCounter = workflows.compute_term_frequencies(
             source=[filename],
             filename=store_name,

@@ -44,7 +44,7 @@ def test_create_dehyphenator_service_succeeds_if_word_frequences_is_set():
 
 
 def test_dehyphenator_service_flush_creates_expected_files():
-    with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):
+    with temporary_file(filename=WORD_FREQUENCY_FILENAME, content=pickle.dumps({'a': 1})):  # type: ignore
         dehyphenator: SwedishDehyphenator = SwedishDehyphenator(  # type: ignore
             data_folder=DEHYPHEN_FOLDER, word_frequencies=WORD_FREQUENCY_FILENAME
         )

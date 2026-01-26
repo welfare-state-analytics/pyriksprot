@@ -117,18 +117,18 @@ def test_load_fakes(document_name: str):
 def test_temporary_file():
     filename = jj("tests", "output", "trazan.txt")
 
-    with pu.temporary_file(filename=filename) as path:
+    with pu.temporary_file(filename=filename) as path:  # type: ignore
         path.touch()
         assert path.is_file(), "file doesn't exists"
     assert not Path(filename).is_file(), "file exists"
 
-    with pu.temporary_file(filename=filename, content="X") as path:
+    with pu.temporary_file(filename=filename, content="X") as path:  # type: ignore
         assert path.is_file(), "file doesn't exists"
         with open(filename, "r", encoding="utf-8") as fp:
             assert fp.read() == "X"
     assert not Path(filename).is_file(), "file exists"
 
-    with pu.temporary_file(filename=None, content="X") as path:
+    with pu.temporary_file(filename=None, content="X") as path:  # type: ignore
         filename = str(path)
         assert path.is_file(), "file doesn't exists"
         with open(filename, "r", encoding="utf-8") as fp:
