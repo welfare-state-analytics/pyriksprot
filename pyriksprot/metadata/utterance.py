@@ -39,5 +39,5 @@ class UtteranceIndex:
     #     """Utterance `u_id` to `gender_id` mapping"""
     #     return self.unknown_utterance_gender['gender_id'].to_dict()
 
-    def protocol(self, document_id: int) -> pd.Series:
+    def protocol(self, document_id: int) -> pd.Series | pd.DataFrame:
         return self.protocols.loc[document_id]

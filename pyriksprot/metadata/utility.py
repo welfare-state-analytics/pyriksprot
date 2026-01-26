@@ -124,7 +124,7 @@ def fix_incomplete_datetime_series(
         dt: pd.Series = pd.to_datetime(df[column_name], errors='coerce')
         dt.loc[mask_year] = dt + pd.DateOffset(years=1) - pd.DateOffset(days=1)
         dt.loc[mask_yearmonth] = dt + pd.DateOffset(months=1) - pd.DateOffset(days=1)
-        df[column_name] = dt.dt.strftime("%Y-%m-%d")
+        df[column_name] = dt.dt.strftime("%Y-%m-%d")  # type: ignore
 
     df.loc[mask_year, f"{column_name}_flag"] = 'Y'
     df.loc[mask_yearmonth, f"{column_name}_flag"] = 'M'

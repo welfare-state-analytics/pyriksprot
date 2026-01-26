@@ -67,7 +67,7 @@ def extract_corpus_text(
 
     lookups: md.Codecs = md.Codecs().load(source=metadata_filename)
 
-    dehypenator: dehyphenation.SwedishDehyphenator = (
+    dehypenator: dehyphenation.SwedishDehyphenator = (  # type: ignore
         dehyphenation.SwedishDehyphenator(data_folder=data_path, word_frequencies=None) if dehyphen else None
     )
     speaker_service: md.SpeakerInfoService = md.SpeakerInfoService(database_filename=metadata_filename)
@@ -102,7 +102,7 @@ def extract_corpus_text(
     )
 
     with dispatch.IDispatcher.dispatcher(target_type)(
-        target_name, compress_type=compress_type, lookups=lookups
+        target_name=target_name, compress_type=compress_type, lookups=lookups
     ) as dispatcher:
         for item in merger.merge(segments):
             dispatcher.dispatch(list(item.values()))

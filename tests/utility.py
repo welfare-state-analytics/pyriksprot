@@ -39,7 +39,7 @@ def generate_merged_speech_test_data(protocol_name: str) -> None:
     ]:
         merger: ts.IMergeStrategy = ts.MergerFactory.get(merge_strategy)
 
-        items: list[list[interface.Utterance]] = merger.group(protocol.utterances)
+        items: list[list[interface.Utterance]] = merger.group(protocol.utterances)  # type: ignore
 
         speech_ids = []
         for i, item in enumerate(items):

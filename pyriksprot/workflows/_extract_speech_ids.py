@@ -33,7 +33,7 @@ def extract_speech_ids_by_strategy(filename: str, target_folder: str = "") -> No
     ]:
         merger: ts.IMergeStrategy = ts.MergerFactory.get(merge_strategy)
 
-        items: list[list[interface.Utterance]] = merger.group(protocol.utterances)
+        items: list[list[interface.Utterance]] = merger.group(protocol.utterances)  # type: ignore
 
         speech_ids = []
         for i, item in enumerate(items):

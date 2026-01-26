@@ -65,7 +65,7 @@ def export_yearly_folders(
             remove(target)
     speaker_service: SpeakerInfoService = SpeakerInfoService(metadata_filename)
     exporter: VrtBatchExporter = VrtBatchExporter(speaker_service, merge_strategy=merge_strategy, processes=processes)
-    exporter.export(batches, *structural_tag)
+    exporter.export(data=batches, *structural_tag)
     # except Exception as ex:
     #    click.echo(ex)
     #    sys.exit(1)
