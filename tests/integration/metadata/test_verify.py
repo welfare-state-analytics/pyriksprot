@@ -1,3 +1,4 @@
+import pytest
 from pyriksprot.configuration import ConfigValue
 from pyriksprot.metadata import verify
 
@@ -8,6 +9,7 @@ def test_config_conforms_to_folder_specification():
     verify.ConfigConformsToFolderSpecification(tag=tag, folder=folder).is_satisfied()
 
 
+@pytest.mark.slow
 def test_config_conforms_to_tags_specification():
     tag: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()
@@ -16,6 +18,7 @@ def test_config_conforms_to_tags_specification():
     verify.ConfigConformsToTagSpecification(user=user, repository=repository, path=path, tag=tag).is_satisfied()
 
 
+@pytest.mark.slow
 def test_tags_conform_specification():
     tag: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()

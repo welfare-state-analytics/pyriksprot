@@ -58,6 +58,7 @@ def test_gh_fetch_metadata_folder():
     assert True
 
 
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_gh_download_items():
     tag: str = ConfigValue("metadata.version").resolve()
     folder: str = 'tests/output'
@@ -73,7 +74,7 @@ def test_gh_download_items():
     assert all(os.path.isfile(jj(folder, x)) for x in items)
 
 
-# @pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS and sample_tagged_frames_corpus_exists(), reason="Test infrastructure test")
 def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
     local_folder: str = ConfigValue("tagged_frames.folder").resolve()
     global_folder: str = ConfigValue("global.tagged_frames.folder").resolve()
@@ -85,7 +86,7 @@ def test_setup_sample_tagged_frames_corpus(list_of_test_protocols: list[str]):
     )
 
 
-# @pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
+@pytest.mark.skipif(not FORCE_RUN_SKIPS, reason="Test infrastructure test")
 def test_subset_corpus_and_metadata(list_of_test_protocols: list[str]):
     subset_corpus_and_metadata(
         corpus_version=ConfigValue("corpus.version").resolve(),

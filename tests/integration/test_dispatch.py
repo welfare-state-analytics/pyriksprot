@@ -62,6 +62,8 @@ def test_zip_file_dispatch(tagged_speeches: list[dict[str, sg.DispatchItem]]):
     'temporal_key,naming_keys',
     [("decade", ("gender_id", "party_id")), ("year", ("gender_id",)), ("decade", [])],
 )
+@pytest.mark.integration
+@pytest.mark.slow
 def test_organized_speeches_in_zip_dispatch(
     tagged_speeches: list[dict[str, sg.DispatchItem]], temporal_key: str, naming_keys: list[str]
 ):

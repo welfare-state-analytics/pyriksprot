@@ -39,6 +39,8 @@ def test_gh_ls():
     assert len(data) > 0
 
 
+@pytest.mark.integration
+@pytest.mark.skip(reason="Skipped due to remote access to GitHub")
 def test_gh_fetch_metadata_folder(tmp_path: pathlib.Path):
     tag: str = ConfigValue("metadata.version").resolve()
     user: str = ConfigValue("metadata.github.user").resolve()

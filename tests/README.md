@@ -66,6 +66,18 @@ pytest --lf                  # Run last failed
 pytest -k "merge"            # Run tests matching name
 ```
 
+### Measure Test Durations
+```bash
+# Show the 10 slowest tests
+pytest --durations=10
+
+# Show all test durations (sorted slowest first)
+pytest --durations=0
+
+# Add to make target
+make test PYTEST_ARGS="--durations=10"
+```
+
 ## Test Structure
 
 ### Unit Tests (`tests/unit/`)
@@ -613,6 +625,39 @@ def test_with_mocked_config():
 ```
 3. Use synthetic fixtures that don't require configuration
 
+### Tests fail intermittently due to ConfigStore state pollution
+
+**Problem**: Global `ConfigStore` context modified by one test affects others.
+
+**Solution**: Preserve and restore `ConfigStore` around tests that change it:
+```python
+import pytest
+from pyriksprot.configuration import ConfigStore
+
+@pytest.fixture(autouse=True)
+def preserve_config_store():
+    original_store = ConfigStore.store.copy() if ConfigStore.store else {}
+    original_context = ConfigStore.context
+    yield
+    ConfigStore.store = original_store
+    ConfigStore.context = original_context
+```
+This pattern is applied in `tests/unit/test_configuration_advanced.py`.
+
+### TypeError with pandas extension dtypes (StringDtype)
+
+**Problem**: `np.issubdtype(dtype, np.integer)` raises `TypeError` with pandas extension dtypes.
+
+**Solution**: Use pandas dtype checkers:
+```python
+import pandas as pd
+
+pd.api.types.is_integer_dtype(series.dtype)
+pd.api.types.is_string_dtype(series.dtype)
+pd.api.types.is_bool_dtype(series.dtype)
+```
+Fixes implemented in `pyriksprot/dispatch/dispatch.py` and `pyriksprot/metadata/person.py`.
+
 ### Mock is not being called
 
 **Problem**: Mock isn't being used, likely wrong patch path
@@ -657,6 +702,7 @@ with patch('pyriksprot.other_module.function'):
 1. Use `pytest -m unit` for fast feedback during development
 2. Run integration tests separately: `pytest -m integration`
 3. Add `@pytest.mark.slow` to known slow tests
+4. Use `--durations` to identify slowest tests and optimize
 
 ## CI/CD Integration
 

@@ -1,3 +1,8 @@
+"""Unit tests for core domain models and conversions.
+
+Covers `Utterance`, merging strategies, and conversions to CSV/JSON/Pandas
+using synthetic fixtures. Requires ConfigStore to be initialized by test setup.
+"""
 from __future__ import annotations
 
 import glob
