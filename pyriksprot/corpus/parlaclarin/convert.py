@@ -39,7 +39,7 @@ class ProtocolConverter:
         """
 
         if isinstance(template, str):
-            
+
             if not template.endswith(".jinja"):
                 template += ".jinja"
 

@@ -1,4 +1,5 @@
 import pytest
+
 from pyriksprot.configuration import ConfigValue
 from pyriksprot.metadata import verify
 

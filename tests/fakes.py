@@ -67,9 +67,7 @@ def load_segment_stream(filename: str, level: interface.SegmentLevel) -> Iterabl
     if level in (interface.SegmentLevel.Who, interface.SegmentLevel.Speech):
         """Return grouping as specified in "fake-segments.csv" file"""
         data_frame: pd.DataFrame = load_sample_segments_dataframe(filename, level=level)
-        groups: list[dict] = (
-            data_frame.groupby('segment_id', sort=False).agg(list).reset_index().to_dict('records')
-        )
+        groups: list[dict] = data_frame.groupby('segment_id', sort=False).agg(list).reset_index().to_dict('records')
 
         for i, group in enumerate(groups):
             segment_id: str = group.get("segment_id")

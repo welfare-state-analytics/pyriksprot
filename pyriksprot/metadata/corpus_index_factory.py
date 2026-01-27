@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from concurrent.futures import ProcessPoolExecutor
 import itertools
 import os
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any, Optional, Sequence, Type
 

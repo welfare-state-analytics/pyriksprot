@@ -3,6 +3,7 @@
 Validates VRT export service by converting a tagged protocol
 to VRT and checking escaping and content alignment.
 """
+
 import gzip
 import os
 from unittest.mock import MagicMock

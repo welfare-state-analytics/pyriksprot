@@ -12,7 +12,7 @@ from tests.utility import sample_parlaclarin_corpus_exists
 
 
 @pytest.mark.integration
-@pytest.mark.skipif( sample_parlaclarin_corpus_exists(), reason="ParlaCLARIN corpus not found")
+@pytest.mark.skipif(sample_parlaclarin_corpus_exists(), reason="ParlaCLARIN corpus not found")
 def test_create_metadata_database_end_to_end(tmp_path):
     """Test complete metadata database creation workflow."""
 

@@ -6,9 +6,8 @@ import pytest
 from pyriksprot import interface, utility
 from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import iterate, parlaclarin
-from tests.integration.parlaclarin.utility import get_test_filenames
-
 from tests import fakes
+from tests.integration.parlaclarin.utility import get_test_filenames
 
 jj = os.path.join
 

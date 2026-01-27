@@ -13,7 +13,6 @@ from pyriksprot.configuration import ConfigStore
 from pyriksprot.corpus import tagged as tagged_corpus
 from pyriksprot.dispatch import dispatch
 from pyriksprot.utility import touch
-
 from tests.utility import sample_tagged_frames_corpus_exists
 
 # pylint: disable=redefined-outer-name,no-member

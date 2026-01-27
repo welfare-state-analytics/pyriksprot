@@ -20,19 +20,20 @@ from pyriksprot.configuration import Config, ConfigStore, ConfigValue
 @pytest.fixture(autouse=True)
 def preserve_config_store():
     """Save and restore ConfigStore state to prevent test pollution.
-    
+
     This autouse fixture runs before/after each test in this module,
     ensuring that modifications to ConfigStore don't leak between tests.
     """
     # Save original state
     original_store = ConfigStore.store.copy() if ConfigStore.store else {}
     original_context = ConfigStore.context
-    
+
     yield  # Run the test
-    
+
     # Restore original state
     ConfigStore.store = original_store
     ConfigStore.context = original_context
+
 
 YAML_CONFIG_WITH_ANCHORS = """
 root_folder: &root /data/corpus

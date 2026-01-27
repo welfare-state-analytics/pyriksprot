@@ -11,9 +11,8 @@ from pyriksprot.corpus import parlaclarin
 from pyriksprot.corpus.parlaclarin.parse import ProtocolMapper
 from pyriksprot.corpus.utility import create_tei_corpus_xml, load_chamber_indexes
 from pyriksprot.metadata.corpus_index_factory import CorpusScanner
-from tests.integration.parlaclarin.utility import count_utterances
-
 from tests import fakes
+from tests.integration.parlaclarin.utility import count_utterances
 
 jj = os.path.join
 

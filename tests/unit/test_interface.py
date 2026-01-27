@@ -3,6 +3,7 @@
 Covers `Utterance`, merging strategies, and conversions to CSV/JSON/Pandas
 using synthetic fixtures. Requires ConfigStore to be initialized by test setup.
 """
+
 from __future__ import annotations
 
 import glob
@@ -151,7 +152,7 @@ def test_protocols_to_items():
             protocol=p,
             content_type=interface.ContentType.Text,
             segment_level=interface.SegmentLevel.Who,
-            merge_strategy="chain"
+            merge_strategy="chain",
         )
         for p in protocols
     )
