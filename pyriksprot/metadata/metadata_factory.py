@@ -80,7 +80,7 @@ class MetadataFactory:
         return self
 
     def _import_table(self, cfg: MetadataTable, folder: str) -> Self:
-        logger.info(f"loading table: {cfg.tablename}")
+        logger.debug(f"loading table: {cfg.tablename}")
 
         columns: list[str] = cfg.all_columns
         table: pd.DataFrame = load(cfg.basename, url=cfg.url, folder=folder, tag=self.version, sep=cfg.sep)

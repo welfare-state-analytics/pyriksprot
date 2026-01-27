@@ -84,7 +84,7 @@ class SegmentMerger:
 
                     current_temporal_group, current_temporal_value = {}, temporal_value
 
-                grouping_values, hashcode_str, hashcode = hashcoder(item=item, source_item=source_item)
+                grouping_values, hashcode_str, hashcode = hashcoder(item=item, source_item=source_item)  # type: ignore
 
                 # FIXME: #14 This fix cannot work. It prevents groupings that exclude `who` added https://github.com/welfare-state-analytics/pyriksprot/commit/8479a7c03458adcc0a0f0d0750cf48e55eec4bb0
                 # grouping_values['who'] = item.who

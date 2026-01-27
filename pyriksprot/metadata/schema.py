@@ -191,7 +191,7 @@ class MetadataSchema:
 
     def __init__(self, version: str | None):
         if version is None:
-            raise ValueError("Tag must be defined")
+            raise ValueError("Version must be defined")
 
         sql_folder: Path = pyriksprot.sql.sql_folder(tag=version)
 

@@ -103,7 +103,7 @@ def gh_get_workdir_ref(path: str) -> tuple[Optional[str], str]:
             return "tag", tag_name
 
     # 4. Fallback: detached at a commit that isn’t an exact tag
-    return None, head_commit.hex[:8]
+    return None, head_commit.hex[:8]  # type: ignore
 
 
 class GitInfo:
@@ -119,7 +119,7 @@ class GitInfo:
         )
         head_tag: pygit2.Reference = first((t for t in all_tags if t.target == head_ref.target), None)
         commit: pygit2.Commit = self.repository[head_ref.target]
-        sha: str = commit.hex
+        sha: str = commit.hex  # type: ignore
         tag: str = head_tag.shorthand if head_tag is not None else ""
         data: dict = {
             "tag": tag,
@@ -139,7 +139,7 @@ class GitInfo:
             raise TagNotFoundError(tag)
 
         tag_object: pygit2.Reference = self.repository.references[tag]
-        sha: str = self.repository[tag_object.target].hex
+        sha: str = self.repository[tag_object.target].hex  # type: ignore
         data: dict = {
             "tag": tag.split("/")[-1],
             "ref": tag_object.name,

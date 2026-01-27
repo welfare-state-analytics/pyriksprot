@@ -116,7 +116,7 @@ class ConfigStore:
         cfg.context = context
         cls.store[context] = cfg
         cls.context = context
-        return cls.store[context]
+        return cls.store[context]  # type: ignore
 
 
 configure_context = ConfigStore.configure_context
@@ -136,11 +136,14 @@ def resolve_arguments(fn_or_cls, args, kwargs):
     return args, kwargs
 
 
-def inject_config(fn_or_cls: T) -> Callable[..., T]:
+S = TypeVar("S")
+
+
+def inject_config(fn_or_cls: S) -> Callable[..., S]:
     @functools.wraps(fn_or_cls)
-    def decorated(*args, **kwargs):
+    def decorated(*args, **kwargs) -> S:
         args, kwargs = resolve_arguments(fn_or_cls, args, kwargs)
-        return fn_or_cls(*args, **kwargs)
+        return fn_or_cls(*args, **kwargs)  # type: ignore
 
     return decorated
 

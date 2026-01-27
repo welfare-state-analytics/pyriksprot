@@ -18,10 +18,12 @@ from pyriksprot.dispatch import merge as sg
 from pyriksprot.dispatch.item import DispatchItem
 from pyriksprot.utility import generate_default_config
 from pyriksprot.workflows.subset_corpus import load_document_patterns
-
-from .utility import ensure_test_corpora_exist
+from tests.utility import ensure_test_corpora_exist
 
 # pylint: disable=redefined-outer-name
+
+# Import synthetic fixtures so they're available to all unit tests
+pytest_plugins = ["tests.fixtures.synthetic"]
 
 TEST_CONFIG_FILENAME = 'tests/output/config.yml'
 TEST_ROOT_FOLDER = 'tests/test_data/source'

@@ -274,7 +274,7 @@ class PersonIndex:
             self.data = db.fetch_tables(self._table_infos)
 
         """ ensure `unknown` has pid = 0 """
-        if self.persons.loc[0]['person_id'] != 'unknown':
+        if self.persons.loc[0]['person_id'] != 'unknown':  # type: ignore
             swap_rows(self.persons, 0, index_of_person_id(self.persons, 'unknown'))
 
         return self
@@ -409,7 +409,7 @@ class PersonIndex:
         if 'pid' not in df.columns and join_column:
             df['pid'] = df[join_column].apply(fg)
         else:
-            if not np.issubdtype(df.index.dtype, np.integer):
+            if not pd.api.types.is_integer_dtype(df.index.dtype):
                 """assume index is person_id"""
                 df['pid'] = pd.Series(df.index).apply(fg)
             else:

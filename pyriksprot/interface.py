@@ -68,6 +68,9 @@ class StorageFormat(str, Enum):
     CSV = 'csv'
     JSON = 'json'
 
+    def __str__(self):
+        return self.value
+
 
 PARAGRAPH_MARKER: str = '@#@'
 

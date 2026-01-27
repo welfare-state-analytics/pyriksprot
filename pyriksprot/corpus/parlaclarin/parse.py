@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from os.path import basename, splitext
+from pathlib import Path
 from typing import Any, Iterable
 
 from loguru import logger
@@ -167,13 +167,22 @@ class ProtocolMapper(interface.IProtocolParser):
 
     @staticmethod
     def parse(
-        filename: str, *, use_preface_name: bool = False, ignore_tags: set[str] | str = "teiHeader"
+        filename: Path | str | untangle.Element,
+        *,
+        use_preface_name: bool = False,
+        ignore_tags: set[str] | str = "teiHeader",
     ) -> interface.Protocol:
         """Map XML to domain entity. Return Protocol."""
-        protocol: interface.Protocol = None
-        source_name: str = filename if isinstance(filename, str) else "unknown"
+        protocol: interface.Protocol | None = None
+
+        protocol_name: str | None = None
+
+        if isinstance(filename, (str, Path)):
+            protocol_name = str(Path(filename).stem)
+
+        ignore_tags = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
+
         try:
-            ignore_tags = set(ignore_tags.split(",")) if isinstance(ignore_tags, str) else ignore_tags
             data: untangle.Element = (
                 filename
                 if isinstance(filename, untangle.Element)
@@ -181,17 +190,18 @@ class ProtocolMapper(interface.IProtocolParser):
             )
 
             if not isinstance(data, untangle.Element):
-                raise ValueError(f"expected untangle.Element, got {type(data)} {source_name}")
+                raise ValueError(f"expected untangle.Element, got {type(data)} {protocol_name or '(unknown protocol)'}")
 
             parsed_data: dict = ProtocolMapper.get_data(data)
 
-            if len(parsed_data.get("utterances") or []) == 0:
-                logger.warning(f'no utterances found in {source_name}')
-
             preface_name: str | None = ProtocolMapper.get_name(data)
-            protocol_name: str | None = preface_name if use_preface_name else splitext(basename(filename))[0]
+            if protocol_name is None or use_preface_name:
+                protocol_name = preface_name or protocol_name
 
-            protocol: interface.Protocol = interface.Protocol(
+            if len(parsed_data.get("utterances") or []) == 0:
+                logger.warning(f'no utterances found in {protocol_name or "(unknown protocol)"}')
+
+            protocol = interface.Protocol(
                 utterances=parsed_data.get("utterances"),
                 speaker_notes=parsed_data.get("speaker_notes"),
                 page_references=parsed_data.get("page_references"),
@@ -200,7 +210,7 @@ class ProtocolMapper(interface.IProtocolParser):
                 preface_name=preface_name,
             )
         except Exception as ex:
-            logger.error(f"error parsing {source_name}: {ex}")
+            logger.error(f"error parsing {protocol_name or '(unknown protocol)'}: {ex}")
             raise ex
 
         return protocol

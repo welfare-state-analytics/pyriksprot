@@ -73,7 +73,7 @@ def _extract_tei_corpus_filenames(tei_filename: str) -> list[str]:
 
 def ls_corpus_by_tei_corpora(
     folder: str, mode: Literal['dict', 'filenames', 'tuples'] = 'dict', normalize: bool = True
-) -> dict[str, dict[str, str | list[str]]] | list[str] | list[tuple[str, str]]:
+) -> dict | list[str] | list[tuple[str, str]]:
     """Returns a list of XML documents as specified in teiCorpus files that reside in `folder`."""
     tei_corpora_filenames: list[str] = glob.glob(jj(folder, 'prot-*.xml'), recursive=False)
     data: dict[str, dict[str, str | list[str]]] = {}
@@ -93,7 +93,7 @@ def ls_corpus_by_tei_corpora(
     if mode == 'filenames':
         return [filename for item in data.values() for filename in item['filenames']]
     if mode == 'tuples':
-        return [(item['chamber_abbrev'], filename) for item in data.values() for filename in item['filenames']]
+        return [(item['chamber_abbrev'], filename) for item in data.values() for filename in item['filenames']]  # type: ignore
     return data
 
 
