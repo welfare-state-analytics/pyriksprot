@@ -64,7 +64,7 @@ def tagit(
             f"Version {configuration.ConfigValue('corpus.version').value} differs from current tag {source_folder}"
         )
 
-    tagger: ITagger = TaggerProvider.tagger_factory().create()
+    tagger: ITagger = TaggerProvider.tagger_factory().create()  # type: ignore
 
     tag_protocols(
         tagger=tagger,

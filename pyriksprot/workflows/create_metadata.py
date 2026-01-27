@@ -94,5 +94,5 @@ def create_database_workflow(  # pylint: disable=too-many-arguments
             service.execute_sql_scripts(folder=extras_folder)
 
     except Exception as ex:
-        logger.exception(ex)
+        logger.error(ex)
         raise ex

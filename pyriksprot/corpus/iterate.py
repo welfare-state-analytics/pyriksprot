@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING, Callable, Iterable, Literal
 import numpy as np
 import tqdm
 
-from .. import to_speech as mu
-from ..corpus.utility import format_protocol_name, get_chamber_by_filename
-from ..interface import ContentType, IDispatchItem, Protocol, SegmentLevel
-from ..utility import compress
+from pyriksprot import to_speech as mu
+from pyriksprot.corpus.utility import format_protocol_name, get_chamber_by_filename
+from pyriksprot.interface import ContentType, IDispatchItem, Protocol, SegmentLevel
+from pyriksprot.utility import compress
 
 if TYPE_CHECKING:
     from ..metadata import SpeakerInfo

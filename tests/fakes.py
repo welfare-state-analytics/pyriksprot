@@ -67,13 +67,11 @@ def load_segment_stream(filename: str, level: interface.SegmentLevel) -> Iterabl
     if level in (interface.SegmentLevel.Who, interface.SegmentLevel.Speech):
         """Return grouping as specified in "fake-segments.csv" file"""
         data_frame: pd.DataFrame = load_sample_segments_dataframe(filename, level=level)
-        groups: list[str, dict] = (
-            data_frame.groupby('segment_id', sort=False).agg(list).reset_index().to_dict('records')
-        )
+        groups: list[dict] = data_frame.groupby('segment_id', sort=False).agg(list).reset_index().to_dict('records')
 
         for i, group in enumerate(groups):
             segment_id: str = group.get("segment_id")
-            u_ids: str = group.get("u_id")
+            u_ids: list[str] = group.get("u_id")
             segment_utterences: list[interface.Utterance] = [u for u in utterances if u.u_id in u_ids]
 
             yield iterate.ProtocolSegment(
@@ -163,7 +161,7 @@ def load_sample_utterance_data(filename: str) -> list[dict]:
 
 def load_sample_tagged_data(filename: str) -> pd.DataFrame:
     tagged: pd.DataFrame = pd.read_csv(expected_tagged_sample_filename(filename), sep=";", quotechar='"', na_values='')
-    tagged['annotated'] = tagged.token + '\t' + tagged.lemma + '\t' + tagged.pos
+    tagged['annotated'] = tagged.token + '\t' + tagged.lemma + '\t' + tagged.pos  # type: ignore
     tagged_merged = tagged[['u_id', 'annotated']].groupby(['u_id'], sort=False).agg('\n'.join)
     tagged_merged['annotated'] = 'token\tlemma\tpos\n' + tagged_merged.annotated
     return tagged_merged.replace({np.nan: None})
@@ -247,4 +245,4 @@ def load_expected_stream(level: interface.Protocol, document_names: list[str]) -
 
 def load_expected_speeches(strategy: str, document_name: str) -> list[iterate.ProtocolSegment]:
     fakes_folder: str = ConfigStore.config().get("fakes.folder")
-    return load_speech_stream(jj(fakes_folder, f"{document_name}.xml"), strategy)
+    return load_speech_stream(jj(fakes_folder, f"{document_name}.xml"), strategy)  # type: ignore

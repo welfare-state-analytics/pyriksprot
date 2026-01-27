@@ -26,14 +26,14 @@ def probe(x: Any, properties: set[str]) -> dict:
 
 def create_grouping_hashcoder(
     grouping_keys: list[str],
-) -> Callable[[iterate.ProtocolSegment, corpus_index.ICorpusSourceItem], str]:
+) -> Callable[[iterate.ProtocolSegment, corpus_index.ICorpusSourceItem], tuple[dict, str, str]]:
     """Create a hashcode function for given grouping keys"""
 
-    grouping_keys: set[str] = set(grouping_keys)
+    grouping_keyset: set[str] = set(grouping_keys)
 
-    if not grouping_keys:
+    if not grouping_keyset:
         """No grouping apart from temporal key"""
-        return hashcoder_with_no_grouping_keys
+        return hashcoder_with_no_grouping_keys  # type: ignore
 
     def hashcoder(item: iterate.ProtocolSegment, source_item: corpus_index.ICorpusSourceItem) -> tuple[dict, str, str]:
         """Compute hash for item, speaker and source item. Return values, hash string and hash code"""
@@ -42,12 +42,12 @@ def create_grouping_hashcoder(
             # **take(item.speaker_info.asdict(), grouping_keys),
             # **take(source_item.to_dict(), grouping_keys),
             # **take(item.to_dict(), grouping_keys),
-            **(probe(item.speaker_info.term_of_office, grouping_keys) if item.speaker_info else {}),
-            **probe(item.speaker_info, grouping_keys),
-            **probe(source_item, grouping_keys),
-            **probe(item, grouping_keys),
+            **(probe(item.speaker_info.term_of_office, grouping_keyset) if item.speaker_info else {}),
+            **probe(item.speaker_info, grouping_keyset),
+            **probe(source_item, grouping_keyset),
+            **probe(item, grouping_keyset),
         }
-        missing: set[str] = grouping_keys - set(parts.keys())
+        missing: set[str] = grouping_keyset - set(parts.keys())
         if len(missing) > 0:
             raise ValueError(f"unknown keys: {', '.join(list(missing))}")
 
@@ -55,7 +55,7 @@ def create_grouping_hashcoder(
 
         return (parts, hashcode_str, hashlib.md5(hashcode_str.encode('utf-8')).hexdigest())
 
-    return hashcoder if grouping_keys else hashcoder_with_no_grouping_keys
+    return hashcoder if grouping_keyset else hashcoder_with_no_grouping_keys  # type: ignore
 
 
 def truncate_year_to_category(year: int, temporal_key: TemporalKey) -> int:

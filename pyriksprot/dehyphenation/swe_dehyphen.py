@@ -11,6 +11,7 @@ This source code is heavily influenced by the source code found at https://gitla
 License: https://gitlab.com/Julipan/swedish-de-hyphenator/-/blob/master/LICENSE
 
 """
+
 import re
 from dataclasses import dataclass, field
 from enum import IntEnum
@@ -25,7 +26,6 @@ from .utility import load_dict, load_token_set, store_dict, store_token_set
 PARAGRAPH_MARKER = '##PARAGRAPH##'
 
 # pylint: disable=too-many-arguments
-jj = join
 
 
 class WhitelistReason(IntEnum):
@@ -61,7 +61,7 @@ def is_ignored_by_conjunction_word(dashed_word: str) -> bool:
     return any(dashed_word.endswith(f' {w}') for w in IGNORE_CONJUNCTION_WORDS)
 
 
-def find_dashed_words(text: str) -> set[str]:
+def find_dashed_words(text: str) -> list[str]:
     dashed_words = [d for d in re.findall(r'\w+- \w+', text) if not is_ignored_by_conjunction_word(d)]
     return dashed_words
 
@@ -80,7 +80,7 @@ WORD_FREQUENCIES_NAME: str = 'word-frequencies.pkl'
 class SwedishDehyphenator:
     """Dehyphens Swedish text"""
 
-    data_folder: str | ConfigValue = ConfigValue.create_field(key="dehyphen:folder", default="/data")
+    data_folder: str = ConfigValue.create_field(key="dehyphen:folder", default="/data")
     word_frequencies: dict[str, int] | str | ConfigValue = ConfigValue.create_field(
         key="dehyphen:tf_filename,tf_filename", default=None
     )
@@ -92,15 +92,15 @@ class SwedishDehyphenator:
     unresolved: set[str] = field(default_factory=set)
     filename: str = field(init=False, default=WORD_FREQUENCIES_NAME)
 
-    def __post_init__(self) -> "SwedishDehyphenator":
+    def __post_init__(self) -> "SwedishDehyphenator":  # type: ignore
         self.data_folder = self.data_folder or "."
 
         if isinstance(self.word_frequencies, dict):
-            self.filename = jj(self.data_folder, self.filename)
+            self.filename = join(self.data_folder, self.filename)
         else:
             if isinstance(self.word_frequencies, str):
                 self.filename = self.word_frequencies
-                self.word_frequencies = None
+                self.word_frequencies = {}
 
             self.filename: str = self.probe_word_frequencies_filename()
 
@@ -112,22 +112,22 @@ class SwedishDehyphenator:
         if isfile(self.filename):
             return self.filename
 
-        if isfile(jj(self.data_folder, self.filename)):
-            return jj(self.data_folder, self.filename)
+        if isfile(join(self.data_folder, self.filename)):
+            return join(self.data_folder, self.filename)
 
         raise FileNotFoundError(f"expected TF file {self.filename} not found")
 
     @property
     def whitelist_filename(self) -> str:
-        return jj(self.data_folder, 'dehyphen_whitelist.txt.gz')
+        return join(self.data_folder, 'dehyphen_whitelist.txt.gz')
 
     @property
     def whitelist_log_filename(self) -> str:
-        return jj(self.data_folder, 'dehyphen_whitelist_log.pkl')
+        return join(self.data_folder, 'dehyphen_whitelist_log.pkl')
 
     @property
     def unresolved_filename(self) -> str:
-        return jj(self.data_folder, 'dehyphen_unresolved.txt.gz')
+        return join(self.data_folder, 'dehyphen_unresolved.txt.gz')
 
     def is_whitelisted(self, word: str) -> bool:
         return word.lower() in self.whitelist
@@ -143,7 +143,7 @@ class SwedishDehyphenator:
         return word
 
     @staticmethod
-    def is_hyphenated_compound(dashed_word: str) -> bool:
+    def is_hyphenated_compound(dashed_word: str) -> bool | None:
         """Test if is compund"""
         if re.match(
             r'[A-ZÅÄÖ]+-[a-zåäö]+|' + r'[A-ZÅÄÖ][a-zåäö]+-[A-ZÅÄÖ][a-zåäö]+|' + r'\d+-\w+|' + r'icke-\w+',
@@ -170,8 +170,8 @@ class SwedishDehyphenator:
         if self.is_hyphenated_compound(dashed_word):
             return self.add_to_whitelist(dashed_word, WhitelistReason.HyphenatedCompound)
 
-        _compound_word_frequency: int = self.word_frequencies.get(_compound_word, 0)
-        _dashed_word_frequency: int = self.word_frequencies.get(_dashed_word, 0)
+        _compound_word_frequency: int = self.word_frequencies.get(_compound_word, 0)  # type: ignore
+        _dashed_word_frequency: int = self.word_frequencies.get(_dashed_word, 0)  # type: ignore
 
         if _compound_word_frequency > _dashed_word_frequency:
             return self.add_to_whitelist(compound_word, WhitelistReason.Frequency)
@@ -188,7 +188,7 @@ class SwedishDehyphenator:
         if (
             not self.is_whitelisted(left_word)
             and not self.is_whitelisted(right_word)
-            and self.word_frequencies.get(left_word, 0) == 0
+            and self.word_frequencies.get(left_word, 0) == 0  # type: ignore
         ):
             return self.add_to_whitelist(compound_word, WhitelistReason.UnknownParts)
 
@@ -198,7 +198,7 @@ class SwedishDehyphenator:
 
     def dehyphen_text(self, text: str) -> str:
         """Remove dehyphens in text"""
-        text: str = re.sub(r'\n{3,}', r'\n\n', text)
+        text = re.sub(r'\n{3,}', r'\n\n', text)
 
         # add paragraph markers:
         text = re.sub(r'\n\n', PARAGRAPH_MARKER, text)
@@ -237,7 +237,7 @@ class SwedishDehyphenator:
     def create_dehypen(data_folder: str, word_frequencies: str | dict = None) -> Callable[[str], str]:
         """Create a dehyphen service. Return wrapped dehyphen function."""
         logger.info(f"dehyphen path: {data_folder}")
-        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(
+        dehyphenator: SwedishDehyphenator = SwedishDehyphenator(  # type: ignore
             data_folder=data_folder, word_frequencies=word_frequencies
         )
 

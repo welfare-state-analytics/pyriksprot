@@ -8,7 +8,7 @@ import zipfile
 from collections import defaultdict
 from enum import Enum
 from io import StringIO
-from typing import Any, Literal, Type
+from typing import Any, Literal, Type, cast
 
 import numpy as np
 import pandas as pd
@@ -231,7 +231,7 @@ class FilesInZipDispatcher(IDispatcher):
     name: str = 'files-in-zip'
 
     def __init__(self, target_name: str, compress_type: CompressType, lookups: Codecs, **kwargs):
-        self.zup: zipfile.ZipFile = None
+        self.zup: zipfile.ZipFile | None = None
         super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
 
     def open_target(self, target_name: Any) -> None:
@@ -332,8 +332,10 @@ class CheckpointPerGroupDispatcher(IDispatcher):
         if len(dispatch_items) == 0:
             return
 
-        checkpoint_name: str = f'{dispatch_items[0].group_temporal_value}.zip'
-        subfolder: str = dispatch_items[0].group_temporal_value.split('-')[1]
+        item: DispatchItem = cast(DispatchItem, dispatch_items[0])
+
+        checkpoint_name: str = f'{item.group_temporal_value}.zip'
+        subfolder: str = str(item.group_temporal_value).split('-')[1]
         path: str = jj(self.target_name, subfolder)
 
         os.makedirs(path, exist_ok=True)
@@ -417,7 +419,7 @@ class TaggedFramePerGroupDispatcher(FilesInFolderDispatcher):
             total_frame: pd.DataFrame = pd.concat(tagged_frames, ignore_index=True)
             self.flush(total_frame, dispatch_items)
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[DispatchItem]):
         temporal_value: str = dispatch_items[0].group_temporal_value  # type: ignore
         subfolder: str = temporal_value.split('-')[1] if '-' in temporal_value else temporal_value
         path: str = jj(self.target_name, subfolder)
@@ -544,7 +546,7 @@ class SingleIdTaggedFrameDispatcher(IdTaggedFramePerGroupDispatcher):
         super().__init__(target_name=target_name, compress_type=compress_type, lookups=lookups, **kwargs)
         self.tagged_frames: list[pd.DataFrame] = []
 
-    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[IDispatchItem]):
+    def flush(self, tagged_frame: pd.DataFrame, dispatch_items: list[DispatchItem]):
         self.tagged_frames.append(tagged_frame)
 
     def close_target(self) -> None:
@@ -566,7 +568,7 @@ def trim_data_frame_typs(frame: pd.DataFrame, columns: list[str] = None) -> pd.D
     for column in columns:
         if not column in frame.columns:
             continue
-        if not np.issubdtype(frame[column].dtype, np.integer):
+        if not pd.api.types.is_integer_dtype(frame[column].dtype):
             continue
         frame[column] = trim_series_type(frame[column])
     return frame

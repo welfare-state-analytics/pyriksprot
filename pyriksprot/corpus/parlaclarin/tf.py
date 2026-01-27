@@ -50,14 +50,14 @@ class TermFrequencyCounter:
     def store(self, filename: str, cut_off: int = None) -> None:
         """Store term frequencies to`filename`."""
         if cut_off:
-            frequencies = {w: c for w, c in self.frequencies if c > cut_off}
+            frequencies = {w: c for w, c in self.frequencies.items() if c > cut_off}
         else:
             frequencies = self.frequencies
         with open(filename, 'wb') as fp:
             pickle.dump(frequencies, fp, pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
-    def load(filename: str) -> defaultdict(int):
+    def load(filename: str) -> defaultdict:
         """Load term frequency counts from pickled file `filename`."""
         with open(filename, 'rb') as fp:
             return pickle.load(fp)

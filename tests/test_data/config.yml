@@ -37,7 +37,7 @@ tagged_frames:
 
 tagged_speeches:
   folder: tests/test_data/source/v1.4.1/tagged_frames_speeches.feather
-
+    
 dehyphen:
   folder: tests/test_data/source/v1.4.1/dehyphen
   tf_filename: tests/test_data/source/v1.4.1/dehyphen/word-frequencies.pkl
@@ -58,3 +58,7 @@ global:
     folder: /data/riksdagen_corpus_data/riksdagen-records/data
   metadata:
     folder: /data/riksdagen_corpus_data/riksdagen-persons/data
+  tagged_frames:
+    folder: /data/swedeb/v1.4.1/tagged_frames/
+    file_pattern: "prot-*.zip"
+    pattern: /data/swedeb/v1.4.1/tagged_frames/**/prot-*.zip

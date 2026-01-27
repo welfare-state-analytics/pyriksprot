@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import itertools
 import os
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
-from typing import Sequence, Type
+from typing import Any, Optional, Sequence, Type
 
 import pandas as pd
 from loguru import logger
@@ -23,6 +24,57 @@ from .schema import MetadataSchema
 jj = os.path.join
 
 
+_WORKER_PARSER: Any = None  # set in _init_worker
+
+
+def _init_worker(parser_cls_or_obj: Any) -> None:
+    """
+    Create exactly one parser per worker process (important for performance).
+
+    Note: If you pass a parser *instance*, it must be picklable to reach workers.
+          Prefer passing a parser *class* to CorpusScanner(parser=YourParserClass).
+    """
+    global _WORKER_PARSER
+    _WORKER_PARSER = parser_cls_or_obj() if isinstance(parser_cls_or_obj, type) else parser_cls_or_obj
+
+
+def _scan_one(args: tuple[int, str, dict[str, str], bool]) -> tuple[
+    tuple[int, str, str, int, str, str],  # protocol row
+    list[tuple],  # utterances rows
+    list[tuple],  # page refs rows
+    dict[str, SpeakerNote],  # speaker notes
+    list[Speech],  # speeches
+]:
+    document_id, filename, protocol_to_chamber, use_preface_name = args
+
+    protocol: IProtocol = _WORKER_PARSER.parse(filename, use_preface_name=use_preface_name, ignore_tags={"teiHeader"})
+
+    chamber_abbrev: str = protocol_to_chamber.get(protocol.name) or get_chamber_by_filename(filename)
+    formatted_name: str = format_protocol_name(protocol.name, chamber_abbrev=chamber_abbrev)
+
+    protocols_row: tuple[int, str, str, int, str, str] = (
+        document_id,
+        protocol.name,
+        protocol.date,
+        int(protocol.date[:4]),
+        chamber_abbrev,
+        formatted_name,
+    )
+
+    utterances_rows: list[tuple[int, str, str, str, int]] = [
+        (document_id, u.u_id, u.who, u.speaker_note_id, u.page_number) for u in protocol.utterances
+    ]
+
+    page_refs_rows: list[tuple[int, int, int, str]] = [
+        (document_id, p.source_id, p.page_number, p.reference) for p in protocol.page_references
+    ]
+
+    speeches: list[Speech] = to_speeches(protocol=protocol, merge_strategy="chain") or []
+    speaker_notes: dict[str, SpeakerNote] = protocol.get_speaker_notes()
+
+    return protocols_row, utterances_rows, page_refs_rows, speaker_notes, speeches
+
+
 class CorpusScanner:
     @dataclass
     class ScanResult:
@@ -35,7 +87,7 @@ class CorpusScanner:
     def __init__(self, parser: IProtocolParser | Type[IProtocolParser]) -> None:
         self.parser: IProtocolParser | Type[IProtocolParser] = parser
 
-    def scan(
+    def scan_simple(
         self, filenames: Sequence[str], chambers: dict[str, set[str]], use_preface_name: bool = False
     ) -> CorpusScanner.ScanResult:
         protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
@@ -67,40 +119,53 @@ class CorpusScanner:
 
         return data
 
-    # def parallel_scan(self, filenames: Sequence[str]) -> CorpusScanner.ScanResult:
-    #     data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
+    def scan(
+        self,
+        filenames: Sequence[str],
+        chambers: dict[str, set[str]],
+        use_preface_name: bool = False,
+        *,
+        max_workers: Optional[int] = None,
+        chunksize: int = 8,
+    ) -> CorpusScanner.ScanResult:
+        """
+        Parallel version of scan() using multiple processes.
 
-    #     # Function to process a single file
-    #     def process_file(document_id, filename):
-    #         protocol: IProtocol = self.parser.parse(filename, ignore_tags={"teiHeader"})
-    #         protocols = (document_id, protocol.name, protocol.date, int(protocol.date[:4]))
-    #         utterances = [
-    #             (document_id, u.u_id, u.who, u.speaker_note_id, u.page_number) for u in protocol.utterances
-    #         ]
-    #         page_references = [
-    #             (document_id, p.source_id, p.page_number, p.reference) for p in protocol.page_references
-    #         ]
-    #         speaker_notes = protocol.get_speaker_notes()
-    #         return protocols, utterances, page_references, speaker_notes
+        Performance tips:
+        - Prefer constructing CorpusScanner with a parser *class* (not an instance),
+          so workers can instantiate locally and avoid pickling issues.
+        - Tune chunksize: higher reduces overhead, too high can reduce load balancing.
+        """
+        protocol_to_chamber: dict[str, str] = {v: k for k, p in chambers.items() for v in p}
 
-    #     # Parallel processing with ThreadPoolExecutor
-    #     with ThreadPoolExecutor() as executor:
-    #         futures = {
-    #             executor.submit(process_file, document_id, filename): filename
-    #             for document_id, filename in enumerate(filenames)
-    #         }
+        if max_workers is None:
+            cpu = os.cpu_count() or 1
+            max_workers = max(1, cpu - 1)
 
-    #         # Process each future as it completes
-    #         for future in tqdm(as_completed(futures), total=len(futures)):
-    #             protocols, utterances, page_references, speaker_notes = future.result()
+        data: CorpusScanner.ScanResult = CorpusScanner.ScanResult()
 
-    #             # Append and extend data to the main ScanResult object
-    #             data.protocols.append(protocols)
-    #             data.utterances.extend(utterances)
-    #             data.page_references.extend(page_references)
-    #             data.speaker_notes.update(speaker_notes)
+        # Pack per-file args once (keeps map fast)
+        work_items: list[tuple[int, str, dict[str, str], bool]] = [
+            (document_id, filename, protocol_to_chamber, use_preface_name)
+            for document_id, filename in enumerate(filenames)
+        ]
 
-    #     return data
+        with ProcessPoolExecutor(max_workers=max_workers, initializer=_init_worker, initargs=(self.parser,)) as ex:
+            # executor.map is typically faster than submit/as_completed for big batches
+            for protocols_row, utter_rows, page_rows, notes, speeches in tqdm(
+                ex.map(_scan_one, work_items, chunksize=chunksize),
+                total=len(work_items),
+            ):
+                data.protocols.append(protocols_row)
+                data.utterances.extend(utter_rows)
+                data.page_references.extend(page_rows)
+                data.speaker_notes.update(notes)
+                data.speeches.extend(speeches)
+
+        # Deterministic ordering (map preserves order, but keeping this is harmless)
+        data.protocols.sort(key=lambda r: r[0])
+
+        return data
 
     def to_dataframes(self, result: CorpusScanner.ScanResult) -> dict[str, pd.DataFrame]:
         """Store enough source reference data to reconstruct source urls."""

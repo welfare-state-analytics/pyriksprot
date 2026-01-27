@@ -38,10 +38,11 @@ class ProtocolConverter:
             template (Union[str, Template]): Jinja template.
         """
 
-        if not template.endswith(".jinja"):
-            template += ".jinja"
-
         if isinstance(template, str):
+
+            if not template.endswith(".jinja"):
+                template += ".jinja"
+
             template = JINJA_ENV.get_template(template)
 
         self.template: Template = template

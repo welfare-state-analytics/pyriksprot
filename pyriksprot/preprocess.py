@@ -30,10 +30,10 @@ class Registry:
 
 
 class DehypenatorProvider:
-    dehyphenator: SwedishDehyphenator = None
+    dehyphenator: SwedishDehyphenator = None  # type: ignore
 
     @classmethod
-    def locate(cls) -> SwedishDehyphenator:
+    def locate(cls) -> SwedishDehyphenator:  # type: ignore
         if cls.dehyphenator is None:
             cls.dehyphenator = SwedishDehyphenator()
         return cls.dehyphenator
@@ -49,7 +49,7 @@ def dehyphen(text: str) -> str:
 @Registry.register(key="pretokenize")
 def pretokenize(text: str) -> str:
     """Tokenize `text`, then join resulting tokens."""
-    return ' '.join(SegmenterRepository.default_tokenize(text))
+    return ' '.join(SegmenterRepository.default_tokenize(text))  # type: ignore
 
 
 @Registry.register(key="strip", type="function")

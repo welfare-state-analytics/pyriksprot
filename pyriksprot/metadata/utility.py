@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Type
+from typing import Any, Callable, Literal, Type
 
 import numpy as np
 import pandas as pd
@@ -36,8 +36,8 @@ DATE_COLUMNS = ['start_date', 'end_date']
 
 def slim_table_types(
     tables: list[pd.DataFrame] | pd.DataFrame,
-    defaults: dict[str, Any] = None,
-    types: dict[str, Any] = None,
+    defaults: dict[str, Any] | None = None,
+    types: dict[str, Any] | None = None,
 ) -> None:
     """Slims types and sets default value for NaN entries"""
 
@@ -48,12 +48,23 @@ def slim_table_types(
     types = COLUMN_TYPES if types is None else types
 
     for table in tables:
+        # Fill defaults (NO inplace)
         for column_name, value in defaults.items():
             if column_name in table.columns:
-                table[column_name].fillna(value, inplace=True)
+                table[column_name] = table[column_name].fillna(value)
 
+        # Cast types (after fill)
         for column_name, dt in types.items():
             if column_name in table.columns:
+                # If any missing values remain, fill with default if we have one,
+                # otherwise leave as-is (or raise).
+                if table[column_name].isna().any():
+                    if column_name in defaults:
+                        table[column_name] = table[column_name].fillna(defaults[column_name])
+                    else:
+                        # Safer to fail loudly than silently cast wrong
+                        raise ValueError(f"Column '{column_name}' contains NA but no default provided")
+
                 if table[column_name].dtype != dt:
                     table[column_name] = table[column_name].astype(dt)
 
@@ -79,7 +90,7 @@ def group_to_list_of_records(
     return key_rows.groupby(key)['data'].apply(list).to_dict()
 
 
-def fx_or_url(url: Any, tag: str) -> str:
+def fx_or_url(url: Callable[[str], str] | str, tag: str) -> str:
     return url(tag) if callable(url) else url
 
 
@@ -113,7 +124,7 @@ def fix_incomplete_datetime_series(
         dt: pd.Series = pd.to_datetime(df[column_name], errors='coerce')
         dt.loc[mask_year] = dt + pd.DateOffset(years=1) - pd.DateOffset(days=1)
         dt.loc[mask_yearmonth] = dt + pd.DateOffset(months=1) - pd.DateOffset(days=1)
-        df[column_name] = dt.dt.strftime("%Y-%m-%d")
+        df[column_name] = dt.dt.strftime("%Y-%m-%d")  # type: ignore
 
     df.loc[mask_year, f"{column_name}_flag"] = 'Y'
     df.loc[mask_yearmonth, f"{column_name}_flag"] = 'M'
