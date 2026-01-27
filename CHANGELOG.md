@@ -4,6 +4,12 @@
 > All notable changes to this project will be documented in this file
 
 
+## [0.9.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.8.0...v0.9.0) (2026-01-27)
+
+### 🍕 Features
+
+* add poetry-plugin-export requirement for plugin support ([7cd2f60](https://github.com/welfare-state-analytics/pyriksprot/commit/7cd2f606c2633ef533a68a7b10f99a52f188986a))
+
 ## [0.8.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.7.0...v0.8.0) (2026-01-27)
 
 ### 🍕 Features
