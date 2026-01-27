@@ -4,6 +4,53 @@
 > All notable changes to this project will be documented in this file
 
 
+## [0.8.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.7.0...v0.8.0) (2026-01-27)
+
+### 🍕 Features
+
+* add comprehensive AI coding agent instructions and project overview ([b66d1fa](https://github.com/welfare-state-analytics/pyriksprot/commit/b66d1fa11ce180113beb3e3c544209da576a36b3))
+* **tests:** add integration tests for parlaclarin and tagged corpus functionalities ([13e14f5](https://github.com/welfare-state-analytics/pyriksprot/commit/13e14f5e5cd415c5bac8f39b5f0b622f3bdb5dbe))
+* **data:** add new feather files for tagged frames speeches ([19fb693](https://github.com/welfare-state-analytics/pyriksprot/commit/19fb693fa1dd276458217da564a5f292caa5ebbe))
+* **tests:** remove obsolete tests and add new interface tests ([8a62313](https://github.com/welfare-state-analytics/pyriksprot/commit/8a62313f1a949f77f7ad23e7dc880145967a580e))
+* update Python version constraint and improve test configuration ([9aff49c](https://github.com/welfare-state-analytics/pyriksprot/commit/9aff49ce5add3f97496b2e1c644245618443e43c))
+
+### 🐛 Bug Fixes
+
+* **tests:** add integration and slow markers to relevant tests ([abae3c6](https://github.com/welfare-state-analytics/pyriksprot/commit/abae3c61244f505182e8c6dbbe3d9b6bd96b8e24))
+* add new test suite for missing files bug and remove outdated integration test ([3286e35](https://github.com/welfare-state-analytics/pyriksprot/commit/3286e350b2d156f1a8ab0098f566befb205724dd))
+* add type ignore comments for temporary file usage in multiple test files ([17aab4e](https://github.com/welfare-state-analytics/pyriksprot/commit/17aab4ec92afa92b65bdc9d673502b1d91666b8d))
+* add type ignore comments for type checking in ConfigStore and inject_config functions ([e58480a](https://github.com/welfare-state-analytics/pyriksprot/commit/e58480a04780522a34c76837d4988a7ab5a62113))
+* add type ignore comments for type hinting issues across multiple files ([4d54134](https://github.com/welfare-state-analytics/pyriksprot/commit/4d541343421a734da816d5e728d4bff0e0047477))
+* add type ignore comments for type hinting issues in extract_test, utility, and test_dehyphen files ([78797f6](https://github.com/welfare-state-analytics/pyriksprot/commit/78797f66998526fbf9dd55581b694b2236ee78fb))
+* change logger from exception to error level for better error handling ([34ff24d](https://github.com/welfare-state-analytics/pyriksprot/commit/34ff24d166aea096f20df83ad2e5e23a8bbd3192))
+* correct frequency filtering and update return type in store and load methods ([b4bc235](https://github.com/welfare-state-analytics/pyriksprot/commit/b4bc23526ce372125f332e634ce56405d650d67d))
+* correct type hint for cut_off parameter and update frequency filtering logic in store method ([a2b909b](https://github.com/welfare-state-analytics/pyriksprot/commit/a2b909bc47f013763bda5fa963ad9110979bdce3))
+* enhance error handling and improve protocol name extraction in parse method ([8792e4c](https://github.com/welfare-state-analytics/pyriksprot/commit/8792e4c4049dfd6e1ab6f292b3f0857a8c26bca5))
+* implement parallel scanning for documents with improved processing and error handling ([525d68c](https://github.com/welfare-state-analytics/pyriksprot/commit/525d68cd9f78ce10e0f209c37c4ba3f666b21152))
+* improve handling of NaN values and type casting in slim_table_types function ([31b5892](https://github.com/welfare-state-analytics/pyriksprot/commit/31b5892c89ef1a4a009c5f5cea95124bd17220dc))
+* refactor document scanning to improve performance and maintainability ([4dd056d](https://github.com/welfare-state-analytics/pyriksprot/commit/4dd056d2cd03446a36d32825b444be05c29023c9))
+* **tests:** remove obsolete infrastructure and VRT tests ([0dd18fc](https://github.com/welfare-state-analytics/pyriksprot/commit/0dd18fc4d4ffc31019d3abc9dcaaf898b73ab03b))
+* **tests:** remove unused import of sample_tagged_frames_corpus_exists ([83e8c54](https://github.com/welfare-state-analytics/pyriksprot/commit/83e8c54a77eec7a37b484c5a143e69b75afe0dfa))
+* **tests:** simplify argument formatting in version validation test ([8ab8168](https://github.com/welfare-state-analytics/pyriksprot/commit/8ab8168747d375ef9734c380ebf8adb1e89671a4))
+* update default_args method to handle callable defaults and improve type hints in segmenter classes ([37e4833](https://github.com/welfare-state-analytics/pyriksprot/commit/37e4833ca7b1fc3461b5c65747cfec1396689d77))
+* **tests:** update documentation, enhance troubleshooting guidance, and improve test isolation ([8a327a7](https://github.com/welfare-state-analytics/pyriksprot/commit/8a327a7cabbe88debad727bfb1f699f056f583ab))
+* **metadata:** update dtype check for integer in PersonIndex and trim_data_frame_typs ([e7ba7f4](https://github.com/welfare-state-analytics/pyriksprot/commit/e7ba7f421032d57b03cc4f4efd759a45d74b3a1c))
+* update error messages, remove unused imports, and improve test structure ([d4a96ef](https://github.com/welfare-state-analytics/pyriksprot/commit/d4a96ef4aa477bfb562806ae234ee714c9acae84))
+* update exclude patterns in pyproject.toml to prevent unnecessary files from being included ([6e45d0a](https://github.com/welfare-state-analytics/pyriksprot/commit/6e45d0a4d74609834b9145af781f6df404705036))
+* update import statements and correct return type for load_dict function ([c502154](https://github.com/welfare-state-analytics/pyriksprot/commit/c50215468275695dddf380cf84cfbe83b5675444))
+* **config:** update local folder paths for corpus and tagged frames ([89604a0](https://github.com/welfare-state-analytics/pyriksprot/commit/89604a0cc317d63c4e9fe18687fabd36bb8c5790))
+* **tests:** update skip conditions for metadata-related tests ([cf58ec1](https://github.com/welfare-state-analytics/pyriksprot/commit/cf58ec1c96fbcbfcbeb941b6ae6b6862324f93f2))
+* **tests:** update target type and assertions in extract corpus tests ([6068ea7](https://github.com/welfare-state-analytics/pyriksprot/commit/6068ea7ce98b84a06957205877bb1b2e5c5ba118))
+* **tests:** update test setup for tagged frames and speech corpora ([8afe048](https://github.com/welfare-state-analytics/pyriksprot/commit/8afe048f135d45ceaaa8ea264e5c05b3ab4f81cf))
+* update type hints for dehyphenation and VRT export functions ([42c0aee](https://github.com/welfare-state-analytics/pyriksprot/commit/42c0aeefd6502a1ad63b8cbd585477f9ad2d30e3))
+* update type hints for optional parameters and correct type casting in multiple files ([b4be9ae](https://github.com/welfare-state-analytics/pyriksprot/commit/b4be9aef36537f218a5f4e00fd63ade06aa43254))
+* update type hints for optional parameters and enhance error handling in extract_corpus_tags function ([3bc1fa2](https://github.com/welfare-state-analytics/pyriksprot/commit/3bc1fa21527c0eae51596bbf46a952ef9da98e4a))
+* update type variable in inject_config function for improved type safety ([ef99b0a](https://github.com/welfare-state-analytics/pyriksprot/commit/ef99b0ac09cdcfe5d004e419429f7d4976d32a12))
+
+### 🧑‍💻 Code Refactoring
+
+* overhaul of test structure and test isolation ([dc66f20](https://github.com/welfare-state-analytics/pyriksprot/commit/dc66f209511ca8ee2265e2b6da0d56c36d284d7b))
+
 ## [0.7.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.6.0...v0.7.0) (2025-06-03)
 
 ### 🍕 Features
