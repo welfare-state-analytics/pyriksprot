@@ -151,6 +151,7 @@ python_version = "3.11"
 include = ["pyriksprot", "tests"]
 exclude = [
     ".git",
+    ".venv",
     ".vscode",
     "**/__init__.py",
     "**/__pycache__",
@@ -158,6 +159,9 @@ exclude = [
     "tests/test_data",
     "tests/output",
     "metadata",
+    "logs",
+    "htmlcov",
+    "data",
     "profile-reports",
 ]
 reportMissingTypeStubs = false
