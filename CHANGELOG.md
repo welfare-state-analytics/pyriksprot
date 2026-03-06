@@ -4,6 +4,17 @@
 > All notable changes to this project will be documented in this file
 
 
+## [0.9.1](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.9.0...v0.9.1) (2026-03-06)
+
+### 🐛 Bug Fixes
+
+* correct batch-tag option definition and update export method call ([dc336c1](https://github.com/welfare-state-analytics/pyriksprot/commit/dc336c18370705d36d627380541815465070d0ba))
+* update ls_corpus_folder signature to allow None as default for pattern ([8a37630](https://github.com/welfare-state-analytics/pyriksprot/commit/8a3763069b77ffd179498b3cb89cf278a16d9a5f))
+
+### 🧑‍💻 Code Refactoring
+
+* replace namedtuple with dataclass for VrtExportBatch and update export method signatures ([4d21f02](https://github.com/welfare-state-analytics/pyriksprot/commit/4d21f02c096588314dcbde43d193e68966d2f827))
+
 ## [0.9.0](https://github.com/welfare-state-analytics/pyriksprot/compare/v0.8.0...v0.9.0) (2026-01-27)
 
 ### 🍕 Features
