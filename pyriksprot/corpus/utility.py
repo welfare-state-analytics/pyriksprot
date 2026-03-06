@@ -97,7 +97,7 @@ def ls_corpus_by_tei_corpora(
     return data
 
 
-def ls_corpus_folder(folder: str, pattern: str = None) -> list[str]:
+def ls_corpus_folder(folder: str, pattern: str | None = None) -> list[str]:
     """List all ParlaCLARIN files in a folder and it's subfolders."""
 
     if pattern is not None:
