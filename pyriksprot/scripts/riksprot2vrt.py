@@ -28,7 +28,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 @click.option('--merge-strategy', type=str, default="chain_consecutive_unknowns", help="Speech merge strategy.")
 @click.option('--processes', type=int, default=1, help="Number of processes to use.")
 @click.option('--force', is_flag=True, default=False, help="Force overwrite of existing files")
-@click.option('--batch-tag', '-t', type=str, multiple=False, required=False, default='year', help="Batch tag.")
+@click.option('--batch-tag', type=str, multiple=False, required=False, default='year', help="Batch tag.")
 def export_yearly_folders(
     source_folder: str,
     target_folder: str,
@@ -65,7 +65,8 @@ def export_yearly_folders(
             remove(target)
     speaker_service: SpeakerInfoService = SpeakerInfoService(metadata_filename)
     exporter: VrtBatchExporter = VrtBatchExporter(speaker_service, merge_strategy=merge_strategy, processes=processes)
-    exporter.export(data=batches, *structural_tag)
+
+    exporter.export(batches, *structural_tag)
     # except Exception as ex:
     #    click.echo(ex)
     #    sys.exit(1)
