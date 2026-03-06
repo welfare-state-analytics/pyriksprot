@@ -1,9 +1,9 @@
 import contextlib
+from dataclasses import dataclass
 import functools
 import gzip
 import sys
 import zipfile
-from collections import namedtuple
 from io import StringIO, TextIOWrapper
 from typing import TextIO, overload
 from venv import logger
@@ -17,7 +17,14 @@ from pyriksprot.utility import strip_csv_header, xml_escape
 from .. import interface
 from .. import to_speech as mu  # pylint: disable=import-outside-toplevel
 
-VrtExportBatch = namedtuple('VrtExportBatch', 'source target tag attribs')
+
+@dataclass
+class VrtExportBatch:
+    source: str
+    target: str
+    tag: str
+    attribs: dict
+
 
 IEntity = interface.Protocol | interface.Speech | interface.Utterance
 
@@ -203,15 +210,15 @@ class VrtBatchExporter:
         self.opts: dict = opts
 
     @overload
-    def export(self, data: tuple, *tags: tuple[str]) -> None: ...
+    def export(self, data: tuple, *tags: str) -> None: ...
 
     @overload
-    def export(self, data: VrtExportBatch, *tags: tuple[str]) -> None: ...  # type: ignore
+    def export(self, data: VrtExportBatch, *tags: str) -> None: ...
 
     @overload
-    def export(self, data: list[VrtExportBatch], *tags: tuple[str]) -> None: ...
+    def export(self, data: list[VrtExportBatch], *tags: str) -> None: ...
 
-    def export(self, data: tuple | VrtExportBatch | list[VrtExportBatch], *tags: tuple[str]) -> None:
+    def export(self, data: tuple | VrtExportBatch | list[VrtExportBatch], *tags: str) -> None:
         if isinstance(data, tuple):
             self.export(VrtExportBatch(*data), *tags)
         elif isinstance(data, VrtExportBatch):
