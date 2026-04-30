@@ -153,5 +153,5 @@ logs
 metadata/**/*.db
 *.jar
 *.session.sql
-docs
+docs/dist
 configs/config_postgres.yml
