@@ -61,10 +61,10 @@ if __name__ == "__main__":
     main()
 
     # tag: str = "v0.10.0"
-    # data_folder: str = "/data/riksdagen_corpus_data"
+    # data_folder: str = "./data"
 
     # arguments = {
-    #     'source_folder': '/data/riksdagen_corpus_data/v0.10.0/tagged_frames',
+    #     'source_folder': './data/v0.10.0/tagged_frames',
     #     'target_name': './metadata/data/v0.10.0/speech_index.chain.v0.10.0.csv.gz',
     #     'database_filename': './metadata/riksprot_metadata.v0.10.0.db',
     #     'merge_strategy': to_speech.MergeStrategyType.chain,
