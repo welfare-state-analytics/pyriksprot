@@ -10,7 +10,7 @@ corpus:
     user: swerik-project
     repository: riksdagen-records
     path: data
-    local_folder: /data/swedeb/{{ corpus_version }}/riksdagen-records/
+    local_folder: /data/swerik/riksdagen-records/
     url: https://github.com/swerik-project/riksdagen-records.git
 
 {%- if "test_data" in root_folder %}
@@ -34,7 +34,7 @@ metadata:
     user: swerik-project
     repository: riksdagen-persons
     path: data
-    local_folder: /data/riksdagen_corpus_data/riksdagen-persons
+    local_folder: /data/swerik/riksdagen-persons
     url: https://github.com/swerik-project/riksdagen-persons.git
 
 tagged_frames:
@@ -62,10 +62,10 @@ tagger:
 
 global:
   corpus:
-    folder: /data/swedeb/{{ corpus_version }}/riksdagen-records/
+    folder: /data/swerik/riksdagen-records/
   metadata:
-    folder: /data/swedeb/metadata/{{ metadata_version }}/
+    folder: /data/swerik/riksdagen-persons/
   tagged_frames:
-    folder: /data/swedeb/{{ corpus_version }}/tagged_frames/
+    folder: /data/swerik/{{ corpus_version }}/tagged_frames/
     file_pattern: "prot-*.zip"
-    pattern: /data/swedeb/{{ corpus_version }}/tagged_frames/**/prot-*.zip
+    pattern: /data/swerik/{{ corpus_version }}/tagged_frames/**/prot-*.zip
