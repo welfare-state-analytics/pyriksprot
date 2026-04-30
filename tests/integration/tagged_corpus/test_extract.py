@@ -30,7 +30,6 @@ def remove_intermediate_subfolders(source_folder):
 
 
 def test_remove_intermediate_subfolders():
-    # source_folder: str = "/data/riksdagen_corpus_data/v0.9.0/tagged_frames"
     source_folder: str = f"./tests/output/{str(uuid.uuid4())[:8]}"
     shutil.rmtree(source_folder, ignore_errors=True)
 
@@ -70,9 +69,9 @@ def test_remove_intermediate_subfolders():
     shutil.rmtree(source_folder, ignore_errors=True)
 
 
-def test_fix_extra_subfolders():
-    source_folder: str = "/data/riksdagen_corpus_data/v0.9.0/tagged_frames"
-    remove_intermediate_subfolders(source_folder)
+# def test_fix_extra_subfolders():
+#     source_folder: str = "/data/swerik/riksdagen-records/data/tagged_frames"
+#     remove_intermediate_subfolders(source_folder)
 
 
 @pytest.mark.skipif(not sample_tagged_frames_corpus_exists(), reason="Tagged frames not found")

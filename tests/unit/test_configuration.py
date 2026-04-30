@@ -125,7 +125,7 @@ def test_configure_by_string_and_env():
 def test_configure_by_string_and_update():
     yml_str: str = """
 
-root_folder: &folder /data/riksdagen_corpus_data
+root_folder: &folder /data/swerik
 data_folder: *folder
 version: &version v0.x.y
 
@@ -154,7 +154,7 @@ metadata:
     assert config.get("version") == "v0.x.y"
     assert config.get("root_folder") == config.get("data_folder")
     assert config.get("corpus:version") == "v0.x.y"
-    assert config.get("corpus:folder") == "/data/riksdagen_corpus_data/riksdagen-records"
+    assert config.get("corpus:folder") == "/data/swerik/riksdagen-records/data"
     assert config.get("metadata:version") == "v0.x.y"
-    assert config.get("metadata:folder") == "/data/riksdagen_corpus_data/riksdagen-persons"
+    assert config.get("metadata:folder") == "/data/swerik/riksdagen-persons/data"
     assert config.get("metadata:github:user") == "swerik-project"

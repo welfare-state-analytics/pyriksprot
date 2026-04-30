@@ -149,7 +149,7 @@
 #     print(f"      Files using Path.rglob: {len(swedeb_filenames['list_using_rglob'])}")
 #     print("")
 
-#     westac_folder = "/data/riksdagen_corpus_data/riksdagen-records/data/"
+#     westac_folder = "/data/swerik/riksdagen-records/data/"
 #     westac_filenames: dict[str, list[str]] = {
 #         "ls_corpus_folder": list_using_ls_corpus_folder(folder=westac_folder, pattern='**/prot-*-*.xml'),
 #         "files_in_index": list_using_index_files(folder=westac_folder),
