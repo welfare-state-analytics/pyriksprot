@@ -50,10 +50,6 @@ class Config:
         self.context: str = context
         self.filename: str | None = filename
 
-    # @cached_property
-    # def data_folder(self) -> str:
-    #     return self.get("data_folder", "root_folder")
-
     def get(self, *keys: str, default: Any | Type[Any] = None, mandatory: bool = False) -> Any:
         if self.data is None:
             raise ValueError("Configuration not initialized")
