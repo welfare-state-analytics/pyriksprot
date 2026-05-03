@@ -2,6 +2,7 @@ import os
 from os.path import join as jj
 from typing import Any, Literal
 
+from pathlib import Path
 from loguru import logger
 
 from pyriksprot.gitchen import gh_create_url, gh_ls
@@ -49,6 +50,8 @@ def gh_download_files(
     for filename, url in items.items():
         infos[filename] = gh_download_file(filename, tag, errors, url=url)
         gh_store_file(target_folder, filename, infos[filename].get('content'))
+        
+    Path(jj(target_folder, 'version')).write_text(tag, encoding='utf-8')
 
     return infos
 
@@ -107,6 +110,8 @@ def gh_download_by_config(
 
         url: str = _resolve_url(cfg, version, **gh_opts)
         download_url_to_file(url, jj(folder, cfg.basename), force, errors=errors)
+
+    Path(jj(folder, 'version')).write_text(version, encoding='utf-8')
 
 
 def _resolve_url(cfg: MetadataTable, tag: str, **opts) -> str:
