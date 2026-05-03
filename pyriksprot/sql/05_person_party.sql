@@ -22,7 +22,7 @@ insert into party("party_id", "party", "party_abbrev", "party_color", "sort_orde
         max(abbreviation) as abbreviation,
         '#000000' as party_color,
         max(sort_order) as sort_order
-    from swedeb_parties
+    from xtra_swedeb_parties
     group by party;
 
 -- update party
@@ -80,7 +80,7 @@ insert into person_party (
     "end_flag",
     "start_year",
     "end_year"
-) 
+)
   with affiliation as (
         select
             "person_id",
@@ -107,7 +107,7 @@ insert into person_party (
             a."end_year"
         from affiliation a
         join persons_of_interest using ("person_id")
-        join swedeb_parties sp
+        join xtra_swedeb_parties sp
           on sp."swerik_party" = a."party"
         join party p on p."party" = sp."party"
         ;
@@ -142,6 +142,6 @@ with persons_with_single_party as (
         from persons_of_interest
         join persons_with_single_party using ("person_id")
         where persons_of_interest."has_multiple_parties" = FALSE
-    on conflict("person_id") do update 
+    on conflict("person_id") do update
         set "party_id"=excluded."party_id";
 

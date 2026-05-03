@@ -1,4 +1,4 @@
-import json
+import yaml
 from functools import cached_property
 from importlib import import_module
 from os.path import exists, isfile, join
@@ -198,16 +198,16 @@ class MetadataSchema:
         if not sql_folder.is_dir():
             raise FileNotFoundError(f"sql folder for {version} not found")
 
-        if not sql_folder.joinpath("schema.json").is_file():
-            raise FileNotFoundError(f"sql schema.json for {version} not found")
+        if not sql_folder.joinpath("schema.yml").is_file():
+            raise FileNotFoundError(f"sql schema.yml for {version} not found")
 
         # if version != pyriksprot.sql.metadata_version():
         #     raise ValueError(
         #         f"Metadata version mismatch: expected {version}, got {pyriksprot.sql.metadata_version()} on disk"
         #     )
 
-        with sql_folder.joinpath("schema.json").open(encoding="utf-8") as f:
-            self.data: dict = json.load(f)
+        with sql_folder.joinpath("schema.yml").open(encoding="utf-8") as f:
+            self.data: dict = yaml.safe_load(f)
 
         self.config: dict = {}
 
