@@ -11,7 +11,7 @@ from loguru import logger
 from pyriksprot.gitchen import gh_create_url
 from pyriksprot.metadata import database
 
-from ..sql import sql_file_paths
+from ..sql import assert_metadata_version, sql_file_paths
 from ..utility import create_class, probe_filename
 from .schema import MetadataSchema, MetadataTable
 
@@ -53,6 +53,9 @@ class MetadataFactory:
     def create(self, force: bool = False) -> Self:
         """Creates database based on schema"""
         logger.info(f"Creating database for tag '{self.version}'.")
+
+        # Check that data version on disk matches expected version before creating database
+        assert_metadata_version(self.version)
 
         self.db.createdb(tag=self.version, force=force)
 
@@ -100,7 +103,7 @@ class MetadataFactory:
             if folder and not isdir(folder):
                 raise FileNotFoundError(folder)
 
-            filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths(tag=self.version)
+            filenames: list[str] = sorted(glob(jj(folder, "*.sql"))) if folder else sql_file_paths()
 
             with self.db:
                 for filename in filenames:
