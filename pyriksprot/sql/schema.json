@@ -124,7 +124,7 @@
         ]
     },
     "party": {
-        "party_id": "text primary key",
+        "party_id": "text not null",
         "party": "text not null",
         "inception": "date",
         "inception_precision": "text",
