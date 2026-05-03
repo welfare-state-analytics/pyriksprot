@@ -1,4 +1,24 @@
 {
+    "xtra_party_abbrev": {
+        "party_id": "text primary key",
+        "abbrev": "text not null",
+        ":constraints:": [
+        ],
+        ":url:": "https://raw.githubusercontent.com/humlab-swedeb/sample-data/refs/heads/v1.6.0_v1.2.2/data/resources/xtra_party_abbrev.csv",
+        ":sep:": "\t",
+        ":filename:": "xtra_party_abbrev.csv",
+        ":is_extra:": true
+    },
+    "xtra_swedeb_parties": {
+        "swerik_party": "text",
+        "abbreviation": "text",
+        "party": "text",
+        "sort_order": "int",
+        ":url:": "https://raw.githubusercontent.com/humlab-swedeb/sample-data/refs/heads/v1.6.0_v1.2.2/data/resources/xtra_swedeb_parties.csv",
+        ":sep:": "\t",
+        ":filename:": "xtra_swedeb_parties.csv",
+        ":is_extra:": true
+    },
     "chairs": {
         "chair_id": "text primary key",
         "chamber": "text",
@@ -103,10 +123,28 @@
             "-- foreign key (person_id) references person (person_id) deferrable initially deferred"
         ]
     },
+    "party": {
+        "party_id": "text primary key",
+        "party": "text not null",
+        "inception": "date",
+        "inception_precision": "text",
+        "dissolution": "date",
+        "dissolution_precision": "text",
+        "successor_id": "text",
+        "swerik_party_id": "text",
+        "swerik_successor": "text",
+        ":compute:": [
+            ["fix_ts_config", "inception", "truncate"],
+            ["fix_ts_config", "dissolution", "extend"]
+        ]
+    },
+
     "party_abbreviation": {
         "party": "text primary key",
         "abbreviation": "text not null",
-        "ocr_correction": "text"
+        "ocr_correction": "text",
+        ":constraints:": [
+        ]
     },
     "party_affiliation": {
         "person_id": "text not null",
@@ -114,12 +152,16 @@
         "end": "date",
         "party": "text",
         "party_id": "text",
+        "swerik_party_id": "text",
+        "start_precision": "text",
+        "end_precision": "text",
         ":compute:": [
             ["fix_ts_config", "start", "truncate"],
             ["fix_ts_config", "end", "extend"]
         ],
         ":constraints:": [
-            "foreign key (person_id) references person (person_id) deferrable initially deferred"
+            "foreign key (person_id) references person (person_id) deferrable initially deferred",
+            "foreign key (party_id) references party (party_id) deferrable initially deferred"
         ]
     },
     "person": {
@@ -140,7 +182,7 @@
         ":constraints:": [
             "foreign key (person_id) references person (person_id) deferrable initially deferred"
         ]
-    },    
+    },
     "place_of_death": {
         "person_id": "text not null",
         "link": "text",
@@ -148,7 +190,7 @@
         ":constraints:": [
             "foreign key (person_id) references person (person_id) deferrable initially deferred"
         ]
-    },   
+    },
     "portraits": {
         "person_id": "text not null",
         "portrait": "text not null",
@@ -156,7 +198,7 @@
             "primary key (person_id, portrait)",
             "foreign key (person_id) references person (person_id) deferrable initially deferred"
         ]
-    },   
+    },
     "references_map": {
         "person_id": "text not null",
         "bibtex_key": "text not null",
@@ -167,16 +209,6 @@
             "primary key (person_id, wiki_id, bibtex_key)",
             "foreign key (person_id) references person (person_id) deferrable initially deferred"
         ]
-    },
-    "swedeb_parties": {
-        "swerik_party": "text", 
-        "abbreviation": "text",
-        "party": "text",
-        "sort_order": "int",
-        ":url:": "https://raw.githubusercontent.com/humlab-swedeb/sample-data/refs/heads/main/data/resources/swedeb-parties.csv",
-        ":sep:": "\t",
-        ":filename:": "swedeb-parties.csv",
-        ":is_extra:": true
     },
     "riksdag_year": {
         "parliament_year": "int not null",
