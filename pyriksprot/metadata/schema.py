@@ -193,7 +193,7 @@ class MetadataSchema:
         if version is None:
             raise ValueError("Version must be defined")
 
-        sql_folder: Path = pyriksprot.sql.sql_folder(tag=version)
+        sql_folder: Path = pyriksprot.sql.sql_folder()
 
         if not sql_folder.is_dir():
             raise FileNotFoundError(f"sql folder for {version} not found")
@@ -201,7 +201,12 @@ class MetadataSchema:
         if not sql_folder.joinpath("schema.json").is_file():
             raise FileNotFoundError(f"sql schema.json for {version} not found")
 
-        with sql_folder.joinpath("schema.json").open() as f:
+        # if version != pyriksprot.sql.metadata_version():
+        #     raise ValueError(
+        #         f"Metadata version mismatch: expected {version}, got {pyriksprot.sql.metadata_version()} on disk"
+        #     )
+
+        with sql_folder.joinpath("schema.json").open(encoding="utf-8") as f:
             self.data: dict = json.load(f)
 
         self.config: dict = {}

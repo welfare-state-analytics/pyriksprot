@@ -24,8 +24,7 @@ DUMMY_METADATA_DATABASE_NAME: str = f'./tests/output/{str(uuid.uuid4())[:8]}.md'
 
 
 def test_list_sql_files():
-    tag: str = ConfigValue("metadata.version").resolve()
-    data = sql.sql_file_paths(tag=tag)
+    data = sql.sql_file_paths()
     assert len(data) > 0
 
 
