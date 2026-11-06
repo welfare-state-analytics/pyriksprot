@@ -25,6 +25,7 @@ def main(): ...
 @click.argument('config_filename', type=str)
 @click.argument('tag', type=str)
 def check_filenames(config_filename: str, metadata_version: str) -> None:
+    """Check that the metadata filenames conform to the specified version's tag specification."""
     try:
         ConfigStore().configure_context(source=config_filename)
 
@@ -47,6 +48,7 @@ def check_filenames(config_filename: str, metadata_version: str) -> None:
 @click.argument('config_filename', type=str)
 @click.argument('tags', nargs=-1, type=str)
 def check_columns(config_filename: str, tags: str):
+    """Check that the metadata columns conform to the specified version's tag specification."""
     try:
         ConfigStore().configure_context(source=config_filename)
 
@@ -71,6 +73,7 @@ def check_columns(config_filename: str, tags: str):
 @click.argument('target_folder', type=str)
 @click.argument('tag', type=str)
 def download(target_folder: str, version: str):
+    """Download metadata from Github according to the specified version's tag specification."""
     schema: md.MetadataSchema = md.MetadataSchema(version=version)
     md.gh_download_by_config(schema=schema, version=version, folder=target_folder, force=True)
 
@@ -80,6 +83,7 @@ def download(target_folder: str, version: str):
 @click.argument('target_folder', type=str)
 @click.argument('version', type=str)
 def index(corpus_folder: str, target_folder: str, version: str) -> None:
+    """Generate an index for the corpus according to the specified version's tag specification."""
     factory: md.CorpusIndexFactory = md.CorpusIndexFactory(ProtocolMapper, schema=md.MetadataSchema(version=version))
     factory.generate(corpus_folder=corpus_folder, target_folder=target_folder)
 
