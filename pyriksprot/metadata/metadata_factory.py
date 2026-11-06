@@ -73,6 +73,14 @@ class MetadataFactory:
                 self.db.create(tablename, cfg.all_columns_specs, cfg.constraints)
         return self
 
+    def rename_swerik_tables(self, schema: MetadataSchema) -> Self:
+        """Adds prefix _ to SWERIK tables (schema tables that are not marked as :is_extra:)"""
+        for tablename, cfg in schema.items():
+            if cfg.is_extra:
+                continue
+            self.db.rename_table(tablename, f"_{tablename}")
+        return self
+
     def upload(self, schema: MetadataSchema, folder: str) -> Self:
         """Uploads data to database based on schema"""
         logger.info(f"Uploading data for tag '{self.version}' using {folder}.")

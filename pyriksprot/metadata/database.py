@@ -147,6 +147,9 @@ class DatabaseInterface(abc.ABC):
     def set_deferred(self, value: bool) -> None: ...
 
     @abc.abstractmethod
+    def rename_table(self, old_name: str, new_name: str) -> Self: ...
+
+    @abc.abstractmethod
     def exists(self, tablename: str) -> bool: ...
 
     @abc.abstractmethod
@@ -201,6 +204,11 @@ class SqliteDatabase(DatabaseInterface):
         self.connection.commit()
         self.connection.close()
         self.connection = None
+
+    def rename_table(self, old_name: str, new_name: str) -> Self:
+        with self:
+            self.execute_script(f'alter table "{old_name}" rename to "{new_name}";')
+        return self
 
     def set_deferred(self, value: bool) -> None:
         if value:
@@ -385,6 +393,11 @@ class PostgresDatabase(DatabaseInterface):
         #     else:
         #         cursor.execute("set constraints all immediate;")
 
+    def rename_table(self, old_name: str, new_name: str) -> Self:
+        with self:
+            self.execute_script(f'alter table "{old_name}" rename to "{new_name}";')
+        return self
+    
     def set_foreign_keys(self, value: bool) -> None:
         self.set_deferred(value)
 
